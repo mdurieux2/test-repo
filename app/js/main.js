@@ -2,6 +2,7 @@
 
 import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
+import { canMove, solveMaze } from './games/labyrinthes.js';
 import { levelRange, programFor } from './programs.js';
 import { createRng, pick, randInt } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
@@ -173,20 +174,56 @@ function domainScreen(domainId) {
     }
     const stats = gameStats(child(), game.id, min);
     const level = Math.min(max, Math.max(min, stats.level));
-    blocks.push(h('button', {
-      class: 'game-card',
-      'data-game': game.id,
-      onclick: () => (game.paliers ? palierMap(min, max) : startSession(game)),
-    },
-    h('span', { class: 'game-icon', 'aria-hidden': 'true' }, game.icon),
-    h('span', { class: 'game-title' }, game.title),
-    game.paliers ? palierSummary(min, max) : levelDots(level, min, max),
-    stats.bestStars ? h('span', { class: 'best' }, '⭐'.repeat(stats.bestStars)) : null));
+    // La carte lance le jeu ; le bas de la carte (les points de niveau) permet de choisir le niveau.
+    const pickable = !game.paliers && max > min;
+    blocks.push(h('div', { class: 'game-card' },
+      h('button', {
+        class: 'game-play',
+        'data-game': game.id,
+        onclick: () => (game.paliers ? palierMap(min, max) : startSession(game)),
+      },
+      h('span', { class: 'game-icon', 'aria-hidden': 'true' }, game.icon),
+      h('span', { class: 'game-title' }, game.title),
+      game.paliers ? palierSummary(min, max) : null,
+      !pickable && !game.paliers ? levelDots(level, min, max) : null,
+      stats.bestStars ? h('span', { class: 'best' }, '⭐'.repeat(stats.bestStars)) : null),
+      pickable
+        ? h('button', {
+          class: 'level-pick',
+          'data-levels': game.id,
+          'aria-label': `Choisir le niveau : ${game.title}`,
+          onclick: () => levelScreen(game),
+        }, levelDots(level, min, max), h('span', { class: 'level-pick-label' }, 'Niveaux ▾'))
+        : null));
   }
   show(h('main', { class: `screen domain domain-theme-${domain.id}` },
     topBar({ onBack: homeScreen, title: `${domain.icon} ${domain.title}`, right: starCounter() }),
     h('div', { class: 'game-grid' }, blocks)));
   say(guide, `${domain.title}. Choisis un jeu !`);
+}
+
+/** Choisir directement son niveau (dans la fourchette de la classe). */
+function levelScreen(game) {
+  const { min, max } = levelRange(child().grade, game.id);
+  const current = Math.min(max, Math.max(min, gameStats(child(), game.id, min).level));
+  const rows = [];
+  for (let level = min; level <= max; level++) {
+    const n = level - min + 1;
+    const state = level < current ? 'passed' : level === current ? 'current' : 'next';
+    rows.push(h('button', {
+      class: `level-row ${state}`,
+      'data-level': level,
+      onclick: () => startSession(game, { level }),
+    },
+    h('span', { class: 'level-num', 'aria-hidden': 'true' }, n),
+    h('span', { class: 'level-label' }, h('b', {}, `Niveau ${n}`), h('span', {}, game.levels[level - 1])),
+    h('span', { class: 'level-state' }, state === 'passed' ? '✓' : state === 'current' ? '▶ Ici' : '')));
+  }
+  show(h('main', { class: `screen levels domain-theme-${game.domain}` },
+    topBar({ onBack: () => domainScreen(game.domain), title: `${game.icon} ${game.title}`, right: starCounter() }),
+    h('p', { class: 'levels-intro' }, 'Choisis ton niveau :'),
+    h('div', { class: 'level-list' }, rows)));
+  say(me(), 'Choisis ton niveau !');
 }
 
 // ---------------------------------------------------------------- Carte des paliers de calcul
@@ -236,8 +273,10 @@ function startSession(game, { level, back } = {}) {
     total: store.settings.sessionLength,
     correct: 0,
     recentKeys: [],
+    briefed: new Set(), // consignes déjà dites en entier pendant cette partie
     startedAt: Date.now(),
-    levelState: { level: startLevel, streak: game.paliers ? 0 : stats.streak, recent: game.paliers ? [] : stats.recent },
+    // un niveau choisi à la main repart d'une série vierge
+    levelState: { level: startLevel, streak: game.paliers || level ? 0 : stats.streak, recent: game.paliers || level ? [] : stats.recent },
     formatOffset: Number(new URLSearchParams(location.search).get('format') || 0),
   };
   nextQuestion(session);
@@ -246,7 +285,7 @@ function startSession(game, { level, back } = {}) {
 function newQuestion(session) {
   let q;
   for (let i = 0; i < 10; i++) {
-    q = session.game.generate(session.levelState.level, rng, session.index + session.formatOffset);
+    q = session.game.generate(session.levelState.level, rng, session.index + session.formatOffset, { name: me().name });
     if (!session.recentKeys.includes(q.key)) break;
   }
   session.recentKeys = [...session.recentKeys, q.key].slice(-4);
@@ -264,6 +303,11 @@ function nextQuestion(session) {
   const { game } = session;
   const guide = me(); // seul l'enfant qui joue apparaît, avec sa photo ou son dessin et sa voix
   session.guide = guide;
+  // La consigne complète est dite la première fois ; ensuite, une version courte
+  // (q.short) évite de répéter la même phrase à chaque question.
+  const briefKey = q.short && (q.short.key ?? q.short.text);
+  const brief = Boolean(q.short) && session.briefed.has(briefKey);
+  if (q.short) session.briefed.add(briefKey);
   const replay = () => say(guide, q.replay || q.instruction);
   const progress = h('div', { class: 'progress', 'aria-label': `Question ${session.index + 1} sur ${session.total}` },
     Array.from({ length: session.total }, (_, i) =>
@@ -273,13 +317,15 @@ function nextQuestion(session) {
 
   let stage = null;
   let zone;
-  if (q.interaction === 'build') {
-    ({ stage, zone } = buildZone(ctx));
+  const custom = { build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone }[q.interaction];
+  if (custom) {
+    ({ stage, zone } = custom(ctx));
   } else {
-    if (q.stage.type !== 'none') stage = h('div', { class: 'stage' }, renderStage(q.stage, { replay }));
+    if (q.stage.type !== 'none') stage = h('div', { class: 'stage' }, renderStage(q.stage, { replay, speak: (parts) => say(guide, parts) }));
     if (q.interaction === 'keypad') zone = keypadZone(ctx);
     else if (q.interaction === 'match') zone = matchZone(ctx);
     else if (q.interaction === 'fill') zone = fillZone(ctx);
+    else if (q.interaction === 'order') zone = orderZone(ctx);
     else zone = choiceZone(ctx);
   }
   if (stage) enableCounting(stage, guide);
@@ -290,11 +336,11 @@ function nextQuestion(session) {
     h('div', { class: 'instruction' },
       h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
         avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')),
-      h('button', { class: 'bubble bubble-left', onclick: replay }, frenchSpacing(q.text))),
+      h('button', { class: 'bubble bubble-left', onclick: replay }, frenchSpacing(brief ? q.short.text : q.text))),
     stage,
     zone,
     feedback));
-  say(guide, q.instruction);
+  say(guide, brief ? (q.short.speak ?? q.short.text) : q.instruction);
 }
 
 /** Toucher les objets pour les compter un par un : la voix dit « un, deux, trois… ». */
@@ -471,42 +517,69 @@ function matchZone(ctx) {
   let matched = 0;
   const lines = document.createElementNS(SVG_NS, 'svg');
   lines.setAttribute('class', 'match-lines');
-  const lefts = q.pairs.map((p, i) => h('button', { class: 'match-item left', 'data-left': i }, p.left));
-  const rights = q.rights.map((v) => h('button', { class: 'match-item right', 'data-right': v }, v));
-  const zone = h('div', { class: 'choices match' }, lines, h('div', { class: 'match-col' }, lefts), h('div', { class: 'match-col' }, rights));
+  // à gauche : un calcul, un mot… ou une collection d'objets à compter
+  const lefts = q.pairs.map((p, i) => h('button', { class: `match-item left${p.objects ? ' has-objects' : ''}${p.emoji ? ' has-emoji' : ''}`, 'data-left': i, 'aria-label': p.objects ? String(p.left) : undefined },
+    p.objects ? renderChoiceContent({ objects: p.objects })
+      : p.swatch ? h('span', { class: 'swatch', style: { background: p.swatch }, role: 'img', 'aria-label': p.left })
+        : p.emoji || p.left));
+  const rightLang = q.rightLang ? { lang: q.rightLang } : {};
+  const rights = q.rights.map((v) => h('button', { class: `match-item right${typeof v === 'string' ? ' is-word' : ''}`, 'data-right': v, ...rightLang }, v));
+  const zone = h('div', { class: `choices match pairs-${q.pairs.length}${q.vanish ? ' vanish' : ''}` },
+    lines, h('div', { class: 'match-col' }, lefts), h('div', { class: 'match-col' }, rights));
 
-  const drawLine = (a, b, color) => {
+  const local = (x, y) => {
     const box = zone.getBoundingClientRect();
+    // coordonnées dans la zone (corrigées du zoom de l'écran sur iPad)
+    const scale = box.width / zone.offsetWidth || 1;
+    return [(x - box.left) / scale, (y - box.top) / scale];
+  };
+  const svgEl = (tag, attrs) => {
+    const el = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  };
+  const drawLine = (a, b, color) => {
     const ra = a.getBoundingClientRect();
     const rb = b.getBoundingClientRect();
-    const line = document.createElementNS(SVG_NS, 'line');
-    line.setAttribute('x1', ra.right - box.left);
-    line.setAttribute('y1', ra.top + ra.height / 2 - box.top);
-    line.setAttribute('x2', rb.left - box.left);
-    line.setAttribute('y2', rb.top + rb.height / 2 - box.top);
-    line.setAttribute('stroke', color);
+    const [x1, y1] = local(ra.right, ra.top + ra.height / 2);
+    const [x2, y2] = local(rb.left, rb.top + rb.height / 2);
+    const line = svgEl('line', { x1, y1, x2, y2, stroke: color });
     lines.append(line);
+    return line;
   };
-  const tryPair = () => {
+  const tryPair = (trace = null) => {
     if (pending.left === null || pending.right === null) return;
     const a = lefts[pending.left];
-    const b = rights.find((r) => Number(r.dataset.right) === pending.right && !r.disabled);
+    const b = rights.find((r) => String(r.dataset.right) === String(pending.right) && !r.disabled);
     if (q.pairs[pending.left].right === pending.right) {
-      const color = PAIR_COLORS[matched % PAIR_COLORS.length];
+      const color = q.vanish ? 'var(--good)' : PAIR_COLORS[matched % PAIR_COLORS.length];
       for (const el of [a, b]) {
         el.classList.remove('selected');
         el.classList.add('matched');
         el.style.setProperty('--pair', color);
         el.disabled = true;
       }
-      drawLine(a, b, color);
+      let line = trace;
+      if (line) line.setAttribute('class', 'trace done');
+      else line = drawLine(a, b, color);
+      line.style.stroke = color;
       matched++;
       playSound('tap');
+      if (q.pairs[pending.left].say) say(ctx.session.guide, q.pairs[pending.left].say);
+      if (q.vanish) {
+        // la paire juste devient verte, puis disparaît
+        setTimeout(() => {
+          a.classList.add('vanished');
+          b.classList.add('vanished');
+          line.remove();
+        }, 650);
+      }
       if (matched === q.pairs.length) {
         zone.classList.add('answered');
         markCorrect(ctx);
       }
     } else {
+      trace?.remove();
       for (const el of [a, b]) {
         el.classList.remove('selected');
         el.classList.add('shake');
@@ -516,154 +589,704 @@ function matchZone(ctx) {
     }
     pending = { left: null, right: null };
   };
-  lefts.forEach((el, i) => el.addEventListener('click', () => {
-    if (ctx.session.locked) return;
-    lefts.forEach((x) => x.classList.remove('selected'));
+  const select = (el) => {
+    if (ctx.session.locked || el.disabled) return;
+    const isLeft = el.classList.contains('left');
+    (isLeft ? lefts : rights).forEach((x) => x.classList.remove('selected'));
     el.classList.add('selected');
-    pending.left = i;
+    if (isLeft) pending.left = Number(el.dataset.left);
+    else pending.right = q.rights.find((v) => String(v) === el.dataset.right);
     tryPair();
-  }));
-  rights.forEach((el) => el.addEventListener('click', () => {
-    if (ctx.session.locked) return;
-    rights.forEach((x) => x.classList.remove('selected'));
-    el.classList.add('selected');
-    pending.right = Number(el.dataset.right);
-    tryPair();
-  }));
+  };
+
+  // Tracer un trait au doigt d'un élément jusqu'à son partenaire (ou toucher l'un puis l'autre).
+  for (const el of [...lefts, ...rights]) {
+    el.addEventListener('click', (e) => {
+      if (e.detail === 0) select(el); // clavier ; le doigt et la souris passent par pointerdown
+    });
+    el.addEventListener('pointerdown', (e) => {
+      if (ctx.session.locked || el.disabled) return;
+      e.preventDefault();
+      const points = [local(e.clientX, e.clientY)];
+      let trace = null;
+      const move = (ev) => {
+        const p = local(ev.clientX, ev.clientY);
+        const last = points.at(-1);
+        if (Math.hypot(p[0] - last[0], p[1] - last[1]) < 3) return;
+        points.push(p);
+        if (!trace && points.length > 2) {
+          trace = svgEl('polyline', { class: 'trace live' });
+          lines.append(trace);
+          el.classList.add('selected');
+        }
+        trace?.setAttribute('points', points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' '));
+      };
+      const up = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        if (!trace) return select(el); // simple toucher
+        const target = ev.type === 'pointerup' ? document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.match-item') : null;
+        const isLeft = el.classList.contains('left');
+        if (!target || target.disabled || !zone.contains(target) || target.classList.contains('left') === isLeft) {
+          trace.remove();
+          el.classList.remove('selected');
+          return;
+        }
+        pending = isLeft
+          ? { left: Number(el.dataset.left), right: q.rights.find((v) => String(v) === target.dataset.right) }
+          : { left: Number(target.dataset.left), right: q.rights.find((v) => String(v) === el.dataset.right) };
+        tryPair(trace);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    });
+  }
   return zone;
 }
 
-// ---- Complète (□ + □ = 8)
+// ---- Complète (□ + □ = 8) : glisser ou toucher les étiquettes ; chaque calcul juste devient vert
 
 function fillZone(ctx) {
   const { q } = ctx;
-  const boxes = q.equations.map(() => [null, null]); // index de la tuile posée dans chaque case
+  const n = q.equations.length;
+  const boxes = q.equations.map(() => [null, null]); // index de l'étiquette posée dans chaque case
+  const done = q.equations.map(() => false); // calculs validés (verts)
+  const misses = q.equations.map(() => 0);
   let selected = null;
-  let checks = 0;
   const tileEls = q.tiles.map((v, t) => h('button', { class: 'tile', 'data-value': v, 'data-tile': t }, v));
   const boxEls = q.equations.map((_, r) => [0, 1].map((c) => h('button', { class: 'fill-box', 'data-row': r, 'data-col': c, 'aria-label': 'Case vide' })));
   const rowEls = q.equations.map((eq, r) => h('div', { class: 'fill-row' },
     boxEls[r][0], h('span', { class: 'op' }, eq.op), boxEls[r][1], h('span', { class: 'op' }, '='), h('span', { class: 'num' }, eq.result)));
+  const value = (r, c) => q.tiles[boxes[r][c]];
+  const used = () => new Set(boxes.flat().filter((t) => t !== null));
+
+  // Une solution pour les calculs pas encore verts, avec les étiquettes encore libres.
+  const solution = (rows, free) => {
+    if (!rows.length) return [];
+    const [r, ...rest] = rows;
+    for (const i of free) {
+      for (const j of free) {
+        if (i === j || !equationHolds(q.equations[r], q.tiles[i], q.tiles[j])) continue;
+        const after = solution(rest, free.filter((t) => t !== i && t !== j));
+        if (after) return [[r, i, j], ...after];
+      }
+    }
+    return null;
+  };
+  const openRows = (except = -1) => q.equations.map((_, r) => r).filter((r) => !done[r] && r !== except);
+  const freeTiles = (taken = []) => q.tiles.map((_, t) => t).filter((t) => !done.some((d, r) => d && boxes[r].includes(t)) && !taken.includes(t));
 
   const refresh = () => {
     boxEls.forEach((row, r) => row.forEach((el, c) => {
       const t = boxes[r][c];
       el.textContent = t === null ? '' : q.tiles[t];
+      el.setAttribute('aria-label', t === null ? 'Case vide' : `Case : ${q.tiles[t]}`);
       el.classList.toggle('filled', t !== null);
       el.classList.toggle('selected', Boolean(selected) && selected[0] === r && selected[1] === c);
+      el.disabled = done[r];
     }));
-    const used = new Set(boxes.flat().filter((t) => t !== null));
+    const taken = used();
     tileEls.forEach((el, t) => {
-      el.classList.toggle('used', used.has(t));
-      el.disabled = used.has(t);
+      el.classList.toggle('used', taken.has(t));
+      el.disabled = taken.has(t);
     });
   };
-  const value = (r, c) => q.tiles[boxes[r][c]];
-  const showSolution = () => {
-    const free = q.tiles.map((_, t) => t);
-    q.equations.forEach((eq, r) => eq.solution.forEach((v, c) => {
-      const t = free.find((i) => q.tiles[i] === v);
-      free.splice(free.indexOf(t), 1);
-      boxes[r][c] = t;
-    }));
-    refresh();
-    rowEls.forEach((row) => row.classList.add('right'));
-    zone.classList.add('answered');
-    setTimeout(() => markCorrect(ctx), 1500);
+  const clearRow = (r) => {
+    boxes[r] = [null, null];
+    rowEls[r].classList.add('shake');
+    setTimeout(() => rowEls[r].classList.remove('shake'), 400);
   };
-  const check = () => {
-    checks++;
-    const wrong = q.equations.map((eq, r) => !equationHolds(eq, value(r, 0), value(r, 1)));
-    rowEls.forEach((row, r) => row.classList.toggle('right', !wrong[r]));
-    if (!wrong.includes(true)) {
-      zone.classList.add('answered');
-      markCorrect(ctx);
+  const checkRow = (r) => {
+    if (done[r] || boxes[r].includes(null) || ctx.session.locked) return;
+    const [x, y] = [value(r, 0), value(r, 1)];
+    tileEls.forEach((el) => el.classList.remove('hint'));
+    if (equationHolds(q.equations[r], x, y)) {
+      // juste… mais il faut que les autres calculs restent possibles avec ce qui reste
+      if (!solution(openRows(r), freeTiles(boxes[r]))) {
+        clearRow(r);
+        refresh();
+        const message = 'C’est juste, mais ces nombres serviront ailleurs. Essaie autrement !';
+        ctx.feedback.replaceChildren(h('p', { class: 'try-again' }, message));
+        say(ctx.session.guide, message);
+        return;
+      }
+      done[r] = true;
+      rowEls[r].classList.add('right');
+      ctx.feedback.replaceChildren();
+      playSound('tap');
+      refresh();
+      if (done.every(Boolean)) {
+        zone.classList.add('answered');
+        markCorrect(ctx);
+      }
       return;
     }
-    if (checks >= 3) {
-      // après 3 essais, on montre la solution pour ne pas bloquer l'enfant
-      markWrong(ctx, { message: 'Regarde la solution.', given: 'solution montrée' });
-      showSolution();
-      return;
-    }
-    wrong.forEach((isWrong, r) => {
-      if (!isWrong) return;
-      rowEls[r].classList.add('shake');
-      setTimeout(() => rowEls[r].classList.remove('shake'), 400);
-      boxes[r] = [null, null];
-    });
+    misses[r]++;
+    clearRow(r);
     refresh();
-    markWrong(ctx, { given: 'calcul faux' });
+    markWrong(ctx, { given: `${x} ${q.equations[r].op} ${y} = ${q.equations[r].result}` });
+    if (misses[r] >= 2) {
+      // après deux essais, les bonnes étiquettes pour ce calcul brillent
+      const step = solution([r, ...openRows(r)], freeTiles())?.[0];
+      if (step) [step[1], step[2]].forEach((t) => tileEls[t].classList.add('hint'));
+    }
+  };
+  const place = (t, r, c) => {
+    if (done[r]) return;
+    boxes[r][c] = t;
+    selected = null;
+    refresh();
+    if (!boxes[r].includes(null)) setTimeout(() => checkRow(r), 250);
+  };
+  // toucher une étiquette : elle va dans la case choisie, sinon dans la première case vide
+  const tapTile = (t) => {
+    if (ctx.session.locked || tileEls[t].disabled) return;
+    let target = selected && !done[selected[0]] && boxes[selected[0]][selected[1]] === null ? selected : null;
+    for (let r = 0; r < n && !target; r++) {
+      for (let c = 0; c < 2 && !target; c++) if (!done[r] && boxes[r][c] === null) target = [r, c];
+    }
+    if (target) place(t, ...target);
   };
   boxEls.forEach((row, r) => row.forEach((el, c) => el.addEventListener('click', () => {
-    if (ctx.session.locked) return;
-    if (boxes[r][c] !== null) boxes[r][c] = null; // la tuile retourne en bas
+    if (ctx.session.locked || done[r]) return;
+    if (boxes[r][c] !== null) boxes[r][c] = null; // l'étiquette retourne en bas
     else selected = [r, c];
     refresh();
   })));
-  tileEls.forEach((el, t) => el.addEventListener('click', () => {
-    if (ctx.session.locked || el.disabled) return;
-    let target = selected && boxes[selected[0]][selected[1]] === null ? selected : null;
-    for (let r = 0; r < boxes.length && !target; r++) {
-      for (let c = 0; c < 2 && !target; c++) if (boxes[r][c] === null) target = [r, c];
-    }
-    if (!target) return;
-    boxes[target[0]][target[1]] = t;
-    selected = null;
-    refresh();
-    if (boxes.flat().every((x) => x !== null)) setTimeout(check, 250);
-  }));
-  const zone = h('div', { class: 'choices fill' },
+
+  // glisser-déposer au doigt
+  let fromPointer = false;
+  tileEls.forEach((el, t) => {
+    el.addEventListener('click', () => {
+      if (fromPointer) { fromPointer = false; return; }
+      tapTile(t); // clavier, lecteur d'écran
+    });
+    el.addEventListener('pointerdown', (e) => {
+      if (ctx.session.locked || el.disabled) return;
+      e.preventDefault();
+      const start = [e.clientX, e.clientY];
+      const rect = el.getBoundingClientRect();
+      let ghost = null;
+      let over = null;
+      const boxAt = (ev) => {
+        const box = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.fill-box');
+        return box && zone.contains(box) && !box.disabled ? box : null;
+      };
+      const move = (ev) => {
+        if (!ghost && Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) > 8) {
+          ghost = h('div', { class: 'tile tile-ghost', 'aria-hidden': 'true', style: { width: `${rect.width}px`, height: `${rect.height}px` } }, q.tiles[t]);
+          document.body.append(ghost);
+          el.classList.add('dragging');
+        }
+        if (!ghost) return;
+        ghost.style.transform = `translate(${ev.clientX - rect.width / 2}px, ${ev.clientY - rect.height / 2}px)`;
+        ghost.hidden = true; // pour trouver la case sous le doigt
+        const box = boxAt(ev);
+        ghost.hidden = false;
+        if (box !== over) {
+          over?.classList.remove('drop-target');
+          box?.classList.add('drop-target');
+          over = box;
+        }
+      };
+      const up = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        fromPointer = true;
+        setTimeout(() => { fromPointer = false; }, 400);
+        over?.classList.remove('drop-target');
+        if (!ghost) return tapTile(t);
+        ghost.remove();
+        el.classList.remove('dragging');
+        const box = ev.type === 'pointerup' ? boxAt(ev) : null;
+        if (box) place(t, Number(box.dataset.row), Number(box.dataset.col));
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    });
+  });
+  const zone = h('div', { class: `choices fill rows-${n}` },
     h('div', { class: 'fill-rows' }, rowEls),
-    h('div', { class: 'tile-tray' }, tileEls));
+    h('div', { class: `tile-tray tiles-${q.tiles.length}` }, tileEls));
+  refresh();
   return zone;
+}
+
+// ---- Sudoku : toucher une case vide, puis une image ou un chiffre
+
+function sudokuZone(ctx) {
+  const { q } = ctx;
+  const { size, box: [br, bc], puzzle, solution, symbols } = q.stage;
+  const grid = [...puzzle];
+  const misses = grid.map(() => 0);
+  let selected = grid.indexOf(null);
+  const label = (i) => `Ligne ${Math.floor(i / size) + 1}, colonne ${(i % size) + 1}${grid[i] === null ? ', vide' : ` : ${symbols[grid[i]]}`}`;
+  const cells = grid.map((v, i) => {
+    const r = Math.floor(i / size);
+    const c = i % size;
+    const classes = ['sudoku-cell'];
+    if (v !== null) classes.push('given');
+    if (c % bc === bc - 1 && c < size - 1) classes.push('box-right');
+    if (r % br === br - 1 && r < size - 1) classes.push('box-bottom');
+    const el = h('button', { class: classes.join(' '), 'data-cell': i, 'aria-label': label(i) }, v === null ? '' : symbols[v]);
+    el.addEventListener('click', () => {
+      if (ctx.session.locked || grid[i] !== null) return;
+      selected = i;
+      refresh();
+    });
+    return el;
+  });
+  const refresh = () => cells.forEach((el, i) => {
+    el.classList.toggle('selected', i === selected);
+    el.setAttribute('aria-label', label(i));
+  });
+  // pourquoi c'est faux : la même image est déjà dans la ligne, la colonne ou le carré
+  const conflict = (cell, v) => {
+    const r = Math.floor(cell / size);
+    const c = cell % size;
+    if (grid.some((x, i) => x === v && Math.floor(i / size) === r)) return 'cette ligne';
+    if (grid.some((x, i) => x === v && i % size === c)) return 'cette colonne';
+    if (grid.some((x, i) => x === v && Math.floor(Math.floor(i / size) / br) === Math.floor(r / br) && Math.floor((i % size) / bc) === Math.floor(c / bc))) return 'ce carré';
+    return null;
+  };
+  const choose = (v) => {
+    if (ctx.session.locked || selected < 0) return;
+    const i = selected;
+    if (solution[i] === v) {
+      grid[i] = v;
+      cells[i].textContent = symbols[v];
+      cells[i].classList.add('found');
+      palette.forEach((p) => p.classList.remove('hint'));
+      playSound('tap');
+      // case vide suivante (en continuant après celle-ci)
+      const order = [...grid.keys()].slice(i + 1).concat([...grid.keys()].slice(0, i + 1));
+      selected = order.find((k) => grid[k] === null) ?? -1;
+      refresh();
+      if (selected === -1) {
+        zone.classList.add('answered');
+        markCorrect(ctx);
+      }
+      return;
+    }
+    misses[i]++;
+    cells[i].classList.add('shake');
+    setTimeout(() => cells[i].classList.remove('shake'), 400);
+    const where = conflict(i, v);
+    markWrong(ctx, { message: where ? `Il y en a déjà dans ${where} !` : 'Essaie encore !', given: `${symbols[v]} (case ${i + 1})` });
+    if (misses[i] >= 2) palette[solution[i]].classList.add('hint');
+  };
+  const palette = symbols.map((sym, v) => h('button', { class: 'sudoku-symbol', 'data-symbol': v, onclick: () => choose(v) }, sym));
+  const board = h('div', { class: `sudoku size-${size}`, style: { '--size': size } }, cells);
+  const zone = h('div', { class: 'choices sudoku-palette', style: { '--n': size } }, palette);
+  refresh();
+  return { stage: h('div', { class: 'stage stage-sudoku' }, board), zone };
+}
+
+// ---- Ranger dans l'ordre (tailles ou nombres)
+
+function orderZone(ctx) {
+  const { q } = ctx;
+  const sorted = [...q.items].sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
+  let next = 0;
+  const content = (item) => (item.emoji
+    ? h('span', { class: 'order-emoji', style: { '--scale': item.scale } }, item.emoji)
+    : item.label);
+  const slots = sorted.map(() => h('span', { class: 'order-slot', ...(q.lang ? { lang: q.lang } : {}) }));
+  const sign = q.sign ?? (q.items[0].emoji ? '→' : q.order === 'desc' ? '>' : '<');
+  const lang = q.lang ? { lang: q.lang } : {};
+  const buttons = q.items.map((item) => {
+    const btn = h('button', { class: `order-item${item.emoji ? ' order-picture' : ''}`, 'data-value': String(item.value), 'aria-label': item.label || `Taille ${item.value + 1}`, ...lang }, content(item));
+    btn.addEventListener('click', () => {
+      if (ctx.session.locked || btn.disabled) return;
+      if (item.value === sorted[next].value) {
+        btn.disabled = true;
+        btn.classList.add('placed');
+        slots[next].replaceChildren(content(item));
+        slots[next].classList.add('filled');
+        buttons.forEach((b) => b.classList.remove('hint'));
+        next++;
+        playSound('tap');
+        if (next === sorted.length) {
+          zone.classList.add('answered');
+          markCorrect(ctx);
+        }
+        return;
+      }
+      btn.classList.add('shake');
+      setTimeout(() => btn.classList.remove('shake'), 400);
+      const hint = ctx.session.attempts >= 1;
+      if (hint) buttons[q.items.indexOf(sorted[next])].classList.add('hint');
+      markWrong(ctx, { message: hint ? 'Touche celui qui brille !' : 'Essaie encore !', given: item.label || `taille ${item.value + 1}` });
+    });
+    return btn;
+  });
+  const zone = h('div', { class: 'choices order center' },
+    h('div', { class: `order-slots n${slots.length}` }, slots.flatMap((slot, i) => (i && sign ? [h('span', { class: 'order-sign', 'aria-hidden': 'true' }, sign), slot] : [slot]))),
+    h('div', { class: `order-items n${q.items.length}` }, buttons));
+  return zone;
+}
+
+// ---- Labyrinthe : glisser le doigt, toucher une case, ou les flèches
+
+function mazeZone(ctx) {
+  const { q } = ctx;
+  const { cols, rows, open, start, goal, hero, goalEmoji } = q.stage;
+  let pos = start;
+  const cells = open.map((bits, i) => h('div', {
+    class: ['maze-cell', ...['n', 'e', 's', 'w'].filter((_, k) => !(bits & (1 << k))).map((d) => `wall-${d}`)].join(' '),
+    'data-cell': i,
+  }));
+  cells[goal].append(h('span', { class: 'maze-goal', 'aria-hidden': 'true' }, goalEmoji));
+  cells[start].classList.add('maze-start');
+  const heroEl = h('span', { class: 'maze-hero', 'aria-hidden': 'true' }, hero);
+  const grid = h('div', {
+    class: 'maze',
+    role: 'img',
+    'aria-label': `Labyrinthe de ${cols} cases sur ${rows}`,
+    style: { '--cols': cols, '--rows': rows },
+  }, cells);
+  const place = () => {
+    cells[pos].append(heroEl);
+    cells.forEach((c, i) => c.classList.toggle('here', i === pos));
+  };
+  const bump = () => {
+    heroEl.classList.remove('bump');
+    void heroEl.offsetWidth; // relance l'animation
+    heroEl.classList.add('bump');
+  };
+  const moveTo = (target) => {
+    if (ctx.session.locked || !canMove(open, cols, pos, target)) return false;
+    cells[pos].classList.add('trail');
+    pos = target;
+    place();
+    cells[pos].classList.remove('hint');
+    if (pos === goal) {
+      grid.classList.add('solved');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+    }
+    return true;
+  };
+  // Toucher une case : on avance en ligne droite tant qu'il n'y a pas de mur.
+  const slideTo = (target, quiet = false) => {
+    if (target === pos) return;
+    const [px, py, tx, ty] = [pos % cols, Math.floor(pos / cols), target % cols, Math.floor(target / cols)];
+    if (px !== tx && py !== ty) return quiet ? null : bump();
+    const step = px === tx ? (ty > py ? cols : -cols) : (tx > px ? 1 : -1);
+    for (let c = pos; c !== target; c += step) if (!canMove(open, cols, c, c + step)) return quiet ? null : bump();
+    while (pos !== target && moveTo(pos + step));
+  };
+  const cellAt = (e) => {
+    const el = document.elementFromPoint(e.clientX, e.clientY)?.closest('.maze-cell');
+    return el && grid.contains(el) ? Number(el.dataset.cell) : null;
+  };
+  let dragging = false;
+  grid.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    dragging = true;
+    grid.setPointerCapture?.(e.pointerId);
+    const cell = cellAt(e);
+    if (cell !== null) slideTo(cell);
+  });
+  grid.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const cell = cellAt(e);
+    if (cell !== null) slideTo(cell, true);
+  });
+  for (const type of ['pointerup', 'pointercancel']) grid.addEventListener(type, () => { dragging = false; });
+  place();
+
+  const arrow = (label, symbol, delta) => h('button', {
+    class: 'maze-arrow',
+    'aria-label': label,
+    onclick: () => { if (!moveTo(pos + delta)) bump(); },
+  }, symbol);
+  // L'indice montre les 3 prochaines cases ; il compte comme une aide (pas d'étoile « du premier coup »).
+  const hint = () => {
+    if (ctx.session.locked) return;
+    ctx.session.attempts++;
+    solveMaze(open, cols, pos, goal).slice(1, 4).forEach((c) => cells[c].classList.add('hint'));
+    say(ctx.session.guide, 'Suis les étoiles !');
+  };
+  const zone = h('div', { class: 'choices maze-controls' },
+    arrow('Gauche', '←', -1), arrow('Haut', '↑', -cols), arrow('Bas', '↓', cols), arrow('Droite', '→', 1),
+    h('button', { class: 'maze-arrow maze-hint', 'aria-label': 'Indice', onclick: hint }, '💡'));
+  return { stage: h('div', { class: 'stage stage-maze' }, grid), zone };
+}
+
+// ---- Chemin des nombres ou des lettres : toucher les cases dans l'ordre
+
+function pathZone(ctx) {
+  const { q } = ctx;
+  const { cols, rows, cells: values, path, seq, spell, picture } = q.stage;
+  let step = 1; // la première case est déjà allumée
+  const trail = document.createElementNS(SVG_NS, 'svg');
+  trail.setAttribute('class', 'path-trail');
+  trail.setAttribute('viewBox', `0 0 ${cols} ${rows}`);
+  trail.setAttribute('aria-hidden', 'true');
+  const line = document.createElementNS(SVG_NS, 'polyline');
+  trail.append(line);
+  const drawTrail = () => line.setAttribute('points',
+    path.slice(0, step).map((c) => `${(c % cols) + 0.5},${Math.floor(c / cols) + 0.5}`).join(' '));
+  const buttons = values.map((v, i) => h('button', { class: 'path-cell', 'data-cell': i, 'data-value': String(v) }, String(v)));
+  buttons[path[0]].classList.add('done', 'start');
+  buttons[path.at(-1)].classList.add('finish');
+  const slots = spell ? seq.map((l, i) => h('span', { class: i === 0 ? 'spell-slot filled' : 'spell-slot' }, i === 0 ? l : '')) : null;
+  buttons.forEach((btn, i) => btn.addEventListener('click', () => {
+    if (ctx.session.locked || btn.classList.contains('done')) return;
+    if (i === path[step]) {
+      btn.classList.add('done');
+      buttons.forEach((b) => b.classList.remove('hint'));
+      if (slots) {
+        slots[step].textContent = seq[step];
+        slots[step].classList.add('filled');
+      }
+      step++;
+      drawTrail();
+      playSound('tap');
+      if (typeof seq[0] === 'number' && step < path.length) say(ctx.session.guide, { text: String(values[i]), rate: 1.05 });
+      if (step === path.length) {
+        zone.classList.add('answered');
+        markCorrect(ctx);
+      }
+      return;
+    }
+    btn.classList.add('shake');
+    setTimeout(() => btn.classList.remove('shake'), 400);
+    const hint = ctx.session.attempts >= 1;
+    if (hint) buttons[path[step]].classList.add('hint');
+    markWrong(ctx, { message: hint ? 'Touche celle qui brille !' : 'Essaie encore !', given: String(values[i]) });
+  }));
+  drawTrail();
+  const grid = h('div', { class: `path-grid${spell ? ' spell' : ''}`, style: { '--cols': cols, '--rows': rows } }, trail, buttons);
+  const top = spell
+    ? h('div', { class: 'spell-top' },
+      picture ? h('button', { class: 'spell-picture', onclick: () => say(ctx.session.guide, q.replay), 'aria-label': 'Réécouter le mot' }, picture) : null,
+      h('div', { class: 'spell-word', 'aria-hidden': 'true' }, slots))
+    : null;
+  const zone = h('div', { class: 'choices path-zone' }, grid);
+  return { stage: top ? h('div', { class: 'stage stage-path' }, top) : null, zone };
+}
+
+// ---- Faire des patates : entourer des paquets au doigt (ou toucher les objets un par un)
+
+function pointInPolygon([x, y], polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [xi, yi] = polygon[i];
+    const [xj, yj] = polygon[j];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+function lassoZone(ctx) {
+  const { q } = ctx;
+  const { emoji, many, count, group, cols, rows, positions } = q.stage;
+  const needed = Math.floor(count / group);
+  const grouped = new Set();
+  let groups = 0;
+  let picked = [];
+  const guide = ctx.session.guide;
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('class', 'lasso-lines');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.setAttribute('aria-hidden', 'true');
+  // une marge de 5 % tout autour : aucun objet ne touche le bord du cadre
+  const spot = positions.map((p) => [5 + p.x * 0.9, 5 + p.y * 0.9]);
+  const objects = spot.map(([x, y], i) => h('span', { class: 'lasso-object', 'data-i': i, style: { left: `${x}%`, top: `${y}%` } }, emoji));
+  const field = h('div', { class: 'lasso-field', role: 'img', 'aria-label': `${count} ${many}`, style: { '--cols': cols, '--rows': rows } }, svg, objects);
+  const help = h('p', { class: 'lasso-help' }, `Entoure ${group} ${emoji} avec ton doigt, ou touche-les un par un.`);
+  const zone = h('div', { class: 'choices lasso-zone' }, help);
+
+  const newPath = (cls) => {
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('class', cls);
+    path.setAttribute('vector-effect', 'non-scaling-stroke');
+    svg.append(path);
+    return path;
+  };
+  const pathData = (pts, closed) => `M${pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L')}${closed ? ' Z' : ''}`;
+  const tell = (message) => {
+    ctx.feedback.replaceChildren(h('p', { class: 'try-again' }, message));
+    say(guide, message);
+  };
+  const askTotal = () => {
+    const rest = count - groups * group;
+    field.classList.add('done');
+    const summary = `${groups === 1 ? 'Un paquet' : `${groups} paquets`} de ${group}${rest ? ` et ${rest} tout seul${rest > 1 ? 's' : ''}` : ''}.`;
+    const bubble = app.querySelector('.instruction .bubble');
+    if (bubble) bubble.textContent = 'Combien en tout ?';
+    ctx.feedback.replaceChildren();
+    zone.replaceChildren(h('p', { class: 'lasso-summary' }, summary), choiceZone(ctx));
+    say(guide, `${summary} Combien y en a-t-il en tout ?`);
+  };
+  const closeGroup = (members, outline) => {
+    const color = PAIR_COLORS[groups % PAIR_COLORS.length];
+    groups++;
+    for (const i of members) {
+      grouped.add(i);
+      objects[i].classList.remove('picked');
+      objects[i].classList.add('grouped');
+      objects[i].style.setProperty('--pair', color);
+      objects[i].dataset.group = groups;
+      delete objects[i].dataset.n;
+    }
+    if (outline) {
+      outline.setAttribute('class', 'patate done');
+      outline.style.stroke = color;
+      outline.style.fill = `${color}22`;
+    }
+    picked = [];
+    playSound('tap');
+    ctx.feedback.replaceChildren();
+    if (groups === needed) askTotal();
+    else say(guide, `${groups === 1 ? 'Un paquet' : `${groups} paquets`} !`);
+  };
+  const togglePick = (i) => {
+    if (grouped.has(i)) return;
+    if (picked.includes(i)) {
+      picked = picked.filter((x) => x !== i);
+      objects[i].classList.remove('picked');
+      delete objects[i].dataset.n;
+    } else {
+      picked.push(i);
+      objects[i].classList.add('picked');
+    }
+    picked.forEach((x, n) => { objects[x].dataset.n = n + 1; });
+    if (picked.length === group) closeGroup(picked, null);
+  };
+
+  let points = null;
+  let live = null;
+  const norm = (e) => {
+    const r = field.getBoundingClientRect();
+    return [((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100];
+  };
+  field.addEventListener('pointerdown', (e) => {
+    if (ctx.session.locked || groups === needed) return;
+    e.preventDefault();
+    field.setPointerCapture?.(e.pointerId);
+    points = [norm(e)];
+    live = newPath('patate live');
+  });
+  field.addEventListener('pointermove', (e) => {
+    if (!points) return;
+    const p = norm(e);
+    const last = points.at(-1);
+    if (Math.hypot(p[0] - last[0], p[1] - last[1]) < 1.5) return;
+    points.push(p);
+    live.setAttribute('d', pathData(points, false));
+  });
+  field.addEventListener('pointerup', (e) => {
+    if (!points) return;
+    const pts = points;
+    points = null;
+    let length = 0;
+    for (let i = 1; i < pts.length; i++) length += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    if (length < 15) {
+      // un simple toucher : on choisit l'objet touché
+      live.remove();
+      const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.lasso-object');
+      if (target && field.contains(target)) togglePick(Number(target.dataset.i));
+      return;
+    }
+    live.setAttribute('d', pathData(pts, true));
+    const inside = spot.map((_, i) => i).filter((i) => !grouped.has(i) && pointInPolygon(spot[i], pts));
+    if (inside.length === group) {
+      picked.forEach((i) => { objects[i].classList.remove('picked'); delete objects[i].dataset.n; });
+      picked = [];
+      closeGroup(inside, live);
+      return;
+    }
+    live.setAttribute('class', 'patate wrong');
+    const wrongPath = live;
+    setTimeout(() => wrongPath.remove(), 700);
+    tell(inside.length === 0
+      ? `Entoure ${group} ${many} avec ton doigt.`
+      : `Il en faut ${group} dans une patate. Tu en as entouré ${inside.length}.`);
+  });
+  field.addEventListener('pointercancel', () => {
+    points = null;
+    live?.remove();
+  });
+  return { stage: h('div', { class: 'stage stage-lasso' }, field), zone };
 }
 
 // ---- Le panier : fabriquer une collection
 
 function buildZone(ctx) {
   const { q } = ctx;
-  const { emoji, tens, perRow, max } = q.stage;
-  let singles = 0;
-  let bags = 0;
-  const basket = h('div', { class: `basket per-${perRow}` });
+  const { items, tens, perRow, limit } = q.stage;
+  const mixed = items.length > 1;
+  const counts = items.map(() => 0); // fruits posés un par un, par sorte
+  let bags = 0; // sachets de 10 (un seul fruit)
+  const basket = h('div', { class: `basket per-${perRow}${mixed ? ' mixed' : ''}` });
   const counter = h('p', { class: 'basket-count', hidden: true });
-  const total = () => singles + 10 * bags;
+  const amount = (i) => counts[i] + (i === 0 ? 10 * bags : 0);
   const render = () => {
     basket.replaceChildren(
       ...Array.from({ length: bags }, () => h('button', {
         class: 'bag-item',
         'aria-label': 'Enlever un sachet de 10',
         onclick: () => { bags--; render(); },
-      }, Array.from({ length: 10 }, () => h('span', {}, emoji)))),
-      h('div', { class: 'basket-singles' }, Array.from({ length: singles }, () =>
-        h('button', { class: 'basket-item', 'aria-label': 'Enlever', onclick: () => { singles--; render(); } }, emoji))));
-    if (!bags && !singles) basket.append(h('span', { class: 'basket-empty' }, '🧺'));
-    counter.textContent = `Tu en as mis ${total()}.`;
+      }, Array.from({ length: 10 }, () => h('span', {}, items[0].emoji)))),
+      ...items.map((item, i) => (counts[i] || !mixed
+        ? h('div', { class: 'basket-singles' }, Array.from({ length: counts[i] }, () => h('button', {
+          class: 'basket-item',
+          'data-fruit': i,
+          'aria-label': `Enlever ${item.one}`,
+          onclick: () => { counts[i]--; render(); },
+        }, item.emoji)))
+        : null)));
+    if (!bags && counts.every((c) => !c)) basket.append(h('span', { class: 'basket-empty' }, '🧺'));
+    const parts = items.map((item, i) => `${amount(i)} ${item.emoji}`);
+    counter.textContent = `Tu as mis ${parts.length > 1 ? `${parts.slice(0, -1).join(', ')} et ${parts.at(-1)}` : parts[0]}.`;
   };
-  const add = (n) => {
-    if (ctx.session.locked || total() + n > max) return;
+  const add = (i, n = 1) => {
+    if (ctx.session.locked || amount(i) + n > limit) return;
     if (n === 10) bags++;
-    else singles++;
+    else counts[i]++;
     render();
   };
   const validate = () => {
     if (ctx.session.locked) return;
-    if (total() === q.answer) {
+    const wrong = items.findIndex((item, i) => amount(i) !== item.target);
+    if (wrong === -1) {
       zone.classList.add('answered');
       markCorrect(ctx);
       return;
     }
+    const item = items[wrong];
+    const tooMany = amount(wrong) > item.target;
+    let message = tooMany ? 'Il y en a trop !' : 'Il en manque !';
+    if (mixed) message = tooMany ? `Il y a trop de ${item.many} !` : `Il manque des ${item.many} !`;
     if (ctx.session.attempts >= 1) counter.hidden = false;
-    markWrong(ctx, { message: total() > q.answer ? 'Il y en a trop !' : 'Il en manque !', given: total() });
+    markWrong(ctx, { message, given: items.map((it, i) => `${amount(i)} ${it.many}`).join(', ') });
   };
   render();
+  // la liste de courses en images, pour les enfants qui ne lisent pas encore
+  const list = mixed
+    ? h('div', { class: 'shopping-list', 'aria-hidden': 'true' },
+      items.map((item) => h('span', { class: 'shopping-item' }, h('b', {}, item.target), ' ', item.emoji)))
+    : null;
   const zone = h('div', { class: 'choices build' },
     h('div', { class: 'build-buttons' },
-      h('button', { class: 'add-btn', 'data-add': '1', onclick: () => add(1) }, h('span', { class: 'add-emoji' }, emoji), '+1'),
-      tens ? h('button', { class: 'add-btn bag', 'data-add': '10', onclick: () => add(10) }, h('span', { class: 'add-emoji' }, '🛍️'), '+10') : null),
+      items.map((item, i) => h('button', {
+        class: 'add-btn',
+        'data-add': '1',
+        'data-fruit': i,
+        'aria-label': `Ajouter ${item.one}`,
+        onclick: () => add(i),
+      }, h('span', { class: 'add-emoji' }, item.emoji), '+1')),
+      tens ? h('button', { class: 'add-btn bag', 'data-add': '10', onclick: () => add(0, 10) }, h('span', { class: 'add-emoji' }, '🛍️'), '+10') : null),
     h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
-  return { stage: h('div', { class: 'stage stage-build' }, basket, counter), zone };
+  return { stage: h('div', { class: 'stage stage-build' }, list, basket, counter), zone };
 }
 
 // ---- Fin de partie

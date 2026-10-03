@@ -81,6 +81,7 @@ export const compter = {
       key: `compter:${count}`,
       text: `Combien y a-t-il de ${obj.many} ?`,
       instruction: `Combien y a-t-il de ${obj.many} ?${tip}`,
+      short: { key: `compter:${layout}`, text: `Combien de ${obj.many} ?` },
       stage,
       choices: numberOptions(choicesWithTens(rng, count, choiceCount, 1, Math.max(max, 6))),
       choiceStyle: 'numbers',
@@ -119,6 +120,7 @@ export const viteVu = {
       key: `vite-vu:${n}`,
       text: 'Regarde bien… Combien y en a-t-il ?',
       instruction: 'Regarde bien ! Combien y en a-t-il ?',
+      short: { text: 'Combien ?' },
       stage: { type: 'flash', duration: [2500, 2500, 3000, 3500][level - 1], inner },
       choices: numberOptions(choicesWithTens(rng, n, level >= 3 ? 4 : 3, 1, max)),
       choiceStyle: 'numbers',
@@ -128,29 +130,107 @@ export const viteVu = {
   },
 };
 
+/** « un citron », « 3 citrons » */
+function quantity(fruit, n) {
+  return n === 1 ? `${fruit.f ? 'une' : 'un'} ${fruit.one}` : `${n} ${fruit.many}`;
+}
+
+/** « 6 bananes, 3 pommes et 2 fraises » */
+function listPhrase(parts) {
+  return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} et ${parts.at(-1)}`;
+}
+
+// Niveaux du panier : un seul fruit, puis des « listes de courses » de 2 ou 3 fruits.
+const PANIER_LEVELS = [
+  { label: "Jusqu'à 5", kinds: 1, min: 1, max: 5 },
+  { label: "Jusqu'à 10", kinds: 1, min: 1, max: 10 },
+  { label: 'Liste de courses : 2 fruits', kinds: 2, min: 1, max: 5 },
+  { label: 'Liste de courses : 3 fruits', kinds: 3, min: 1, max: 6 },
+  { label: 'De 11 à 20', kinds: 1, min: 11, max: 20 },
+  { label: 'De 20 à 50 avec des sachets de 10', kinds: 1, min: 20, max: 50, tens: true },
+  { label: 'Liste de courses : 3 fruits, jusqu’à 10 de chaque', kinds: 3, min: 2, max: 10 },
+];
+
 export const panier = {
   id: 'panier',
   domain: 'maths',
   section: DENOMBREMENT,
   title: 'Le panier',
   icon: '🧺',
-  skill: 'Fabriquer une collection d’un nombre donné, grouper par 10',
-  levels: ["Jusqu'à 5", "Jusqu'à 10", 'De 11 à 20', 'De 20 à 50 avec des sachets de 10'],
+  skill: 'Fabriquer une collection d’un nombre donné (plusieurs fruits à la fois), grouper par 10',
+  levels: PANIER_LEVELS.map((l) => l.label),
   generate(level, rng) {
-    const [min, max] = [[1, 5], [1, 10], [11, 20], [20, 50]][level - 1];
-    const target = randInt(rng, min, max);
-    const fruit = pick(rng, FRUITS);
-    const what = target === 1 ? `${fruit.f ? 'une' : 'un'} ${fruit.one}` : `${target} ${fruit.many}`;
-    const tens = level === 4;
+    const { kinds, min, max, tens = false } = PANIER_LEVELS[level - 1];
+    const items = sample(rng, FRUITS, kinds).map((fruit) => ({ ...fruit, target: randInt(rng, min, max) }));
+    const what = listPhrase(items.map((i) => quantity(i, i.target)));
+    const total = items.reduce((sum, i) => sum + i.target, 0);
     return {
-      key: `panier:${target}`,
+      key: `panier:${items.map((i) => i.emoji + i.target).join('')}`,
       interaction: 'build',
       text: `Mets ${what} dans le panier.`,
-      instruction: `Mets ${what} dans le panier.${tens ? ` Un sachet contient 10 ${fruit.many}.` : ''}`,
-      stage: { type: 'build', emoji: fruit.emoji, target, tens, perRow: level >= 3 ? 10 : 5, max: max + 10 },
+      instruction: `Mets ${what} dans le panier.${tens ? ` Un sachet contient 10 ${items[0].many}.` : ''}`,
+      short: { key: `panier:${kinds}:${tens}`, text: `Mets ${what}.` },
+      stage: {
+        type: 'build',
+        items: items.map((i) => ({ emoji: i.emoji, one: i.one, many: i.many, f: Boolean(i.f), target: i.target })),
+        tens,
+        perRow: kinds === 1 && max > 10 ? 10 : 5,
+        limit: tens ? max + 10 : max + 5, // nombre maximum d'un même fruit dans le panier
+      },
       choices: [],
-      answer: target,
-      success: { speak: `${target} ${target > 1 ? fruit.many : fruit.one}` },
+      answer: total,
+      success: { speak: what },
+    };
+  },
+};
+
+// « Faire des patates » : entourer des paquets de 2, de 5 ou de 10, puis compter le tout.
+const PATATES_LEVELS = [
+  { label: 'Paquets de 2 (jusqu’à 10)', group: 2, min: 5, max: 10 },
+  { label: 'Paquets de 5 (jusqu’à 15)', group: 5, min: 7, max: 15 },
+  { label: 'Paquets de 10 (de 11 à 20)', group: 10, min: 11, max: 20 },
+  { label: 'Paquets de 10 (de 20 à 30)', group: 10, min: 20, max: 30 },
+  { label: 'Paquets de 10 (jusqu’à 40)', group: 10, min: 30, max: 40 },
+];
+
+/** Objets éparpillés sans chevauchement, avec assez de place pour les entourer. */
+export function patatePositions(rng, count) {
+  const [cols, rows] = count <= 10 ? [4, 4] : count <= 15 ? [5, 5] : count <= 24 ? [6, 6] : count <= 32 ? [7, 6] : [8, 7];
+  const cells = sample(rng, Array.from({ length: cols * rows }, (_, i) => i), count);
+  const jitter = () => (rng() - 0.5) * 0.3;
+  const positions = cells.map((cell) => ({
+    x: Math.round(((cell % cols) + 0.5 + jitter()) * (1000 / cols)) / 10,
+    y: Math.round((Math.floor(cell / cols) + 0.5 + jitter()) * (1000 / rows)) / 10,
+  }));
+  return { cols, rows, positions };
+}
+
+export const patates = {
+  id: 'patates',
+  domain: 'maths',
+  section: DENOMBREMENT,
+  title: 'Fais des patates',
+  icon: '🥔',
+  skill: 'Faire des paquets (de 2, de 5, de 10) pour dénombrer une grande collection',
+  levels: PATATES_LEVELS.map((l) => l.label),
+  generate(level, rng) {
+    const { group, min, max } = PATATES_LEVELS[level - 1];
+    const count = randInt(rng, min, max);
+    const obj = pick(rng, OBJECTS);
+    const groups = Math.floor(count / group);
+    const rest = count - groups * group;
+    const parts = `${groups === 1 ? 'un paquet' : `${groups} paquets`} de ${group}${rest ? ` et ${rest}` : ''}`;
+    return {
+      key: `patates:${count}`,
+      interaction: 'lasso',
+      text: `Fais des paquets de ${group}.`,
+      instruction: `Fais des patates : entoure des paquets de ${group} ${obj.many} avec ton doigt. Ensuite, on comptera combien il y en a en tout.`,
+      short: { key: `patates:${group}`, text: `Des paquets de ${group} !` },
+      stage: { type: 'lasso', emoji: obj.emoji, one: obj.one, many: obj.many, count, group, ...patatePositions(rng, count) },
+      choices: numberOptions(choicesWithTens(rng, count, level <= 2 ? 3 : 4, 1, max + 10)),
+      choiceStyle: 'numbers',
+      answer: count,
+      success: { speak: `${parts} : ${count} ${obj.many} !` },
     };
   },
 };
@@ -179,6 +259,7 @@ export const dizaines = {
         key: `dizaines:${hundreds}-${tens}-${units}`,
         text: 'Quel nombre est représenté ? (plaque = 100, barre = 10)',
         instruction: 'Quel nombre est représenté ? Une plaque, c’est 100. Une barre, c’est 10.',
+        short: { key: 'dizaines:100', text: 'Quel nombre ?' },
         stage: { type: 'blocks', hundreds, tens, units },
         choices: numberOptions(values),
         choiceStyle: 'numbers',
@@ -208,6 +289,7 @@ export const dizaines = {
       key: `dizaines:${tens}-${units}`,
       text: 'Combien de cubes en tout ? (une barre = 10 cubes)',
       instruction: 'Combien de cubes en tout ? Une barre, c’est 10 cubes.',
+      short: { key: 'dizaines:10', text: 'Combien de cubes ?' },
       stage: { type: 'blocks', tens, units },
       choices: numberOptions(values),
       choiceStyle: 'numbers',
@@ -237,6 +319,7 @@ export const comparer = {
         key: `comparer:${a}-${b}`,
         text: `Où y a-t-il le plus de ${obj.many} ?`,
         instruction: `Où y a-t-il le plus de ${obj.many} ?`,
+        short: { key: 'comparer:plus', text: 'Où y en a-t-il le plus ?' },
         stage: { type: 'none' },
         choices: [
           { value: 'gauche', objects: { emoji: obj.emoji, count: a } },
@@ -282,6 +365,7 @@ export const comparer = {
       key: `comparer:${Math.min(a, b)}-${Math.max(a, b)}`,
       text: `Touche le nombre ${word}.`,
       instruction: `Touche le nombre ${word}.`,
+      short: { key: `comparer:${word}`, text: `${word[0].toUpperCase()}${word.slice(1)} ?` },
       stage: { type: 'none' },
       choices: numberOptions([a, b]),
       choiceStyle: 'big-numbers',
@@ -323,6 +407,7 @@ export const suite = {
       key: `suite:${start}-${step}-${gap}`,
       text: 'Quel nombre manque ?',
       instruction: step === 1 ? 'Quel nombre manque ?' : `On compte de ${step} en ${step}. Quel nombre manque ?`,
+      short: { key: `suite:${step}`, text: 'Quel nombre manque ?' },
       stage: { type: 'sequence', items },
       choices: numberOptions(numberChoices(rng, answer, level >= 3 ? 4 : 3, 0, level === 5 ? 1000 : 100, step)),
       choiceStyle: 'numbers',
@@ -384,6 +469,7 @@ function keypadQuestion(rng, palier) {
     interaction: 'keypad',
     text: 'Calcule !',
     instruction: `Combien font ${a} ${opWord(op)} ${b} ?`,
+    short: { key: 'calcul:pave', text: 'Calcule !', speak: `${a} ${opWord(op)} ${b} ?` },
     stage: { type: 'operation', a, b, op, emoji: palier.max <= 10 ? pick(rng, OBJECTS).emoji : null },
     choices: [],
     answer,
@@ -400,6 +486,7 @@ function matchQuestion(rng, palier) {
     interaction: 'match',
     text: 'Relie chaque calcul à son résultat.',
     instruction: 'Relie chaque calcul à son résultat.',
+    short: { text: 'Relie !' },
     stage: { type: 'none' },
     pairs: ops.map((o) => ({ left: `${o.a} ${o.op} ${o.b}`, right: o.answer })),
     rights: shuffle(rng, ops.map((o) => o.answer)),
@@ -410,13 +497,14 @@ function matchQuestion(rng, palier) {
 }
 
 /** « Complète » : placer les nombres dans les cases (□ + □ = 8). */
-function fillQuestion(rng, palier) {
-  const ops = distinctOperations(rng, palier, 3, (o) => `${o.op}${o.answer}`);
+function fillQuestion(rng, palier, count = 3) {
+  const ops = distinctOperations(rng, palier, count, (o) => `${o.op}${o.answer}`);
   return {
     key: `calcul:complete:${ops.map((o) => `${o.op}${o.answer}`).join(',')}`,
     interaction: 'fill',
     text: 'Place les nombres dans les cases.',
     instruction: 'Place les nombres dans les cases, pour que les calculs soient justes.',
+    short: { text: 'Complète !' },
     stage: { type: 'none' },
     equations: ops.map((o) => ({ op: o.op, result: o.answer, solution: [o.a, o.b] })),
     tiles: shuffle(rng, ops.flatMap((o) => [o.a, o.b])),
@@ -430,6 +518,76 @@ function fillQuestion(rng, palier) {
 export function equationHolds({ op, result }, x, y) {
   return op === '+' ? x + y === result : x - y === result;
 }
+
+// « Les calculs à trous » : glisser les étiquettes dans les cases ; chaque calcul juste devient vert.
+const TROUS_LEVELS = [
+  { label: '3 additions jusqu’à 5', count: 3, op: '+', max: 5 },
+  { label: '4 additions jusqu’à 10', count: 4, op: '+', max: 10 },
+  { label: '5 calculs, + et −, jusqu’à 10', count: 5, op: '±', max: 10 },
+  { label: '5 calculs, + et −, jusqu’à 20', count: 5, op: '±', max: 20 },
+  { label: '4 calculs, + et −, jusqu’à 50', count: 4, op: '±', max: 50 },
+  { label: '4 calculs, + et −, jusqu’à 100', count: 4, op: '±', max: 100 },
+];
+
+export const trous = {
+  id: 'trous',
+  domain: 'maths',
+  section: CALCUL,
+  title: 'Les calculs à trous',
+  icon: '🧩',
+  skill: 'Trouver les nombres qui rendent des additions et des soustractions justes',
+  levels: TROUS_LEVELS.map((l) => l.label),
+  generate(level, rng) {
+    const { count, op, max } = TROUS_LEVELS[level - 1];
+    const q = fillQuestion(rng, { op, max }, count);
+    return {
+      ...q,
+      key: q.key.replace('calcul:complete', 'trous'),
+      text: 'Glisse les nombres dans les cases.',
+      instruction: 'Glisse les nombres dans les cases, pour que les calculs soient justes. Chaque calcul juste devient vert.',
+      short: { key: 'trous', text: 'Complète !' },
+    };
+  },
+};
+
+// « Relie les calculs » : tracer un trait au doigt de chaque calcul à son résultat ;
+// la paire juste devient verte puis disparaît.
+const RELIE_LEVELS = [
+  { label: '4 additions jusqu’à 10', count: 4, op: '+', max: 10 },
+  { label: '6 calculs, + et −, jusqu’à 10', count: 6, op: '±', max: 10 },
+  { label: '8 calculs, + et −, jusqu’à 10', count: 8, op: '±', max: 10 },
+  { label: '6 calculs, + et −, jusqu’à 20', count: 6, op: '±', max: 20 },
+  { label: '8 calculs, + et −, jusqu’à 20', count: 8, op: '±', max: 20 },
+  { label: '6 calculs, + et −, jusqu’à 100', count: 6, op: '±', max: 100 },
+];
+
+export const relieCalculs = {
+  id: 'relie-calculs',
+  domain: 'maths',
+  section: CALCUL,
+  title: 'Relie les calculs',
+  icon: '🖍️',
+  skill: 'Calculer de tête et associer chaque calcul à son résultat',
+  levels: RELIE_LEVELS.map((l) => l.label),
+  generate(level, rng) {
+    const { count, op, max } = RELIE_LEVELS[level - 1];
+    const ops = distinctOperations(rng, { op, max }, count, (o) => o.answer);
+    return {
+      key: `relie-calculs:${ops.map((o) => `${o.a}${o.op}${o.b}`).join(',')}`,
+      interaction: 'match',
+      vanish: true,
+      text: 'Relie chaque calcul à son résultat.',
+      instruction: 'Trace un trait avec ton doigt, de chaque calcul jusqu’à son résultat.',
+      short: { key: 'relie-calculs', text: 'Relie !' },
+      stage: { type: 'none' },
+      pairs: ops.map((o) => ({ left: `${o.a} ${o.op} ${o.b}`, right: o.answer })),
+      rights: shuffle(rng, ops.map((o) => o.answer)),
+      choices: [],
+      answer: null,
+      success: { speak: 'Tout est relié !' },
+    };
+  },
+};
 
 /** Ordre des exercices dans une partie de calcul. */
 export const CALC_FORMATS = ['keypad', 'match', 'keypad', 'fill'];
@@ -473,6 +631,7 @@ export const faireDix = {
       instruction: withFrame
         ? `Combien en manque-t-il pour faire ${total} ?`
         : `${filled} plus combien égale ${total} ?`,
+      short: withFrame ? { key: `faire-dix:${total}`, text: `Pour faire ${total} ?` } : undefined,
       stage: withFrame
         ? { type: 'frame', size: total, filled }
         : { type: 'equation', parts: [filled, '+', null, '=', total] },
@@ -484,4 +643,4 @@ export const faireDix = {
   },
 };
 
-export const MATHS_GAMES = [compter, viteVu, panier, dizaines, comparer, suite, calcul, faireDix];
+export const MATHS_GAMES = [compter, viteVu, panier, patates, dizaines, comparer, suite, calcul, trous, relieCalculs, faireDix];

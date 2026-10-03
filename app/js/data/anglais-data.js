@@ -65,7 +65,8 @@ export const ENGLISH_THEMES = [
       { en: 'book', fr: 'le livre', emoji: '📖' }, { en: 'pencil', fr: 'le crayon', emoji: '✏️' },
       { en: 'bag', fr: 'le cartable', emoji: '🎒' }, { en: 'scissors', fr: 'les ciseaux', emoji: '✂️' },
       { en: 'ruler', fr: 'la règle', emoji: '📏' }, { en: 'school', fr: "l'école", emoji: '🏫' },
-      { en: 'crayons', fr: 'les craies grasses', emoji: '🖍️' },
+      { en: 'crayons', fr: 'les craies grasses', emoji: '🖍️' }, { en: 'pen', fr: 'le stylo', emoji: '🖊️' },
+      { en: 'paint', fr: 'la peinture', emoji: '🎨' },
     ],
   },
   {
@@ -74,6 +75,23 @@ export const ENGLISH_THEMES = [
       { en: 'sun', fr: 'le soleil', emoji: '☀️' }, { en: 'rain', fr: 'la pluie', emoji: '🌧️' },
       { en: 'snow', fr: 'la neige', emoji: '❄️' }, { en: 'cloud', fr: 'le nuage', emoji: '☁️' },
       { en: 'wind', fr: 'le vent', emoji: '💨' }, { en: 'rainbow', fr: "l'arc-en-ciel", emoji: '🌈' },
+    ],
+  },
+  {
+    title: 'Les émotions', icon: '😀',
+    words: [
+      { en: 'happy', fr: 'content', emoji: '😀' }, { en: 'sad', fr: 'triste', emoji: '😢' },
+      { en: 'angry', fr: 'en colère', emoji: '😠' }, { en: 'tired', fr: 'fatigué', emoji: '😴' },
+      { en: 'scared', fr: 'effrayé', emoji: '😱' }, { en: 'sick', fr: 'malade', emoji: '🤒' },
+    ],
+  },
+  {
+    title: 'La famille', icon: '👪',
+    words: [
+      { en: 'mum', fr: 'maman', emoji: '👩' }, { en: 'dad', fr: 'papa', emoji: '👨' },
+      { en: 'baby', fr: 'le bébé', emoji: '👶' }, { en: 'grandma', fr: 'mamie', emoji: '👵' },
+      { en: 'grandpa', fr: 'papi', emoji: '👴' }, { en: 'boy', fr: 'le garçon', emoji: '👦' },
+      { en: 'girl', fr: 'la fille', emoji: '👧' }, { en: 'family', fr: 'la famille', emoji: '👪' },
     ],
   },
 ];

@@ -1,6 +1,6 @@
 {
   "name": "lire-et-compter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Application iPhone et iPad (web app installable) de jeux de français, maths et anglais, de la moyenne section au CE1",
   "type": "module",

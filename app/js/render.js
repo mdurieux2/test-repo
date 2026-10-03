@@ -9,7 +9,12 @@ export function h(tag, attrs = {}, ...children) {
     if (value === undefined || value === null || value === false) continue;
     if (key.startsWith('on')) el.addEventListener(key.slice(2), value);
     else if (key === 'class') el.className = value;
-    else if (key === 'style' && typeof value === 'object') Object.assign(el.style, value);
+    else if (key === 'style' && typeof value === 'object') {
+      for (const [prop, v] of Object.entries(value)) {
+        if (prop.startsWith('--')) el.style.setProperty(prop, v); // variables CSS (--cols…)
+        else el.style[prop] = v;
+      }
+    }
     else el.setAttribute(key, value === true ? '' : value);
   }
   for (const child of children.flat()) {
@@ -29,7 +34,7 @@ export function objectsGrid(emoji, count, perRow = 5, extraClass = '') {
   return h('div', { class: `objects per-${perRow} ${extraClass}`, 'aria-label': String(count), role: 'img' }, rows);
 }
 
-function operationStage({ a, b, op, emoji }) {
+function operationStage({ a, b, op, emoji, hideEquation = false }) {
   const eq = h('div', { class: 'equation' },
     h('span', { class: 'num' }, a), h('span', { class: 'op' }, op),
     h('span', { class: 'num' }, b), h('span', { class: 'op' }, '='),
@@ -48,7 +53,43 @@ function operationStage({ a, b, op, emoji }) {
     for (let i = 0; i < a; i += perRow) rows.push(h('div', { class: 'objects-row' }, items.slice(i, i + perRow)));
     visual = h('div', { class: 'operation-visual' }, h('div', { class: `objects small per-${perRow}` }, rows));
   }
-  return h('div', { class: 'stage-operation' }, visual, eq);
+  return h('div', { class: 'stage-operation' }, visual, hideEquation ? null : eq);
+}
+
+/** Petit problème : l'histoire écrite, et des images pour les plus jeunes. */
+function storyStage({ text, picture }) {
+  return h('div', { class: 'stage-story' },
+    h('p', { class: 'story-text' }, text),
+    picture ? operationStage({ ...picture, hideEquation: true }) : null);
+}
+
+/** Horloge à aiguilles : la petite aiguille (heures) est courte et épaisse, la grande est longue et fine. */
+export function clockSvg(hours, minutes) {
+  const hourAngle = ((hours % 12) + minutes / 60) * 30;
+  const minuteAngle = minutes * 6;
+  const ticks = Array.from({ length: 60 }, (_, i) => {
+    const big = i % 5 === 0;
+    return `<line x1="50" y1="${big ? 7 : 6}" x2="50" y2="${big ? 12 : 9}" stroke="${big ? '#2b2d42' : '#b9b2a3'}" stroke-width="${big ? 1.6 : 0.8}" transform="rotate(${i * 6} 50 50)"/>`;
+  }).join('');
+  const numbers = Array.from({ length: 12 }, (_, i) => {
+    const n = i + 1;
+    const a = (n * 30 * Math.PI) / 180;
+    return `<text x="${(50 + 32 * Math.sin(a)).toFixed(2)}" y="${(50 - 32 * Math.cos(a)).toFixed(2)}">${n}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" fill="#fff" stroke="#2b2d42" stroke-width="3"/>
+    ${ticks}
+    <g class="clock-numbers">${numbers}</g>
+    <line class="hand-hour" x1="50" y1="50" x2="50" y2="29" stroke="#2b2d42" stroke-width="5" stroke-linecap="round" transform="rotate(${hourAngle} 50 50)"/>
+    <line class="hand-minute" x1="50" y1="50" x2="50" y2="13" stroke="#e8650c" stroke-width="2.6" stroke-linecap="round" transform="rotate(${minuteAngle} 50 50)"/>
+    <circle cx="50" cy="50" r="3.2" fill="#2b2d42"/>
+  </svg>`;
+}
+
+function clockStage({ h: hours, m: minutes }) {
+  const el = h('div', { class: 'stage-clock', role: 'img', 'aria-label': 'Une horloge à aiguilles' });
+  el.innerHTML = clockSvg(hours, minutes);
+  return el;
 }
 
 function frameStage({ size, filled }) {
@@ -159,11 +200,17 @@ export function renderStage(stage, actions) {
     case 'swatch':
       return h('span', { class: 'stage-swatch', style: { background: stage.color } });
     case 'sentence':
-      return h('p', { class: 'stage-sentence' }, stage.text);
+      return h('p', { class: 'stage-sentence', lang: stage.lang }, stage.text);
+    case 'text':
+      return textStage(stage, actions);
     case 'word':
       return h('button', { class: 'stage-word', lang: stage.lang, onclick: actions.replay }, stage.text);
     case 'operation':
       return operationStage(stage);
+    case 'story':
+      return storyStage(stage);
+    case 'clock':
+      return clockStage(stage);
     case 'sequence':
       return h('div', { class: 'sequence' },
         stage.items.map((n) => h('span', { class: n === null ? 'seq-item gap' : 'seq-item' }, n === null ? '?' : n)));
@@ -177,7 +224,34 @@ export function renderStage(stage, actions) {
   }
 }
 
+/** Petit texte à lire ; le bouton 🔊 le lit à voix haute, en cas de besoin. */
+function textStage({ title, text }, actions) {
+  return h('div', { class: 'stage-text' },
+    title ? h('h2', { class: 'text-title' }, title) : null,
+    h('p', { class: 'text-body' }, text),
+    h('button', { class: 'text-listen', onclick: () => actions.speak?.([{ text: `${title ? `${title}. ` : ''}${text}`, rate: 0.9 }]) }, '🔊 Écouter le texte'));
+}
+
+/** Petite scène « où est le chat ? » : sur, sous, à côté de la table, ou dans le panier. */
+function sceneContent({ who, where }, label) {
+  const el = h('span', { class: `scene scene-${where}`, role: 'img', 'aria-label': label });
+  if (where === 'in') {
+    el.append(h('span', { class: 'scene-who' }, who), h('span', { class: 'scene-basket' }, '🧺'));
+  } else {
+    el.append(h('span', { class: 'scene-table' }, h('span', { class: 'tbl-top' }), h('span', { class: 'tbl-leg l' }), h('span', { class: 'tbl-leg r' })),
+      h('span', { class: 'scene-who' }, who));
+  }
+  return el;
+}
+
+/** Silhouette noire d'un objet (jeu des ombres). */
+function shadowContent(emoji, label, transform) {
+  return h('span', { class: 'shadow', role: 'img', 'aria-label': label || 'ombre', style: transform ? { transform } : undefined }, emoji);
+}
+
 export function renderChoiceContent(choice) {
+  if (choice.scene) return sceneContent(choice.scene, choice.name);
+  if (choice.shadow) return shadowContent(choice.shadow, choice.name, choice.transform);
   if (choice.objects) return objectsGrid(choice.objects.emoji, choice.objects.count, 5, 'small');
   if (choice.shape) return shapeSvg(choice.shape, choice.color);
   if (choice.swatch) return h('span', { class: 'swatch', style: { background: choice.swatch }, role: 'img', 'aria-label': choice.name });

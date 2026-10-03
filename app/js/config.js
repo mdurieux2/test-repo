@@ -4,12 +4,29 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.1.0',
+  version: '1.2.0',
   author: 'Michaël Durieux',
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.2.0',
+    date: '2026-10-03',
+    changes: [
+      'Labyrinthes de 4 × 4 à 9 × 9 cases, chemins des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours) et des lettres.',
+      'Fais des patates : entourer au doigt des paquets de 2, de 5 ou de 10, puis compter le tout.',
+      'Les calculs à trous : glisser les nombres dans les cases, chaque calcul juste devient vert (6 niveaux).',
+      'Relie les calculs : tracer un trait au doigt jusqu’au résultat ; la paire juste devient verte puis disparaît.',
+      'Sudoku pour enfants : 4 × 4 avec des images, puis avec des chiffres, jusqu’au 6 × 6.',
+      'Le panier : listes de courses avec plusieurs fruits (6 bananes, 3 pommes et 2 fraises).',
+      'Nouveaux jeux de maths : relie les quantités, range dans l’ordre, petits problèmes avec le prénom de l’enfant, doubles et moitiés, l’heure, l’intrus, les ombres.',
+      'Petits textes à lire, avec des questions de compréhension.',
+      'Anglais : relie en anglais, compte en anglais, « Where is the cat? », épelle en anglais, et deux thèmes (émotions, famille).',
+      'Chaque jeu permet de choisir directement son niveau.',
+      'Consigne complète à la première question, puis une consigne courte pour ne pas répéter.',
+    ],
+  },
   {
     version: '1.1.0',
     date: '2026-10-03',

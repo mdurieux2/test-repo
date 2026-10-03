@@ -564,6 +564,17 @@ input { -webkit-user-select: text; user-select: text; }
   box-shadow: 0 3px 0 #e9c98f;
 }
 .basket-count { margin: 0; font-weight: 700; color: var(--maths-dark); }
+.shopping-list { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.shopping-item {
+  background: var(--card); border-radius: 999px; padding: 4px 14px; font-size: 1.5rem;
+  box-shadow: 0 3px 0 var(--line); white-space: nowrap;
+}
+.shopping-item b { font-size: 1.6rem; }
+.basket.mixed { gap: 6px; }
+.basket.mixed .basket-singles { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; padding-bottom: 4px; border-bottom: 2px dashed #ecd7ad; }
+.basket.mixed .basket-singles:last-child { border-bottom: 0; }
+.basket.mixed .basket-item { font-size: min(26px, 6.4vw); }
+.build-buttons .add-btn { min-width: 0; flex: 1; max-width: 160px; padding: 0 10px; }
 .build { display: flex; flex-direction: column; gap: 12px; }
 .build-buttons { display: flex; gap: 12px; justify-content: center; }
 .add-btn {
@@ -727,3 +738,292 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .avatar-xl .avatar-name { font-size: 1rem; }
 .avatar-xs .avatar-name, .avatar-sm .avatar-name { display: none; }
+
+/* =====================================================================
+   Version 1.2 : choix du niveau, ranger, labyrinthe, chemins, patates,
+   petits problèmes, horloge
+   ===================================================================== */
+.shake { animation: shake 0.4s; }
+
+/* carte de jeu : le haut lance le jeu, le bas choisit le niveau */
+.game-card { padding: 0; gap: 0; overflow: hidden; }
+.game-card:active { transform: none; box-shadow: 0 5px 0 var(--accent-soft), 0 0 0 3px var(--accent-soft) inset; }
+.game-play {
+  width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  padding: 14px 10px 10px;
+}
+.game-play:active { transform: translateY(2px); }
+.level-pick {
+  width: 100%; min-height: 48px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 8px;
+  border-top: 2px dashed var(--accent-soft); padding: 6px 8px 10px;
+  font-size: 0.85rem; font-weight: 700; color: var(--accent-dark);
+}
+.level-pick:active { background: var(--accent-soft); }
+.level-pick-label { white-space: nowrap; }
+
+.levels-intro { margin: 14px 4px 10px; font-weight: 700; font-size: 1.2rem; }
+.level-list { display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; }
+.level-row {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  background: var(--card); border-radius: 20px; padding: 10px 14px; min-height: 66px;
+  box-shadow: 0 4px 0 var(--accent-soft), 0 0 0 3px var(--accent-soft) inset;
+}
+.level-row:active { transform: translateY(3px); }
+.level-num {
+  flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent-dark); font-weight: 700; font-size: 1.3rem;
+}
+.level-row.current { box-shadow: 0 4px 0 var(--accent-dark), 0 0 0 3px var(--accent) inset; }
+.level-row.current .level-num { background: var(--accent-dark); color: #fff; }
+.level-label { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.level-label b { font-size: 1.1rem; }
+.level-label span { color: var(--muted); font-size: 0.95rem; }
+.level-state { flex: none; font-weight: 700; color: var(--accent-dark); white-space: nowrap; }
+.level-row.passed .level-state { color: var(--good-dark); font-size: 1.4rem; }
+
+/* ranger dans l'ordre */
+.order { display: flex; flex-direction: column; gap: 22px; }
+.order-slots { display: flex; align-items: center; justify-content: center; gap: 4px; }
+.order-slot {
+  flex: 1 1 0; min-width: 0; max-width: 96px; height: 78px; border-radius: 16px;
+  border: 3px dashed var(--accent); background: var(--accent-soft);
+  display: grid; place-items: center; font-size: min(1.8rem, 7vw); font-weight: 700;
+}
+.order-slot.filled { border-style: solid; background: var(--card); animation: pop 0.3s ease-out; }
+.order-sign { flex: none; font-size: 1.5rem; font-weight: 700; color: var(--accent-dark); }
+.order-items { display: grid; gap: 10px; }
+.order-items.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.order-items.n4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.order-items.n5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.order-item {
+  min-width: 0; min-height: 84px; border-radius: 20px; padding: 4px 2px;
+  display: grid; place-items: center; background: var(--card);
+  font-size: min(2rem, 7.5vw); font-weight: 700;
+  box-shadow: 0 6px 0 var(--line), 0 0 0 3px var(--line) inset;
+}
+.order-items.n5 .order-item { font-size: min(1.6rem, 6.4vw); }
+.order-item.order-picture { min-height: 112px; }
+.order-item.placed { opacity: 0.25; transform: scale(0.92); }
+.order-item.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 6px 0 #e6b800, 0 0 0 4px var(--hint) inset; }
+.order-emoji { font-size: calc(var(--scale, 1) * min(44px, 10vw)); line-height: 1; }
+.order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(30px, 7vw)); }
+
+/* labyrinthe */
+.stage-maze { padding: 4px 0; min-height: 0; }
+.maze {
+  display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+  width: min(100%, 440px, calc(100vh / var(--zoom, 1) - 370px));
+  width: min(100%, 440px, calc(100dvh / var(--zoom, 1) - 370px));
+  aspect-ratio: 1; border: 2px solid var(--ink); border-radius: 8px; background: var(--card);
+  box-shadow: 0 5px 0 var(--line);
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  container-type: inline-size;
+}
+.maze-cell { position: relative; border: 2px solid transparent; display: grid; place-items: center; min-width: 0; min-height: 0; }
+.maze-cell.wall-n { border-top-color: var(--ink); }
+.maze-cell.wall-e { border-right-color: var(--ink); }
+.maze-cell.wall-s { border-bottom-color: var(--ink); }
+.maze-cell.wall-w { border-left-color: var(--ink); }
+.maze-cell.trail::before { content: ''; width: 24%; aspect-ratio: 1; border-radius: 50%; background: var(--accent); opacity: 0.5; }
+.maze-cell.hint::before { content: '⭐'; width: auto; background: none; opacity: 1; font-size: 16px; font-size: calc(45cqi / var(--cols)); }
+.maze-cell.here::before { content: none; }
+.maze-hero, .maze-goal { position: absolute; line-height: 1; font-size: 26px; font-size: calc(68cqi / var(--cols)); }
+.maze-hero { z-index: 2; }
+.maze-hero.bump { animation: shake 0.3s; }
+.maze.solved .maze-hero { animation: pop 0.4s ease-out; }
+.maze-controls { display: flex; justify-content: center; gap: 10px; }
+.maze-arrow {
+  width: 58px; height: 58px; border-radius: 18px; background: var(--card);
+  font-size: 1.8rem; font-weight: 700;
+  box-shadow: 0 5px 0 var(--line), 0 0 0 3px var(--line) inset;
+}
+.maze-arrow:active { transform: translateY(3px); }
+.maze-hint { background: #fff6d6; }
+.maze-controls.answered .maze-arrow { opacity: 0.4; }
+
+/* chemins de nombres et de lettres */
+.path-zone { flex: 1; display: flex; align-items: center; justify-content: center; }
+.path-grid {
+  position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 8px;
+  width: min(100%, calc(var(--cols) * 92px), calc((100vh / var(--zoom, 1) - 320px) * var(--cols) / var(--rows)));
+  width: min(100%, calc(var(--cols) * 92px), calc((100dvh / var(--zoom, 1) - 320px) * var(--cols) / var(--rows)));
+}
+.path-grid.spell {
+  width: min(100%, calc(var(--cols) * 80px), calc((100vh / var(--zoom, 1) - 440px) * var(--cols) / var(--rows)));
+  width: min(100%, calc(var(--cols) * 80px), calc((100dvh / var(--zoom, 1) - 440px) * var(--cols) / var(--rows)));
+}
+.path-cell {
+  position: relative; z-index: 1; aspect-ratio: 1; min-width: 0; border-radius: 16px;
+  background: var(--card); font-size: min(1.7rem, 6.5vw); font-weight: 700;
+  box-shadow: 0 4px 0 var(--line), 0 0 0 3px var(--line) inset;
+}
+.path-cell:active { transform: translateY(2px); }
+.path-cell.done { background: var(--accent); color: #fff; box-shadow: 0 4px 0 var(--accent-dark); }
+.path-cell.finish::after { content: '🏁'; position: absolute; top: 3px; right: 4px; font-size: 0.85rem; line-height: 1; }
+.path-cell.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 4px 0 #e6b800, 0 0 0 4px var(--hint) inset; }
+.path-trail { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; }
+.path-trail polyline { fill: none; stroke: var(--accent); stroke-width: 0.14; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55; }
+.stage-path { flex: none; min-height: 0; padding: 4px 0; }
+.spell-top { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.spell-picture { font-size: 60px; line-height: 1.1; background: var(--card); border-radius: 22px; padding: 4px 14px; box-shadow: 0 5px 0 var(--line); }
+.spell-word { display: flex; gap: 4px; }
+.spell-slot {
+  width: 30px; height: 46px; border-bottom: 4px solid var(--accent);
+  display: grid; place-items: center; font-size: 1.8rem; font-weight: 700;
+}
+.spell-slot.filled { color: var(--accent-dark); animation: pop 0.3s ease-out; }
+
+/* faire des patates */
+.stage-lasso { padding: 4px 0; min-height: 0; }
+.lasso-field {
+  position: relative; overflow: hidden;
+  width: min(100%, 460px, calc((100vh / var(--zoom, 1) - 400px) * var(--cols) / var(--rows)));
+  width: min(100%, 460px, calc((100dvh / var(--zoom, 1) - 400px) * var(--cols) / var(--rows)));
+  aspect-ratio: var(--cols) / var(--rows);
+  background: var(--card); border-radius: 22px; box-shadow: 0 5px 0 var(--line);
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  container-type: inline-size;
+}
+.lasso-object {
+  position: absolute; transform: translate(-50%, -50%); line-height: 1; padding: 3px; border-radius: 50%;
+  font-size: 26px; font-size: calc(54cqi / var(--cols));
+}
+.lasso-object.picked { background: #fff6d6; box-shadow: 0 0 0 3px #e6b800; }
+.lasso-object.grouped { box-shadow: 0 0 0 3px var(--pair); }
+.lasso-object.picked::after, .lasso-object.grouped::after {
+  position: absolute; right: -7px; top: -9px; min-width: 16px; padding: 0 4px;
+  border-radius: 999px; background: #fff; color: var(--ink); border: 2px solid var(--ink);
+  font-size: 11px; font-weight: 700; line-height: 14px; text-align: center;
+}
+.lasso-object.picked::after { content: attr(data-n); }
+.lasso-object.grouped::after { content: attr(data-group); border-color: var(--pair); }
+.lasso-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.patate { fill: none; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.patate.live { stroke: var(--ink); stroke-dasharray: 6 6; }
+.patate.wrong { stroke: var(--bad); }
+.patate.done { stroke-width: 5; }
+.lasso-zone { display: flex; flex-direction: column; gap: 8px; }
+.lasso-help { margin: 0; text-align: center; font-weight: 700; color: var(--muted); }
+.lasso-summary { margin: 0; text-align: center; font-weight: 700; font-size: 1.2rem; }
+.lasso-zone .choices { margin-top: 0; }
+
+/* petits problèmes */
+.stage-story { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.story-text {
+  margin: 0; background: var(--card); border-radius: 22px; padding: 14px 18px;
+  font-size: 1.35rem; font-weight: 700; line-height: 1.4; text-align: center; box-shadow: 0 5px 0 var(--line);
+}
+
+/* horloge */
+.stage-clock {
+  width: min(240px, 62vw, calc(100vh / var(--zoom, 1) - 430px));
+  width: min(240px, 62vw, calc(100dvh / var(--zoom, 1) - 430px));
+  aspect-ratio: 1;
+}
+.stage-clock svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 5px 0 var(--line)); }
+.clock-numbers text { font-size: 9px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--ink); font-family: inherit; }
+
+/* relie : objets à compter ou images à gauche */
+.match-item.has-objects { padding: 6px 4px; }
+.match-item.has-objects .objects .object { font-size: min(20px, 5vw); }
+.match-item.has-emoji { font-size: 2.2rem; }
+.match-item.right.is-word { font-size: 1.35rem; }
+
+/* calculs à trous : 4 ou 5 calculs, étiquettes à glisser */
+.fill-row.right { animation: pop 0.3s ease-out; }
+.fill-row.right .fill-box { border-color: var(--good); background: #fff; color: var(--good-dark); }
+.fill.rows-4 .fill-rows, .fill.rows-5 .fill-rows { gap: 8px; }
+.fill.rows-4 .fill-row, .fill.rows-5 .fill-row { padding: 4px 10px; font-size: 1.6rem; }
+.fill.rows-4 .fill-box, .fill.rows-5 .fill-box { height: min(52px, 13vw); font-size: 1.6rem; }
+.fill.rows-5 { gap: 12px; }
+.tile-tray.tiles-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tile-tray.tiles-10 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.tile-tray.tiles-8 .tile, .tile-tray.tiles-10 .tile { min-height: 52px; font-size: 1.6rem; }
+.tile { touch-action: none; user-select: none; -webkit-user-select: none; }
+.tile.dragging { opacity: 0.3; }
+.tile.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 5px 0 #e6b800, 0 0 0 4px var(--hint) inset; }
+.tile-ghost {
+  position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none;
+  display: grid; place-items: center; border-radius: 18px;
+  background: var(--maths); color: #fff; font-size: 1.9rem; font-weight: 700;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+.fill-box.drop-target { box-shadow: 0 0 0 4px var(--hint); background: #fff6d6; }
+.play-fill .feedback { min-height: 64px; }
+
+/* petits textes : un texte à lire, des réponses courtes sur 3 colonnes */
+.choices-answers.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.choices-answers .choice {
+  font-size: min(1.2rem, 4.6vw); min-height: 64px; line-height: 1.2; padding: 6px 4px;
+  overflow-wrap: anywhere; hyphens: auto;
+}
+.stage-text {
+  width: 100%; background: var(--card); border-radius: 22px; padding: 12px 16px 10px;
+  box-shadow: 0 5px 0 var(--line); display: flex; flex-direction: column; gap: 6px;
+}
+.text-title { margin: 0; font-size: 1.15rem; color: var(--accent-dark); text-align: center; }
+.text-body { margin: 0; font-size: 1.3rem; line-height: 1.5; font-weight: 700; }
+.text-listen { align-self: center; min-height: 44px; padding: 0 14px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-dark); font-weight: 700; font-size: 0.95rem; }
+
+/* les ombres : silhouettes noires */
+.shadow { display: inline-block; line-height: 1; filter: brightness(0) opacity(0.85); }
+
+/* « Where is the cat? » : petites scènes */
+.choices-scenes.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.choices-scenes.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choices-scenes .choice { min-height: 0; padding: 6px; }
+.scene { position: relative; display: block; width: 100%; max-width: 140px; aspect-ratio: 1; container-type: inline-size; }
+.choices-scenes.n4 .scene { max-width: 118px; }
+.scene-table { position: absolute; inset: 0; }
+.tbl-top { position: absolute; left: 12%; right: 12%; top: 46%; height: 8%; border-radius: 4px; background: #b5753a; }
+.tbl-leg { position: absolute; top: 53%; bottom: 6%; width: 7%; background: #8a5426; border-radius: 0 0 3px 3px; }
+.tbl-leg.l { left: 18%; }
+.tbl-leg.r { right: 18%; }
+.scene-who { position: absolute; line-height: 1; font-size: 30px; font-size: 30cqi; transform: translate(-50%, -100%); }
+.scene-on .scene-who { left: 50%; top: 47%; }
+.scene-under .scene-who { left: 50%; top: 92%; }
+.scene-next .tbl-top { left: 2%; right: 42%; }
+.scene-next .tbl-leg.l { left: 7%; }
+.scene-next .tbl-leg.r { right: 47%; }
+.scene-next .scene-who { left: 80%; top: 94%; }
+.scene-in .scene-who { left: 50%; top: 66%; z-index: 0; }
+.scene-in .scene-basket { position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%); line-height: 1; font-size: 56px; font-size: 52cqi; z-index: 1; }
+
+/* relier au doigt : le trait suit le doigt ; avec « vanish », la paire juste disparaît */
+.match-lines .trace { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.match-lines .trace.live { stroke: var(--accent); }
+.match-item { touch-action: none; user-select: none; -webkit-user-select: none; transition: opacity 0.3s; }
+.match.vanish .match-item.matched { background: #e3f8ee; color: var(--good-dark); box-shadow: 0 5px 0 #b6e8cf, 0 0 0 3px var(--good) inset; }
+.match-item.vanished { opacity: 0; pointer-events: none; }
+.match.pairs-6 .match-col, .match.pairs-8 .match-col { gap: 8px; }
+.match.pairs-6 .match-item { min-height: 52px; font-size: 1.45rem; }
+.match.pairs-8 .match-item { min-height: 44px; font-size: 1.3rem; border-radius: 16px; }
+.play-match .feedback { min-height: 64px; }
+
+/* sudoku */
+.stage-sudoku { padding: 4px 0; }
+.sudoku {
+  display: grid; grid-template-columns: repeat(var(--size), minmax(0, 1fr)); grid-template-rows: repeat(var(--size), minmax(0, 1fr));
+  width: min(100%, 380px, calc(100vh / var(--zoom, 1) - 380px));
+  width: min(100%, 380px, calc(100dvh / var(--zoom, 1) - 380px));
+  aspect-ratio: 1; background: var(--card); border: 3px solid var(--ink); border-radius: 14px; overflow: hidden;
+  box-shadow: 0 5px 0 var(--line); container-type: inline-size;
+}
+.sudoku-cell {
+  min-width: 0; min-height: 0; display: grid; place-items: center; line-height: 1;
+  border-right: 1px solid #d9cfbd; border-bottom: 1px solid #d9cfbd;
+  font-size: 24px; font-size: calc(52cqi / var(--size)); font-weight: 700; color: var(--accent-dark);
+}
+.sudoku-cell.box-right { border-right: 3px solid var(--ink); }
+.sudoku-cell.box-bottom { border-bottom: 3px solid var(--ink); }
+.sudoku-cell.given { background: #f4efe4; color: var(--ink); }
+.sudoku-cell.selected { background: var(--accent-soft); box-shadow: inset 0 0 0 4px var(--accent); }
+.sudoku-cell.found { animation: pop 0.3s ease-out; }
+.sudoku-palette { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 10px; }
+.sudoku-symbol {
+  min-width: 0; min-height: 64px; border-radius: 18px; background: var(--card);
+  font-size: min(2rem, 7.5vw); font-weight: 700;
+  box-shadow: 0 5px 0 var(--line), 0 0 0 3px var(--line) inset;
+}
+.sudoku-symbol:active { transform: translateY(3px); }
+.sudoku-symbol.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 5px 0 #e6b800, 0 0 0 4px var(--hint) inset; }

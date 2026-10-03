@@ -96,6 +96,52 @@ async function typeNumber(page, n) {
   await page.click('.key[data-key="✔"]');
 }
 
+/** Dessine une boucle au doigt (souris) passant par ces points de la page. */
+async function drawLoop(page, points) {
+  await page.mouse.move(...points[0]);
+  await page.mouse.down();
+  for (const p of [...points.slice(1), points[0]]) await page.mouse.move(...p, { steps: 3 });
+  await page.mouse.up();
+}
+
+// Les patates : une boucle autour d'un seul objet est refusée, une boucle autour des
+// deux objets les plus proches fait un paquet de 2.
+let lassoTested = false;
+let dragTested = false;
+let dragMatchTested = false;
+async function testLasso(page, q) {
+  lassoTested = true;
+  const centers = await page.$$eval('.lasso-object', (els) => els.map((el) => {
+    const r = el.getBoundingClientRect();
+    return [r.left + r.width / 2, r.top + r.height / 2];
+  }));
+  const box = await page.$eval('.lasso-field', (el) => el.getBoundingClientRect().width);
+  const radius = (box / q.stage.cols) * 0.32;
+  const circle = ([x, y]) => Array.from({ length: 16 }, (_, k) => [x + radius * Math.cos((k * Math.PI) / 8), y + radius * Math.sin((k * Math.PI) / 8)]);
+  await drawLoop(page, circle(centers[0]));
+  await page.waitForSelector('.try-again');
+  if (!(await page.textContent('.try-again')).includes('entouré 1')) fail('patates : boucle autour d’un objet mal comptée');
+  if (q.stage.group !== 2) return;
+  let best = null;
+  for (let i = 0; i < centers.length; i++) {
+    for (let j = i + 1; j < centers.length; j++) {
+      const d = Math.hypot(centers[i][0] - centers[j][0], centers[i][1] - centers[j][1]);
+      if (!best || d < best.d) best = { i, j, d };
+    }
+  }
+  // gélule autour du segment qui relie les deux objets
+  const [a, b] = [centers[best.i], centers[best.j]];
+  const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
+  const arc = ([x, y], from) => Array.from({ length: 9 }, (_, k) => {
+    const t = from + (k * Math.PI) / 8;
+    return [x + radius * Math.cos(t), y + radius * Math.sin(t)];
+  });
+  await drawLoop(page, [...arc(b, angle - Math.PI / 2), ...arc(a, angle + Math.PI / 2)]);
+  await page.waitForFunction(() => document.querySelectorAll('.lasso-object.grouped').length === 2, null, { timeout: 3000 })
+    .catch(() => fail('patates : la boucle autour de deux objets n’a pas fait de paquet'));
+  console.log('  ✔ patates : boucle dessinée au doigt (refusée autour d’un objet, acceptée autour de deux)');
+}
+
 async function answer(page, q, wrongFirst) {
   switch (q.interaction) {
     case 'keypad':
@@ -106,6 +152,23 @@ async function answer(page, q, wrongFirst) {
       await typeNumber(page, q.answer);
       break;
     case 'match':
+      if (!dragMatchTested && !wrongFirst) {
+        // tracer un trait au doigt de la 1re étiquette jusqu'à son résultat
+        dragMatchTested = true;
+        const from = await page.locator('[data-left="0"]').boundingBox();
+        const to = await page.locator(`[data-right="${q.pairs[0].right}"]`).boundingBox();
+        await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 12 });
+        await page.mouse.up();
+        if (!(await page.locator('[data-left="0"].matched').count())) fail('relier au doigt : la paire n’a pas été reliée');
+        for (let i = 1; i < q.pairs.length; i++) {
+          await page.click(`[data-left="${i}"]`);
+          await page.click(`[data-right="${q.pairs[i].right}"]:not([disabled])`);
+        }
+        console.log('  ✔ relier : trait tracé au doigt');
+        break;
+      }
       if (wrongFirst) {
         const wrong = q.rights.find((v) => v !== q.pairs[0].right);
         await page.click('[data-left="0"]');
@@ -118,25 +181,105 @@ async function answer(page, q, wrongFirst) {
       }
       break;
     case 'fill':
+      if (wrongFirst) {
+        // deux étiquettes qui ne donnent pas le bon résultat : la ligne tremble et se vide
+        const eq = q.equations[0];
+        const pairs = q.tiles.flatMap((x, i) => q.tiles.map((y, j) => [i, j, x, y]));
+        const [i, j] = pairs.find(([a, b, x, y]) => a !== b && (eq.op === '+' ? x + y : x - y) !== eq.result);
+        await page.click('.fill-box[data-row="0"][data-col="0"]');
+        await page.click(`.tile[data-tile="${i}"]`);
+        await page.click('.fill-box[data-row="0"][data-col="1"]');
+        await page.click(`.tile[data-tile="${j}"]`);
+        await page.waitForSelector('.try-again');
+        await page.waitForFunction(() => !document.querySelector('.fill-box.filled'));
+      }
       for (let r = 0; r < q.equations.length; r++) {
         for (let c = 0; c < 2; c++) {
+          if (!dragTested && r === 0 && c === 0) {
+            // glisser-déposer au doigt d'une étiquette dans la première case
+            dragTested = true;
+            const from = await page.locator(`.tile[data-value="${q.equations[0].solution[0]}"]:not(.used)`).first().boundingBox();
+            const to = await page.locator('.fill-box[data-row="0"][data-col="0"]').boundingBox();
+            await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+            await page.mouse.down();
+            await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 8 });
+            await page.mouse.up();
+            if ((await page.textContent('.fill-box[data-row="0"][data-col="0"]')) !== String(q.equations[0].solution[0])) {
+              fail('glisser-déposer : l’étiquette n’est pas arrivée dans la case');
+            }
+            console.log('  ✔ calculs à trous : glisser-déposer au doigt');
+            continue;
+          }
           await page.click(`.fill-box[data-row="${r}"][data-col="${c}"]`);
           await page.click(`.tile[data-value="${q.equations[r].solution[c]}"]:not(.used)`);
         }
       }
       break;
     case 'build': {
-      const bags = q.stage.tens ? Math.floor(q.answer / 10) : 0;
-      const singles = q.answer - 10 * bags;
-      for (let i = 0; i < bags; i++) await page.click('[data-add="10"]');
-      for (let i = 0; i < singles; i++) await page.click('[data-add="1"]');
+      for (const [i, item] of q.stage.items.entries()) {
+        const bags = q.stage.tens && i === 0 ? Math.floor(item.target / 10) : 0;
+        for (let k = 0; k < bags; k++) await page.click('[data-add="10"]');
+        for (let k = 0; k < item.target - 10 * bags; k++) await page.click(`[data-add="1"][data-fruit="${i}"]`);
+      }
       if (wrongFirst) {
-        await page.click('[data-add="1"]');
+        await page.click('[data-add="1"][data-fruit="0"]');
         await page.click('.validate-btn');
         await page.waitForSelector('.try-again');
-        await page.click('.basket-item');
+        await page.click('.basket-item[data-fruit="0"]');
       }
       await page.click('.validate-btn');
+      break;
+    }
+    case 'maze':
+      // l'indice compte comme une aide : la question n'est plus « du premier coup »
+      if (wrongFirst) await page.click('.maze-hint');
+      for (const cell of q.stage.solution.slice(1)) await page.click(`.maze-cell[data-cell="${cell}"]`);
+      break;
+    case 'path': {
+      const { path, cells } = q.stage;
+      if (wrongFirst) {
+        await page.click(`.path-cell[data-cell="${cells.findIndex((_, i) => !path.includes(i))}"]`);
+        await page.waitForSelector('.try-again');
+      }
+      for (const cell of path.slice(1)) await page.click(`.path-cell[data-cell="${cell}"]`);
+      break;
+    }
+    case 'order': {
+      const sorted = [...q.items].sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
+      if (wrongFirst) {
+        await page.click(`.order-item[data-value="${sorted[1].value}"]`);
+        await page.waitForSelector('.try-again');
+      }
+      for (const item of sorted) await page.click(`.order-item[data-value="${item.value}"]:not([disabled])`);
+      break;
+    }
+    case 'sudoku': {
+      const { puzzle, solution } = q.stage;
+      const empty = puzzle.map((v, i) => (v === null ? i : -1)).filter((i) => i >= 0);
+      if (wrongFirst) {
+        await page.click(`.sudoku-cell[data-cell="${empty[0]}"]`);
+        await page.click(`.sudoku-symbol[data-symbol="${(solution[empty[0]] + 1) % q.stage.size}"]`);
+        await page.waitForSelector('.try-again');
+      }
+      for (const cell of empty) {
+        await page.click(`.sudoku-cell[data-cell="${cell}"]`);
+        await page.click(`.sudoku-symbol[data-symbol="${solution[cell]}"]`);
+      }
+      break;
+    }
+    case 'lasso': {
+      if (!lassoTested) await testLasso(page, q);
+      const needed = Math.floor(q.stage.count / q.stage.group);
+      while ((await page.locator('.lasso-object.grouped').count()) < needed * q.stage.group) {
+        await page.click('.lasso-object:not(.grouped):not(.picked) >> nth=0');
+      }
+      await page.waitForSelector('.lasso-zone .choice');
+      if (wrongFirst) {
+        const wrong = q.choices.find((c) => c.value !== q.answer);
+        await page.click(`.choice[data-value="${wrong.value}"]`);
+        await page.waitForSelector('.choice.wrong');
+      }
+      await page.click(`.choice[data-value="${q.answer}"]`);
       break;
     }
     default:
@@ -168,7 +311,14 @@ await page.waitForSelector('.home');
 if (!(await page.textContent('.home-title')).replace('\u2011', '-').includes('Eva-Rose')) fail('prénom absent de l’accueil');
 await shot('02-accueil');
 
-const shotsWanted = { compter: '10-compter', 'vite-vu': '11-vite-vu', panier: '12-panier', dizaines: '13-dizaines', ecoute: '18-anglais' };
+const shotsWanted = {
+  compter: '10-compter', 'vite-vu': '11-vite-vu', panier: '12-panier', dizaines: '13-dizaines', ecoute: '18-anglais',
+  patates: '20-patates', labyrinthe: '21-labyrinthe', 'chemin-nombres': '22-chemin', ranger: '23-ranger',
+  problemes: '24-probleme', heure: '25-heure', 'petits-textes': '26-texte', 'ou-est': '27-where', intrus: '28-intrus',
+  ombres: '29-ombres', 'epelle-anglais': '30-epelle', relier: '31-relier', trous: '32-trous',
+  sudoku: '33-sudoku', 'relie-calculs': '34-relie-calculs',
+};
+const bubbleText = (t) => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\u2011/g, '-').replace(/\s+/g, ' ').trim();
 for (const game of GAMES) {
   const grade = gradeFor(game.id);
   await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`);
@@ -184,15 +334,22 @@ for (const game of GAMES) {
   } else {
     await openGame(page, game);
   }
+  const briefed = new Set();
   for (let i = 0; i < 5; i++) {
     const zone = await page.waitForSelector('.choices:not(.answered)');
     const q = await page.evaluate(() => globalThis.__lc.question);
+    // consigne complète la première fois, puis la consigne courte
+    const briefKey = q.short && (q.short.key ?? q.short.text);
+    const expectedText = q.short && briefed.has(briefKey) ? q.short.text : q.text;
+    if (q.short) briefed.add(briefKey);
+    const shown = bubbleText(await page.textContent('.instruction .bubble'));
+    if (shown !== bubbleText(expectedText)) fail(`${game.id} question ${i + 1} : bulle « ${shown} » au lieu de « ${expectedText} »`);
     if (i === 0 && shotsWanted[game.id]) await shot(shotsWanted[game.id]);
     if (game.id === 'calcul' && i === 0) await shot('14-calcul');
     if (game.id === 'calcul' && i === 1) await shot('15-relie');
     if (game.id === 'calcul' && i === 3) await shot('16-complete');
     if (!(await page.locator('.guide-btn .avatar-eva-rose').count())) fail(`${game.id} : la question n’est pas posée par Eva-Rose`);
-    await answer(page, q, i === 1 && q.interaction !== 'fill');
+    await answer(page, q, i === 1);
     await assertNoJunk(page, `${game.id} question ${i + 1}`);
     await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
   }
@@ -206,6 +363,20 @@ for (const game of GAMES) {
   }
   console.log(`✔ ${game.id} (${grade}) : partie complète, ${stars} étoiles`);
 }
+
+// choisir directement son niveau
+await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
+await goProfile(page);
+await page.click('[data-domain="maths"]');
+await page.click('[data-levels="compter"]');
+await page.waitForSelector('.level-list');
+if ((await page.locator('.level-row').count()) !== 6) fail('compter (CP) : 6 niveaux attendus');
+await shot('19-niveaux');
+await page.click('.level-row[data-level="4"]');
+await page.waitForSelector('.choices');
+if ((await page.textContent('.level-badge')) !== 'Niv. 4') fail('le niveau choisi n’est pas celui de la partie');
+if ((await page.evaluate(() => globalThis.__lc.question.stage.count)) < 10) fail('compter niveau 4 : moins de 10 objets');
+console.log('✔ choix direct du niveau');
 
 // album : 2 étoiles par partie, un autocollant toutes les 5 étoiles
 await goProfile(page);
@@ -243,8 +414,9 @@ const programGames = Object.values(PROGRAMS[grade]).flat().length;
 if (rows !== programGames) fail(`${rows} jeux suivis au lieu de ${programGames}`);
 if ((await page.locator('.chart-col').count()) !== 7) fail('graphique de la semaine absent');
 await shot('06-parents');
+const gamesBefore = await page.$$eval('.game-row', (els) => els.map((el) => el.textContent).join('|'));
 await page.selectOption('.parents select.select >> nth=0', grade === 'CP' ? 'CE1' : 'CP');
-await page.waitForFunction((n) => document.querySelectorAll('.game-row').length !== n, rows);
+await page.waitForFunction((before) => [...document.querySelectorAll('.game-row')].map((el) => el.textContent).join('|') !== before, gamesBefore);
 console.log('✔ espace parents (barrière, suivi, changement de classe)');
 
 // réglages : photo depuis l'iPhone (enregistrée automatiquement), version, journal, crédits
@@ -312,12 +484,15 @@ const DEVICES = [
 
 // Jeux dont la hauteur dépend du tirage (nombre de plaques, d'objets, de paquets) :
 // plus de questions tirées sur le plus petit écran pour attraper le pire cas.
-const STRESS = { dizaines: 15, compter: 8, tables: 8, 'vite-vu': 6, panier: 4 };
+const STRESS = {
+  dizaines: 15, compter: 8, tables: 8, 'vite-vu': 6, panier: 6, patates: 4, 'petits-textes': 8, problemes: 4, relier: 3,
+  'relie-calculs': 3, trous: 3,
+};
 
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
-    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card')) {
+    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol')) {
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
     const zone = document.querySelector('.choices, .home-menu, .profile-list');
@@ -352,7 +527,11 @@ async function checkDevice(device, repeat) {
     }
   }
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-accueil.png` });
-  checked += 9;
+  await page.click('[data-domain="maths"]');
+  await page.click('[data-levels="calcul"], [data-levels="compter"]');
+  await page.waitForSelector('.level-list');
+  await checkLayout(page, tag('choix du niveau'), { reachable: false });
+  checked += 10;
 
   // chaque niveau de chaque jeu
   for (const game of GAMES) {

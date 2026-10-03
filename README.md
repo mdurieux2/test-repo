@@ -11,8 +11,11 @@ fonctionne ensuite **sans Internet**. Pas besoin de Mac, d'Xcode ni de l'App Sto
 
 1. Activer GitHub Pages (une seule fois) : *Settings → Pages → Source : GitHub Actions*.
 2. Après fusion sur `master`, l'app est publiée sur `https://mdurieux2.github.io/test-repo/`.
-3. Sur l'iPhone ou l'iPad, ouvrir cette adresse dans **Safari**, toucher **Partager**, puis
-   **Sur l'écran d'accueil**.
+3. Sur l'iPhone ou l'iPad, ouvrir cette adresse dans **Safari**, toucher **Partager** (carré
+   avec une flèche), faire défiler la liste jusqu'à **Sur l'écran d'accueil**, puis **Ajouter**.
+   L'icône « Lire & Compter » apparaît sur l'écran d'accueil et l'app s'ouvre en plein écran.
+   Dans Brave ou Chrome, l'option est aussi en bas du menu Partager (sinon : *Modifier les
+   actions…* → ajouter « Sur l'écran d'accueil »).
 
 Sur iPad, l'interface s'agrandit automatiquement, en portrait comme en paysage.
 
@@ -37,17 +40,28 @@ Construit à partir des programmes officiels (BO n°41 du 31/10/2024, en vigueur
 
 | Classe | Français | Maths | Anglais |
 |---|---|---|---|
-| MS | Frappe les syllabes, rimes, lettres capitales | Compter jusqu'à 10, dé, panier, comparer, faire 5, formes, suites de motifs | Écoute et touche (couleurs, nombres, animaux) |
-| GS | Syllabes, rimes, lettres (nom et son), premier son | Compter jusqu'à 20, décompositions, calcul ±5 et ±10, formes, motifs | Écoute et touche (5 thèmes) |
-| CP | Premier son, syllabes, lire un mot, mots-outils, un/une | Dénombrement (4 séries), dizaines, comparer, suite, **calcul en 36 paliers**, faire 10 | Écoute, lis et touche (8 thèmes) |
-| CE1 | Lire des mots et des phrases, homophones (a/à, et/est…), déterminants | Nombres jusqu'à 1000, tables de 2 à 10, calcul jusqu'à 100 | Écoute, lis, trouve le mot anglais |
+| MS | Frappe les syllabes, rimes, lettres capitales, chemin de A à E | Compter jusqu'à 10, dé, panier (2-3 fruits), relie les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, labyrinthes | Écoute et touche, compte en anglais, « Where is the cat? » |
+| GS | Syllabes, rimes, lettres (nom et son), premier son, alphabet | Compter jusqu'à 20, patates (paquets de 2 et 5), petits problèmes, doubles, calcul ±5 et ±10, logique, labyrinthes | Écoute et touche (5 thèmes), compter, in/on/under |
+| CP | Premier son, syllabes, lire un mot, mots-outils, **petits textes**, épeler | Dénombrement (5 séries), dizaines, **calcul en 36 paliers**, problèmes, doubles, ranger, l'heure, chemins de nombres | Écoute (10 thèmes), lis, relie, compte, in/on/under |
+| CE1 | Mots, phrases et textes, homophones, déterminants | Nombres jusqu'à 1000, tables, problèmes en deux étapes, l'heure, moitiés, labyrinthes 9 × 9 | Écoute, lis, relie, épelle, trouve le mot anglais |
 
 **Dénombrement** : *Combien ?* (pointer chaque objet, la voix compte), *Vite vu !* (dé,
-boîtes de 10, dizaines en vue éclair), *Le panier* (fabriquer une collection, sachets de 10),
-*Dizaines et unités*.
+boîtes de 10, dizaines en vue éclair), *Le panier* (fabriquer une collection, listes de courses
+à plusieurs fruits, sachets de 10), *Fais des patates* (entourer au doigt des paquets de 2, 5
+ou 10, puis compter le tout), *Dizaines et unités*.
+
+**Labyrinthes** : *Le labyrinthe* (de 4 × 4 à 9 × 9, en glissant le doigt, en touchant les
+cases ou avec les flèches, 💡 pour un indice), *Le chemin des nombres* (de 1 en 1, de 2 en 2,
+de 5 en 5, de 10 en 10, à rebours) et *Le chemin des lettres* (alphabet, épeler un mot).
 
 **Calcul** : une carte de 36 paliers (+5, −5, ±5, +10 … ±100) avec 5 étoiles de maîtrise
 par palier, et trois formes d'exercice : pavé numérique, « Relie », « Complète » (□ + □ = 8).
+*Les calculs à trous* : de 3 à 5 calculs, des étiquettes à glisser au doigt dans les cases ;
+chaque calcul juste devient vert (additions jusqu'à 5, puis + et − jusqu'à 100).
+*Relie les calculs* : tracer un trait au doigt de chaque calcul à son résultat (4 à 8 paires).
+
+**Logique** : formes, suites de motifs, l'intrus, les ombres, et un *Sudoku* pour enfants
+(4 × 4 avec des images, puis des chiffres, jusqu'au 6 × 6).
 
 ## Pédagogie
 
@@ -56,6 +70,9 @@ par palier, et trois formes d'exercice : pavé numérique, « Relie », « Compl
 - Niveau adaptatif pour viser environ 80 % de réussite : 5 bonnes réponses d'affilée font
   monter d'un niveau, 3 erreurs sur 5 font redescendre, dans la fourchette de la classe.
 - Pas d'échec : après une erreur, « Essaie encore » ; après deux, la bonne réponse brille.
+- Consigne complète à la première question, puis une consigne courte pour ne pas lasser
+  (toucher la bulle redit la consigne complète).
+- Chaque jeu permet de choisir directement son niveau (bas de la carte du jeu).
 - Récompenses : étoiles, autocollants, étoiles de palier.
 
 ## Suivi des parents
