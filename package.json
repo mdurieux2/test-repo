@@ -1,6 +1,6 @@
 {
   "name": "lire-et-compter",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "description": "Jeux de français, de maths et d'anglais, de la moyenne section au CE1 : web app installable sur téléphone, tablette et ordinateur",
   "type": "module",

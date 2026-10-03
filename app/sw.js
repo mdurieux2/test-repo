@@ -2,7 +2,7 @@
 // (en voiture, en vacances…). Changer VERSION à chaque mise à jour publiée.
 // Tout nouveau fichier de l'app doit être ajouté à PRECACHE (vérifié par les tests).
 
-const VERSION = 'v8';
+const VERSION = 'v9';
 const CACHE = `lire-et-compter-${VERSION}`;
 
 const PRECACHE = [

@@ -267,7 +267,7 @@ function homeScreen() {
           h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🏆'),
           h('span', {}, 'Mon album'),
           h('span', { class: 'pill' }, `${stickersUnlocked(child().stars)}/${STICKERS.length}`)),
-        h('button', { class: 'domain-btn domain-dress', 'data-dress': '', onclick: characterScreen },
+        h('button', { class: 'domain-btn domain-dress', 'data-dress': '', onclick: () => characterScreen() },
           h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🎨'),
           h('span', {}, 'Mon personnage'))))));
 }
@@ -1809,7 +1809,7 @@ function albumScreen() {
   const remaining = starsToNextSticker(child().stars);
   show(h('main', { class: 'screen album' },
     topBar({ onBack: homeScreen, title: '🏆 Mon album', right: starCounter() }),
-    h('button', { class: 'big-btn dress-btn', onclick: characterScreen }, '🎨 Habiller mon personnage'),
+    h('button', { class: 'big-btn dress-btn', onclick: () => characterScreen() }, '🎨 Habiller mon personnage'),
     h('p', { class: 'album-info' }, remaining === null
       ? 'Bravo, ton album est complet !'
       : frenchSpacing(`Encore ${remaining} ⭐ !`)),
@@ -1823,7 +1823,7 @@ function albumScreen() {
 // ---------------------------------------------------------------- Habiller son personnage
 
 /** Couleurs de tee-shirt et accessoires, débloqués au fil des étoiles gagnées. */
-function characterScreen(message = '') {
+function characterScreen() {
   const kid = child();
   const style = kid.style || {};
   const stars = kid.stars;
@@ -1837,7 +1837,6 @@ function characterScreen(message = '') {
   const lock = (need) => h('span', { class: 'lock' }, `🔒 ${need} ⭐`);
   show(h('main', { class: 'screen dress' },
     topBar({ onBack: homeScreen, title: '🎨 Mon personnage', right: starCounter() }),
-    message ? h('p', { class: 'toast', role: 'status' }, message) : null,
     h('div', { class: 'dress-preview' }, avatar(store.active, 'avatar-xl')),
     kid.photo ? h('p', { class: 'muted small dress-note' }, 'Avec une photo, seuls les accessoires se voient.') : null,
     h('section', { class: 'card' },

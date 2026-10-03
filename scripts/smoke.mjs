@@ -91,7 +91,7 @@ async function openGame(page, game, { palier, format = 0 } = {}) {
 
 /** Aucun « null », « undefined » ou « NaN » ne doit apparaître à l'écran. */
 async function assertNoJunk(page, label) {
-  const junk = await page.evaluate(() => document.body.innerText.match(/\b(null|undefined|NaN)\b/)?.[0]);
+  const junk = await page.evaluate(() => document.body.innerText.match(/\b(null|undefined|NaN)\b|\[object \w+\]/)?.[0]);
   if (junk) fail(`${label} : « ${junk} » affiché à l'écran`);
 }
 
@@ -496,6 +496,7 @@ console.log('✔ jeu bonus : les bulles');
 
 // habiller son personnage
 await page.click('[data-dress]');
+await assertNoJunk(page, 'personnage'); // l'écran ne doit pas afficher l'événement du toucher
 await page.click('[data-shirt="vert"]');
 await page.click('[data-accessory="couronne"]');
 if (!(await page.locator('.dress-preview svg text').allTextContents()).includes('👑')) fail('personnage : la couronne n’apparaît pas');
