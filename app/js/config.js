@@ -17,6 +17,8 @@ export const CHANGELOG = [
     changes: [
       'Nouveaux jeux : « Écris au doigt » (traits, chiffres, capitales, lettres attachées, puis son prénom), « La dictée de mots », « Règle l’horloge » et « Défi chrono des tables ».',
       'Jouer à deux : deux enfants jouent chacun leur tour sur le même appareil, chacun à son niveau.',
+      'Vos voix pour les histoires : un parent enregistre une histoire (Espace parents → Réglages), et l’enfant l’entend avec sa voix pendant que les phrases s’allument. Les enregistrements restent sur l’appareil.',
+      'Histoires et petits textes de saison (Halloween, Noël, hiver, printemps, été, automne) : ils reviennent plus souvent pendant leur saison.',
       'Espace parents : choisir les jeux de chaque enfant (masquer une rubrique ou un jeu, en conseiller jusqu’à 3 en haut de son accueil).',
       '« Qui joue ? » explique comment ajouter l’icône sur l’écran d’accueil.',
       'Les prénoms peuvent faire jusqu’à 30 caractères.',

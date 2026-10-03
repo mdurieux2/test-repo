@@ -86,7 +86,9 @@ l'enfant, et on peut aussi le choisir directement.
 - *Écouter les sons* : frappe les syllabes, les rimes.
 - *Lettres et sons* : les lettres, le premier son, les syllabes.
 - *Lire* : le bon mot, les petits mots, la bonne phrase, **petits textes** avec des questions
-  de compréhension.
+  de compréhension (dont des textes de saison, plus fréquents pendant leur saison).
+- *Histoires* : lues en karaoké, par la voix de l'appareil ou **par la voix d'un parent** ;
+  des histoires d'Halloween, de Noël, d'hiver, de printemps, d'été et d'automne reviennent pendant leur saison.
 - *Grammaire* : le bon petit mot (a/à, et/est, son/sont, on/ont), le, la, les, un, une.
 - *Labyrinthes* : le chemin des lettres (alphabet, épeler un mot).
 - *Écrire* : **écris au doigt** (suivre le modèle dans le bon sens : traits et boucles,
@@ -171,6 +173,10 @@ Il ouvre trois onglets :
 - **Réglages** : consignes lues ou non, choix de la voix avec un bouton d'essai, petits sons,
   musique douce, décors de saison, nombre de questions par partie, installation, version,
   journal des modifications, et le contact pour vos remarques.
+- **Vos voix pour les histoires** (dans Réglages) : enregistrez-vous en lisant une histoire
+  (le texte s'affiche en gros, 3 minutes au plus) ; dans « Histoires », l'enfant entend votre
+  voix pendant que les phrases s'allument, puis la question est posée. On peut réécouter,
+  recommencer ou supprimer. Les enregistrements restent sur l'appareil (jamais envoyés).
 
 ### Des voix plus naturelles
 
@@ -200,7 +206,7 @@ téléchargée) ; sur ordinateur, l'app choisit alors une voix installée.
 ## Confidentialité et sécurité
 
 - Aucune inscription, aucune publicité, aucun traceur ; l'application n'envoie rien sur Internet.
-- Les prénoms, photos et progrès restent dans le navigateur de l'appareil (stockage local).
+- Les prénoms, photos, progrès et voix enregistrées restent dans le navigateur de l'appareil (stockage local).
 - Effacer les données du site dans le navigateur supprime les profils.
 - Aucune bibliothèque extérieure ; la page n'accepte que ses propres fichiers (règle CSP).
 
