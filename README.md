@@ -51,11 +51,17 @@ aussi : en paysage, le dessin est à gauche, la consigne et les réponses à dro
    féliciter l'enfant (« Bravo Léa ! »). On peut ajouter une photo ensuite.
 2. **« Qui joue ? »** : l'enfant touche son portrait.
 3. Il choisit le **Défi du jour** (5 questions variées, une série de jours 🔥), **Je révise**
-   (les jeux ratés qui reviennent) ou une rubrique : **Lire et écrire**, **Histoires**,
-   **Nombres et calcul**, **Jeux et logique**, **Temps et mesures**, **Le monde**, **Anglais**.
-   Ses autocollants sont dans **Mon album**.
+   (les jeux ratés qui reviennent), un des jeux **⭐ Conseillé pour toi** par ses parents, ou une
+   rubrique : **Lire et écrire**, **Histoires**, **Nombres et calcul**, **Jeux et logique**,
+   **Temps et mesures**, **Le monde**, **Anglais**. Ses autocollants sont dans **Mon album**.
 4. Chaque jeu montre le niveau atteint (les points). En touchant **Niveaux ▾**, on choisit
    directement un niveau.
+5. **👫 Jouer à deux** (sur « Qui joue ? ») : deux enfants jouent à tour de rôle sur le même
+   appareil, chacun à son niveau ; le tableau des points montre à qui c'est le tour, et chacun
+   gagne ses étoiles.
+
+Tant que l'application n'est pas installée, « Qui joue ? » rappelle comment ajouter l'icône sur
+l'écran d'accueil (les étapes dépendent de l'appareil) ; « Plus tard » masque ce rappel.
 
 ---
 
@@ -66,10 +72,10 @@ officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/program
 
 | Classe | Français | Maths | Anglais | Le monde |
 |---|---|---|---|---|
-| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes, **puzzle**, **memory**, **coloriage magique**, **points à relier** | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons |
-| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes, puzzle, memory | Écouter et toucher, compter, in/on/under, les nombres, mélanger les couleurs, l'intrus, les contraires | Les bébés des animaux, les moments de la journée, **les drapeaux** |
-| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, la monnaie, sudoku, symétrie, cubes, coloriage magique avec des calculs | Écouter (10 thèmes), lire, relier, compter, les nombres jusqu'à 20, calculer en anglais, colorier, memory, petites phrases | Ce que mangent les animaux, les jours, les pays, les drapeaux |
-| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants | Nombres jusqu'à 1000, tables, problèmes en deux étapes, l'heure, moitiés, sudoku 6 × 6, labyrinthes 9 × 9, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau |
+| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E, **écrire au doigt** (traits, chiffres, capitales) | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes, **puzzle**, **memory**, **coloriage magique**, **points à relier** | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons |
+| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet, écrire au doigt (jusqu'aux lettres attachées et son prénom), **première dictée** | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes, puzzle, memory | Écouter et toucher, compter, in/on/under, les nombres, mélanger les couleurs, l'intrus, les contraires | Les bébés des animaux, les moments de la journée, **les drapeaux** |
+| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler, **dictée de mots**, écrire au doigt | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, **régler l'horloge**, la monnaie, sudoku, symétrie, cubes, coloriage magique avec des calculs | Écouter (10 thèmes), lire, relier, compter, les nombres jusqu'à 20, calculer en anglais, colorier, memory, petites phrases | Ce que mangent les animaux, les jours, les pays, les drapeaux |
+| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants, dictée (sons complexes, lettres pièges) | Nombres jusqu'à 1000, tables, **défi chrono des tables**, problèmes en deux étapes, l'heure, régler l'horloge, moitiés, sudoku 6 × 6, labyrinthes 9 × 9, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau |
 
 Chaque jeu a plusieurs niveaux de difficulté croissante (de 3 à 13) ; le niveau s'adapte à
 l'enfant, et on peut aussi le choisir directement.
@@ -83,6 +89,9 @@ l'enfant, et on peut aussi le choisir directement.
   de compréhension.
 - *Grammaire* : le bon petit mot (a/à, et/est, son/sont, on/ont), le, la, les, un, une.
 - *Labyrinthes* : le chemin des lettres (alphabet, épeler un mot).
+- *Écrire* : **écris au doigt** (suivre le modèle dans le bon sens : traits et boucles,
+  chiffres, capitales, minuscules attachées, puis son prénom) et **la dictée de mots** (on entend le mot, on touche les lettres dans
+  l'ordre ; puis sans l'image, puis avec des lettres pièges b/d, m/n, é/è…).
 
 **Maths**
 - *Dénombrement* : *Combien ?* (on touche chaque objet, la voix compte), *Vite vu !* (dé,
@@ -97,7 +106,11 @@ l'enfant, et on peut aussi le choisir directement.
 - *Formes et logique* : les formes, les suites de motifs, l'intrus, les ombres, le **sudoku**
   (4 × 4 en images, puis en chiffres, jusqu'au 6 × 6), la **symétrie** sur quadrillage,
   **compte les cubes** (empilements en 3D, avec des cubes cachés).
-- *Heure et mesures* : lire l'heure (heures pile, et demie, et quart, de 5 en 5 minutes).
+- *Heure et mesures* : lire l'heure (heures pile, et demie, et quart, de 5 en 5 minutes) et
+  **règle l'horloge** (tourner les aiguilles au doigt ou avec les boutons, « dans 1 heure… »,
+  les heures de l'après-midi).
+- **Défi chrono des tables** : 10 multiplications le plus vite possible (une erreur ne fait pas
+  perdre, le temps continue) ; le record de chaque niveau est gardé.
 - *Labyrinthes* : de 4 × 4 à 9 × 9 cases (doigt, flèches, ou toucher une case ; 💡 pour un
   indice) et le chemin des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours).
 
@@ -151,9 +164,10 @@ Il ouvre trois onglets :
 - **Suivi** : pour chaque enfant, l'activité de la semaine (parties, minutes, réussite, jours
   d'affilée), l'état de chaque compétence, le niveau de chaque jeu (réglable), ce qui est à
   retravailler et les erreurs fréquentes.
-- **Enfants** : ajouter un enfant, changer son prénom, son personnage, sa classe ou sa photo
-  (photothèque ou appareil photo, enregistrée automatiquement), effacer sa progression ou
-  supprimer son profil. On y trouve aussi **Partager le lien**.
+- **Enfants** : ajouter un enfant, changer son prénom (jusqu'à 30 caractères), son personnage,
+  sa classe ou sa photo (photothèque ou appareil photo, enregistrée automatiquement), effacer sa
+  progression ou supprimer son profil. **Ses jeux** : masquer une rubrique ou un jeu, et
+  conseiller jusqu'à 3 jeux (en haut de son accueil). On y trouve aussi **Partager le lien**.
 - **Réglages** : consignes lues ou non, choix de la voix avec un bouton d'essai, petits sons,
   musique douce, décors de saison, nombre de questions par partie, installation, version,
   journal des modifications, et le contact pour vos remarques.
@@ -207,8 +221,12 @@ npm run icons        # régénère les icônes
 ```
 
 Options du test de bout en bout : `ONLY=memory,points` (mise en page de quelques jeux),
-`ONLY=hors-ligne` (mode avion), `PLAY=memory,points` (une partie de quelques jeux),
+`ONLY=hors-ligne` (mode avion), `ONLY=ecrans` (mise en page des écrans fixes),
+`PLAY=memory,points` (une partie de quelques jeux), `PARTS=scenario` ou `PARTS=layout` (le
+parcours complet ou la mise en page seulement), `SHARD=2/4` (un quart de la mise en page),
 `PORT=8124` (plusieurs tests en même temps), `CHROMIUM_PATH=…` (un Chromium déjà installé).
+Sur GitHub, le test tourne en 5 morceaux en même temps : le parcours complet et 4 quarts de la
+mise en page.
 
 | Fichier | Rôle |
 |---|---|
