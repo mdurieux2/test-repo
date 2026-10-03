@@ -12,14 +12,14 @@ export const CHARACTERS = [
     id: 'eva-rose',
     name: 'Eva-Rose',
     spoken: 'Éva-Rose',
-    voice: { voice: 'female', pitch: 1.2 },
+    voice: { voice: 'female', pitch: 1.05 },
     hello: 'Coucou ! Moi, c’est Éva-Rose. Tu viens jouer avec nous ?',
   },
   {
     id: 'matteo',
     name: 'Matteo',
     spoken: 'Mattéo',
-    voice: { voice: 'male', pitch: 1.25 },
+    voice: { voice: 'male', pitch: 1 },
     hello: 'Salut ! Moi, c’est Mattéo. On va bien s’amuser !',
   },
 ];

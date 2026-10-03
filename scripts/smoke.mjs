@@ -4,7 +4,7 @@
 // Usage : npm run test:e2e   (SCREENSHOTS=dossier pour enregistrer des captures)
 
 import { chromium } from 'playwright';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { startServer } from './serve.mjs';
 import { GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
@@ -83,6 +83,12 @@ async function openGame(page, game, { palier, format = 0 } = {}) {
   await page.click(`[data-game="${game.id}"]`);
   // la tuile conseillée est animée en continu : clic forcé
   if (game.paliers) await page.click(palier ? `[data-palier="${palier}"]` : '.palier-tile.recommended', { force: true });
+}
+
+/** Aucun « null », « undefined » ou « NaN » ne doit apparaître à l'écran. */
+async function assertNoJunk(page, label) {
+  const junk = await page.evaluate(() => document.body.innerText.match(/\b(null|undefined|NaN)\b/)?.[0]);
+  if (junk) fail(`${label} : « ${junk} » affiché à l'écran`);
 }
 
 async function typeNumber(page, n) {
@@ -185,10 +191,13 @@ for (const game of GAMES) {
     if (game.id === 'calcul' && i === 0) await shot('14-calcul');
     if (game.id === 'calcul' && i === 1) await shot('15-relie');
     if (game.id === 'calcul' && i === 3) await shot('16-complete');
+    if (!(await page.locator('.guide-btn .avatar-eva-rose').count())) fail(`${game.id} : la question n’est pas posée par Eva-Rose`);
     await answer(page, q, i === 1 && q.interaction !== 'fill');
+    await assertNoJunk(page, `${game.id} question ${i + 1}`);
     await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
   }
   await page.waitForSelector('.results');
+  await assertNoJunk(page, `${game.id} résultats`);
   const stars = await page.locator('.big-star.on').count();
   if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (4 bonnes sur 5)`);
   if (game.id === 'calcul') {
@@ -238,6 +247,29 @@ await page.selectOption('.parents select.select >> nth=0', grade === 'CP' ? 'CE1
 await page.waitForFunction((n) => document.querySelectorAll('.game-row').length !== n, rows);
 console.log('✔ espace parents (barrière, suivi, changement de classe)');
 
+// réglages : photo depuis l'iPhone (enregistrée automatiquement), version, journal, crédits
+const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+await page.click('.settings-btn');
+await page.waitForSelector('.settings');
+await shot('07-reglages');
+if ((await page.textContent('[data-version]')) !== pkg.version) fail('version affichée différente de package.json');
+if (!(await page.textContent('.credits')).includes('Michaël Durieux')) fail('crédits absents');
+if (!(await page.locator('.changelog-entry').count())) fail('journal des modifications absent');
+await page.setInputFiles('[data-photo-input="eva-rose"]', 'app/icons/icon-512.png');
+await page.waitForSelector('.toast');
+if (!(await page.locator('[data-photo-row="eva-rose"] .avatar-photo img').count())) fail('photo non affichée');
+await page.reload();
+await goProfiles(page);
+if (!(await page.locator('[data-profile="eva-rose"] .avatar-photo img').count())) fail('photo non conservée après rechargement');
+if (await page.locator('[data-profile="matteo"] .avatar-photo').count()) fail('la photo d’Eva-Rose est apparue chez Matteo');
+await shot('08-qui-joue-photo');
+await page.click('.settings-btn'); // barrière déjà franchie pendant cette séance
+await page.waitForSelector('.settings');
+await page.click('[data-photo-row="eva-rose"] .link-action');
+await page.waitForSelector('.toast');
+if (await page.locator('[data-photo-row="eva-rose"] .avatar-photo').count()) fail('le dessin n’est pas revenu');
+console.log('✔ réglages (photo enregistrée automatiquement, version, journal, crédits)');
+
 // hors ligne : le service worker doit servir l'app sans réseau
 await page.goto(BASE);
 await page.evaluate(() => navigator.serviceWorker.ready);
@@ -263,6 +295,19 @@ const DEVICES = [
   { name: 'iPhone 14-15 Pro Max-15-16 Plus', width: 430, height: 932 },
   { name: 'iPhone 16-17 Pro-17', width: 402, height: 874 },
   { name: 'iPhone 16-17 Pro Max', width: 440, height: 956 },
+  // iPad, en portrait puis en paysage
+  { name: 'iPad mini', width: 744, height: 1133 },
+  { name: 'iPad mini paysage', width: 1133, height: 744 },
+  { name: 'iPad 10,2"', width: 810, height: 1080 },
+  { name: 'iPad 10,2" paysage', width: 1080, height: 810 },
+  { name: 'iPad 10e-11e gén., iPad Air 11"', width: 820, height: 1180 },
+  { name: 'iPad 10e-11e gén., iPad Air 11" paysage', width: 1180, height: 820 },
+  { name: 'iPad Pro 11"', width: 834, height: 1194 },
+  { name: 'iPad Pro 11" paysage', width: 1194, height: 834 },
+  { name: 'iPad Pro 12,9", iPad Air 13"', width: 1024, height: 1366 },
+  { name: 'iPad Pro 12,9", iPad Air 13" paysage', width: 1366, height: 1024 },
+  { name: 'iPad Pro 13" (M4)', width: 1032, height: 1376 },
+  { name: 'iPad Pro 13" (M4) paysage', width: 1376, height: 1032 },
 ];
 
 // Jeux dont la hauteur dépend du tirage (nombre de plaques, d'objets, de paquets) :
@@ -346,13 +391,20 @@ async function checkDevice(device, repeat) {
   await page.click('.gate-form button');
   await page.waitForSelector('.parents');
   await checkLayout(page, tag('espace parents'), { reachable: false });
-  checked += 2;
+  await page.click('.settings-btn');
+  await page.waitForSelector('.settings');
+  await checkLayout(page, tag('réglages'), { reachable: false });
+  checked += 3;
   await ctx.close();
   return checked;
 }
 
 if (SHOTS) mkdirSync(`${SHOTS}/devices`, { recursive: true });
-const counts = await Promise.all(DEVICES.map((d, i) => checkDevice(d, i === 0 ? 3 : 1)));
+// 6 appareils à la fois, pour ne pas saturer la machine de test
+const counts = [];
+for (let i = 0; i < DEVICES.length; i += 6) {
+  counts.push(...await Promise.all(DEVICES.slice(i, i + 6).map((d, k) => checkDevice(d, i + k === 0 ? 3 : 1))));
+}
 DEVICES.forEach((d, i) => console.log(`✔ ${d.name} (${d.width}×${d.height}) : ${counts[i]} écrans vérifiés`));
 
 await browser.close();

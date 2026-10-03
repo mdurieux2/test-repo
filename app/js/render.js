@@ -1,6 +1,6 @@
 // Fabrique des éléments DOM à partir des données des questions.
 
-import { avatarSvg } from './characters.js';
+import { avatarSvg, character } from './characters.js';
 
 /** h('div', {class: 'x', onclick}, enfant1, enfant2…) */
 export function h(tag, attrs = {}, ...children) {
@@ -191,8 +191,20 @@ export function revealWord(word, highlight = 0) {
     word.slice(highlight));
 }
 
-/** Portrait d'Eva-Rose ou de Matteo (SVG statique, généré par characters.js). */
+// Photos choisies dans les Réglages (data URL par profil) ; sinon, le dessin.
+let photos = {};
+export function setPhotos(map) {
+  photos = { ...map };
+}
+
+/** Portrait d'Eva-Rose ou de Matteo : sa photo si elle existe, sinon le dessin SVG. */
 export function avatar(id, extraClass = '') {
+  const photo = photos[id];
+  if (photo) {
+    return h('span', { class: `avatar avatar-photo avatar-${id} ${extraClass}` },
+      h('img', { src: photo, alt: character(id).name }),
+      h('span', { class: 'avatar-name', 'aria-hidden': 'true' }, character(id).name));
+  }
   const el = h('span', { class: `avatar avatar-${id} ${extraClass}` });
   el.innerHTML = avatarSvg(id);
   return el;
