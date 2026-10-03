@@ -1,12 +1,12 @@
 {
   "name": "Lire & Compter",
   "short_name": "Lire&Compter",
-  "description": "Jeux de lecture et de mathématiques pour les enfants de CP.",
+  "description": "Jeux de français, de maths et d’anglais, de la moyenne section au CE1.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#fff7e8",
   "theme_color": "#fff7e8",
   "icons": [

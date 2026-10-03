@@ -2,6 +2,7 @@
 // Un profil par enfant (Eva-Rose, Matteo) : classe, étoiles, niveaux, paliers et historique.
 
 import { createGameState } from './progress.js';
+import { isPhoto } from './photo.js';
 
 export const STORAGE_KEY = 'lire-et-compter:v2';
 export const HISTORY_LIMIT = 300;
@@ -17,13 +18,13 @@ export const GRADES = {
 const DEFAULT_GRADES = { 'eva-rose': 'CP', matteo: 'MS' };
 
 export function defaultChild(grade = 'CP') {
-  return { grade, stars: 0, games: {}, paliers: {}, history: [], mistakes: [] };
+  return { grade, stars: 0, games: {}, paliers: {}, history: [], mistakes: [], photo: null };
 }
 
 export function defaultStore() {
   return {
     active: null,
-    settings: { voice: true, sounds: true, sessionLength: 10 },
+    settings: { voice: true, sounds: true, sessionLength: 10, voices: {} },
     profiles: Object.fromEntries(Object.entries(DEFAULT_GRADES).map(([id, grade]) => [id, defaultChild(grade)])),
   };
 }
@@ -42,6 +43,7 @@ function mergeChild(base, saved) {
     paliers: saved.paliers && typeof saved.paliers === 'object' ? saved.paliers : {},
     history: Array.isArray(saved.history) ? saved.history.slice(-HISTORY_LIMIT) : [],
     mistakes: Array.isArray(saved.mistakes) ? saved.mistakes.slice(-MISTAKES_LIMIT) : [],
+    photo: isPhoto(saved.photo) ? saved.photo : null,
   };
 }
 
@@ -89,7 +91,9 @@ export function logMistake(child, entry) {
   child.mistakes = [...child.mistakes, entry].slice(-MISTAKES_LIMIT);
 }
 
+/** Efface la progression d'un enfant (sa classe et sa photo sont conservées). */
 export function resetChild(store, id) {
-  store.profiles[id] = defaultChild(store.profiles[id]?.grade || DEFAULT_GRADES[id]);
+  const { grade, photo } = store.profiles[id] || {};
+  store.profiles[id] = { ...defaultChild(grade || DEFAULT_GRADES[id]), photo: photo || null };
   return store;
 }

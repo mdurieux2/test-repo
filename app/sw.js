@@ -2,7 +2,7 @@
 // (en voiture, en vacances…). Changer VERSION à chaque mise à jour publiée.
 // Tout nouveau fichier de l'app doit être ajouté à PRECACHE (vérifié par les tests).
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `lire-et-compter-${VERSION}`;
 
 const PRECACHE = [
@@ -15,6 +15,7 @@ const PRECACHE = [
   './icons/icon-512.png',
   './index.html',
   './js/characters.js',
+  './js/config.js',
   './js/dashboard.js',
   './js/data/anglais-data.js',
   './js/data/lecture-data.js',
@@ -26,6 +27,7 @@ const PRECACHE = [
   './js/games/maths-extra.js',
   './js/games/maths.js',
   './js/main.js',
+  './js/photo.js',
   './js/programs.js',
   './js/progress.js',
   './js/random.js',

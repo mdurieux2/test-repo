@@ -7,11 +7,13 @@ import { createRng, pick, randInt } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import { GRADES, gameStats, loadStore, logMistake, logSession, resetChild, saveStore } from './storage.js';
-import { setSpeechEnabled, speak, stopSpeaking } from './speech.js';
+import { listFrenchVoices, setSpeechEnabled, setVoicePreferences, speak, stopSpeaking } from './speech.js';
 import { playSound, setSoundsEnabled, unlockAudio } from './sounds.js';
-import { avatar, h, renderChoiceContent, renderStage, revealWord } from './render.js';
+import { avatar, h, renderChoiceContent, renderStage, revealWord, setPhotos } from './render.js';
 import { CHARACTERS, character } from './characters.js';
 import { dashboard } from './dashboard.js';
+import { squarePhoto } from './photo.js';
+import { APP, CHANGELOG } from './config.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
@@ -34,10 +36,12 @@ function me() {
 function applySettings() {
   setSpeechEnabled(store.settings.voice);
   setSoundsEnabled(store.settings.sounds);
+  setVoicePreferences(store.settings.voices);
+  setPhotos(Object.fromEntries(Object.entries(store.profiles).map(([id, kid]) => [id, kid.photo])));
 }
 
 function save() {
-  saveStore(store);
+  return saveStore(store);
 }
 
 function show(...children) {
@@ -96,7 +100,9 @@ function domainById(id) {
 function profileScreen() {
   show(h('main', { class: 'screen profiles' },
     h('header', { class: 'top-bar' }, h('span'), h('span'),
-      h('button', { class: 'parent-btn', onclick: () => parentGate(parentsScreen), 'aria-label': 'Espace parents' }, '👪')),
+      h('div', { class: 'grown-up-btns' },
+        h('button', { class: 'parent-btn', onclick: () => parentGate(parentsScreen), 'aria-label': 'Suivi des parents' }, '👪'),
+        h('button', { class: 'parent-btn settings-btn', onclick: () => parentGate(settingsScreen), 'aria-label': 'Réglages' }, '⚙️'))),
     h('h1', { class: 'profiles-title' }, 'Qui joue ?'),
     h('div', { class: 'profile-list' },
       CHARACTERS.map((c) => {
@@ -750,14 +756,17 @@ function albumScreen() {
 // ---------------------------------------------------------------- Espace parents
 
 function parentGate(next) {
+  if (sessionFlag('parent-ok')) return next();
   const a = randInt(rng, 3, 9);
   const b = randInt(rng, 3, 9);
   const input = h('input', { type: 'text', inputmode: 'numeric', pattern: '[0-9]*', class: 'gate-input', 'aria-label': 'Réponse', autocomplete: 'off' });
   const error = h('p', { class: 'gate-error' });
   const check = (e) => {
     e.preventDefault();
-    if (Number(input.value) === a * b) next();
-    else {
+    if (Number(input.value) === a * b) {
+      sessionFlag('parent-ok', true);
+      next();
+    } else {
       error.textContent = 'Ce n’est pas la bonne réponse.';
       input.value = '';
     }
@@ -786,16 +795,6 @@ function parentsScreen(selectedId = store.active || CHARACTERS[0].id) {
     onclick: () => parentsScreen(c.id),
   }, avatar(c.id, 'avatar-xs'), c.name)));
 
-  const lengthSelect = h('div', { class: 'segmented' }, [5, 10, 15].map((n) => {
-    const btn = h('button', { class: store.settings.sessionLength === n ? 'seg on' : 'seg' }, n);
-    btn.addEventListener('click', () => {
-      store.settings.sessionLength = n;
-      save();
-      lengthSelect.querySelectorAll('.seg').forEach((el) => el.classList.toggle('on', el === btn));
-    });
-    return btn;
-  }));
-
   const kid = store.profiles[selectedId];
   const gradeSelect = h('select', { class: 'select', 'aria-label': 'Classe' },
     Object.entries(GRADES).map(([id, label]) => h('option', { value: id, selected: kid.grade === id }, label)));
@@ -806,19 +805,18 @@ function parentsScreen(selectedId = store.active || CHARACTERS[0].id) {
   });
 
   show(h('main', { class: 'screen parents' },
-    topBar({ onBack: () => (store.active ? homeScreen() : profileScreen()), title: '👪 Espace parents' }),
+    topBar({
+      onBack: () => (store.active ? homeScreen() : profileScreen()),
+      title: '👪 Suivi',
+      right: h('button', { class: 'parent-btn settings-btn', onclick: () => settingsScreen(), 'aria-label': 'Réglages' }, '⚙️'),
+    }),
     tabs,
     h('section', { class: 'card' },
       h('h2', {}, `Profil de ${character(selectedId).name}`),
       h('label', { class: 'setting' }, h('span', {}, 'Classe'), gradeSelect)),
     dashboard({ kid, grade: kid.grade, onChange: save }),
-    h('section', { class: 'card' },
-      h('h2', {}, 'Réglages (les deux enfants)'),
-      toggle('Voix (consignes lues)', store.settings.voice, (v) => { store.settings.voice = v; applySettings(); save(); }),
-      toggle('Petits sons', store.settings.sounds, (v) => { store.settings.sounds = v; applySettings(); save(); }),
-      h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect)),
     isStandalone() ? null : h('section', { class: 'card' },
-      h('h2', {}, 'Installer sur l’iPhone'),
+      h('h2', {}, 'Installer sur l’iPhone ou l’iPad'),
       h('p', { class: 'muted' }, 'Dans Safari : Partager, puis « Sur l’écran d’accueil ». L’app fonctionne ensuite sans Internet.')),
     h('details', { class: 'card tips' },
       h('summary', {}, 'Conseils'),
@@ -839,6 +837,104 @@ function parentsScreen(selectedId = store.active || CHARACTERS[0].id) {
           }
         },
       }, `Effacer la progression de ${character(selectedId).name}`))));
+}
+
+// ---------------------------------------------------------------- Réglages
+
+function photoRow(c) {
+  const kid = store.profiles[c.id];
+  const status = h('p', { class: 'photo-status muted small', 'aria-live': 'polite' });
+  const input = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden', 'data-photo-input': c.id });
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    status.textContent = 'Enregistrement…';
+    try {
+      const previous = kid.photo;
+      kid.photo = await squarePhoto(file);
+      if (!save()) {
+        kid.photo = previous;
+        status.textContent = 'Photo trop lourde pour l’appareil. Essayez une autre photo.';
+        return;
+      }
+      applySettings();
+      settingsScreen(`Photo de ${c.name} enregistrée ✓`);
+    } catch {
+      status.textContent = 'Impossible de lire cette image.';
+    }
+  });
+  return h('div', { class: 'photo-row', 'data-photo-row': c.id },
+    avatar(c.id, 'avatar-md'),
+    h('div', { class: 'photo-actions' },
+      h('span', { class: 'game-row-title' }, c.name),
+      h('label', { class: 'big-btn primary photo-btn' }, '📷 Choisir une photo', input),
+      kid.photo
+        ? h('button', {
+          class: 'link-action',
+          onclick: () => {
+            kid.photo = null;
+            save();
+            applySettings();
+            settingsScreen(`${c.name} retrouve son dessin.`);
+          },
+        }, 'Revenir au dessin')
+        : null,
+      status));
+}
+
+function voiceRow(c, voiceList) {
+  const select = h('select', { class: 'select', 'aria-label': `Voix de ${c.name}` },
+    h('option', { value: '' }, 'Automatique (la plus naturelle)'),
+    voiceList.map((v) => h('option', { value: v.id, selected: store.settings.voices[c.voice.voice] === v.id }, `${v.name} (${v.lang})`)));
+  select.addEventListener('change', () => {
+    store.settings.voices = { ...store.settings.voices, [c.voice.voice]: select.value || undefined };
+    save();
+    applySettings();
+    say(c, c.hello);
+  });
+  return h('div', { class: 'setting voice-row' },
+    h('span', {}, c.name),
+    h('div', { class: 'voice-ctrl' }, select,
+      h('button', { class: 'mini-btn', 'aria-label': `Écouter la voix de ${c.name}`, onclick: () => say(c, c.hello) }, '▶')));
+}
+
+function settingsScreen(message = '') {
+  const lengthSelect = h('div', { class: 'segmented' }, [5, 10, 15].map((n) => {
+    const btn = h('button', { class: store.settings.sessionLength === n ? 'seg on' : 'seg' }, n);
+    btn.addEventListener('click', () => {
+      store.settings.sessionLength = n;
+      save();
+      lengthSelect.querySelectorAll('.seg').forEach((el) => el.classList.toggle('on', el === btn));
+    });
+    return btn;
+  }));
+  const voiceList = listFrenchVoices();
+
+  show(h('main', { class: 'screen parents settings' },
+    topBar({ onBack: () => (store.active ? homeScreen() : profileScreen()), title: '⚙️ Réglages' }),
+    message ? h('p', { class: 'toast', role: 'status' }, message) : null,
+    h('section', { class: 'card' },
+      h('h2', {}, 'Photos des profils'),
+      h('p', { class: 'muted small' }, 'Photothèque ou appareil photo. Enregistrement automatique, la photo reste sur l’appareil.'),
+      CHARACTERS.map(photoRow)),
+    h('section', { class: 'card' },
+      h('h2', {}, 'Voix et sons'),
+      toggle('Consignes lues à voix haute', store.settings.voice, (v) => { store.settings.voice = v; applySettings(); save(); }),
+      voiceList.length ? CHARACTERS.map((c) => voiceRow(c, voiceList)) : null,
+      toggle('Petits sons', store.settings.sounds, (v) => { store.settings.sounds = v; applySettings(); save(); }),
+      h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
+      h('p', { class: 'muted small' }, 'Voix plus naturelles : Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
+    h('section', { class: 'card about' },
+      h('h2', {}, 'À propos'),
+      h('div', { class: 'setting' }, h('span', {}, 'Version'), h('b', { 'data-version': APP.version }, APP.version)),
+      h('details', { class: 'changelog' },
+        h('summary', {}, 'Journal des modifications'),
+        CHANGELOG.map((entry) => h('div', { class: 'changelog-entry' },
+          h('h3', {}, `Version ${entry.version}`, h('span', { class: 'muted small' }, ` · ${new Date(entry.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`)),
+          h('ul', { class: 'plain-list' }, entry.changes.map((c) => h('li', {}, c)))))),
+      h('div', { class: 'credits' },
+        h('p', {}, h('b', {}, APP.name), ' · conçue par ', h('b', {}, APP.author)),
+        h('p', { class: 'muted small' }, 'Avec Eva-Rose et Matteo. Police Andika © SIL International (licence OFL).')))));
 }
 
 // ---------------------------------------------------------------- Démarrage

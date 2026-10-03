@@ -1,18 +1,34 @@
 # Lire & Compter, avec Eva-Rose et Matteo
 
-Application iPhone de jeux pour apprendre **le français, les maths et l'anglais**, de la
-moyenne section au CE1. Deux profils au lancement : **Eva-Rose** (CP, CE1) et **Matteo**
+Application iPhone et iPad de jeux pour apprendre **le français, les maths et l'anglais**,
+de la moyenne section au CE1. Deux profils au lancement : **Eva-Rose** (CP, CE1) et **Matteo**
 (moyenne et grande section). Chaque enfant a sa progression, ses étoiles et son album.
 
 C'est une web app installable : elle s'ouvre dans Safari, s'ajoute à l'écran d'accueil et
 fonctionne ensuite **sans Internet**. Pas besoin de Mac, d'Xcode ni de l'App Store.
 
-## Installer sur l'iPhone
+## Installer sur l'iPhone ou l'iPad
 
 1. Activer GitHub Pages (une seule fois) : *Settings → Pages → Source : GitHub Actions*.
 2. Après fusion sur `master`, l'app est publiée sur `https://mdurieux2.github.io/test-repo/`.
-3. Sur l'iPhone, ouvrir cette adresse dans **Safari**, toucher **Partager**, puis
+3. Sur l'iPhone ou l'iPad, ouvrir cette adresse dans **Safari**, toucher **Partager**, puis
    **Sur l'écran d'accueil**.
+
+Sur iPad, l'interface s'agrandit automatiquement, en portrait comme en paysage.
+
+## Réglages
+
+Le bouton ⚙️ de l'écran « Qui joue ? » ouvre les réglages, protégés par une multiplication :
+
+- **Photos des profils** : une photo pour chaque enfant, choisie dans la photothèque ou prise
+  avec l'appareil photo. Elle est enregistrée automatiquement et reste sur l'appareil.
+- **Voix et sons** : consignes lues ou non, voix d'Eva-Rose et de Matteo avec un bouton
+  d'essai, petits sons, nombre de questions par partie.
+- **À propos** : version, journal des modifications (`app/js/config.js`) et crédits.
+
+Pour des voix plus naturelles, téléchargez une voix « Premium » ou « améliorée » dans
+*Réglages de l'iPhone → Accessibilité → Contenu énoncé → Voix → Français*. L'app choisit
+toujours la plus naturelle disponible.
 
 ## Le programme
 
@@ -42,9 +58,9 @@ par palier, et trois formes d'exercice : pavé numérique, « Relie », « Compl
 - Pas d'échec : après une erreur, « Essaie encore » ; après deux, la bonne réponse brille.
 - Récompenses : étoiles, autocollants, étoiles de palier.
 
-## Espace parents
+## Suivi des parents
 
-Accès protégé par une multiplication. Pour chaque enfant :
+Le bouton 👪 de l'écran « Qui joue ? » ouvre le suivi. Pour chaque enfant :
 - la classe ;
 - l'activité de la semaine (parties, minutes, réussite, jours d'affilée, graphique) ;
 - l'état de chaque compétence (pas commencé, en cours, acquis) et le niveau réglable ;
@@ -60,7 +76,7 @@ Aucune étape de compilation : HTML, CSS et JavaScript (modules ES) dans `app/`.
 npm install          # Playwright, pour le test de bout en bout et les icônes
 npm start            # http://localhost:8080
 npm test             # tests unitaires (node --test)
-npm run test:e2e     # parcours complet + mise en page sur 10 tailles d'iPhone (6 → 17 Pro Max)
+npm run test:e2e     # parcours complet + mise en page sur 10 iPhone (6 → 17 Pro Max) et 12 iPad
 npm run icons        # régénère les icônes
 ```
 
@@ -71,7 +87,8 @@ npm run icons        # régénère les icônes
 | `app/js/main.js` | Écrans, profils et déroulement d'une partie |
 | `app/js/dashboard.js` | Tableau de bord des parents |
 | `app/js/characters.js` | Dessins d'Eva-Rose et de Matteo (SVG) |
+| `app/js/config.js` | Version, journal des modifications, crédits |
 | `app/sw.js` | Mode hors ligne : tout nouveau fichier doit être ajouté à `PRECACHE` |
 
-Police : [Andika](https://software.sil.org/andika/) (SIL Open Font License), conçue pour
-l'apprentissage de la lecture.
+Conçue par **Michaël Durieux**. Police : [Andika](https://software.sil.org/andika/)
+(SIL Open Font License), conçue pour l'apprentissage de la lecture.
