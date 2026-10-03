@@ -163,6 +163,10 @@ async function journey() {
   await page.click('[data-group="showTitle"] input[value="non"]');
   check(!(await page.isVisible('#title')), 'titre masqué');
   await page.click('[data-group="showTitle"] input[value="oui"]');
+  // un titre long tapé au clavier est gardé en entier (19 lettres et plus)
+  await page.fill('#title', '');
+  await page.locator('#title').pressSequentially('Paris Saint-Germain');
+  check(await page.inputValue('#title') === 'Paris Saint-Germain', 'titre long gardé en entier');
   check(await previewDrawn(page), 'aperçu après réglages');
 
   // les réglages restent après rechargement
