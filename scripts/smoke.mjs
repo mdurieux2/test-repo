@@ -902,19 +902,23 @@ if ((await page.textContent('[data-profile="eva-rose"] svg text')) !== 'Lou') fa
 await page.click('[data-profile="eva-rose"]');
 await page.waitForSelector('.home');
 if (!(await page.textContent('.home-title')).includes('Lou')) fail('nouveau prénom absent de l’accueil');
-// ajouter puis supprimer un enfant
+// ajouter puis supprimer un enfant, avec un prénom long tapé au clavier (gardé en entier)
+const LONG_NAME = 'Paris Saint-Germain Féminines';
 page.on('dialog', (dialog) => dialog.accept());
 await goProfiles(page);
 await page.click('.parent-btn');
 await page.click('[data-tab="enfants"]');
 await page.click('.add-child');
-await page.fill('[data-field="name"]', 'Zoé');
+await page.locator('[data-field="name"]').pressSequentially(LONG_NAME);
 await page.click('.child-submit');
-await page.waitForSelector('[data-child-card="zoe"]');
-await page.click('[data-edit="zoe"]');
+const longId = 'paris-saint-germain-feminines';
+await page.waitForSelector(`[data-child-card="${longId}"]`);
+const longName = await page.evaluate(([key, id]) => JSON.parse(localStorage.getItem(key)).profiles[id]?.name, [STORAGE_KEY, longId]);
+if (longName !== LONG_NAME) fail(`prénom long coupé : « ${longName} » au lieu de « ${LONG_NAME} »`);
+await page.click('[data-edit="' + longId + '"]');
 await page.click('.delete-child');
 await page.waitForSelector('[data-child-card="matteo"]');
-if (await page.locator('[data-child-card="zoe"]').count()) fail('le profil supprimé est toujours là');
+if (await page.locator(`[data-child-card="${longId}"]`).count()) fail('le profil supprimé est toujours là');
 // remettre le prénom d'origine
 await page.click('[data-edit="eva-rose"]');
 await page.fill('[data-field="name"]', 'Eva-Rose');

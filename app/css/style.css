@@ -63,6 +63,8 @@ body {
 }
 
 button, input, select { font: inherit; color: inherit; }
+/* un prénom long sans espace (« Marie-Charlotte-Alexandrine ») passe à la ligne au lieu de déborder */
+h1, h2, h3 { overflow-wrap: break-word; max-width: 100%; }
 :focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; border-radius: 12px; }
 .choice:focus-visible, .key:focus-visible, .palier-tile:focus-visible { outline-offset: 4px; }
 .object, .stage-picture, .sticker, .sticker-big, .game-icon, .domain-icon, .big-star,

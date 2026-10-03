@@ -18,7 +18,9 @@ export const GRADES = {
 };
 
 export const MAX_CHILDREN = 6;
-export const NAME_MAX = 20;
+// assez long pour un prénom composé ou un surnom (« Paris Saint-Germain » : 19 caractères) ;
+// sur iPhone, la correction automatique peut ajouter des caractères pendant la frappe
+export const NAME_MAX = 30;
 
 // Profils créés avant la version 1.3 (sans prénom enregistré) : on les retrouve tels quels.
 const LEGACY = {
