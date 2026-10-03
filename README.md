@@ -7,7 +7,7 @@ Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la moye
 - Un profil par enfant (jusqu'à 6), avec son prénom, son personnage et sa photo.
 - Toutes les données restent **sur l'appareil**. Rien n'est envoyé ailleurs.
 
-👉 **Adresse de l'application : <https://mdurieux2.github.io/test-repo/>**
+👉 **Adresse de l'application : <https://mdurieux2.github.io/lire-compter-samuser/>**
 
 ---
 
