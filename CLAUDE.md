@@ -18,3 +18,16 @@ Interface et commentaires en français.
   portrait et paysage).
 - Couleurs : texte blanc seulement sur des fonds à contraste ≥ 3:1 (gros textes) ; jamais d'information
   portée par la couleur seule.
+
+## Affiche foot (dossier `affiche/`)
+
+Deuxième application, indépendante : affiche de foot parent(s) et enfant(s) vus de dos, prénoms et numéros
+paramétrables, export JPG/PDF A4 ou A3 à 300 dpi. Publiée dans `/affiche/` du même site (voir `pages.yml`).
+
+- Pas de build ni de dépendance à l'exécution (le PDF est écrit à la main dans `pdf.js`).
+- Dessin sur canvas dans un repère de 1000 × 1414 unités (`poster.js`, `figures.js`) : le même code sert à
+  l'aperçu et aux fichiers haute résolution (le PDF est dessiné par bandes, limite des canvas sur iPhone).
+- Tout nouveau fichier dans `affiche/` doit être ajouté à `PRECACHE` dans `affiche/sw.js` (un test le vérifie)
+  et `VERSION` doit être incrémentée à chaque mise en production.
+- Aucun logo ni nom de club : seulement des couleurs et un titre libre.
+- Vérifier avant de pousser : `npm test` puis `npm run test:e2e:affiche`.

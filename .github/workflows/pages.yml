@@ -23,8 +23,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
+      # Lire & Compter à la racine du site, l'application d'affiches dans /affiche/
+      - name: Assemblage du site
+        run: |
+          mkdir _site
+          cp -R app/. _site/
+          cp -R affiche _site/affiche
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: app
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
