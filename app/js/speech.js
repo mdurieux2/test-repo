@@ -32,6 +32,19 @@ function best(list, wantedLang) {
   return [...list].sort((a, b) => voiceScore(b, wantedLang) - voiceScore(a, wantedLang))[0] || null;
 }
 
+/**
+ * Hors connexion, les voix en ligne (« Google français », voix « Online » de Microsoft) restent
+ * muettes : on prend alors la meilleure voix installée sur l'appareil.
+ */
+export function offlineSafe(voice, list, wantedLang, online = globalThis.navigator?.onLine !== false) {
+  if (!voice || online || voice.localService !== false) return voice;
+  return best(list.filter((v) => v.localService !== false), wantedLang) || voice;
+}
+
+function englishVoices() {
+  return synth ? synth.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith('en')) : [];
+}
+
 function frenchVoices() {
   return synth ? synth.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith('fr')) : [];
 }
@@ -40,7 +53,7 @@ function chooseVoices() {
   if (!synth) return;
   const fr = frenchVoices();
   const byUri = (uri) => fr.find((v) => v.voiceURI === uri) || null;
-  const english = synth.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith('en'));
+  const english = englishVoices();
   voices = {
     // une seule voix pour toute l'app (l'ancien réglage « voix des filles » est repris)
     main: byUri(preferences.main) || byUri(preferences.female) || best(fr, 'fr-FR'),
@@ -87,7 +100,9 @@ function sayOne(part, id) {
     const { text, rate = 0.95, pitch = 1, voice, lang = 'fr-FR' } = part;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
-    const chosen = lang.startsWith('en') ? voices.en : voices.main;
+    const chosen = lang.startsWith('en')
+      ? offlineSafe(voices.en, englishVoices(), 'en-GB')
+      : offlineSafe(voices.main, frenchVoices(), 'fr-FR');
     if (chosen) {
       utterance.voice = chosen;
       utterance.lang = chosen.lang;

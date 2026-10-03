@@ -4,7 +4,9 @@
 // Usage : npm run test:e2e   (SCREENSHOTS=dossier pour enregistrer des captures)
 //         ONLY=memory,points npm run test:e2e   (seulement la mise en page de ces jeux, sur tous les appareils)
 //         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
+//         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
 //         PORT=8124 pour lancer plusieurs tests en même temps
+//         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
 
 import { chromium } from 'playwright';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -18,10 +20,12 @@ const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
 const SHOTS = process.env.SCREENSHOTS;
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
+const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
-const browser = await chromium.launch();
+// CHROMIUM_PATH : utiliser un Chromium déjà installé (sinon celui téléchargé par Playwright)
+const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 const errors = [];
 
 function fail(message) {
@@ -38,7 +42,10 @@ async function newContext(viewport) {
       cancel() {}, getVoices: () => [], addEventListener() {},
     };
     Object.defineProperty(window, 'speechSynthesis', { value: fake });
+    // tout ce que la règle de sécurité (CSP) bloque est une erreur
+    document.addEventListener('securitypolicyviolation', (e) => console.error(`CSP ${e.violatedDirective} ${e.blockedURI}`));
   });
+  context.on('console', (msg) => { if (msg.text().startsWith('CSP ')) errors.push(msg.text()); });
   return context;
 }
 
@@ -318,6 +325,68 @@ async function answer(page, q, wrongFirst) {
       await page.click(`.choice[data-value="${q.answer}"]`);
       break;
     }
+    case 'swap': {
+      // l'aide place une pièce (elle compte comme une aide), puis on échange les pièces
+      if (wrongFirst) await page.click('.pz-hint');
+      for (;;) {
+        const order = await page.$$eval('.pz-tile', (els) => els.map((el) => Number(el.dataset.piece)));
+        const pos = order.findIndex((v, i) => v !== i);
+        if (pos < 0) break;
+        await page.click(`.pz-tile[data-pos="${pos}"]`);
+        await page.click(`.pz-tile[data-pos="${order.indexOf(pos)}"]`);
+      }
+      break;
+    }
+    case 'memory': {
+      const { cards } = q;
+      const first = (pair) => cards.findIndex((c) => c.pair === pair);
+      if (wrongFirst) {
+        // beaucoup de cartes retournées pour rien : pas d'étoile du premier coup
+        const other = cards.findIndex((c) => c.pair !== cards[0].pair);
+        for (let k = 0; k <= cards.length; k++) {
+          await page.click('.memory-card[data-card="0"]');
+          await page.click(`.memory-card[data-card="${other}"]`);
+          await page.waitForFunction(() => !document.querySelector('.memory-card.open:not(.found)'));
+        }
+      }
+      for (const pair of new Set(cards.map((c) => c.pair))) {
+        const a = first(pair);
+        const b = cards.findIndex((c, i) => i !== a && c.pair === pair);
+        await page.click(`.memory-card[data-card="${a}"]`);
+        await page.click(`.memory-card[data-card="${b}"]`);
+        await page.waitForSelector(`.memory-card[data-card="${b}"].found`);
+      }
+      break;
+    }
+    case 'colorby': {
+      const { zones } = q.stage;
+      if (wrongFirst) {
+        await page.click(`.magic-color[data-color="${(zones[0].c + 1) % q.stage.legend.length}"]`);
+        await page.locator('.magic-zone[data-zone="0"]').dispatchEvent('click');
+        await page.waitForSelector('.try-again');
+      }
+      for (const [i, z] of zones.entries()) {
+        await page.click(`.magic-color[data-color="${z.c}"]`);
+        await page.locator(`.magic-zone[data-zone="${i}"]`).dispatchEvent('click');
+      }
+      break;
+    }
+    case 'dots': {
+      const centers = await page.$$eval('.dot .dot-point', (els) => els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return [r.left + r.width / 2, r.top + r.height / 2];
+      }));
+      if (wrongFirst) {
+        await page.mouse.click(...centers[2]);
+        await page.waitForSelector('.try-again');
+      }
+      // un seul trait au doigt, d'un point au suivant
+      await page.mouse.move(...centers[0]);
+      await page.mouse.down();
+      for (const c of centers.slice(1)) await page.mouse.move(...c, { steps: 4 });
+      await page.mouse.up();
+      break;
+    }
     default:
       if (wrongFirst) {
         const wrong = q.choices.find((c) => c.value !== q.answer);
@@ -378,7 +447,7 @@ const shotsWanted = {
   mesures: '46-mesures', calendrier: '47-calendrier', tangram: '48-tangram', reproduire: '49-reproduire', 'parle-anglais': '50-parle',
 };
 const bubbleText = (t) => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\u2011/g, '-').replace(/\s+/g, ' ').trim();
-for (const game of GAMES) {
+for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
   const grade = gradeFor(game.id);
   await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`);
   if (game.id === 'calcul') {
@@ -423,13 +492,16 @@ for (const game of GAMES) {
   console.log(`✔ ${game.id} (${grade}) : partie complète, ${stars} étoiles`);
 }
 
+if (PLAY) return;
+
 // choisir directement son niveau
 await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
 await goProfile(page);
 await page.click('[data-domain="maths"]');
 await page.click('[data-levels="compter"]');
 await page.waitForSelector('.level-list');
-if ((await page.locator('.level-row').count()) !== 6) fail('compter (CP) : 6 niveaux attendus');
+const [, compterMin, compterMax] = PROGRAMS.CP.maths.find(([id]) => id === 'compter');
+if ((await page.locator('.level-row').count()) !== compterMax - compterMin + 1) fail(`compter (CP) : ${compterMax - compterMin + 1} niveaux attendus`);
 await shot('19-niveaux');
 await page.click('.level-row[data-level="4"]');
 await page.waitForSelector('.choices');
@@ -497,6 +569,7 @@ console.log('✔ jeu bonus : les bulles');
 // habiller son personnage
 await page.click('[data-dress]');
 await assertNoJunk(page, 'personnage'); // l'écran ne doit pas afficher l'événement du toucher
+if (await page.locator('.dress [disabled], .dress .lock').count()) fail('personnage : des tee-shirts ou accessoires sont encore verrouillés');
 await page.click('[data-shirt="vert"]');
 await page.click('[data-accessory="couronne"]');
 if (!(await page.locator('.dress-preview svg text').allTextContents()).includes('👑')) fail('personnage : la couronne n’apparaît pas');
@@ -819,11 +892,11 @@ async function checkDevice(device, repeat) {
 if (SHOTS) mkdirSync(`${SHOTS}/devices`, { recursive: true });
 // 6 appareils à la fois, pour ne pas saturer la machine de test
 const counts = [];
-for (let i = 0; i < DEVICES.length; i += 6) {
+for (let i = 0; i < (PLAY ? 0 : DEVICES.length); i += 6) {
   // plus de tirages sur les deux écrans les plus petits (iPhone SE, Android 360 points)
   counts.push(...await Promise.all(DEVICES.slice(i, i + 6).map((d, k) => checkDevice(d, i + k === 0 || d.width === 360 && d.height === 740 ? 3 : 1))));
 }
-DEVICES.forEach((d, i) => console.log(`✔ ${d.name} (${d.width}×${d.height}) : ${counts[i]} écrans vérifiés`));
+counts.forEach((n, i) => console.log(`✔ ${DEVICES[i].name} (${DEVICES[i].width}×${DEVICES[i].height}) : ${n} écrans vérifiés`));
 if (layoutProblems.length) fail(`mise en page :\n${layoutProblems.join('\n')}`);
 
 await browser.close();

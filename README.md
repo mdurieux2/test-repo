@@ -50,9 +50,10 @@ aussi : en paysage, le dessin est à gauche, la consigne et les réponses à dro
    (fille ou garçon) et classe. Le prénom est écrit sur le tee-shirt du personnage et sert à
    féliciter l'enfant (« Bravo Léa ! »). On peut ajouter une photo ensuite.
 2. **« Qui joue ? »** : l'enfant touche son portrait.
-3. Il choisit le **Défi du jour** (5 questions variées, une série de jours 🔥) ou une matière
-   (**Français**, **Maths**, **Anglais**, **Le monde**) puis un jeu. Ses autocollants sont dans
-   **Mon album**.
+3. Il choisit le **Défi du jour** (5 questions variées, une série de jours 🔥), **Je révise**
+   (les jeux ratés qui reviennent) ou une rubrique : **Lire et écrire**, **Histoires**,
+   **Nombres et calcul**, **Jeux et logique**, **Temps et mesures**, **Le monde**, **Anglais**.
+   Ses autocollants sont dans **Mon album**.
 4. Chaque jeu montre le niveau atteint (les points). En touchant **Niveaux ▾**, on choisit
    directement un niveau.
 
@@ -65,10 +66,13 @@ officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/program
 
 | Classe | Français | Maths | Anglais | Le monde |
 |---|---|---|---|---|
-| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons |
-| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes | Écouter et toucher (5 thèmes), compter, in/on/under | Les bébés des animaux, les moments de la journée |
-| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, sudoku, symétrie, cubes | Écouter (10 thèmes), lire, relier, compter, in/on/under | Ce que mangent les animaux, les jours, les pays d'Europe et du monde |
-| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants | Nombres jusqu'à 1000, tables, problèmes en deux étapes, l'heure, moitiés, sudoku 6 × 6, labyrinthes 9 × 9 | Écouter, lire, relier, épeler, trouver le mot anglais | Qui pond des œufs, les mois, les continents |
+| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes, **puzzle**, **memory**, **coloriage magique**, **points à relier** | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons |
+| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes, puzzle, memory | Écouter et toucher, compter, in/on/under, les nombres, mélanger les couleurs, l'intrus, les contraires | Les bébés des animaux, les moments de la journée, **les drapeaux** |
+| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, la monnaie, sudoku, symétrie, cubes, coloriage magique avec des calculs | Écouter (10 thèmes), lire, relier, compter, les nombres jusqu'à 20, calculer en anglais, colorier, memory, petites phrases | Ce que mangent les animaux, les jours, les pays, les drapeaux |
+| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants | Nombres jusqu'à 1000, tables, problèmes en deux étapes, l'heure, moitiés, sudoku 6 × 6, labyrinthes 9 × 9, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau |
+
+Chaque jeu a plusieurs niveaux de difficulté croissante (de 3 à 13) ; le niveau s'adapte à
+l'enfant, et on peut aussi le choisir directement.
 
 ### Les jeux
 
@@ -97,15 +101,29 @@ officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/program
 - *Labyrinthes* : de 4 × 4 à 9 × 9 cases (doigt, flèches, ou toucher une case ; 💡 pour un
   indice) et le chemin des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours).
 
+**Jeux et logique**
+- *Puzzles, memory et coloriages* : **le puzzle** (de 4 à 25 pièces, toucher deux pièces pour les
+  échanger, 💡 pour placer une pièce), **le memory** (de 2 à 10 paires, et « chiffre et quantité »),
+  **le coloriage magique** (chaque zone a un nombre ou un calcul, sa couleur est dans la palette),
+  **les points à relier** au doigt (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours : un
+  dessin apparaît).
+
 **Anglais** (10 thèmes : couleurs, nombres, animaux, nourriture, corps, vêtements, école,
 météo, émotions, famille)
-- Écoute et touche, lis et touche, le mot anglais, relie en anglais, compte en anglais,
-  « Where is the cat? » (in, on, under, next to), épelle en anglais.
+- *Écouter et lire* : écoute et touche, lis et touche, le mot anglais, relie en anglais, épelle.
+- *Nombres et couleurs* : compte en anglais, **les nombres jusqu'à 100** (écouter, lire, écrire),
+  **calcule en anglais** (« two plus three »), **mélange les couleurs** (« red and yellow make
+  orange »), **colorie en anglais** (lire « 1 red, 2 blue… »).
+- *Mots et phrases* : **le memory anglais** (image et mot), **l'intrus**, **les contraires**
+  (big / small, hot / cold…), « Where is the cat? », **les petites phrases** à remettre dans
+  l'ordre, parler anglais (saluer, comptines).
 
 **Le monde**
 - *Les animaux* : où ils vivent, leurs bébés, ce qu'ils mangent, qui pond des œufs.
 - *Le temps qui passe* : les saisons, les moments de la journée, les jours, les mois.
 - *Les pays du monde* : des pays d'Europe et du monde, les continents.
+- **Les drapeaux** : 46 drapeaux dessinés ; reconnaître un pays, trouver le drapeau, les
+  drapeaux qui se ressemblent, le continent, la couleur qui manque.
 
 **Défi du jour** : chaque jour, 5 questions tirées des jeux de l'enfant, à son niveau. Une étoile
 bonus et un jour de plus dans la série 🔥.
@@ -157,11 +175,20 @@ L'application choisit toujours la voix la plus naturelle de l'appareil. Pour l'a
 Il suffit d'envoyer l'adresse (ou *Espace parents → Enfants → Partager le lien*). Chaque
 famille crée ses propres profils sur son appareil : rien n'est partagé entre les familles.
 
-## Confidentialité
+## Sans Internet (mode avion)
 
-- Aucune inscription, aucune publicité, aucun traceur.
+Après une première ouverture avec Internet, **tout fonctionne sans réseau** : les jeux, les
+images, les sons et les progrès sont sur l'appareil (le test automatique ouvre chaque jeu en
+mode avion). Ouvrez l'application une fois connecté après une mise à jour pour la recevoir.
+La voix aussi marche hors connexion sur iPhone, iPad et Android (si la voix française est
+téléchargée) ; sur ordinateur, l'app choisit alors une voix installée.
+
+## Confidentialité et sécurité
+
+- Aucune inscription, aucune publicité, aucun traceur ; l'application n'envoie rien sur Internet.
 - Les prénoms, photos et progrès restent dans le navigateur de l'appareil (stockage local).
 - Effacer les données du site dans le navigateur supprime les profils.
+- Aucune bibliothèque extérieure ; la page n'accepte que ses propres fichiers (règle CSP).
 
 ---
 
@@ -178,6 +205,10 @@ npm test             # tests unitaires (node --test)
 npm run test:e2e     # parcours complet + mise en page sur 14 iPhone (dont 3 en paysage), 12 iPad et 8 Android
 npm run icons        # régénère les icônes
 ```
+
+Options du test de bout en bout : `ONLY=memory,points` (mise en page de quelques jeux),
+`ONLY=hors-ligne` (mode avion), `PLAY=memory,points` (une partie de quelques jeux),
+`PORT=8124` (plusieurs tests en même temps), `CHROMIUM_PATH=…` (un Chromium déjà installé).
 
 | Fichier | Rôle |
 |---|---|

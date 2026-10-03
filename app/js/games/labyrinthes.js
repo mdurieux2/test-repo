@@ -105,6 +105,11 @@ export function randomPath(rng, cols, rows, length) {
 
 // ---------------------------------------------------------------- Le labyrinthe
 
+/** « jusqu’au fromage », « jusqu’à la fleur » (à + le = au). */
+export function untilGoal(what) {
+  return what.startsWith('le ') ? `jusqu’au ${what.slice(3)}` : `jusqu’à ${what}`;
+}
+
 const HEROES = [
   { hero: '🐭', goal: '🧀', who: 'la souris', what: 'le fromage' },
   { hero: '🐰', goal: '🥕', who: 'le lapin', what: 'la carotte' },
@@ -115,6 +120,44 @@ const HEROES = [
   { hero: '🐔', goal: '🌽', who: 'la poule', what: 'le maïs' },
 ];
 const MAZE_SIZES = [[4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9]];
+// Après le 9 × 9 (la plus grande taille), le labyrinthe change de forme plutôt que de taille.
+const MAZE_TWISTS = [
+  { label: 'Avec des boucles, 9 × 9', twist: 'boucles' },
+  { label: 'Au centre, 9 × 9', twist: 'centre' },
+  { label: 'Le plus long chemin, 9 × 9', twist: 'long' },
+];
+
+/** La case la plus éloignée (en nombre de pas) d'une case de départ. */
+function farthestCell(open, cols, start) {
+  const dist = new Map([[start, 0]]);
+  const queue = [start];
+  let far = start;
+  while (queue.length) {
+    const cell = queue.shift();
+    if (dist.get(cell) > dist.get(far)) far = cell;
+    for (const next of [cell - cols, cell + 1, cell + cols, cell - 1]) {
+      if (next >= 0 && next < open.length && !dist.has(next) && canMove(open, cols, cell, next)) {
+        dist.set(next, dist.get(cell) + 1);
+        queue.push(next);
+      }
+    }
+  }
+  return far;
+}
+
+/** Ouvre quelques murs en plus : plusieurs chemins possibles, et des boucles. */
+function addLoops(rng, open, cols, rows, count) {
+  const walls = [];
+  for (let cell = 0; cell < cols * rows; cell++) {
+    if (cell % cols < cols - 1 && !(open[cell] & E)) walls.push([cell, E, cell + 1, W]);
+    if (cell < cols * (rows - 1) && !(open[cell] & S)) walls.push([cell, S, cell + cols, N]);
+  }
+  for (const [a, bit, b, opposite] of sample(rng, walls, count)) {
+    open[a] |= bit;
+    open[b] |= opposite;
+  }
+  return open;
+}
 
 export const labyrinthe = {
   id: 'labyrinthe',
@@ -123,20 +166,28 @@ export const labyrinthe = {
   title: 'Le labyrinthe',
   icon: '🌀',
   skill: 'Se repérer dans l’espace, anticiper un trajet',
-  levels: MAZE_SIZES.map(([c, r]) => `${c} × ${r} cases`),
+  levels: [...MAZE_SIZES.map(([c, r]) => `${c} × ${r} cases`), ...MAZE_TWISTS.map((t) => t.label)],
   generate(level, rng) {
-    const [cols, rows] = MAZE_SIZES[level - 1];
+    const [cols, rows] = MAZE_SIZES[Math.min(level, MAZE_SIZES.length) - 1];
+    const twist = MAZE_TWISTS[level - MAZE_SIZES.length - 1]?.twist;
     const open = makeMaze(rng, cols, rows);
     const pair = pick(rng, HEROES);
     const corners = [0, cols - 1, cols * (rows - 1), cols * rows - 1];
-    const start = pick(rng, corners);
-    const goal = corners[3 - corners.indexOf(start)]; // coin opposé
+    let start = pick(rng, corners);
+    let goal = corners[3 - corners.indexOf(start)]; // coin opposé
+    if (twist === 'boucles') addLoops(rng, open, cols, rows, 10);
+    if (twist === 'centre') goal = Math.floor(rows / 2) * cols + Math.floor(cols / 2);
+    if (twist === 'long') {
+      // les deux bouts du plus long chemin du labyrinthe
+      start = farthestCell(open, cols, start);
+      goal = farthestCell(open, cols, start);
+    }
     const solution = solveMaze(open, cols, start, goal);
     return {
-      key: `labyrinthe:${cols}:${open.join('')}`,
+      key: twist ? `labyrinthe:${twist}:${start}:${open.join('')}` : `labyrinthe:${cols}:${open.join('')}`,
       interaction: 'maze',
       text: `Aide ${pair.who} à trouver ${pair.what}.`,
-      instruction: `Glisse ton doigt, ou touche les cases, pour guider ${pair.who} jusqu'à ${pair.what}.`,
+      instruction: `Glisse ton doigt, ou touche les cases, pour guider ${pair.who} ${untilGoal(pair.what)}.${twist === 'boucles' ? ' Il y a plusieurs chemins !' : ''}`,
       short: { key: 'labyrinthe', text: `Aide ${pair.who} à trouver ${pair.what}.` },
       stage: { type: 'maze', cols, rows, open, start, goal, hero: pair.hero, goalEmoji: pair.goal, solution },
       choices: [],
@@ -157,6 +208,11 @@ const NUMBER_PATHS = [
   { label: 'De 5 en 5 jusqu’à 50', cols: 4, rows: 4, seq: range(5, 50, 5) },
   { label: 'De 10 en 10 jusqu’à 100', cols: 4, rows: 4, seq: range(10, 100, 10) },
   { label: 'À rebours, de 20 à 1', cols: 5, rows: 5, seq: range(1, 20, 1).reverse() },
+  { label: 'De 3 en 3 jusqu’à 30', cols: 4, rows: 4, seq: range(3, 30, 3) },
+  // passer la centaine ; les intrus sont des nombres proches (87, 112…)
+  { label: 'De 95 à 110', cols: 5, rows: 4, seq: range(95, 110, 1), pool: range(80, 125, 1) },
+  // les intrus (150, 250…) ressemblent aux nombres du chemin ; 3 chiffres au plus, comme « 100 »
+  { label: 'De 100 en 100 jusqu’à 900', cols: 4, rows: 4, seq: range(100, 900, 100), pool: range(50, 950, 100) },
 ];
 
 function range(from, to, step) {
@@ -183,9 +239,9 @@ export const cheminNombres = {
   skill: 'Réciter et lire la suite des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours)',
   levels: NUMBER_PATHS.map((p) => p.label),
   generate(level, rng) {
-    const { cols, rows, seq } = NUMBER_PATHS[level - 1];
+    const { cols, rows, seq, pool: near } = NUMBER_PATHS[level - 1];
     const max = Math.max(...seq);
-    const pool = range(1, max + 10, 1).filter((n) => !seq.includes(n));
+    const pool = (near || range(1, max + 10, 1)).filter((n) => !seq.includes(n));
     const stage = pathStage(rng, cols, rows, seq, pool);
     const step = seq[1] - seq[0];
     const how = step < 0 ? 'en comptant à rebours' : step === 1 ? 'dans l’ordre' : `de ${step} en ${step}`;
@@ -217,8 +273,41 @@ export const cheminLettres = {
   title: 'Le chemin des lettres',
   icon: '🔡',
   skill: 'Connaître l’ordre alphabétique, épeler un mot',
-  levels: ['Alphabet de A à E', 'Alphabet de A à J', 'Épelle un mot court', 'Épelle un mot long'],
+  levels: ['Alphabet de A à E', 'Alphabet de A à J', 'Épelle un mot court', 'Épelle un mot long', 'Alphabet de K à T', 'Minuscules de a à j', 'À l’envers, de J à A'],
   generate(level, rng) {
+    if (level >= 5) {
+      // la suite de l'alphabet, les minuscules (b, d, p, q se ressemblent), l'alphabet à l'envers
+      const lower = ALPHABET.map((l) => l.toLowerCase());
+      let seq;
+      let intruders;
+      let how = '';
+      let instruction;
+      if (level === 5) {
+        seq = ALPHABET.slice(10, 20);
+        intruders = ALPHABET.filter((l) => !seq.includes(l));
+      } else if (level === 6) {
+        seq = lower.slice(0, 10);
+        intruders = ['p', 'q', ...sample(rng, lower.slice(10).filter((l) => l !== 'p' && l !== 'q'), 4)];
+        how = ' en minuscules';
+        instruction = 'Suis l’alphabet en lettres minuscules, de a à j. Attention au b et au d ! Touche les lettres une par une.';
+      } else {
+        seq = ALPHABET.slice(0, 10).reverse();
+        intruders = ALPHABET.slice(10);
+        how = ' à l’envers';
+      }
+      const stage = pathStage(rng, 4, 4, seq, intruders);
+      return {
+        key: `chemin-lettres:${level}:${stage.path.join('-')}`,
+        interaction: 'path',
+        text: `Suis l’alphabet${how}, de ${seq[0]} à ${seq.at(-1)}.`,
+        instruction: instruction || `Suis l’alphabet${how}, de ${seq[0]} à ${seq.at(-1)}. Touche les lettres une par une.`,
+        short: { text: `De ${seq[0]} à ${seq.at(-1)} !` },
+        stage: { ...stage, seq },
+        choices: [],
+        answer: seq.at(-1),
+        success: { speak: seq.join(', ') },
+      };
+    }
     if (level <= 2) {
       const seq = ALPHABET.slice(0, level === 1 ? 5 : 10);
       const [cols, rows] = level === 1 ? [3, 3] : [4, 4];

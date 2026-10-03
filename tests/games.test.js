@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { GAMES, DOMAINS, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS, CALC_FORMATS, equationHolds } from '../app/js/games/maths.js';
 import { areNeighbours, canMove } from '../app/js/games/labyrinthes.js';
-import { clockLabel, countSolutions, sudokuAllows } from '../app/js/games/maths-extra.js';
+import { clockLabel, countSolutions, solvesBySingles, sudokuAllows } from '../app/js/games/maths-extra.js';
 import { TEXT_DATA } from '../app/js/games/textes.js';
 import { mirrorCell, PIECES } from '../app/js/games/logique.js';
 import { makeChange } from '../app/js/games/mesures.js';
@@ -81,11 +81,27 @@ function checkQuestion(q, ctx) {
       break;
     }
     case 'symmetry': {
-      const { cols, rows, axis, model, solution } = q.stage;
-      assert.equal(model.length, solution.length, ctx);
-      const image = (c) => (q.stage.mode === 'copy' ? c + cols / 2 : mirrorCell(c, cols, rows, axis));
-      assert.deepEqual([...model.map(image)].sort((a, b) => a - b), solution, ctx);
-      assert.equal(new Set([...model, ...solution]).size, model.length * 2, `modèle et reflet se chevauchent : ${ctx}`);
+      const { cols, rows, axis, model, solution, mode } = q.stage;
+      const half = cols / 2;
+      const xs = model.map((c) => c % cols);
+      const ys = model.map((c) => Math.floor(c / cols));
+      const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+      // ce qu'il faut colorier pour chaque case du modèle : reflet, copie, copie plus bas, demi-tour, agrandie
+      const image = (c) => {
+        const [x, y] = [c % cols, Math.floor(c / cols)];
+        if (mode === 'copy') return [c + half];
+        if (mode === 'shift') return [c + cols + half];
+        if (mode === 'turn') return [(y0 + y1 - y) * cols + (x0 + x1 - x) + half];
+        if (mode === 'zoom') return [0, 1, cols, cols + 1].map((d) => (2 * (y - y0)) * cols + half + 2 * (x - x0) + d);
+        return [mirrorCell(c, cols, rows, axis)];
+      };
+      const expected = model.flatMap(image).sort((a, b) => a - b);
+      assert.deepEqual(expected, solution, ctx);
+      assert.equal(new Set(solution).size, solution.length, ctx);
+      for (const c of solution) assert.ok(c >= 0 && c < cols * rows, `case hors du quadrillage : ${ctx}`);
+      // le modèle est d'un côté du trait, ce qu'on colorie de l'autre
+      const target = (c) => (axis === 'v' ? c % cols >= half : Math.floor(c / cols) >= rows / 2);
+      assert.ok(model.every((c) => !target(c)) && solution.every(target), `modèle et reflet se chevauchent : ${ctx}`);
       break;
     }
     case 'pay':
@@ -107,6 +123,37 @@ function checkQuestion(q, ctx) {
       for (const p of positions) assert.ok(p.x > 0 && p.x < 100 && p.y > 0 && p.y < 100, ctx);
       const values = q.choices.map((c) => c.value);
       assert.equal(values.filter((v) => v === q.answer).length, 1, ctx);
+      break;
+    }
+    case 'swap': {
+      const { cols, rows, order } = q.stage;
+      assert.deepEqual([...order].sort((a, b) => a - b), Array.from({ length: cols * rows }, (_, i) => i), ctx);
+      assert.ok(order.some((v, i) => v !== i), `puzzle déjà fini : ${ctx}`);
+      break;
+    }
+    case 'memory': {
+      const counts = {};
+      for (const c of q.cards) counts[c.pair] = (counts[c.pair] || 0) + 1;
+      assert.ok(Object.values(counts).every((n) => n === 2), `chaque carte a exactement une paire : ${ctx}`);
+      assert.ok(q.cards.length >= 4 && q.cards.length <= 20, ctx);
+      break;
+    }
+    case 'colorby': {
+      const { zones, legend } = q.stage;
+      for (const z of zones) {
+        assert.ok(z.c >= 0 && z.c < legend.length, ctx);
+        // le calcul écrit dans la zone donne bien le nombre de sa couleur
+        const value = Function(`return ${z.label.replace('−', '-').replace('×', '*')}`)();
+        assert.equal(value, legend[z.c].n, `${z.label} ≠ ${legend[z.c].n} : ${ctx}`);
+      }
+      assert.ok(new Set(zones.map((z) => z.c)).size >= 2, ctx);
+      break;
+    }
+    case 'dots': {
+      const { points, labels } = q.stage;
+      assert.equal(points.length, labels.length, ctx);
+      assert.equal(new Set(labels).size, labels.length, ctx);
+      for (const [x, y] of points) assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100, ctx);
       break;
     }
     default: {
@@ -141,7 +188,8 @@ for (const game of GAMES) {
 }
 
 test('premier-son : le mot commence par le son, jamais par un distracteur', () => {
-  for (const { q } of questions(findGame('premier-son'))) {
+  for (const { level, q } of questions(findGame('premier-son'))) {
+    if (level > 3) continue; // niveaux 4 à 6 : voir tests/nouveaux-niveaux.test.js
     const word = q.success.reveal;
     assert.ok(word.startsWith(q.answer), word);
     for (const c of q.choices) {
@@ -154,6 +202,7 @@ test('premier-son : le mot commence par le son, jamais par un distracteur', () =
 test('compter : nombre d’objets dans les bornes du niveau, positions sans chevauchement', () => {
   const bounds = { 1: [1, 5], 2: [1, 10], 3: [3, 10], 4: [10, 20], 5: [8, 20], 6: [20, 30] };
   for (const { level, q } of questions(findGame('compter'))) {
+    if (!bounds[level]) continue; // niveaux 7 à 9 : voir maths-niveaux.test.js
     const [min, max] = bounds[level];
     assert.equal(q.stage.count, q.answer);
     assert.ok(q.answer >= min && q.answer <= max);
@@ -167,12 +216,14 @@ test('compter : nombre d’objets dans les bornes du niveau, positions sans chev
 });
 
 test('vite-vu, dizaines : la quantité montrée est la réponse', () => {
-  for (const { q } of questions(findGame('vite-vu'))) {
+  for (const { level, q } of questions(findGame('vite-vu'))) {
+    if (level > 4) continue; // calcul flash : voir maths-niveaux.test.js
     const inner = q.stage.inner;
     const shown = inner.type === 'dice' ? inner.value : inner.type === 'frames' ? inner.filled : inner.tens * 10 + inner.units;
     assert.equal(shown, q.answer);
   }
   for (const { q } of questions(findGame('dizaines'))) {
+    if (q.stage.type !== 'blocks') continue;
     const { hundreds = 0, tens, units } = q.stage;
     assert.equal(hundreds * 100 + tens * 10 + units, q.answer);
   }
@@ -181,6 +232,7 @@ test('vite-vu, dizaines : la quantité montrée est la réponse', () => {
 test('panier : listes de courses à 2 et 3 fruits, sachets de 10 au niveau 6 seulement', () => {
   const kinds = { 1: 1, 2: 1, 3: 2, 4: 3, 5: 1, 6: 1, 7: 3 };
   for (const { level, q } of questions(findGame('panier'))) {
+    if (!kinds[level]) continue; // niveaux 8 à 10 : voir maths-niveaux.test.js
     assert.equal(q.stage.tens, level === 6);
     assert.equal(q.stage.items.length, kinds[level]);
     if (kinds[level] > 1) assert.ok(q.text.includes(' et '), q.text);
@@ -192,6 +244,7 @@ test('panier : listes de courses à 2 et 3 fruits, sachets de 10 au niveau 6 seu
 test('calculs à trous : 3 à 5 calculs, deux étiquettes par calcul, résultats dans le niveau', () => {
   const levels = { 1: [3, 5], 2: [4, 10], 3: [5, 10], 4: [5, 20], 5: [4, 50], 6: [4, 100] };
   for (const { level, q } of questions(findGame('trous'))) {
+    if (!levels[level]) continue; // niveaux 7 à 9 : voir maths-niveaux.test.js
     const [count, max] = levels[level];
     assert.equal(q.interaction, 'fill');
     assert.equal(q.equations.length, count);
@@ -202,13 +255,19 @@ test('calculs à trous : 3 à 5 calculs, deux étiquettes par calcul, résultats
 });
 
 test('sudoku : grille juste, une seule solution, nombre de cases à trouver du niveau', () => {
-  const holes = { 1: 4, 2: 7, 3: 6, 4: 10, 5: 12, 6: 18 };
-  for (let level = 1; level <= 6; level++) {
+  const holes = { 1: 4, 2: 7, 3: 6, 4: 10, 5: 12, 6: 18, 7: 20, 8: 22, 9: 24 };
+  for (let level = 1; level <= 9; level++) {
     const rng = createRng(level);
     for (let i = 0; i < 40; i++) {
       const q = findGame('sudoku').generate(level, rng);
       const { size, puzzle, solution, symbols } = q.stage;
       assert.equal(symbols.length, size);
+      assert.equal(new Set(symbols).size, size);
+      assert.ok(size <= 6, 'grille trop grande pour un téléphone');
+      if (level === 7) assert.ok(symbols.every((s) => !/^[A-Z0-9]$/.test(s)), 'des images au niveau 7');
+      if (level === 8) assert.deepEqual(symbols, ['A', 'B', 'C', 'D', 'E', 'F']);
+      // les grilles les plus dures se résolvent sans jamais deviner
+      if (level >= 7) assert.ok(solvesBySingles(puzzle, size), q.key);
       assert.equal(puzzle.filter((v) => v === null).length, holes[level]);
       puzzle.forEach((v, k) => { if (v !== null) assert.equal(v, solution[k]); });
       solution.forEach((v, k) => {
@@ -224,6 +283,7 @@ test('sudoku : grille juste, une seule solution, nombre de cases à trouver du n
 test('relie les calculs : 4 à 8 paires, résultats tous différents et justes', () => {
   const counts = { 1: 4, 2: 6, 3: 8, 4: 6, 5: 8, 6: 6 };
   for (const { level, q } of questions(findGame('relie-calculs'))) {
+    if (!counts[level]) continue; // niveaux 7 à 9 : voir maths-niveaux.test.js
     assert.equal(q.pairs.length, counts[level]);
     for (const p of q.pairs) {
       const [a, op, b] = p.left.split(' ');
@@ -235,7 +295,7 @@ test('relie les calculs : 4 à 8 paires, résultats tous différents et justes',
 test('cubes : le dessus de chaque pile est visible (escaliers vers l’enfant), réponse = nombre de cubes', () => {
   for (const { level, q } of questions(findGame('cubes'))) {
     const { heights } = q.stage;
-    assert.equal(q.answer, heights.flat().reduce((a, b) => a + b, 0));
+    if (level <= 4) assert.equal(q.answer, heights.flat().reduce((a, b) => a + b, 0));
     if (level >= 3) {
       heights.forEach((row, y) => row.forEach((hgt, x) => {
         if (y > 0) assert.ok(hgt <= heights[y - 1][x], JSON.stringify(heights));
@@ -286,11 +346,15 @@ test('les pièces du carré : la bonne pièce a la forme du trou', () => {
   }
 });
 
-test('histoires : 3 niveaux, une bonne réponse parmi 3, histoires courtes', () => {
-  for (const level of [1, 2, 3]) assert.ok(STORY_DATA.filter((st) => st.level === level).length >= 4);
+test('histoires : 6 niveaux, une bonne réponse parmi 3, histoires courtes', () => {
+  for (const level of [1, 2, 3, 4, 5, 6]) assert.ok(STORY_DATA.filter((st) => st.level === level).length >= 4);
   for (const story of STORY_DATA) {
-    assert.equal(new Set([story.answer, ...story.others]).size, 3, story.title);
-    assert.ok(story.sentences.length >= 3 && story.sentences.length <= 4, story.title);
+    // niveau 6 : des images à remettre dans l'ordre au lieu d'une question
+    if (story.level === 6) assert.equal(new Set(story.steps.map(([emoji]) => emoji)).size, 3, story.title);
+    else assert.equal(new Set([story.answer, ...story.others]).size, 3, story.title);
+    // niveau 5 : 6 phrases (courtes : l'histoire doit tenir sur l'écran d'un petit téléphone)
+    const [min, max] = story.level === 5 ? [6, 6] : [3, 4];
+    assert.ok(story.sentences.length >= min && story.sentences.length <= max, story.title);
   }
 });
 
@@ -312,8 +376,8 @@ test('décors de saison selon la date', () => {
   assert.equal(seasonOf(new Date(2026, 0, 15)).id, 'hiver');
 });
 
-test('patates : paquets de 2, 5 ou 10, la réponse est le nombre d’objets', () => {
-  const groups = { 1: 2, 2: 5, 3: 10, 4: 10, 5: 10 };
+test('patates : paquets de 2, 3, 4, 5 ou 10, la réponse est le nombre d’objets', () => {
+  const groups = { 1: 2, 2: 5, 3: 10, 4: 10, 5: 10, 6: 3, 7: 4, 8: 5 };
   for (const { level, q } of questions(findGame('patates'))) {
     assert.equal(q.stage.group, groups[level]);
     assert.equal(q.stage.positions.length, q.answer);
@@ -325,24 +389,26 @@ test('labyrinthe : le chemin solution existe, la taille augmente avec le niveau'
   let previous = 0;
   for (let level = 1; level <= game.levels.length; level++) {
     const q = game.generate(level, createRng(level));
-    assert.ok(q.stage.cols * q.stage.rows > previous);
+    // jusqu'au 9 × 9, la taille augmente ; ensuite le labyrinthe change de forme (9 × 9 au plus)
+    if (level <= 6) assert.ok(q.stage.cols * q.stage.rows > previous);
+    else assert.ok(q.stage.cols <= 9 && q.stage.rows <= 9);
     previous = q.stage.cols * q.stage.rows;
     assert.ok(q.stage.solution.length >= q.stage.cols, 'chemin trop court');
   }
 });
 
 test('chemins : suites de nombres et mots épelés', () => {
-  const steps = { 1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 6: 5, 7: 10, 8: -1 };
+  const steps = { 1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 6: 5, 7: 10, 8: -1, 9: 3, 10: 1, 11: 100 };
   for (const { level, q } of questions(findGame('chemin-nombres'))) {
     const { seq } = q.stage;
     for (let i = 1; i < seq.length; i++) assert.equal(seq[i] - seq[i - 1], steps[level]);
   }
   for (const { level, q } of questions(findGame('chemin-lettres'))) {
-    if (level >= 3) assert.equal(q.stage.seq.join(''), q.answer);
+    if (level === 3 || level === 4) assert.equal(q.stage.seq.join(''), q.answer);
   }
 });
 
-test('ranger : ordre croissant, sauf le dernier niveau (décroissant)', () => {
+test('ranger : ordre croissant, sauf le niveau 7 (décroissant)', () => {
   for (const { level, q } of questions(findGame('ranger'))) {
     assert.equal(q.order, level === 7 ? 'desc' : 'asc');
     if (level >= 6 && level < 7) for (const item of q.items) assert.ok(item.value >= 100 && item.value <= 999);
@@ -370,12 +436,13 @@ test('petits problèmes : le prénom de l’enfant, des nombres justes', () => {
 
 test('doubles et heure : réponses justes', () => {
   for (const { level, q } of questions(findGame('doubles'))) {
+    if (level === 5) continue; // presque des doubles : test à part
     const n = Number(q.text.match(/\d+/)[0]);
     assert.equal(q.answer, q.text.includes('moitié') ? n / 2 : n * 2, q.text);
     if (level === 3) assert.equal(q.stage.count, n);
   }
   for (const { level, q } of questions(findGame('heure'))) {
-    assert.equal(q.answer, clockLabel(q.stage.h, q.stage.m));
+    if (level <= 4) assert.equal(q.answer, clockLabel(q.stage.h, q.stage.m));
     assert.ok([[0], [0, 30], [0, 15, 30, 45]][level - 1]?.includes(q.stage.m) ?? q.stage.m % 5 === 0);
   }
 });
@@ -383,7 +450,7 @@ test('doubles et heure : réponses justes', () => {
 test('intrus et ombres : une seule bonne réponse, dans le bon sens', () => {
   for (const { level, q } of questions(findGame('ombres'))) {
     if (level === 3) assert.equal(q.choices.find((c) => c.value === q.answer).transform, 'none');
-    else assert.equal(q.stage.emoji, q.answer);
+    else if (level <= 4) assert.equal(q.stage.emoji, q.answer);
   }
   for (const { level, q } of questions(findGame('intrus'))) {
     if (level === 3) {
@@ -395,9 +462,9 @@ test('intrus et ombres : une seule bonne réponse, dans le bon sens', () => {
 });
 
 test('petits textes : questions variées, réponses distinctes, textes courts', () => {
-  for (const level of [1, 2, 3]) assert.ok(TEXT_DATA.filter((t) => t.level === level).length >= 5);
+  for (const level of [1, 2, 3, 4, 5, 6]) assert.ok(TEXT_DATA.filter((t) => t.level === level).length >= 5);
   for (const t of TEXT_DATA) {
-    assert.ok(t.text.length <= [0, 80, 140, 220][t.level], `${t.title} trop long (${t.text.length})`);
+    assert.ok(t.text.length <= [0, 80, 140, 220, 220, 220, 220][t.level], `${t.title} trop long (${t.text.length})`);
     for (const [question, ...answers] of t.questions) {
       assert.ok(question.endsWith('?') || question.endsWith('…'), question);
       assert.equal(new Set(answers).size, 3, question);
@@ -441,7 +508,7 @@ test('comparer : jamais deux valeurs égales, la bonne réponse est la bonne', (
       const [g, d] = q.choices.map((c) => c.objects.count);
       assert.notEqual(g, d);
       assert.equal(q.answer, g > d ? 'gauche' : 'droite');
-    } else {
+    } else if (level <= 4) { // niveaux 5 à 7 : voir maths-niveaux.test.js
       const [a, b] = q.choices.map((c) => c.value);
       assert.notEqual(a, b);
       const expected = q.text.includes('grand') ? Math.max(a, b) : Math.min(a, b);
@@ -461,21 +528,23 @@ test('suite : le trou correspond à la réponse', () => {
     const step = (known[1][0] - known[0][0]) / (known[1][1] - known[0][1]);
     const start = known[0][0] - known[0][1] * step;
     assert.equal(q.answer, start + gap * step);
-    assert.ok(Math.max(...known.map(([n]) => n), q.answer) <= (level === 5 ? 1000 : 100));
+    assert.ok(Math.max(...known.map(([n]) => n), q.answer) <= (level === 5 || level === 8 ? 1000 : 100));
   }
 });
 
 test('faire-dix et tables : résultats justes', () => {
   for (const { level, q } of questions(findGame('faire-dix'))) {
+    if (level > 3) continue; // niveaux 4 à 6 : voir maths-niveaux.test.js
     const total = level === 1 ? 5 : 10;
     const filled = q.stage.type === 'frame' ? q.stage.filled : q.stage.parts[0];
     assert.equal(filled + q.answer, total);
   }
-  for (const { q } of questions(findGame('tables'))) assert.equal(q.answer, q.stage.a * q.stage.b);
+  for (const { level, q } of questions(findGame('tables'))) if (level <= 6) assert.equal(q.answer, q.stage.a * q.stage.b);
 });
 
 test('algorithmes : la réponse continue bien le motif', () => {
-  for (const { q } of questions(findGame('algorithmes'))) {
+  for (const { level, q } of questions(findGame('algorithmes'))) {
+    if (level >= 5) continue; // trou au milieu, aller-retour, suites qui grandissent : test à part
     const items = q.stage.items.slice(0, -1);
     const period = [1, 2, 3, 4].find((p) => items.every((x, i) => i < p || x === items[i - p]));
     assert.ok(period, q.key);

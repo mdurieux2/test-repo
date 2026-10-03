@@ -81,6 +81,70 @@ const TEXTS = [
     ['Quel sport fait Adam ?', 'du judo', 'du foot', 'de la danse'],
     ['De quelle couleur est sa ceinture ?', 'jaune', 'blanche', 'noire'],
     ['Quel jour va-t-il au judo ?', 'le mercredi', 'le samedi', 'le lundi']] },
+
+  // ---- Niveau 4 : lire entre les lignes (la réponse n'est pas écrite, il faut la deviner)
+  { level: 4, title: 'Le grand jour', text: 'Ce matin, Lina a un cartable tout neuf. Elle serre fort la main de papa. Devant la grille, il y a plein d’enfants qu’elle ne connaît pas. Son cœur bat très vite. Papa lui dit : « À ce soir ! »', questions: [
+    ['Où va Lina ?', 'à l’école', 'au parc', 'chez mamie'],
+    ['Comment se sent Lina ?', 'un peu inquiète', 'en colère', 'fatiguée'],
+    ['C’est quel jour pour Lina ?', 'la rentrée', 'Noël', 'les vacances']] },
+  { level: 4, title: 'Les flaques', text: 'Sami met ses bottes et son ciré jaune. Dehors, le ciel est gris et il saute dans toutes les flaques. Plouf ! Quand il rentre, maman lui dit en riant : « Va vite te changer ! »', questions: [
+    ['Quel temps fait-il ?', 'il pleut', 'il neige', 'il fait chaud'],
+    ['Pourquoi Sami doit-il se changer ?', 'il est mouillé', 'il va au lit', 'il a chaud']] },
+  { level: 4, title: 'Les biscuits', text: 'Max ouvre le placard : la boîte de biscuits est vide ! Sur le tapis, il y a plein de miettes. Dans son panier, son chien Filou se lèche les babines et remue la queue.', questions: [
+    ['Qui a mangé les biscuits ?', 'le chien', 'Max', 'papa'],
+    ['Que cherchait Max dans le placard ?', 'des biscuits', 'son chien', 'un tapis']] },
+  { level: 4, title: 'La surprise', text: 'Papa cache un paquet derrière son dos. Sur la table, il y a un gâteau avec sept bougies. Tout le monde chante pour Jules. Jules ferme les yeux et souffle très fort.', questions: [
+    ['Quel âge a Jules aujourd’hui ?', 'sept ans', 'six ans', 'huit ans'],
+    ['Que cache papa ?', 'un cadeau', 'une bougie', 'un ballon']] },
+  { level: 4, title: 'Dans la nuit', text: 'Il fait noir et tout le monde dort. Soudain, Hugo entend « hou hou » dans le jardin. Il allume sa lampe et voit deux grands yeux ronds sur une branche. Il sourit : ce n’est pas un monstre !', questions: [
+    ['Quel animal voit Hugo ?', 'un hibou', 'un chat', 'un loup'],
+    ['Quand se passe l’histoire ?', 'la nuit', 'le matin', 'à midi']] },
+  { level: 4, title: 'À la caisse', text: 'Maman pose les pommes, le lait et le pain sur le tapis qui avance. La dame dit : « Bonjour ! Ça fait douze euros. » Maman paie, puis range tout dans son grand sac.', questions: [
+    ['Où sont-ils ?', 'au magasin', 'à l’école', 'à la plage'],
+    ['Que fait maman ?', 'des courses', 'la cuisine', 'du sport']] },
+  { level: 4, title: 'Le bonhomme', text: 'Ce matin, tout le jardin est blanc. Zoé et son frère roulent deux grosses boules. Ils ajoutent une carotte pour le nez et une écharpe. À midi, le soleil brille fort et le nez tombe…', questions: [
+    ['Que fabriquent les enfants ?', 'un bonhomme de neige', 'un château de sable', 'une cabane'],
+    ['Pourquoi le nez tombe-t-il ?', 'la neige fond', 'le vent souffle', 'un chien le prend']] },
+
+  // ---- Niveau 5 : qui parle ? qui est « il », « elle », « lui » ?
+  { level: 5, title: 'Coco', text: 'Lucas a un perroquet vert. Il s’appelle Coco. Chaque matin, Coco crie : « Bonjour Lucas ! » Alors Lucas lui donne des graines, et l’oiseau les mange une à une.', questions: [
+    ['Qui dit « Bonjour Lucas ! » ?', 'le perroquet', 'Lucas', 'maman'],
+    ['Dans « Lucas lui donne », « lui », c’est…', 'Coco', 'Lucas', 'maman']] },
+  { level: 5, title: 'À la boulangerie', text: '« Bonjour, je voudrais deux croissants », dit Inès. La boulangère les met dans un sac. « Ça fait deux euros », répond-elle. Inès lui donne une pièce.', questions: [
+    ['Qui dit « Ça fait deux euros » ?', 'la boulangère', 'Inès', 'sa maman'],
+    ['Dans « les met dans un sac », « les », c’est…', 'les croissants', 'les euros', 'les pièces']] },
+  { level: 5, title: 'Le chaton', text: 'Nora trouve un chaton sous la pluie. Elle le prend dans ses bras. Le petit animal tremble. Nora l’enveloppe dans une serviette bien chaude.', questions: [
+    ['Qui est « le petit animal » ?', 'le chaton', 'Nora', 'un oiseau'],
+    ['Dans « Elle le prend », « elle », c’est…', 'Nora', 'la pluie', 'la serviette']] },
+  { level: 5, title: 'Le match', text: 'Léo et Adam jouent au foot. Léo tire très fort, mais le ballon passe au-dessus du but. « Raté ! » crie Adam en riant. Léo, lui, est un peu vexé.', questions: [
+    ['Qui crie « Raté ! » ?', 'Adam', 'Léo', 'l’arbitre'],
+    ['Qui est vexé ?', 'Léo', 'Adam', 'le ballon']] },
+  { level: 5, title: 'Allô ?', text: 'Le téléphone sonne. « Allô, c’est mamie ! » Jade est très contente. Elle lui raconte sa journée. Mamie promet de venir dimanche.', questions: [
+    ['Qui téléphone ?', 'mamie', 'Jade', 'papa'],
+    ['Dans « Elle lui raconte », « lui », c’est…', 'mamie', 'Jade', 'le téléphone']] },
+  { level: 5, title: 'Le petit frère', text: 'Paul a un petit frère qui s’appelle Théo. Théo ne sait pas encore marcher. Paul lui montre comment empiler des cubes. Le bébé tape dans ses mains et rit très fort.', questions: [
+    ['Qui est « le bébé » ?', 'Théo', 'Paul', 'papa'],
+    ['Qui montre les cubes ?', 'Paul', 'Théo', 'maman']] },
+
+  // ---- Niveau 6 : le bon titre (le texte est montré sans son titre) et l'ordre des faits
+  { level: 6, title: 'Le chat perché', text: 'Le chat de Lou grimpe dans un grand arbre. Il miaule : il n’ose plus descendre. Papa prend l’échelle et monte doucement. Il redescend avec le chat dans les bras.', questions: [
+    ['Quel est le meilleur titre ?', 'Le chat perché', 'Le chien perdu', 'Une belle fleur'],
+    ['Que se passe-t-il en premier ?', 'le chat grimpe', 'papa monte', 'le chat miaule']] },
+  { level: 6, title: 'La tarte aux pommes', text: 'Ce matin, Noé veut faire une tarte. D’abord, il épluche les pommes avec maman. Ensuite, il étale la pâte. Enfin, il met la tarte au four. Ça sent bon !', questions: [
+    ['Quel est le meilleur titre ?', 'La tarte aux pommes', 'Le jardin', 'La piscine'],
+    ['Que fait Noé en premier ?', 'il épluche les pommes', 'il étale la pâte', 'il allume le four']] },
+  { level: 6, title: 'Une amie gentille', text: 'Pendant la récréation, Mia tombe et se fait mal au genou. Elle pleure. Son amie Rose l’aide à se relever. La maîtresse met un pansement, et Mia sourit à nouveau.', questions: [
+    ['Quel est le meilleur titre ?', 'Une amie gentille', 'Le gâteau raté', 'Vive la neige'],
+    ['Comment finit l’histoire ?', 'Mia sourit', 'Mia pleure', 'Mia tombe']] },
+  { level: 6, title: 'La tempête', text: 'Le vent souffle très fort. Les arbres se penchent et la pluie tape aux fenêtres. Toute la famille reste à l’abri. Le lendemain, des branches sont tombées dans le jardin.', questions: [
+    ['Quel est le meilleur titre ?', 'La tempête', 'Le beau temps', 'La neige'],
+    ['Que voit-on le lendemain ?', 'des branches', 'de la neige', 'des fleurs']] },
+  { level: 6, title: 'Le tournesol', text: 'Lucie plante une graine de tournesol. Chaque jour, elle l’arrose. Une tige verte sort de la terre. Elle grandit, grandit… À la fin de l’été, une grande fleur jaune regarde le soleil.', questions: [
+    ['Quel est le meilleur titre ?', 'Le tournesol', 'La mer', 'Le chat'],
+    ['Que se passe-t-il à la fin ?', 'la fleur pousse', 'Lucie plante', 'la tige casse']] },
+  { level: 6, title: 'La fête du village', text: 'Ce soir, c’est la fête au village. Il y a des lampions et de la musique. Ethan danse avec sa sœur. À dix heures, un feu d’artifice illumine le ciel.', questions: [
+    ['Quel est le meilleur titre ?', 'La fête du village', 'Un jour d’école', 'Le loup'],
+    ['Que se passe-t-il à dix heures ?', 'un feu d’artifice', 'un orage', 'un concert']] },
 ];
 
 export const petitsTextes = {
@@ -89,8 +153,8 @@ export const petitsTextes = {
   section: 'Lire',
   title: 'Petits textes',
   icon: '📚',
-  skill: 'Lire un petit texte et le comprendre',
-  levels: ['Textes très courts', 'Petits textes', 'Textes de 4 phrases'],
+  skill: 'Lire un petit texte et le comprendre (y compris ce qui n’est pas écrit)',
+  levels: ['Textes très courts', 'Petits textes', 'Textes de 4 phrases', 'Lire entre les lignes', 'Dialogues et pronoms', 'Titre et ordre des faits'],
   generate(level, rng) {
     const story = pick(rng, TEXTS.filter((t) => t.level === level));
     const [question, answer, ...others] = pick(rng, story.questions);
@@ -100,7 +164,8 @@ export const petitsTextes = {
       instruction: ['Lis le petit texte, puis réponds à la question.', question],
       short: { key: 'petits-textes', text: question },
       replay: [question],
-      stage: { type: 'text', title: story.title, text: story.text },
+      // niveau 6 : le titre est une des réponses, il n'est donc pas montré
+      stage: { type: 'text', title: level === 6 ? null : story.title, text: story.text },
       choices: shuffle(rng, [answer, ...others]).map((value) => ({ value, label: value })),
       choiceStyle: 'answers',
       answer,

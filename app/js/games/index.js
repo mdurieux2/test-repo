@@ -13,10 +13,14 @@ import { histoires } from './histoires.js';
 import { LOGIQUE_GAMES } from './logique.js';
 import { MONDE_GAMES } from './monde.js';
 import { MESURES_GAMES } from './mesures.js';
+import { JEUX_GAMES } from './jeux.js';
+import { drapeaux } from './drapeaux.js';
+import { ANGLAIS_PLUS_GAMES } from './anglais-plus.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
-  ...LOGIQUE_GAMES, ...LABYRINTHE_GAMES, ...MESURES_GAMES, ...MONDE_GAMES, ...ANGLAIS_GAMES,
+  ...LOGIQUE_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, ...ANGLAIS_GAMES,
+  ...ANGLAIS_PLUS_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -38,28 +42,41 @@ const RUBRIQUES = [
   },
   {
     id: 'jeux',
-    title: 'Jeux de logique',
+    title: 'Jeux et logique',
     icon: '🧩',
     games: [
+      'puzzle', 'memory', 'coloriage-magique', 'points',
       'formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'symetrie', 'reproduire', 'tangram', 'cubes',
       'labyrinthe', 'chemin-nombres', 'chemin-lettres',
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
-  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays'] },
+  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux'] },
   {
     id: 'anglais',
     title: 'Anglais',
     icon: '🇬🇧',
-    games: ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'compte-anglais', 'ou-est', 'epelle-anglais', 'parle-anglais'],
+    games: [
+      'ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais',
+      'compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais',
+      'memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais',
+    ],
   },
 ];
 
 // Sections affichées dans la liste des jeux de certaines rubriques.
-const SECTIONS = {
-  heure: 'L’heure et le calendrier', calendrier: 'L’heure et le calendrier', saisons: 'L’heure et le calendrier',
-  monnaie: 'Monnaie et mesures', mesures: 'Monnaie et mesures',
+const SECTION_GAMES = {
+  'L’heure et le calendrier': ['heure', 'calendrier', 'saisons'],
+  'Monnaie et mesures': ['monnaie', 'mesures'],
+  'Puzzles, memory et coloriages': ['puzzle', 'memory', 'coloriage-magique', 'points'],
+  'Logique': ['formes', 'algorithmes', 'intrus', 'ombres', 'sudoku'],
+  'Formes et espace': ['symetrie', 'reproduire', 'tangram', 'cubes'],
+  'Labyrinthes': ['labyrinthe', 'chemin-nombres', 'chemin-lettres'],
+  'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
+  'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
+  'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais'],
 };
+const SECTIONS = Object.fromEntries(Object.entries(SECTION_GAMES).flatMap(([section, ids]) => ids.map((id) => [id, section])));
 
 export const DOMAINS = RUBRIQUES.map(({ games, ...rubrique }) => ({
   ...rubrique,

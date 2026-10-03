@@ -4,13 +4,27 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.5.1',
+  version: '1.6.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.6.0',
+    date: '2026-10-03',
+    changes: [
+      'Nouveaux jeux : le puzzle (de 4 à 25 pièces), le memory (de 2 à 10 paires, chiffres et quantités), le coloriage magique (la couleur dépend du nombre ou du calcul) et les points à relier au doigt (un dessin apparaît).',
+      'Les drapeaux : 46 pays dessinés, les reconnaître, les drapeaux qui se ressemblent, les continents, compléter un drapeau.',
+      'Anglais : 8 nouveaux jeux pour les nombres jusqu’à 100, calculer en anglais, mélanger les couleurs, colorier en lisant les couleurs, le memory, l’intrus, les contraires et les petites phrases.',
+      'Trois niveaux de plus dans chaque jeu, de plus en plus difficiles.',
+      'Rubriques « Jeux et logique » et « Anglais » rangées en sections.',
+      'Mon personnage : tous les tee-shirts et accessoires sont disponibles tout de suite, sans attendre les étoiles.',
+      'Mode avion vérifié : tous les jeux s’ouvrent sans réseau ; hors connexion, la voix passe sur une voix installée sur l’appareil.',
+      'Sécurité renforcée : la page n’accepte que ses propres fichiers.',
+    ],
+  },
   {
     version: '1.5.1',
     date: '2026-10-03',

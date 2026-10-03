@@ -29,7 +29,7 @@ test('la maternelle ne fait ni lecture de mots ni grands nombres', () => {
   const ms = programFor('MS').flatMap((d) => d.games.map((g) => g.game.id));
   for (const id of ['bon-mot', 'petits-mots', 'dizaines', 'tables', 'calcul']) assert.ok(!ms.includes(id), id);
   assert.deepEqual(levelRange('GS', 'calcul'), { min: 1, max: 6 });
-  assert.deepEqual(levelRange('CE1', 'tables'), { min: 1, max: 6 });
+  assert.deepEqual(levelRange('CE1', 'tables'), { min: 1, max: 9 });
 });
 
 test('suivi : activité des 7 derniers jours et jours d’affilée', () => {

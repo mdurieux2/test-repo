@@ -29,3 +29,11 @@ test('le manifeste et la page d’accueil pointent vers des fichiers existants',
     assert.ok(statSync(join(APP, ref)).isFile(), ref);
   }
 });
+
+test('sécurité : la page n’autorise que les fichiers de l’app (CSP)', () => {
+  const html = readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
+  const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1] || '';
+  assert.match(csp, /default-src 'self'/);
+  assert.match(csp, /object-src 'none'/);
+  assert.doesNotMatch(csp, /script-src[^;]*unsafe/, 'aucun script en ligne ni eval');
+});
