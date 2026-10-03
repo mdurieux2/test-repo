@@ -3,7 +3,8 @@ name: Voix (essai)
 # Essai de voix naturelles gratuites, sur les phrases de scripts/voix/phrases-essai.json :
 # Pocket TTS (Kyutai, français normal et grand modèle, anglais) et Chatterbox Multilingual
 # (Resemble AI, avec le timbre de la voix « Estelle » de Pocket TTS). Les MP3 sont dans les
-# artefacts de l'exécution. Ne touche pas à l'application.
+# artefacts de l'exécution, et sous les étiquettes git voix-essai-pocket et voix-essai-chatterbox
+# (aucune branche n'est modifiée). Ne touche pas à l'application.
 on:
   push:
     branches: ['claude/**']
@@ -17,6 +18,8 @@ jobs:
   pocket:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: write # pour l'étiquette voix-essai-pocket
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -32,11 +35,16 @@ jobs:
         with:
           name: voix-pocket
           path: voix-essai
+      - run: bash scripts/voix/publier.sh voix-essai-pocket voix-essai
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   chatterbox:
     needs: pocket
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    permissions:
+      contents: write # pour l'étiquette voix-essai-chatterbox
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -54,3 +62,6 @@ jobs:
         with:
           name: voix-chatterbox
           path: voix-essai
+      - run: bash scripts/voix/publier.sh voix-essai-chatterbox voix-essai
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
