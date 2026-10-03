@@ -1512,6 +1512,9 @@ input { -webkit-user-select: text; user-select: text; }
 .karaoke-text { margin: 0; font-size: 1.3rem; line-height: 1.55; font-weight: 700; }
 .w { border-radius: 6px; transition: background 0.15s; }
 .w.on { background: #ffe066; box-shadow: 0 0 0 3px #ffe066; }
+/* histoire lue par un parent (enregistrement) : toute la phrase lue s'allume */
+.k-sentence { border-radius: 6px; transition: background 0.2s; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.k-sentence.on { background: #ffe066; box-shadow: 0 0 0 3px #ffe066; }
 @media (max-height: 700px) {
   .karaoke-text { font-size: 1.1rem; line-height: 1.4; }
 }
@@ -2048,4 +2051,68 @@ body[data-season="ete"] { background: #fffbea; }
   .duo-final .big-star { font-size: 26px; }
   .duo-actions { margin: 0; }
   .duo-actions .big-btn { min-height: 52px; font-size: 1.2rem; }
+}
+
+/* =====================================================================
+   Vos voix pour les histoires (espace parents) : liste et enregistrement
+   ===================================================================== */
+.voices-open { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; margin-top: 10px; font-size: 1.15rem; }
+.voices-count { margin-top: 10px; }
+.voices-intro p { margin: 0; line-height: 1.45; }
+.voices-intro p + p { margin-top: 8px; }
+.voices-private { font-weight: 700; }
+.voices-level h2 { margin-bottom: 0; }
+.voices-grades { margin: 2px 0 4px; }
+.voice-story { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.voice-story-emoji {
+  flex: none; width: 2.2rem; text-align: center; font-size: 1.8rem; line-height: 1;
+  font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+}
+.voice-story-text { display: flex; flex-direction: column; flex: 1 1 120px; min-width: 0; }
+.voice-story-text b { font-size: 1.1rem; overflow-wrap: anywhere; }
+.voice-state { color: var(--muted); }
+/* « ✔ Enregistrée » : le texte et la coche disent l'état, la couleur ne fait que le souligner */
+.voice-story.recorded .voice-state { color: var(--good-dark); font-weight: 700; }
+.voice-story.recorded .voice-state .muted { font-weight: 400; }
+.voice-story-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-left: auto; }
+.voice-story-actions .pill-btn { padding: 0 12px; font-size: 0.95rem; white-space: nowrap; }
+.pill-btn.quiet { background: var(--bg); color: var(--ink); box-shadow: inset 0 0 0 2px var(--line); }
+.pill-btn.warn { background: #fff0f0; color: #c43d3d; }
+.pill-btn.playing, .record-buttons .playing { box-shadow: inset 0 0 0 3px var(--ink); }
+
+.record-layout { display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.record-head { display: flex; align-items: center; gap: 12px; }
+.record-head h2 { margin: 0; }
+.record-head p { margin: 2px 0 0; }
+.record-emoji { flex: none; font-size: 2.4rem; line-height: 1; font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
+/* le texte à lire à voix haute, en gros */
+.record-text { margin: 12px 0 10px; font-size: 1.5rem; line-height: 1.55; font-weight: 700; overflow-wrap: anywhere; }
+/* les boutons restent sous le pouce, même quand le texte est long */
+.record-controls {
+  position: sticky; bottom: calc(var(--safe-bottom) + 8px); display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 3px 0 var(--line), 0 -6px 18px rgba(43, 45, 66, 0.08);
+}
+.record-controls p { margin: 0; }
+.record-status { line-height: 1.4; }
+.record-status.problem { color: #c43d3d; font-weight: 700; }
+.record-timer { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.record-timer[hidden] { display: none; }
+.rec-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: #e03131; animation: rec-blink 1.2s ease-in-out infinite; }
+@keyframes rec-blink { 50% { opacity: 0.3; } }
+.record-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.record-buttons:empty { display: none; }
+.record-buttons .big-btn {
+  flex: 1 1 140px; min-height: 56px; padding: 0 14px; font-size: 1.2rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) { .rec-dot { animation: none; } }
+
+/* téléphone en paysage : le texte à gauche, les boutons à droite */
+@media (orientation: landscape) and (max-height: 520px) {
+  .record-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .record-controls { top: 8px; bottom: auto; padding: 10px 14px; gap: 8px; }
+  .record-text { font-size: 1.3rem; line-height: 1.45; }
+  .record-status { font-size: 0.95rem; line-height: 1.3; }
+  .record-buttons { gap: 8px; }
+  .record-buttons .big-btn { flex: 1 1 auto; min-height: 46px; font-size: 1.05rem; }
 }

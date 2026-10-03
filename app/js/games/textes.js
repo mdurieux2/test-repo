@@ -2,6 +2,7 @@
 // Le bouton « Écouter le texte » aide l'enfant qui bloque ; la question est toujours lue.
 
 import { pick, shuffle } from '../random.js';
+import { pickSeasonal } from './helpers.js';
 
 // [question, bonne réponse, autre réponse, autre réponse]
 const TEXTS = [
@@ -145,6 +146,55 @@ const TEXTS = [
   { level: 6, title: 'La fête du village', text: 'Ce soir, c’est la fête au village. Il y a des lampions et de la musique. Ethan danse avec sa sœur. À dix heures, un feu d’artifice illumine le ciel.', questions: [
     ['Quel est le meilleur titre ?', 'La fête du village', 'Un jour d’école', 'Le loup'],
     ['Que se passe-t-il à dix heures ?', 'un feu d’artifice', 'un orage', 'un concert']] },
+
+  // ---- Textes de saison (identifiants de themes.js) : pendant leur saison, un texte sur deux
+  // en est un ; hors saison, ils ne sont jamais proposés. Ajoutés à la fin pour ne rien
+  // changer au tirage des autres textes.
+  { season: 'noel', level: 1, title: 'Le sac du père Noël', text: 'Le père Noël a un sac. Le sac est lourd. Il est plein de cadeaux !', questions: [
+    ['Qu’a le père Noël ?', 'un sac', 'un vélo', 'un chat'],
+    ['Comment est le sac ?', 'lourd', 'petit', 'vide'],
+    ['Le sac est plein de…', 'cadeaux', 'pommes', 'livres']] },
+  { season: 'noel', level: 3, title: 'Le marché de Noël', text: 'Samedi, Léo va au marché de Noël avec sa mamie. Il y a des chalets en bois et des guirlandes partout. Mamie achète du pain d’épices. Léo boit un chocolat chaud qui fume.', questions: [
+    ['Avec qui Léo va-t-il au marché ?', 'sa mamie', 'son papa', 'sa sœur'],
+    ['Qu’achète mamie ?', 'du pain d’épices', 'des bonbons', 'un sapin'],
+    ['Que boit Léo ?', 'un chocolat chaud', 'un jus d’orange', 'un verre de lait']] },
+  { season: 'halloween', level: 2, title: 'La petite sorcière', text: 'À Halloween, Lina se déguise en sorcière. Elle met un chapeau noir. Avec son panier, elle va chercher des bonbons.', questions: [
+    ['En quoi se déguise Lina ?', 'en sorcière', 'en princesse', 'en pirate'],
+    ['De quelle couleur est son chapeau ?', 'noir', 'rouge', 'vert'],
+    ['Que va-t-elle chercher ?', 'des bonbons', 'des fleurs', 'des jouets']] },
+  { season: 'halloween', level: 4, title: 'Le petit fantôme', text: 'On sonne à la porte. Papa ouvre : un petit fantôme blanc est là ! Sous le drap, on voit deux baskets roses. « Des bonbons ou un sort ! » dit une voix que papa connaît bien.', questions: [
+    ['Quelle fête est-ce ?', 'Halloween', 'Noël', 'Pâques'],
+    ['Qui est sous le drap ?', 'un enfant', 'un vrai fantôme', 'un chat']] },
+  { season: 'hiver', level: 2, title: 'La Chandeleur', text: 'C’est la Chandeleur. Papa fait des crêpes. Il fait sauter une crêpe très haut… et elle reste collée au plafond !', questions: [
+    ['Que fait papa ?', 'des crêpes', 'un gâteau', 'une soupe'],
+    ['Où reste la crêpe ?', 'au plafond', 'dans la poêle', 'par terre'],
+    ['Quelle fête est-ce ?', 'la Chandeleur', 'Noël', 'Pâques']] },
+  { season: 'hiver', level: 5, title: 'Les moufles', text: 'Il neige. Maman tend des moufles à Nathan : « Mets-les, il fait froid ! » Nathan les enfile vite. Puis il rejoint Léa, qui l’attend dehors avec la luge.', questions: [
+    ['Qui dit « Mets-les, il fait froid ! » ?', 'maman', 'Nathan', 'Léa'],
+    ['Dans « Nathan les enfile », « les », c’est…', 'les moufles', 'les luges', 'les bottes'],
+    ['Qui attend dehors avec la luge ?', 'Léa', 'maman', 'Nathan']] },
+  { season: 'printemps', level: 1, title: 'La fleur rose', text: 'Lola a une fleur. La fleur est rose. Une abeille se pose dessus.', questions: [
+    ['Qu’a Lola ?', 'une fleur', 'un ballon', 'un chat'],
+    ['De quelle couleur est la fleur ?', 'rose', 'bleue', 'jaune'],
+    ['Qui se pose sur la fleur ?', 'une abeille', 'un oiseau', 'un papillon']] },
+  { season: 'printemps', level: 6, title: 'Le printemps est là', text: 'Ce matin, Jade ouvre la fenêtre : il fait doux. Dans le jardin, les tulipes sont ouvertes. Une hirondelle passe dans le ciel. Jade range son bonnet et sort en tee-shirt.', questions: [
+    ['Quel est le meilleur titre ?', 'Le printemps est là', 'Une nuit d’hiver', 'La fête de Noël'],
+    ['Que fait Jade en premier ?', 'elle ouvre la fenêtre', 'elle sort', 'elle range son bonnet']] },
+  { season: 'ete', level: 2, title: 'À la plage', text: 'Cet été, Sacha va à la plage. Il fait un grand château de sable. Puis il mange une glace à la vanille.', questions: [
+    ['Où va Sacha ?', 'à la plage', 'à la piscine', 'au zoo'],
+    ['Que fait Sacha ?', 'un château de sable', 'un bonhomme de neige', 'un gâteau'],
+    ['Quelle glace mange-t-il ?', 'à la vanille', 'à la fraise', 'au chocolat']] },
+  { season: 'ete', level: 4, title: 'Le coup de soleil', text: 'Tout l’après-midi, Tom joue sur la plage sans chapeau. Il ne veut pas mettre de crème. Le soir, son nez et ses épaules sont tout rouges, et ça pique !', questions: [
+    ['Pourquoi le nez de Tom est-il rouge ?', 'un coup de soleil', 'il a froid', 'il est tombé'],
+    ['Quel temps fait-il sur la plage ?', 'il fait beau', 'il pleut', 'il neige']] },
+  { season: 'automne', level: 1, title: 'Au bois', text: 'Rémi va au bois. Il ramasse des feuilles. Les feuilles sont rousses.', questions: [
+    ['Où va Rémi ?', 'au bois', 'à la mer', 'au zoo'],
+    ['Que ramasse Rémi ?', 'des feuilles', 'des fleurs', 'des cailloux'],
+    ['De quelle couleur sont les feuilles ?', 'rousses', 'bleues', 'roses']] },
+  { season: 'automne', level: 3, title: 'Le verger', text: 'En automne, Lison et son papa cueillent des pommes dans le verger. Ils remplissent deux grands paniers. À la maison, ils préparent une compote. Toute la cuisine sent bon !', questions: [
+    ['Que cueillent-ils ?', 'des pommes', 'des poires', 'des prunes'],
+    ['Combien de paniers remplissent-ils ?', 'deux', 'trois', 'un'],
+    ['Que préparent-ils ?', 'une compote', 'une tarte', 'un jus']] },
 ];
 
 export const petitsTextes = {
@@ -155,8 +205,9 @@ export const petitsTextes = {
   icon: '📚',
   skill: 'Lire un petit texte et le comprendre (y compris ce qui n’est pas écrit)',
   levels: ['Textes très courts', 'Petits textes', 'Textes de 4 phrases', 'Lire entre les lignes', 'Dialogues et pronoms', 'Titre et ordre des faits'],
-  generate(level, rng) {
-    const story = pick(rng, TEXTS.filter((t) => t.level === level));
+  // context.season : la saison du moment (seasonOf), pour les textes de saison
+  generate(level, rng, _index, context = {}) {
+    const story = pickSeasonal(rng, TEXTS.filter((t) => t.level === level), context.season);
     const [question, answer, ...others] = pick(rng, story.questions);
     return {
       key: `petits-textes:${story.title}`,

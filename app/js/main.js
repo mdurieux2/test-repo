@@ -26,12 +26,17 @@ import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
 import { APP, CHANGELOG } from './config.js';
-import { seasonOf } from './themes.js';
+import { SEASON_LABELS, seasonOf } from './themes.js';
+import { STORY_DATA } from './games/histoires.js';
+import * as recordings from './recordings.js';
+import { formatDuration, MAX_SECONDS, pickMime, sentenceAt, sentenceTimeline } from './recordings.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
 const store = loadStore();
 applySettings();
+
+let leaveScreen = null; // ce qu'il faut arrêter en quittant l'écran affiché (le micro…)
 
 const PRAISES = ['Bravo !', 'Super !', 'Génial !', 'Très bien !', 'Excellent !', 'Bien joué !', 'Parfait !'];
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -60,6 +65,12 @@ function save() {
 
 function show(...children) {
   stopSpeaking();
+  stopStoryAudio();
+  if (leaveScreen) {
+    const leave = leaveScreen;
+    leaveScreen = null;
+    leave();
+  }
   document.body.classList.toggle('easy-read', Boolean(child()?.easyRead));
   document.body.dataset.season = store.settings.seasonal === false ? '' : currentSeason().id;
   app.replaceChildren(...children.filter(Boolean));
@@ -91,6 +102,7 @@ function frenchSpacing(text) {
 
 /** Fait parler le personnage de l'enfant, avec sa voix (fille ou garçon). */
 function say(who, parts) {
+  stopStoryAudio(); // comme la voix de synthèse, une voix enregistrée s'arrête quand on parle
   return speak(parts, who?.voice);
 }
 
@@ -843,7 +855,8 @@ function startSession(game, { level, back, total, duo } = {}) {
 function newQuestion(session) {
   let q;
   for (let i = 0; i < 10; i++) {
-    q = session.game.generate(session.levelState.level, rng, session.index + session.formatOffset, { name: me().name });
+    // contexte : le prénom de l'enfant et la saison (histoires et textes de saison)
+    q = session.game.generate(session.levelState.level, rng, session.index + session.formatOffset, { name: me().name, season: currentSeason().id });
     if (!session.recentKeys.includes(q.key)) break;
   }
   session.recentKeys = [...session.recentKeys, q.key].slice(-4);
@@ -913,8 +926,9 @@ function nextQuestion(session) {
     zone,
     feedback));
   if (clock) runChrono(session, clock);
-  // histoire en karaoké : la voix lit l'histoire (chaque mot s'allume), puis pose la question
-  const readAlong = (before = []) => (q.karaoke ? karaoke(stage, guide, q.stage.sentences, q.instruction, before) : null);
+  // histoire en karaoké : la voix d'un parent (si l'histoire est enregistrée) ou la voix de
+  // synthèse lit l'histoire pendant que le texte s'allume, puis la question est posée
+  const readAlong = (before = []) => (q.karaoke ? readStory(stage, guide, q, before) : null);
   const turn = session.duo ? [`À toi, ${guide.spoken} !`] : []; // à deux : « À toi, Matteo ! »
   if (q.karaoke) readAlong(turn);
   else say(guide, [...turn, ...[brief ? (q.short.speak ?? q.short.text) : q.instruction].flat()]);
@@ -975,6 +989,120 @@ function karaoke(stageEl, guide, sentences, after = [], before = []) {
     clearInterval(timer);
     clear();
   });
+}
+
+// ---- Histoires lues par papa ou maman (enregistrées sur l'appareil, voir recordings.js)
+
+let recordedIds = null; // identifiants des histoires enregistrées (null : pas encore lus)
+let storyAudioEl = null;
+let storyRun = 0; // chaque lecture a son numéro : une nouvelle lecture ou une parole annule la précédente
+let stopCurrentAudio = null;
+let audioUnlocked = false;
+
+function refreshRecorded() {
+  return recordings.list().then((ids) => {
+    recordedIds = new Set(ids);
+    return recordedIds;
+  });
+}
+
+/** Un seul élément <audio> pour toute l'app (caché, sans commandes), placé là où il joue. */
+function storyAudio() {
+  if (!storyAudioEl) storyAudioEl = h('audio', { class: 'story-audio', preload: 'auto' });
+  return storyAudioEl;
+}
+
+/**
+ * Sur iPhone et iPad, un élément audio ne peut jouer après une attente (lecture de la base)
+ * que s'il a déjà été lancé pendant un toucher : on le « débloque » au premier toucher.
+ */
+function unlockStoryAudio() {
+  if (audioUnlocked || stopCurrentAudio || !recordedIds?.size) return;
+  audioUnlocked = true;
+  const audio = storyAudio();
+  audio.load();
+  audio.play()?.catch(() => {});
+  audio.pause();
+}
+
+/** Arrête la voix enregistrée en cours (nouvel écran, nouvelle parole, réécoute…). */
+function stopStoryAudio() {
+  storyRun++;
+  stopCurrentAudio?.();
+}
+
+/**
+ * Joue un son enregistré avec l'élément audio de l'app, placé (caché) dans `into`.
+ * `onTime(t, durée)` suit la lecture. Se termine par 'ended', 'stopped' ou 'failed'.
+ */
+function playAudio(blob, { into = null, duration = 0, onTime = null } = {}) {
+  stopStoryAudio();
+  const audio = storyAudio();
+  if (into && audio.parentNode !== into) into.append(audio);
+  const url = URL.createObjectURL(blob);
+  return new Promise((resolve) => {
+    let ticker = null;
+    let safety = null;
+    // un son WebM enregistré par Chrome n'annonce pas sa durée : on prend celle mesurée
+    const length = () => (Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : duration);
+    const finish = (outcome) => {
+      if (stopCurrentAudio !== stop) return;
+      stopCurrentAudio = null;
+      clearInterval(ticker);
+      clearTimeout(safety);
+      audio.onended = null;
+      audio.onerror = null;
+      audio.pause();
+      URL.revokeObjectURL(url);
+      resolve(outcome);
+    };
+    const stop = () => finish('stopped');
+    stopCurrentAudio = stop;
+    audio.onended = () => finish('ended');
+    audio.onerror = () => finish('failed');
+    audio.src = url;
+    if (onTime) ticker = setInterval(() => onTime(audio.currentTime, length()), 100);
+    // filet de sécurité : certains navigateurs n'émettent jamais « ended »
+    if (duration > 0) safety = setTimeout(() => finish('ended'), (duration + 4) * 1000);
+    audio.play()?.catch(() => finish('failed'));
+  });
+}
+
+/**
+ * Lit l'histoire puis pose la question. Si un parent a enregistré l'histoire sur cet appareil,
+ * c'est sa voix qu'on entend, et les phrases s'allument une à une au prorata de leur longueur ;
+ * la question reste posée par la voix de synthèse. Sinon, karaoké avec la voix de synthèse.
+ */
+async function readStory(stageEl, guide, q, before = []) {
+  const id = q.stage.storyId;
+  // histoire non enregistrée : la voix de synthèse tout de suite
+  if (!id || (recordedIds && !recordedIds.has(id))) return karaoke(stageEl, guide, q.stage.sentences, q.instruction, before);
+  stopSpeaking();
+  stopStoryAudio();
+  const run = storyRun;
+  const saved = await recordings.get(id);
+  if (run !== storyRun || !stageEl.isConnected) return undefined; // une autre lecture a commencé, ou l'écran a changé
+  let intro = before;
+  if (saved) {
+    // à deux : « À toi, Matteo ! » avant l'histoire enregistrée (speak et non say, qui arrêterait cette lecture)
+    if (intro.length) {
+      await speak(intro, guide?.voice);
+      intro = [];
+      if (run !== storyRun || !stageEl.isConnected) return undefined;
+    }
+    const sentenceEls = [...stageEl.querySelectorAll('.k-sentence')];
+    const light = (index) => sentenceEls.forEach((el, i) => el.classList.toggle('on', i === index));
+    const outcome = await playAudio(saved.blob, {
+      into: stageEl.querySelector('.stage-karaoke') || stageEl,
+      duration: saved.duration,
+      onTime: (t, length) => light(sentenceAt(sentenceTimeline(q.stage.sentences, length), t)),
+    });
+    light(-1);
+    if (outcome === 'stopped' || !stageEl.isConnected) return undefined;
+    if (outcome === 'ended') return say(guide, q.instruction);
+    // son illisible sur cet appareil : la voix de synthèse prend le relais
+  }
+  return karaoke(stageEl, guide, q.stage.sentences, q.instruction, intro);
 }
 
 /** Toucher les objets pour les compter un par un : la voix dit « un, deux, trois… ». */
@@ -3443,6 +3571,323 @@ function voiceRow(voiceList) {
       h('button', { class: 'mini-btn', 'aria-label': 'Écouter la voix', onclick: test }, '▶')));
 }
 
+// ---- Vos voix pour les histoires : les parents enregistrent les histoires (micro de l'appareil)
+
+const plural = (n, word) => `${n} ${word}${n > 1 ? 's' : ''}`;
+
+/** « 3 histoires enregistrées sur 49. » */
+function recordedSummary(ids) {
+  const n = STORY_DATA.filter((s) => ids.has(s.id)).length;
+  return `${plural(n, 'histoire')} ${n > 1 ? 'enregistrées' : 'enregistrée'} sur ${STORY_DATA.length}.`;
+}
+
+/** Réglages : la section qui ouvre l'écran des voix. */
+function voicesCard() {
+  const count = h('p', { class: 'muted small voices-count', 'aria-live': 'polite', hidden: true });
+  refreshRecorded().then((ids) => {
+    if (!ids.size) return;
+    count.textContent = recordedSummary(ids);
+    count.hidden = false;
+  });
+  return h('section', { class: 'card voices-card' },
+    h('h2', {}, 'Vos voix pour les histoires'),
+    h('p', { class: 'muted small' }, 'Lisez les histoires à voix haute : votre enfant les entendra avec votre voix au lieu de la voix de synthèse. Les enregistrements restent sur cet appareil.'),
+    h('button', { class: 'big-btn primary voices-open', 'data-voices': '', onclick: () => voicesScreen() }, '🎙 Enregistrer les histoires'),
+    count);
+}
+
+/** Les classes qui entendent les histoires de ce niveau (« MS, GS, CP »). */
+function gradesForStoryLevel(level) {
+  return Object.keys(GRADES).filter((grade) => {
+    const { min, max } = levelRange(grade, 'histoires');
+    return level >= min && level <= max;
+  }).join(', ');
+}
+
+/** Toutes les histoires, par niveau, chacune avec 🎙 Enregistrer, et ▶ Écouter, 🗑 Supprimer si elle est enregistrée. */
+async function voicesScreen(message = '') {
+  const saved = await refreshRecorded();
+  const { levels } = findGame('histoires');
+  show(h('main', { class: 'screen parents voices' },
+    topBar({ onBack: () => parentsScreen({ tab: 'reglages' }), title: 'Vos voix' }),
+    message ? h('p', { class: 'toast', role: 'status' }, message) : null,
+    h('section', { class: 'card voices-intro' },
+      h('p', {}, 'Choisissez une histoire et lisez-la à voix haute. Dans « Histoires lues », votre enfant l’entendra avec votre voix et les phrases s’allumeront au fil de la lecture ; la question est ensuite posée par la voix de l’application.'),
+      h('p', { class: 'voices-private' }, '🔒 Les enregistrements restent sur cet appareil : ils ne sont envoyés nulle part.'),
+      h('p', { class: 'muted small', 'data-recorded-count': '' }, recordedSummary(saved))),
+    levels.map((label, i) => {
+      const stories = STORY_DATA.filter((s) => s.level === i + 1);
+      const grades = gradesForStoryLevel(i + 1);
+      return h('section', { class: 'card voices-level' },
+        h('h2', {}, `Niveau ${i + 1} · ${label}`),
+        grades ? h('p', { class: 'muted small voices-grades' }, grades) : null,
+        stories.map((story) => storyVoiceRow(story, saved.has(story.id))));
+    })));
+}
+
+function storyVoiceRow(story, recorded) {
+  const season = SEASON_LABELS[story.season];
+  const listen = h('button', { class: 'pill-btn quiet', 'data-listen': story.id }, '▶ Écouter');
+  listen.addEventListener('click', () => listenRecording(story, listen));
+  return h('div', { class: recorded ? 'voice-story recorded' : 'voice-story', 'data-story': story.id, 'data-recorded': recorded },
+    h('span', { class: 'voice-story-emoji', 'aria-hidden': 'true' }, story.emoji),
+    h('div', { class: 'voice-story-text' },
+      h('b', {}, story.title),
+      h('span', { class: 'small voice-state' }, recorded ? '✔ Enregistrée' : 'À enregistrer',
+        season ? h('span', { class: 'muted' }, ` · ${season}`) : null)),
+    h('div', { class: 'voice-story-actions' },
+      h('button', { class: 'pill-btn', 'data-record': story.id, onclick: () => recordScreen(story) }, '🎙 Enregistrer'),
+      recorded ? listen : null,
+      recorded ? h('button', { class: 'pill-btn warn', 'data-delete': story.id, onclick: () => deleteRecording(story) }, '🗑 Supprimer') : null));
+}
+
+/** ▶ Écouter un enregistrement (le bouton devient ⏹ Arrêter pendant la lecture). */
+async function listenRecording(story, button) {
+  if (button.classList.contains('playing')) {
+    stopStoryAudio();
+    return;
+  }
+  unlockStoryAudio(); // pendant le toucher : l'élément audio pourra jouer après la lecture de la base
+  stopSpeaking();
+  const saved = await recordings.get(story.id);
+  if (!button.isConnected) return;
+  if (!saved) {
+    voicesScreen('Cet enregistrement est introuvable.');
+    return;
+  }
+  button.classList.add('playing');
+  button.textContent = '⏹ Arrêter';
+  await playAudio(saved.blob, { into: button.closest('.voice-story'), duration: saved.duration });
+  button.classList.remove('playing');
+  button.textContent = '▶ Écouter';
+}
+
+async function deleteRecording(story) {
+  if (!confirm(`Supprimer l’enregistrement de « ${story.title} » ? L’histoire sera de nouveau lue par la voix de l’application.`)) return;
+  stopStoryAudio();
+  const done = await recordings.remove(story.id);
+  voicesScreen(done ? `Enregistrement de « ${story.title} » supprimé.` : 'L’enregistrement n’a pas pu être supprimé.');
+}
+
+/** Pourquoi le micro ne peut pas servir, en clair. */
+function micProblem(error) {
+  const name = error?.name || '';
+  if (name === 'NotAllowedError' || name === 'SecurityError' || name === 'PermissionDeniedError') {
+    return 'L’accès au micro est refusé. Autorisez le micro pour cette app (sur iPhone : touchez « aA » dans la barre d’adresse → Réglages du site web → Micro, ou Réglages → Safari → Micro), puis réessayez.';
+  }
+  if (name === 'NotFoundError' || name === 'DevicesNotFoundError' || name === 'OverconstrainedError') {
+    return 'Aucun micro n’a été trouvé sur cet appareil.';
+  }
+  if (name === 'NotReadableError' || name === 'TrackStartError' || name === 'AbortError') {
+    return 'Le micro est occupé (un appel ou une autre app ?). Fermez-la, puis réessayez.';
+  }
+  return 'Le micro n’a pas pu démarrer. Réessayez.';
+}
+
+/**
+ * Enregistrer une histoire : le texte en gros pour le lire, ⏺ Commencer puis ⏹ Terminer
+ * (3 minutes au plus), puis ▶ Écouter, ✔ Garder ou ↺ Recommencer.
+ */
+function recordScreen(story) {
+  const levelLabel = findGame('histoires').levels[story.level - 1];
+  const timer = h('p', { class: 'record-timer', hidden: true });
+  const status = h('p', { class: 'record-status', 'aria-live': 'polite' });
+  const buttons = h('div', { class: 'record-buttons' });
+  let take = null; // la lecture enregistrée : { blob, mime, duration }
+  let capture = null; // l'enregistrement en cours : { recorder, stream, startedAt, … }
+
+  const button = (label, className, data, onclick) => h('button', { class: `big-btn ${className}`, [`data-${data}`]: '', onclick }, label);
+
+  // chaque étape : le message, puis les boutons
+  const steps = {
+    ready: () => ['Touchez « Commencer », puis lisez l’histoire à voix haute, lentement et avec le ton. 3 minutes au plus.',
+      [button('⏺ Commencer', 'primary', 'rec-start', start)]],
+    asking: () => ['Autorisez le micro si l’appareil le demande…', []],
+    recording: () => ['Lisez l’histoire, puis touchez « Terminer ».', [button('⏹ Terminer', 'danger', 'rec-stop', stop)]],
+    stopping: () => ['Un instant…', []],
+    recorded: () => [take.duration >= MAX_SECONDS - 1
+      ? 'L’enregistrement s’est arrêté à 3 minutes. Écoutez-le, puis gardez-le ou recommencez.'
+      : `Votre lecture dure ${formatDuration(take.duration)}. Écoutez-la, puis gardez-la ou recommencez.`,
+    [listenButton(), button('✔ Garder', 'primary', 'rec-keep', keep), button('↺ Recommencer', '', 'rec-redo', redo)]],
+    saving: () => ['Enregistrement sur l’appareil…', []],
+    error: (retry) => ['', retry ? [button('↺ Réessayer', '', 'rec-start', start)] : []],
+  };
+
+  function setState(state, message = '', retry = true) {
+    timer.hidden = state !== 'recording';
+    const [text, actions] = steps[state](retry);
+    status.textContent = message || text;
+    status.classList.toggle('problem', state === 'error');
+    buttons.replaceChildren(...actions);
+  }
+
+  function listenButton() {
+    const listen = button('▶ Écouter', '', 'rec-listen', async () => {
+      if (listen.classList.contains('playing')) {
+        stopStoryAudio();
+        return;
+      }
+      listen.classList.add('playing');
+      listen.textContent = '⏹ Arrêter';
+      await playAudio(take.blob, { into: screen, duration: take.duration });
+      listen.classList.remove('playing');
+      listen.textContent = '▶ Écouter';
+    });
+    return listen;
+  }
+
+  function showTime() {
+    if (!capture) return;
+    timer.replaceChildren(h('span', { class: 'rec-dot', 'aria-hidden': 'true' }),
+      `Enregistrement en cours · ${formatDuration((Date.now() - capture.startedAt) / 1000)} / ${formatDuration(MAX_SECONDS)}`);
+  }
+
+  async function start() {
+    stopStoryAudio();
+    stopSpeaking();
+    take = null;
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setState('error', 'Cet appareil ou ce navigateur ne permet pas d’enregistrer le son. Sur iPhone et iPad, mettez Safari à jour.', false);
+      return;
+    }
+    setState('asking');
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (error) {
+      if (screen.isConnected) setState('error', micProblem(error));
+      return;
+    }
+    const release = () => stream.getTracks().forEach((track) => track.stop());
+    if (!screen.isConnected) {
+      release();
+      return;
+    }
+    const mime = pickMime((type) => MediaRecorder.isTypeSupported?.(type));
+    let recorder;
+    try {
+      recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    } catch {
+      release();
+      setState('error', 'L’enregistrement n’a pas pu démarrer sur cet appareil.', false);
+      return;
+    }
+    const chunks = [];
+    const current = { recorder, release, startedAt: Date.now(), stoppedAt: 0, cancelled: false, ticker: null, limit: null };
+    const end = () => {
+      clearInterval(current.ticker);
+      clearTimeout(current.limit);
+      release();
+      if (capture === current) capture = null;
+    };
+    recorder.ondataavailable = (e) => {
+      if (e.data?.size) chunks.push(e.data);
+    };
+    recorder.onerror = () => {
+      current.cancelled = true;
+      end();
+      if (screen.isConnected) setState('error', 'L’enregistrement s’est interrompu. Réessayez.');
+    };
+    recorder.onstop = () => {
+      end();
+      if (current.cancelled || !screen.isConnected) return;
+      const type = recorder.mimeType || mime || chunks[0]?.type || '';
+      const blob = new Blob(chunks, type ? { type } : {});
+      if (!blob.size) {
+        setState('error', 'Aucun son n’a été enregistré. Vérifiez le micro, puis réessayez.');
+        return;
+      }
+      take = { blob, mime: type, duration: Math.min(MAX_SECONDS, ((current.stoppedAt || Date.now()) - current.startedAt) / 1000) };
+      setState('recorded');
+    };
+    try {
+      recorder.start();
+    } catch {
+      end();
+      setState('error', 'L’enregistrement n’a pas pu démarrer. Réessayez.');
+      return;
+    }
+    capture = current;
+    current.ticker = setInterval(showTime, 250);
+    current.limit = setTimeout(stop, MAX_SECONDS * 1000);
+    showTime();
+    setState('recording');
+  }
+
+  function stop() {
+    if (!capture) return;
+    capture.stoppedAt = Date.now();
+    clearInterval(capture.ticker);
+    clearTimeout(capture.limit);
+    setState('stopping');
+    try {
+      capture.recorder.stop(); // la suite dans onstop
+    } catch {
+      capture.cancelled = true;
+      capture.release();
+      capture = null;
+      setState('error', 'L’enregistrement s’est interrompu. Réessayez.');
+    }
+  }
+
+  /** En quittant l'écran : on arrête tout et on libère le micro (rien n'est gardé). */
+  function cancel() {
+    stopStoryAudio();
+    if (!capture) return;
+    const current = capture;
+    capture = null;
+    current.cancelled = true;
+    clearInterval(current.ticker);
+    clearTimeout(current.limit);
+    try {
+      if (current.recorder.state !== 'inactive') current.recorder.stop();
+    } catch {
+      // déjà arrêté
+    }
+    current.release();
+  }
+
+  async function keep() {
+    stopStoryAudio();
+    setState('saving');
+    const ok = await recordings.save(story.id, take.blob, { mime: take.mime, duration: take.duration });
+    if (!ok) {
+      if (screen.isConnected) setState('recorded', 'L’enregistrement n’a pas pu être gardé (espace plein ou navigation privée ?). Réessayez.');
+      return;
+    }
+    recordedIds = new Set([...(recordedIds || []), story.id]);
+    // demande à l'appareil de ne pas effacer ces données quand l'espace manque
+    navigator.storage?.persist?.().catch(() => {});
+    if (screen.isConnected) voicesScreen(`« ${story.title} » est enregistrée avec votre voix ✓`);
+  }
+
+  function redo() {
+    stopStoryAudio();
+    take = null;
+    setState('ready');
+  }
+
+  const screen = h('main', { class: 'screen parents record-screen', 'data-recording': story.id },
+    topBar({ onBack: () => { cancel(); voicesScreen(); }, title: 'Enregistrer' }),
+    h('div', { class: 'record-layout' },
+      h('section', { class: 'card record-story' },
+        h('div', { class: 'record-head' },
+          h('span', { class: 'record-emoji', 'aria-hidden': 'true' }, story.emoji),
+          h('div', {},
+            h('h2', {}, story.title),
+            h('p', { class: 'muted small' }, `Niveau ${story.level} · ${levelLabel}`))),
+        h('p', { class: 'record-text' }, frenchSpacing(story.sentences.join(' '))),
+        h('p', { class: 'muted small' }, story.question
+          ? `Ensuite, l’application pose la question : « ${frenchSpacing(story.question)} »`
+          : 'Ensuite, l’enfant remet les images dans l’ordre de l’histoire.')),
+      h('section', { class: 'card record-controls' },
+        timer, status, buttons,
+        h('p', { class: 'muted small' }, '🔒 L’enregistrement reste sur cet appareil.'))));
+  show(screen);
+  leaveScreen = cancel;
+  setState('ready');
+}
+
 function settingsTab() {
   const lengthSelect = h('div', { class: 'segmented' }, [5, 10, 15].map((n) => {
     const btn = h('button', { class: store.settings.sessionLength === n ? 'seg on' : 'seg' }, n);
@@ -3464,6 +3909,7 @@ function settingsTab() {
       toggle('Décors de saison (Noël, Halloween…)', store.settings.seasonal !== false, (v) => { store.settings.seasonal = v; save(); }),
       h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
       h('p', { class: 'muted small' }, 'Voix plus naturelles : Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
+    voicesCard(),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),
@@ -3486,6 +3932,8 @@ function settingsTab() {
 // ---------------------------------------------------------------- Démarrage
 
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
+document.addEventListener('pointerdown', unlockStoryAudio, { capture: true });
+refreshRecorded(); // les histoires enregistrées par les parents sur cet appareil
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopMusic(); });
 document.addEventListener('pointerdown', (e) => {
   if (e.target.closest('button')) playSound('tap');

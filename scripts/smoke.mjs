@@ -16,9 +16,11 @@ import { startServer } from './serve.mjs';
 import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
 import { formatChrono } from '../app/js/games/chrono.js';
+import { STORY_DATA } from '../app/js/games/histoires.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
+import { seasonOf } from '../app/js/themes.js';
 
 const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
@@ -33,20 +35,29 @@ if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
 // CHROMIUM_PATH : utiliser un Chromium déjà installé (sinon celui téléchargé par Playwright)
-const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
+// Micro factice (un bip), autorisé sans question : pour enregistrer les voix des parents.
+const browser = await chromium.launch({
+  args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'],
+  ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
+});
 const errors = [];
 
 function fail(message) {
   throw new Error(message);
 }
 
-/** Voix factice : la vraie synthèse vocale n'existe pas dans Chromium sans tête. */
+/** Voix factice : la vraie synthèse vocale n'existe pas dans Chromium sans tête (ce qui est dit va dans __spoken). */
 async function newContext(viewport) {
-  const context = await browser.newContext({ viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'fr-FR' });
+  const context = await browser.newContext({
+    viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'fr-FR', permissions: ['microphone'],
+  });
   await context.addInitScript(() => {
     const fake = {
       speaking: false, pending: false,
-      speak(u) { setTimeout(() => u.onend && u.onend(), 5); },
+      speak(u) {
+        (window.__spoken = window.__spoken || []).push(u.text);
+        setTimeout(() => u.onend && u.onend(), 5);
+      },
       cancel() {}, getVoices: () => [], addEventListener() {},
     };
     Object.defineProperty(window, 'speechSynthesis', { value: fake });
@@ -94,6 +105,27 @@ async function goProfile(page, id = 'eva-rose', url = BASE) {
   await goProfiles(page, url);
   await page.click(`[data-profile="${id}"]`);
   await page.waitForSelector('.home');
+}
+
+/** Ouvre l'espace parents (en calculant la multiplication si la barrière est là). */
+async function openParents(page) {
+  await goProfiles(page);
+  await page.click('.parent-btn');
+  await page.waitForSelector('.parents, .gate');
+  if (await page.locator('.gate').count()) {
+    const [a, b] = (await page.textContent('.gate-question')).match(/\d+/g).map(Number);
+    await page.fill('.gate-input', String(a * b));
+    await page.click('.gate-form button');
+    await page.waitForSelector('.parents');
+  }
+}
+
+/** Écran « Vos voix » : Espace parents → Réglages → Vos voix pour les histoires. */
+async function openVoices(page) {
+  await openParents(page);
+  await page.click('[data-tab="reglages"]');
+  await page.click('[data-voices]');
+  await page.waitForSelector('.voices');
 }
 
 async function openGame(page, game, { palier, format = 0 } = {}) {
@@ -562,6 +594,112 @@ async function checkChronoResults(page, game, { level = null, record = null } = 
   return level;
 }
 
+/**
+ * L'histoire à enregistrer pour le test : celle que le jeu tire le plus souvent aujourd'hui
+ * (une histoire de la saison, seule de sa saison à son niveau, sort une fois sur deux).
+ */
+function storyToRecord() {
+  const season = seasonOf(new Date()).id;
+  const odds = (story) => {
+    if (story.season && story.season !== season) return 0;
+    const same = STORY_DATA.filter((s) => s.level === story.level);
+    const seasonal = same.filter((s) => s.season === season);
+    const common = same.filter((s) => !s.season);
+    if (story.season) return (common.length ? 0.5 : 1) / seasonal.length;
+    return (seasonal.length ? 0.5 : 1) / common.length;
+  };
+  return [...STORY_DATA].sort((a, b) => odds(b) - odds(a))[0];
+}
+
+/**
+ * Histoires lues par un parent : Espace parents → Réglages → Vos voix → enregistrer une histoire
+ * au micro (factice) → la garder ; puis, dans le jeu « Histoires », c'est l'enregistrement qui est
+ * joué (élément audio, source blob:), les phrases s'allument, et la question est posée ensuite.
+ */
+async function checkRecordings(page) {
+  const story = storyToRecord();
+  await openVoices(page);
+  if ((await page.locator('.voice-story').count()) !== STORY_DATA.length) fail('voix : toutes les histoires ne sont pas listées');
+  if (!(await page.textContent('.voices-intro')).includes('restent sur cet appareil')) fail('voix : il manque le rappel « restent sur cet appareil »');
+  await page.click(`[data-record="${story.id}"]`);
+  await page.waitForSelector('[data-rec-start]');
+  if (!(await page.textContent('.record-text')).replace(/\s+/g, ' ').includes(story.sentences[0].split(' ')[0])) fail('voix : le texte de l’histoire n’est pas affiché');
+  // micro refusé une fois : un message clair, rien ne casse, et on peut réessayer
+  await page.evaluate(() => {
+    const devices = navigator.mediaDevices;
+    const real = devices.getUserMedia.bind(devices);
+    devices.getUserMedia = () => {
+      devices.getUserMedia = real;
+      return Promise.reject(new DOMException('Permission refusée', 'NotAllowedError'));
+    };
+  });
+  await page.click('[data-rec-start]');
+  await page.waitForSelector('.record-status.problem');
+  if (!(await page.textContent('.record-status')).includes('micro est refusé')) fail('voix : pas de message clair quand le micro est refusé');
+  await page.click('[data-rec-start]'); // « Réessayer »
+  await page.waitForSelector('[data-rec-stop]');
+  await page.waitForTimeout(1500);
+  await page.click('[data-rec-stop]');
+  await page.waitForSelector('[data-rec-keep]', { timeout: 5000 });
+  if (!(await page.locator('[data-rec-listen]').count()) || !(await page.locator('[data-rec-redo]').count())) fail('voix : Écouter et Recommencer absents');
+  await page.click('[data-rec-listen]');
+  await page.waitForFunction(() => document.querySelector('.record-screen audio.story-audio')?.getAttribute('src')?.startsWith('blob:'), null, { timeout: 5000 });
+  await page.click('[data-rec-keep]');
+  await page.waitForSelector(`[data-story="${story.id}"][data-recorded]`);
+  if (!(await page.textContent(`[data-story="${story.id}"]`)).includes('Enregistrée')) fail('voix : l’histoire n’apparaît pas comme enregistrée');
+  if (!(await page.locator(`[data-listen="${story.id}"]`).count()) || !(await page.locator(`[data-delete="${story.id}"]`).count())) fail('voix : Écouter et Supprimer absents');
+  const saved = await page.evaluate(async (id) => {
+    const record = await (await import('./js/recordings.js')).get(id);
+    return record && { duration: record.duration, size: record.size, mime: record.mime };
+  }, story.id);
+  if (!saved || !(saved.duration >= 1 && saved.duration <= 3) || !saved.size) fail(`voix : enregistrement inattendu ${JSON.stringify(saved)}`);
+  console.log(`✔ voix des parents : « ${story.title} » enregistrée au micro (${saved.duration.toFixed(1)} s, ${saved.mime}), gardée sur l’appareil`);
+
+  // dans le jeu : la voix enregistrée remplace la voix de synthèse pour l'histoire
+  // (les phrases allumées sont relevées dès le chargement : une phrase courte ne reste allumée qu'un instant)
+  await page.addInitScript(() => {
+    window.__lit = [];
+    new MutationObserver((records) => {
+      for (const { target } of records) {
+        if (target.classList?.contains('k-sentence') && target.classList.contains('on')) window.__lit.push(Number(target.dataset.s));
+      }
+    }).observe(document, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  });
+  await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor('histoires', story.level)}'; store.profiles['eva-rose'].games.histoires = { level: ${story.level} };`);
+  let q = null;
+  for (let tries = 0; tries < 40 && q?.stage.storyId !== story.id; tries++) {
+    await openGame(page, findGame('histoires'));
+    await page.waitForSelector('.choices');
+    q = await page.evaluate(() => globalThis.__lc.question);
+  }
+  if (q.stage.storyId !== story.id) fail(`voix : l’histoire « ${story.title} » n’a pas été tirée en 40 essais`);
+  await page.waitForSelector('.stage-karaoke audio.story-audio[src^="blob:"]', { state: 'attached', timeout: 5000 })
+    .catch(() => fail('voix : l’enregistrement n’est pas joué dans le jeu'));
+  await page.waitForFunction((text) => (globalThis.__spoken || []).includes(text), q.instruction[0], { timeout: 15000 })
+    .catch(() => fail('voix : la question n’est pas posée après l’enregistrement'));
+  const spoken = await page.evaluate(() => globalThis.__spoken);
+  if (spoken.some((text) => story.sentences.includes(text))) fail('voix : l’histoire a aussi été lue par la voix de synthèse');
+  // les phrases se sont allumées une à une, dans l'ordre, pendant la lecture ; plus rien ensuite
+  const order = await page.evaluate(() => globalThis.__lit.filter((s, i, all) => s !== all[i - 1]));
+  if (order.join() !== story.sentences.map((_, i) => i).join()) fail(`voix : phrases allumées ${order.join(', ') || 'jamais'} au lieu d’une à une`);
+  if (await page.locator('.k-sentence.on').count()) fail('voix : une phrase reste allumée après la lecture');
+  // 🔊 Relire l'histoire : l'enregistrement est rejoué
+  await page.click('.karaoke-replay');
+  await page.waitForFunction(() => {
+    const audio = document.querySelector('.stage-karaoke audio.story-audio');
+    return audio && !audio.paused && audio.getAttribute('src').startsWith('blob:');
+  }, null, { timeout: 5000 }).catch(() => fail('voix : « Relire l’histoire » ne rejoue pas l’enregistrement'));
+  console.log('✔ voix des parents : dans « Histoires », l’enregistrement est joué, les phrases s’allument, puis la question est posée');
+
+  // 🗑 Supprimer : l'histoire revient à la voix de synthèse
+  if (!page.listenerCount('dialog')) page.once('dialog', (dialog) => dialog.accept());
+  await openVoices(page);
+  await page.click(`[data-delete="${story.id}"]`);
+  await page.waitForSelector(`[data-story="${story.id}"]:not([data-recorded])`);
+  if (await page.locator('.voice-story[data-recorded]').count()) fail('voix : l’enregistrement supprimé est toujours là');
+  console.log('✔ voix des parents : enregistrement supprimé');
+}
+
 // ---------------------------------------------------------------- Parcours complet (iPhone 13)
 
 async function scenario() {
@@ -688,7 +826,10 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
   console.log(`✔ ${game.id} (${grade}) : partie complète, ${stars} étoiles`);
 }
 
-if (PLAY) return;
+if (PLAY) {
+  if (PLAY.includes('histoires')) await checkRecordings(page);
+  return;
+}
 
 // choisir directement son niveau
 await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
@@ -992,6 +1133,9 @@ await page.waitForSelector('.toast');
 if (await page.locator('[data-photo-row="eva-rose"] .avatar-photo').count()) fail('le dessin n’est pas revenu');
 console.log('✔ réglages (photo enregistrée automatiquement, version, journal, crédits)');
 
+// vos voix pour les histoires : enregistrer une histoire, puis l'entendre dans le jeu
+await checkRecordings(page);
+
 // hors ligne (mode avion) : le service worker doit servir l'app et tous les jeux sans réseau
 await checkOffline(context, page);
 await context.close();
@@ -1106,6 +1250,34 @@ async function checkLayout(page, label, { reachable = true } = {}) {
 }
 const layoutProblems = [];
 
+/** Les boutons de l'écran d'enregistrement restent visibles sans faire défiler. */
+async function checkRecordButtons(page, label) {
+  const problem = await page.evaluate(() => {
+    const r = document.querySelector('.record-buttons').getBoundingClientRect();
+    return r.top < 0 || r.bottom > window.innerHeight + 1 ? `boutons d’enregistrement hors de l’écran (${Math.round(r.top)}–${Math.round(r.bottom)})` : null;
+  });
+  if (problem) layoutProblems.push(`${label} : ${problem}`);
+}
+
+/** Vos voix : la liste des histoires, puis l'enregistrement de la plus longue (avant et après). */
+async function checkVoicesLayout(page, tag) {
+  await openVoices(page);
+  await checkLayout(page, tag('vos voix'), { reachable: false });
+  const longest = STORY_DATA.reduce((a, b) => (b.sentences.join(' ').length > a.sentences.join(' ').length ? b : a));
+  await page.click(`[data-record="${longest.id}"]`);
+  await page.waitForSelector('[data-rec-start]');
+  await checkLayout(page, tag('enregistrer une histoire'), { reachable: false });
+  await checkRecordButtons(page, tag('enregistrer une histoire'));
+  await page.click('[data-rec-start]');
+  await page.waitForSelector('[data-rec-stop]');
+  await page.waitForTimeout(400);
+  await page.click('[data-rec-stop]');
+  await page.waitForSelector('[data-rec-keep]', { timeout: 5000 });
+  await checkLayout(page, tag('enregistrement à garder'), { reachable: false });
+  await checkRecordButtons(page, tag('enregistrement à garder'));
+  return 3;
+}
+
 async function checkDevice(device, repeat, deviceIndex) {
   // découpage en morceaux (SHARD=k/n) : chaque morceau vérifie tous les appareils, mais un jeu sur n
   // (décalé selon l'appareil), et les écrans fixes d'un appareil sur n
@@ -1174,6 +1346,7 @@ async function checkDevice(device, repeat, deviceIndex) {
     }
   }
   if ((ONLY && !screens) || !mine(deviceIndex)) {
+    if (ONLY?.includes('histoires')) checked += await checkVoicesLayout(page, tag);
     await ctx.close();
     return checked;
   }
@@ -1210,6 +1383,7 @@ async function checkDevice(device, repeat, deviceIndex) {
   await page.waitForSelector('.settings');
   await checkLayout(page, tag('réglages'), { reachable: false });
   checked += 6;
+  checked += await checkVoicesLayout(page, tag);
   await ctx.close();
   return checked;
 }
