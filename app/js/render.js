@@ -211,8 +211,10 @@ export function renderStage(stage, actions) {
       return storyStage(stage);
     case 'clock':
       return clockStage(stage);
+    case 'cubes':
+      return cubesStage(stage);
     case 'sequence':
-      return h('div', { class: 'sequence' },
+      return h('div', { class: `sequence${stage.items.some((n) => typeof n === 'string') ? ' words' : ''}` },
         stage.items.map((n) => h('span', { class: n === null ? 'seq-item gap' : 'seq-item' }, n === null ? '?' : n)));
     case 'frame':
       return frameStage(stage);
@@ -241,6 +243,38 @@ function sceneContent({ who, where }, label) {
     el.append(h('span', { class: 'scene-table' }, h('span', { class: 'tbl-top' }), h('span', { class: 'tbl-leg l' }), h('span', { class: 'tbl-leg r' })),
       h('span', { class: 'scene-who' }, who));
   }
+  return el;
+}
+
+/**
+ * Des cubes empilés, dessinés en perspective (isométrique). heights[y][x] = nombre de cubes
+ * de la pile ; y grandit vers l'enfant, x vers la droite. On dessine du fond vers l'avant.
+ */
+export function cubesSvg(heights) {
+  const iso = (x, y, z) => [(x - y) * 0.866, (x + y) * 0.5 - z];
+  const cubes = [];
+  heights.forEach((row, y) => row.forEach((hgt, x) => { for (let z = 0; z < hgt; z++) cubes.push([x, y, z]); }));
+  cubes.sort((a, b) => a[0] + a[1] + a[2] - (b[0] + b[1] + b[2]));
+  const all = [];
+  const face = (cls, pts) => {
+    all.push(...pts);
+    return `<polygon class="${cls}" points="${pts.map(([X, Y]) => `${X.toFixed(3)},${Y.toFixed(3)}`).join(' ')}"/>`;
+  };
+  const faces = cubes.map(([x, y, z]) => [
+    face('cube-right', [iso(x + 1, y, z), iso(x + 1, y + 1, z), iso(x + 1, y + 1, z + 1), iso(x + 1, y, z + 1)]),
+    face('cube-left', [iso(x, y + 1, z), iso(x + 1, y + 1, z), iso(x + 1, y + 1, z + 1), iso(x, y + 1, z + 1)]),
+    face('cube-top', [iso(x, y, z + 1), iso(x + 1, y, z + 1), iso(x + 1, y + 1, z + 1), iso(x, y + 1, z + 1)]),
+  ].join('')).join('');
+  const xs = all.map((p) => p[0]);
+  const ys = all.map((p) => p[1]);
+  const [minX, minY] = [Math.min(...xs) - 0.1, Math.min(...ys) - 0.1];
+  const [w, hgt] = [Math.max(...xs) - minX + 0.1, Math.max(...ys) - minY + 0.1];
+  return `<svg viewBox="${minX.toFixed(2)} ${minY.toFixed(2)} ${w.toFixed(2)} ${hgt.toFixed(2)}" aria-hidden="true">${faces}</svg>`;
+}
+
+function cubesStage({ heights }) {
+  const el = h('div', { class: 'stage-cubes', role: 'img', 'aria-label': 'Des cubes empilés' });
+  el.innerHTML = cubesSvg(heights);
   return el;
 }
 

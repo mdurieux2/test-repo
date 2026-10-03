@@ -4,12 +4,22 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.3.0',
+  version: '1.4.0',
   author: 'Michaël Durieux',
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.4.0',
+    date: '2026-10-03',
+    changes: [
+      'Défi du jour : 5 questions de jeux variés, une étoile bonus et une série de jours 🔥.',
+      'Nouvelle matière « Le monde » : les animaux (où ils vivent, leurs bébés, ce qu’ils mangent), le temps qui passe (saisons, moments de la journée, jours, mois), les pays et les continents.',
+      'Logique : la symétrie sur quadrillage et « Compte les cubes » (empilements en 3D, avec des cubes cachés).',
+      'Téléphone en paysage : le dessin à gauche, la consigne et les réponses à droite.',
+    ],
+  },
   {
     version: '1.3.0',
     date: '2026-10-03',

@@ -253,6 +253,15 @@ async function answer(page, q, wrongFirst) {
       for (const item of sorted) await page.click(`.order-item[data-value="${item.value}"]:not([disabled])`);
       break;
     }
+    case 'symmetry': {
+      if (wrongFirst) {
+        await page.click('.sym-zone .validate-btn'); // rien de colorié : il manque des cases
+        await page.waitForSelector('.try-again');
+      }
+      for (const cell of q.stage.solution) await page.click(`.sym-cell[data-cell="${cell}"]`);
+      await page.click('.sym-zone .validate-btn');
+      break;
+    }
     case 'sudoku': {
       const { puzzle, solution } = q.stage;
       const empty = puzzle.map((v, i) => (v === null ? i : -1)).filter((i) => i >= 0);
@@ -335,7 +344,8 @@ const shotsWanted = {
   patates: '20-patates', labyrinthe: '21-labyrinthe', 'chemin-nombres': '22-chemin', ranger: '23-ranger',
   problemes: '24-probleme', heure: '25-heure', 'petits-textes': '26-texte', 'ou-est': '27-where', intrus: '28-intrus',
   ombres: '29-ombres', 'epelle-anglais': '30-epelle', relier: '31-relier', trous: '32-trous',
-  sudoku: '33-sudoku', 'relie-calculs': '34-relie-calculs',
+  sudoku: '33-sudoku', 'relie-calculs': '34-relie-calculs', symetrie: '36-symetrie', cubes: '37-cubes',
+  'animaux-monde': '38-animaux', saisons: '39-saisons', pays: '40-pays',
 };
 const bubbleText = (t) => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\u2011/g, '-').replace(/\s+/g, ' ').trim();
 for (const game of GAMES) {
@@ -404,6 +414,25 @@ const expected = Math.floor((GAMES.length * 2) / 5);
 const unlocked = await page.locator('.sticker:not(.locked)').count();
 if (unlocked !== expected) fail(`${unlocked} autocollants au lieu de ${expected}`);
 console.log(`✔ album : ${unlocked} autocollants`);
+
+// défi du jour : 5 questions de jeux variés, une série de jours et une étoile bonus
+await goProfile(page);
+await page.click('[data-defi]');
+const fromGames = new Set();
+for (let i = 0; i < 5; i++) {
+  const zone = await page.waitForSelector('.choices:not(.answered)');
+  const q = await page.evaluate(() => globalThis.__lc.question);
+  fromGames.add(q.from);
+  await answer(page, q, false);
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+}
+await page.waitForSelector('.daily-result');
+if (!(await page.textContent('.daily-result')).includes('1 jour')) fail('défi du jour : série de jours absente');
+if (fromGames.size < 3) fail(`défi du jour : seulement ${fromGames.size} jeux différents`);
+await shot('35-defi');
+await goProfile(page);
+if (!(await page.textContent('[data-defi] .pill')).includes('fait')) fail('défi du jour : non marqué comme fait');
+console.log(`✔ défi du jour (${fromGames.size} jeux différents, série de jours)`);
 
 // profils séparés : Matteo n'a pas les étoiles d'Eva-Rose
 await goProfiles(page);
@@ -512,8 +541,8 @@ console.log('✔ fonctionne hors ligne');
 
 // ---------------------------------------------------------------- Mise en page : tous les iPhone
 
-// Tailles d'écran (points CSS) de l'iPhone 6 à l'iPhone 17 Pro Max, des iPad, et des
-// principaux Android (le plus étroit : 360 points).
+// Tailles d'écran (points CSS) de l'iPhone 6 à l'iPhone 17 Pro Max (portrait et paysage),
+// des iPad, et des principaux Android (le plus étroit : 360 points).
 const DEVICES = [
   { name: 'iPhone 6-7-8-SE', width: 375, height: 667 },
   { name: 'iPhone 6-7-8 Plus', width: 414, height: 736 },
@@ -525,6 +554,11 @@ const DEVICES = [
   { name: 'iPhone 14-15 Pro Max-15-16 Plus', width: 430, height: 932 },
   { name: 'iPhone 16-17 Pro-17', width: 402, height: 874 },
   { name: 'iPhone 16-17 Pro Max', width: 440, height: 956 },
+  // téléphones en paysage
+  { name: 'iPhone 6-7-8-SE paysage', width: 667, height: 375 },
+  { name: 'iPhone 12-13-14 paysage', width: 844, height: 390 },
+  { name: 'iPhone 16-17 Pro Max paysage', width: 956, height: 440 },
+  { name: 'Samsung Galaxy S20-S24 paysage', width: 800, height: 360 },
   // Android (Chrome), téléphones puis tablette
   { name: 'Samsung Galaxy S8-S9, A50', width: 360, height: 740 },
   { name: 'Samsung Galaxy S20-S24, A54', width: 360, height: 800 },
@@ -558,12 +592,17 @@ const STRESS = {
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
-    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol')) {
+    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell')) {
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
     const zone = document.querySelector('.choices, .home-menu, .profile-list');
     if (mustReach && zone && zone.getBoundingClientRect().bottom > window.innerHeight + 1) {
       return `boutons hors de l'écran (${Math.round(zone.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
+    }
+    // en paysage, le dessin est à côté des réponses : il doit aussi tenir dans l'écran
+    const stage = document.querySelector('.stage');
+    if (mustReach && stage && stage.getBoundingClientRect().bottom > window.innerHeight + 1) {
+      return `dessin hors de l'écran (${Math.round(stage.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
     }
     return null;
   }, reachable);
@@ -590,7 +629,7 @@ async function checkDevice(device, repeat) {
     await setStore(page, `store.profiles['${id}'] = store.profiles['${id}'] || {}; store.profiles['${id}'].grade = '${grade}';`);
     await goProfile(page, id);
     await checkLayout(page, tag(`accueil ${id}`));
-    for (const domain of ['francais', 'maths', 'anglais']) {
+    for (const domain of ['francais', 'maths', 'anglais', 'monde']) {
       await page.click(`[data-domain="${domain}"]`);
       await checkLayout(page, tag(`liste ${domain} ${id}`), { reachable: false });
       await page.click('.top-bar .icon-btn');
@@ -601,7 +640,7 @@ async function checkDevice(device, repeat) {
   await page.click('[data-levels="calcul"], [data-levels="compter"]');
   await page.waitForSelector('.level-list');
   await checkLayout(page, tag('choix du niveau'), { reachable: false });
-  checked += 10;
+  checked += 12;
 
   // chaque niveau de chaque jeu
   for (const game of GAMES) {

@@ -5,6 +5,7 @@ import { CALC_PALIERS, CALC_FORMATS, equationHolds } from '../app/js/games/maths
 import { areNeighbours, canMove } from '../app/js/games/labyrinthes.js';
 import { clockLabel, countSolutions, sudokuAllows } from '../app/js/games/maths-extra.js';
 import { TEXT_DATA } from '../app/js/games/textes.js';
+import { mirrorCell } from '../app/js/games/logique.js';
 import { createRng } from '../app/js/random.js';
 import {
   FIRST_SOUNDS, PICTURES, READING_WORDS, SIGHT_WORDS, SYLLABLE_LEVELS,
@@ -76,6 +77,13 @@ function checkQuestion(q, ctx) {
       assert.ok(['asc', 'desc'].includes(q.order), ctx);
       break;
     }
+    case 'symmetry': {
+      const { cols, rows, axis, model, solution } = q.stage;
+      assert.equal(model.length, solution.length, ctx);
+      assert.deepEqual([...model.map((c) => mirrorCell(c, cols, rows, axis))].sort((a, b) => a - b), solution, ctx);
+      assert.equal(new Set([...model, ...solution]).size, model.length * 2, `modèle et reflet se chevauchent : ${ctx}`);
+      break;
+    }
     case 'sudoku': {
       const { size, puzzle, solution } = q.stage;
       assert.equal(puzzle.length, size * size, ctx);
@@ -106,7 +114,7 @@ test('les identifiants de jeux sont uniques et rangés par matière', () => {
   const ids = GAMES.map((g) => g.id);
   assert.equal(new Set(ids).size, ids.length);
   for (const d of DOMAINS) for (const g of d.games) assert.equal(g.domain, d.id, g.id);
-  assert.deepEqual(DOMAINS.map((d) => d.id), ['francais', 'maths', 'anglais']);
+  assert.deepEqual(DOMAINS.map((d) => d.id), ['francais', 'maths', 'anglais', 'monde']);
   assert.equal(findGame('calcul').title, 'Calcul');
 });
 
@@ -212,6 +220,28 @@ test('relie les calculs : 4 à 8 paires, résultats tous différents et justes',
     for (const p of q.pairs) {
       const [a, op, b] = p.left.split(' ');
       assert.equal(p.right, op === '+' ? Number(a) + Number(b) : Number(a) - Number(b), p.left);
+    }
+  }
+});
+
+test('cubes : le dessus de chaque pile est visible (escaliers vers l’enfant), réponse = nombre de cubes', () => {
+  for (const { level, q } of questions(findGame('cubes'))) {
+    const { heights } = q.stage;
+    assert.equal(q.answer, heights.flat().reduce((a, b) => a + b, 0));
+    if (level >= 3) {
+      heights.forEach((row, y) => row.forEach((hgt, x) => {
+        if (y > 0) assert.ok(hgt <= heights[y - 1][x], JSON.stringify(heights));
+        if (x > 0) assert.ok(hgt <= row[x - 1], JSON.stringify(heights));
+      }));
+    }
+    if (level === 1) assert.ok(heights.flat().every((hgt) => hgt === 1));
+  }
+});
+
+test('le monde : réponses présentes, phrases sans faute de liaison', () => {
+  for (const id of ['animaux-monde', 'saisons', 'pays']) {
+    for (const { q } of questions(findGame(id))) {
+      assert.ok(!/de le |de les |à le /.test(`${q.text} ${q.success.speak}`), `${q.text} / ${q.success.speak}`);
     }
   }
 });

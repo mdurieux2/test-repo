@@ -21,10 +21,11 @@ export const PROGRAMS = {
     maths: [
       ['compter', 1, 2], ['vite-vu', 1, 1], ['panier', 1, 3], ['relier', 1, 2],
       ['comparer', 1, 1], ['suite', 1, 1], ['faire-dix', 1, 1], ['ranger', 1, 2],
-      ['formes', 1, 2], ['algorithmes', 1, 3], ['intrus', 1, 1], ['ombres', 1, 2], ['sudoku', 1, 1],
+      ['formes', 1, 2], ['algorithmes', 1, 3], ['intrus', 1, 1], ['ombres', 1, 2], ['sudoku', 1, 1], ['cubes', 1, 1],
       ['labyrinthe', 1, 2], ['chemin-nombres', 1, 1],
     ],
     anglais: [['ecoute', 1, 3], ['compte-anglais', 1, 1], ['ou-est', 1, 1]],
+    monde: [['animaux-monde', 1, 1], ['saisons', 1, 1]],
   },
   GS: {
     francais: [
@@ -36,9 +37,11 @@ export const PROGRAMS = {
       ['comparer', 1, 2], ['suite', 1, 2], ['faire-dix', 1, 2], ['calcul', 1, 6], ['relie-calculs', 1, 1], ['ranger', 1, 3],
       ['problemes', 1, 3], ['doubles', 1, 1],
       ['formes', 2, 3], ['algorithmes', 2, 4], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
+      ['symetrie', 1, 1], ['cubes', 1, 2],
       ['labyrinthe', 1, 3], ['chemin-nombres', 1, 2],
     ],
     anglais: [['ecoute', 1, 5], ['compte-anglais', 1, 2], ['ou-est', 1, 2]],
+    monde: [['animaux-monde', 1, 2], ['saisons', 1, 2]],
   },
   CP: {
     francais: [
@@ -49,12 +52,13 @@ export const PROGRAMS = {
       ['compter', 1, 6], ['vite-vu', 1, 4], ['panier', 1, 7], ['patates', 2, 4], ['dizaines', 1, 4],
       ['comparer', 1, 3], ['suite', 1, 4], ['calcul', 1, 36], ['trous', 1, 4], ['relie-calculs', 1, 5], ['faire-dix', 1, 3], ['ranger', 3, 5],
       ['problemes', 1, 5], ['doubles', 1, 3],
-      ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['heure', 1, 2],
+      ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['symetrie', 1, 3], ['cubes', 1, 3], ['heure', 1, 2],
       ['labyrinthe', 2, 4], ['chemin-nombres', 2, 7],
     ],
     anglais: [
       ['ecoute', 1, 10], ['lis-anglais', 1, 4], ['relie-anglais', 1, 4], ['compte-anglais', 1, 3], ['ou-est', 1, 3],
     ],
+    monde: [['animaux-monde', 1, 3], ['saisons', 1, 3], ['pays', 1, 2]],
   },
   CE1: {
     francais: [
@@ -65,13 +69,14 @@ export const PROGRAMS = {
       ['patates', 4, 5], ['dizaines', 2, 5],
       ['comparer', 2, 4], ['suite', 3, 5], ['calcul', 4, 36], ['trous', 3, 6], ['relie-calculs', 3, 6], ['tables', 1, 6], ['faire-dix', 2, 3],
       ['ranger', 5, 7], ['problemes', 4, 7], ['doubles', 2, 4],
-      ['intrus', 2, 3], ['ombres', 3, 3], ['sudoku', 3, 6], ['heure', 2, 4],
+      ['intrus', 2, 3], ['ombres', 3, 3], ['sudoku', 3, 6], ['symetrie', 2, 4], ['cubes', 2, 4], ['heure', 2, 4],
       ['labyrinthe', 3, 6], ['chemin-nombres', 5, 8],
     ],
     anglais: [
       ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],
       ['compte-anglais', 3, 4], ['ou-est', 2, 3], ['epelle-anglais', 1, 10],
     ],
+    monde: [['animaux-monde', 2, 4], ['saisons', 2, 4], ['pays', 1, 3]],
   },
 };
 

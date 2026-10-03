@@ -4,7 +4,7 @@ import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
 import { canMove, solveMaze } from './games/labyrinthes.js';
 import { levelRange, programFor } from './programs.js';
-import { createRng, pick, randInt } from './random.js';
+import { createRng, pick, randInt, sample } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import {
@@ -239,12 +239,67 @@ function homeScreen() {
     h('div', { class: 'home-hero' },
       h('h1', { class: 'home-title' }, frenchSpacing(`Bonjour ${c.name} !`))),
     h('nav', { class: 'home-menu' },
+      dailyButton(),
       domains.map((d) => h('button', { class: `domain-btn domain-${d.id}`, 'data-domain': d.id, onclick: () => domainScreen(d.id) },
         h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, d.icon), h('span', {}, d.title))),
       h('button', { class: 'domain-btn domain-album', onclick: albumScreen },
         h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🏆'),
         h('span', {}, 'Mon album'),
         h('span', { class: 'pill' }, `${stickersUnlocked(child().stars)}/${STICKERS.length}`)))));
+}
+
+// ---------------------------------------------------------------- Défi du jour
+
+/** Date du jour (ou d'un autre jour, en décalage), au format AAAA-MM-JJ, à l'heure locale. */
+function dayKey(offset = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function hashText(text) {
+  let hash = 2166136261;
+  for (const ch of text) hash = Math.imul(hash ^ ch.codePointAt(0), 16777619);
+  return hash >>> 0;
+}
+
+/**
+ * Le défi du jour : 5 questions tirées des jeux de la classe, au niveau de l'enfant.
+ * Les mêmes jeux toute la journée ; une étoile bonus et un jour de plus dans la série.
+ */
+function dailyGame() {
+  const pool = programFor(child().grade).flatMap((d) => d.games).filter(({ game }) => !game.paliers);
+  const picks = sample(createRng(hashText(`${dayKey()}:${store.active}`)), pool, 5);
+  return {
+    id: 'defi',
+    domain: 'defi',
+    title: 'Défi du jour',
+    icon: '🔥',
+    levels: ['Défi du jour'],
+    range: { min: 1, max: 1 },
+    fixedLevel: true,
+    badge: () => 'Défi 🔥',
+    generate(_level, rng, index, context) {
+      const { game, min, max } = picks[index % picks.length];
+      const level = Math.min(max, Math.max(min, gameStats(child(), game.id, min).level));
+      const q = game.generate(level, rng, index, context);
+      return { ...q, key: `defi:${q.key}`, from: game.id };
+    },
+  };
+}
+
+function dailyButton() {
+  const daily = child().daily;
+  const done = daily?.last === dayKey();
+  const streak = daily && (done || daily.last === dayKey(-1)) ? daily.streak : 0;
+  return h('button', {
+    class: `domain-btn domain-defi${done ? ' done' : ''}`,
+    'data-defi': '',
+    onclick: () => startSession(dailyGame(), { back: homeScreen, total: 5 }),
+  },
+  h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🔥'),
+  h('span', {}, 'Défi du jour'),
+  done || streak ? h('span', { class: 'pill' }, done ? '✓ fait' : `${streak} j.`) : null);
 }
 
 // ---------------------------------------------------------------- Choix du jeu
@@ -360,8 +415,8 @@ function palierMap(min = 1, max = CALC_PALIERS.length) {
 
 // ---------------------------------------------------------------- Partie
 
-function startSession(game, { level, back } = {}) {
-  const { min, max } = levelRange(child().grade, game.id);
+function startSession(game, { level, back, total } = {}) {
+  const { min, max } = game.range || levelRange(child().grade, game.id);
   const stats = gameStats(child(), game.id, min);
   const startLevel = level || Math.min(max, Math.max(min, stats.level));
   const session = {
@@ -370,7 +425,7 @@ function startSession(game, { level, back } = {}) {
     max,
     back: back || (() => domainScreen(game.domain)),
     index: 0,
-    total: store.settings.sessionLength,
+    total: total || store.settings.sessionLength,
     correct: 0,
     recentKeys: [],
     briefed: new Set(), // consignes déjà dites en entier pendant cette partie
@@ -417,7 +472,7 @@ function nextQuestion(session) {
 
   let stage = null;
   let zone;
-  const custom = { build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone }[q.interaction];
+  const custom = { build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
   } else {
@@ -641,8 +696,10 @@ function matchZone(ctx) {
   const drawLine = (a, b, color) => {
     const ra = a.getBoundingClientRect();
     const rb = b.getBoundingClientRect();
-    const [x1, y1] = local(ra.right, ra.top + ra.height / 2);
-    const [x2, y2] = local(rb.left, rb.top + rb.height / 2);
+    // deux colonnes (portrait) : de côté à côté ; deux lignes (paysage) : de haut en bas
+    const stacked = rb.top >= ra.bottom - 1;
+    const [x1, y1] = stacked ? local(ra.left + ra.width / 2, ra.bottom) : local(ra.right, ra.top + ra.height / 2);
+    const [x2, y2] = stacked ? local(rb.left + rb.width / 2, rb.top) : local(rb.left, rb.top + rb.height / 2);
     const line = svgEl('line', { x1, y1, x2, y2, stroke: color });
     lines.append(line);
     return line;
@@ -984,6 +1041,56 @@ function sudokuZone(ctx) {
   const zone = h('div', { class: 'choices sudoku-palette', style: { '--n': size } }, palette);
   refresh();
   return { stage: h('div', { class: 'stage stage-sudoku' }, board), zone };
+}
+
+// ---- Symétrie : colorier les cases de l'autre côté du trait
+
+function symmetryZone(ctx) {
+  const { q } = ctx;
+  const { cols, rows, axis, model, solution } = q.stage;
+  const isTarget = (i) => (axis === 'v' ? i % cols >= cols / 2 : Math.floor(i / cols) >= rows / 2);
+  const filled = new Set();
+  const cells = Array.from({ length: cols * rows }, (_, i) => {
+    const target = isTarget(i);
+    const el = h(target ? 'button' : 'span', {
+      class: `sym-cell ${target ? 'target' : 'model'}${model.includes(i) ? ' on' : ''}`,
+      'data-cell': i,
+      'aria-label': target ? `Case ${Math.floor(i / cols) + 1}-${(i % cols) + 1}` : undefined,
+      'aria-pressed': target ? 'false' : undefined,
+    });
+    if (target) {
+      el.addEventListener('click', () => {
+        if (ctx.session.locked) return;
+        if (filled.has(i)) filled.delete(i);
+        else filled.add(i);
+        el.classList.toggle('on', filled.has(i));
+        el.classList.remove('wrong', 'hint');
+        el.setAttribute('aria-pressed', String(filled.has(i)));
+        playSound('tap');
+      });
+    }
+    return el;
+  });
+  const validate = () => {
+    if (ctx.session.locked) return;
+    const wrong = [...filled].filter((c) => !solution.includes(c));
+    const missing = solution.filter((c) => !filled.has(c));
+    if (!wrong.length && !missing.length) {
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    wrong.forEach((c) => cells[c].classList.add('wrong'));
+    setTimeout(() => wrong.forEach((c) => cells[c].classList.remove('wrong')), 1600);
+    if (ctx.session.attempts >= 1) missing.forEach((c) => cells[c].classList.add('hint'));
+    markWrong(ctx, {
+      message: wrong.length ? 'Regarde bien dans le miroir !' : `Il manque ${missing.length} case${missing.length > 1 ? 's' : ''} !`,
+      given: `${filled.size} cases`,
+    });
+  };
+  const grid = h('div', { class: `sym-grid axis-${axis}`, style: { '--cols': cols, '--rows': rows } }, cells);
+  const zone = h('div', { class: 'choices sym-zone' }, h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
+  return { stage: h('div', { class: 'stage stage-sym' }, grid), zone };
 }
 
 // ---- Ranger dans l'ordre (tailles ou nombres)
@@ -1400,6 +1507,17 @@ function finishSession(session) {
   const stats = gameStats(kid, game.id, session.min);
   kid.games[game.id] = { ...stats, sessions: stats.sessions + 1, bestStars: Math.max(stats.bestStars, stars) };
   let palierLine = null;
+  let dailyLine = null;
+  if (game.id === 'defi') {
+    const firstToday = kid.daily?.last !== dayKey();
+    if (firstToday) {
+      const streak = kid.daily?.last === dayKey(-1) ? (kid.daily.streak || 0) + 1 : 1;
+      kid.daily = { last: dayKey(), streak, best: Math.max(streak, kid.daily?.best || 0) };
+      kid.stars += 1; // une étoile bonus par jour
+    }
+    dailyLine = h('p', { class: 'daily-result' }, `🔥 ${kid.daily.streak} jour${kid.daily.streak > 1 ? 's' : ''} d’affilée`,
+      firstToday ? h('b', {}, ' · +1 ⭐') : null);
+  }
   if (game.paliers) {
     const palier = CALC_PALIERS[session.levelState.level - 1];
     const previous = kid.paliers[palier.id]?.stars || 0;
@@ -1431,11 +1549,12 @@ function finishSession(session) {
     h('h1', {}, frenchSpacing(title)),
     h('p', { class: 'result-detail' }, `${session.correct} sur ${session.total} du premier coup`),
     palierLine,
+    dailyLine,
     unlocked.length
       ? h('div', { class: 'new-sticker' }, h('span', { class: 'sticker-big' }, unlocked.at(-1).emoji), h('p', {}, 'Nouvel autocollant !'))
       : null,
     h('div', { class: 'result-actions' },
-      h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers ? session.levelState.level : undefined, back: session.back }) }, '🔁 Rejouer'),
+      h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers ? session.levelState.level : undefined, back: session.back, total: game.id === 'defi' ? session.total : undefined }) }, '🔁 Rejouer'),
       h('button', { class: 'big-btn', onclick: session.back }, game.paliers ? '🗺️ Les paliers' : '🎲 Autres jeux'))));
   playSound('fanfare');
   say(me(), [

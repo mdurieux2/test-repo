@@ -5,6 +5,8 @@ import { MATHS_EXTRA_GAMES } from './maths-extra.js';
 import { ANGLAIS_GAMES } from './anglais.js';
 import { LABYRINTHE_GAMES, cheminLettres } from './labyrinthes.js';
 import { petitsTextes } from './textes.js';
+import { LOGIQUE_GAMES } from './logique.js';
+import { MONDE_GAMES } from './monde.js';
 
 export const DOMAINS = [
   {
@@ -17,9 +19,10 @@ export const DOMAINS = [
     id: 'maths',
     title: 'Maths',
     icon: '🔢',
-    games: [...MATHS_GAMES, ...MATHS_EXTRA_GAMES, ...LABYRINTHE_GAMES.filter((g) => g.domain === 'maths')],
+    games: [...MATHS_GAMES, ...MATHS_EXTRA_GAMES, ...LOGIQUE_GAMES, ...LABYRINTHE_GAMES.filter((g) => g.domain === 'maths')],
   },
   { id: 'anglais', title: 'Anglais', icon: '🇬🇧', games: ANGLAIS_GAMES },
+  { id: 'monde', title: 'Le monde', icon: '🌍', games: MONDE_GAMES },
 ];
 
 export const GAMES = DOMAINS.flatMap((d) => d.games);
