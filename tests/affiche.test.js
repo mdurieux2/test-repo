@@ -10,7 +10,9 @@ import {
   ADULTS, ADULT_HAIRS, CHILD_HAIRS, CUSTOM_DEFAULT, GENDERS, HAIR_COLORS, LAYOUTS, SKINS, THEMES,
   adultHairsFor, contrast, customTheme, hairsFor,
 } from '../affiche/js/themes.js';
-import { DEFAULTS, jerseyName, jerseyNumber, resolveScene, withDefaults } from '../affiche/js/poster.js';
+import {
+  DEFAULTS, jerseyName, jerseyNumber, resolveScene, titleSplits, withDefaults,
+} from '../affiche/js/poster.js';
 import { HAIRS_BELOW, PLACEMENTS } from '../affiche/js/figures.js';
 
 const APP = new URL('../affiche/', import.meta.url).pathname;
@@ -121,6 +123,21 @@ test('maillots : prénoms en majuscules, numéros de 2 chiffres au plus', () => 
   assert.equal(jerseyNumber('1a2b3'), '12');
   assert.equal(jerseyNumber(7), '7');
   assert.equal(jerseyNumber(''), '');
+});
+
+test('titre long : coupé aux espaces, sinon après un trait d’union', () => {
+  assert.deepEqual(titleSplits('PARIS SAINT-GERMAIN'), [['PARIS', 'SAINT-GERMAIN']]);
+  assert.deepEqual(titleSplits('ALLEZ LES BLEUS'), [['ALLEZ', 'LES BLEUS'], ['ALLEZ LES', 'BLEUS']]);
+  assert.deepEqual(titleSplits('SAINT-ÉTIENNE'), [['SAINT-', 'ÉTIENNE']]);
+  assert.deepEqual(titleSplits('PARIS'), []);
+  assert.deepEqual(titleSplits('ALLEZ-'), []);
+});
+
+test('saisie : titre de 30 caractères, prénoms de 16 (PARIS SAINT-GERMAIN, JEAN-BAPTISTE…)', () => {
+  const html = readFileSync(join(APP, 'index.html'), 'utf8');
+  assert.equal(Number(html.match(/id="title"[^>]*maxlength="(\d+)"/)[1]), 30);
+  const main = readFileSync(join(APP, 'js/main.js'), 'utf8');
+  assert.equal(Number(main.match(/\.name" type="text" maxlength="(\d+)"/)[1]), 16);
 });
 
 test('couleurs : prénoms lisibles sur le maillot, titre lisible sur le fond', () => {

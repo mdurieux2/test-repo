@@ -2,7 +2,7 @@
 // Changer VERSION à chaque mise à jour publiée.
 // Tout nouveau fichier de l'app doit être ajouté à PRECACHE (vérifié par les tests).
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const PREFIX = 'affiche-foot-';
 const CACHE = `${PREFIX}${VERSION}`;
 
