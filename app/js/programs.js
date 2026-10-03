@@ -52,12 +52,12 @@ export const PROGRAMS = {
       ['histoires', 1, 1],
     ],
     maths: [
-      ['compter', 1, 4], ['vite-vu', 1, 2], ['panier', 1, 4], ['patates', 1, 2], ['relier', 1, 3],
+      ['compter', 1, 4], ['vite-vu', 1, 2], ['panier', 1, 4], ['patates', 1, 2], ['relier', 1, 6],
       ['comparer', 1, 2], ['suite', 1, 2], ['calcul', 1, 6], ['relie-calculs', 1, 1], ['faire-dix', 1, 2],
       ['ranger', 1, 3], ['problemes', 1, 3], ['doubles', 1, 1],
     ],
     jeux: [
-      ['formes', 2, 3], ['algorithmes', 2, 4], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
+      ['formes', 2, 6], ['algorithmes', 2, 7], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
       ['symetrie', 1, 1], ['reproduire', 1, 1], ['tangram', 1, 2], ['cubes', 1, 2], ['labyrinthe', 1, 3],
       ['chemin-nombres', 1, 2], ['chemin-lettres', 1, 2],
       ['puzzle', 1, 4], ['memory', 1, 5], ['coloriage-magique', 1, 3], ['points', 1, 3],
@@ -115,17 +115,17 @@ export const PROGRAMS = {
     ],
     maths: [
       ['patates', 4, 8], ['dizaines', 2, 8], ['comparer', 2, 7], ['suite', 3, 8], ['calcul', 4, 36],
-      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 6], ['tables', 1, 6], ['ranger', 5, 7],
-      ['problemes', 4, 7], ['doubles', 2, 4],
+      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 6], ['tables', 1, 9], ['ranger', 5, 10],
+      ['problemes', 4, 10], ['doubles', 2, 7],
     ],
     jeux: [
-      ['intrus', 2, 3], ['ombres', 3, 3], ['sudoku', 3, 6], ['symetrie', 2, 4], ['reproduire', 2, 3],
-      ['tangram', 2, 2], ['cubes', 2, 4], ['labyrinthe', 3, 6], ['chemin-nombres', 5, 8],
-      ['chemin-lettres', 3, 4],
+      ['intrus', 2, 6], ['ombres', 3, 6], ['sudoku', 3, 9], ['symetrie', 2, 7], ['reproduire', 2, 6],
+      ['tangram', 2, 5], ['cubes', 2, 7], ['labyrinthe', 3, 9], ['chemin-nombres', 5, 11],
+      ['chemin-lettres', 3, 7],
       ['puzzle', 3, 6], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
     ],
     temps: [
-      ['heure', 2, 4], ['calendrier', 2, 4], ['saisons', 2, 4], ['monnaie', 2, 4], ['mesures', 2, 5],
+      ['heure', 2, 7], ['calendrier', 2, 4], ['saisons', 2, 4], ['monnaie', 2, 4], ['mesures', 2, 5],
     ],
     monde: [
       ['animaux-monde', 2, 4], ['pays', 1, 3],
