@@ -3,6 +3,7 @@
 // l'espace parents. Vérifie aussi la mise en page de chaque niveau sur un petit iPhone.
 // Usage : npm run test:e2e   (SCREENSHOTS=dossier pour enregistrer des captures)
 //         ONLY=memory,points npm run test:e2e   (seulement la mise en page de ces jeux, sur tous les appareils)
+//         PORT=8124 pour lancer plusieurs tests en même temps
 
 import { chromium } from 'playwright';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -12,7 +13,7 @@ import { CALC_PALIERS } from '../app/js/games/maths.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 
-const PORT = 8123;
+const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
 const SHOTS = process.env.SCREENSHOTS;
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
