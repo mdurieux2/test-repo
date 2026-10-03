@@ -17,60 +17,113 @@ import { DOMAINS, findGame } from './games/index.js';
 
 export const PROGRAMS = {
   MS: {
-    francais: [['syllabes-rythme', 1, 2], ['rimes', 1, 1], ['lettres', 1, 2], ['chemin-lettres', 1, 1]],
-    maths: [
-      ['compter', 1, 2], ['vite-vu', 1, 1], ['panier', 1, 3], ['relier', 1, 2],
-      ['comparer', 1, 1], ['suite', 1, 1], ['faire-dix', 1, 1], ['ranger', 1, 2],
-      ['formes', 1, 2], ['algorithmes', 1, 3], ['intrus', 1, 1], ['ombres', 1, 2], ['sudoku', 1, 1],
-      ['labyrinthe', 1, 2], ['chemin-nombres', 1, 1],
+    francais: [
+      ['syllabes-rythme', 1, 2], ['rimes', 1, 1], ['lettres', 1, 2],
     ],
-    anglais: [['ecoute', 1, 3], ['compte-anglais', 1, 1], ['ou-est', 1, 1]],
+    histoires: [
+      ['histoires', 1, 1],
+    ],
+    maths: [
+      ['compter', 1, 2], ['vite-vu', 1, 1], ['panier', 1, 3], ['relier', 1, 2], ['comparer', 1, 1],
+      ['suite', 1, 1], ['faire-dix', 1, 1], ['ranger', 1, 2],
+    ],
+    jeux: [
+      ['formes', 1, 2], ['algorithmes', 1, 3], ['intrus', 1, 1], ['ombres', 1, 2], ['sudoku', 1, 1],
+      ['tangram', 1, 1], ['cubes', 1, 1], ['labyrinthe', 1, 2], ['chemin-nombres', 1, 1],
+      ['chemin-lettres', 1, 1],
+    ],
+    temps: [
+      ['saisons', 1, 1],
+    ],
+    monde: [
+      ['animaux-monde', 1, 1],
+    ],
+    anglais: [
+      ['ecoute', 1, 3], ['compte-anglais', 1, 1], ['ou-est', 1, 1],
+    ],
   },
   GS: {
     francais: [
-      ['syllabes-rythme', 1, 3], ['rimes', 1, 2], ['lettres', 2, 4], ['premier-son', 1, 2], ['syllabes', 1, 1],
-      ['chemin-lettres', 1, 2],
+      ['syllabes-rythme', 1, 3], ['rimes', 1, 2], ['lettres', 2, 4], ['premier-son', 1, 2],
+      ['syllabes', 1, 1],
+    ],
+    histoires: [
+      ['histoires', 1, 1],
     ],
     maths: [
       ['compter', 1, 4], ['vite-vu', 1, 2], ['panier', 1, 4], ['patates', 1, 2], ['relier', 1, 3],
-      ['comparer', 1, 2], ['suite', 1, 2], ['faire-dix', 1, 2], ['calcul', 1, 6], ['relie-calculs', 1, 1], ['ranger', 1, 3],
-      ['problemes', 1, 3], ['doubles', 1, 1],
-      ['formes', 2, 3], ['algorithmes', 2, 4], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
-      ['labyrinthe', 1, 3], ['chemin-nombres', 1, 2],
+      ['comparer', 1, 2], ['suite', 1, 2], ['calcul', 1, 6], ['relie-calculs', 1, 1], ['faire-dix', 1, 2],
+      ['ranger', 1, 3], ['problemes', 1, 3], ['doubles', 1, 1],
     ],
-    anglais: [['ecoute', 1, 5], ['compte-anglais', 1, 2], ['ou-est', 1, 2]],
+    jeux: [
+      ['formes', 2, 3], ['algorithmes', 2, 4], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
+      ['symetrie', 1, 1], ['reproduire', 1, 1], ['tangram', 1, 2], ['cubes', 1, 2], ['labyrinthe', 1, 3],
+      ['chemin-nombres', 1, 2], ['chemin-lettres', 1, 2],
+    ],
+    temps: [
+      ['saisons', 1, 2], ['mesures', 1, 1],
+    ],
+    monde: [
+      ['animaux-monde', 1, 2],
+    ],
+    anglais: [
+      ['ecoute', 1, 5], ['compte-anglais', 1, 2], ['ou-est', 1, 2], ['parle-anglais', 1, 1],
+    ],
   },
   CP: {
     francais: [
-      ['premier-son', 1, 3], ['syllabes', 1, 3], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['petits-textes', 1, 2],
-      ['genre', 1, 1], ['chemin-lettres', 2, 3],
+      ['premier-son', 1, 3], ['syllabes', 1, 3], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
+    ],
+    histoires: [
+      ['histoires', 1, 2], ['petits-textes', 1, 2],
     ],
     maths: [
       ['compter', 1, 6], ['vite-vu', 1, 4], ['panier', 1, 7], ['patates', 2, 4], ['dizaines', 1, 4],
-      ['comparer', 1, 3], ['suite', 1, 4], ['calcul', 1, 36], ['trous', 1, 4], ['relie-calculs', 1, 5], ['faire-dix', 1, 3], ['ranger', 3, 5],
-      ['problemes', 1, 5], ['doubles', 1, 3],
-      ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['heure', 1, 2],
-      ['labyrinthe', 2, 4], ['chemin-nombres', 2, 7],
+      ['comparer', 1, 3], ['suite', 1, 4], ['calcul', 1, 36], ['trous', 1, 4], ['relie-calculs', 1, 5],
+      ['faire-dix', 1, 3], ['ranger', 3, 5], ['problemes', 1, 5], ['doubles', 1, 3],
+    ],
+    jeux: [
+      ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['symetrie', 1, 3], ['reproduire', 1, 2],
+      ['tangram', 1, 2], ['cubes', 1, 3], ['labyrinthe', 2, 4], ['chemin-nombres', 2, 7],
+      ['chemin-lettres', 2, 3],
+    ],
+    temps: [
+      ['heure', 1, 2], ['calendrier', 1, 2], ['saisons', 1, 3], ['monnaie', 1, 3], ['mesures', 1, 4],
+    ],
+    monde: [
+      ['animaux-monde', 1, 3], ['pays', 1, 2],
     ],
     anglais: [
-      ['ecoute', 1, 10], ['lis-anglais', 1, 4], ['relie-anglais', 1, 4], ['compte-anglais', 1, 3], ['ou-est', 1, 3],
+      ['ecoute', 1, 10], ['lis-anglais', 1, 4], ['relie-anglais', 1, 4], ['compte-anglais', 1, 3],
+      ['ou-est', 1, 3], ['parle-anglais', 1, 2],
     ],
   },
   CE1: {
     francais: [
-      ['bon-mot', 2, 3], ['petits-mots', 2, 3], ['petits-textes', 2, 3], ['phrase', 1, 2], ['homophones', 1, 2],
-      ['genre', 1, 3], ['chemin-lettres', 3, 4],
+      ['bon-mot', 2, 3], ['petits-mots', 2, 3], ['phrase', 1, 2], ['homophones', 1, 2], ['genre', 1, 3],
+    ],
+    histoires: [
+      ['histoires', 2, 3], ['petits-textes', 2, 3],
     ],
     maths: [
-      ['patates', 4, 5], ['dizaines', 2, 5],
-      ['comparer', 2, 4], ['suite', 3, 5], ['calcul', 4, 36], ['trous', 3, 6], ['relie-calculs', 3, 6], ['tables', 1, 6], ['faire-dix', 2, 3],
-      ['ranger', 5, 7], ['problemes', 4, 7], ['doubles', 2, 4],
-      ['intrus', 2, 3], ['ombres', 3, 3], ['sudoku', 3, 6], ['heure', 2, 4],
-      ['labyrinthe', 3, 6], ['chemin-nombres', 5, 8],
+      ['patates', 4, 5], ['dizaines', 2, 5], ['comparer', 2, 4], ['suite', 3, 5], ['calcul', 4, 36],
+      ['trous', 3, 6], ['relie-calculs', 3, 6], ['faire-dix', 2, 3], ['tables', 1, 6], ['ranger', 5, 7],
+      ['problemes', 4, 7], ['doubles', 2, 4],
+    ],
+    jeux: [
+      ['intrus', 2, 3], ['ombres', 3, 3], ['sudoku', 3, 6], ['symetrie', 2, 4], ['reproduire', 2, 3],
+      ['tangram', 2, 2], ['cubes', 2, 4], ['labyrinthe', 3, 6], ['chemin-nombres', 5, 8],
+      ['chemin-lettres', 3, 4],
+    ],
+    temps: [
+      ['heure', 2, 4], ['calendrier', 2, 4], ['saisons', 2, 4], ['monnaie', 2, 4], ['mesures', 2, 5],
+    ],
+    monde: [
+      ['animaux-monde', 2, 4], ['pays', 1, 3],
     ],
     anglais: [
       ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],
-      ['compte-anglais', 3, 4], ['ou-est', 2, 3], ['epelle-anglais', 1, 10],
+      ['compte-anglais', 3, 4], ['ou-est', 2, 3], ['epelle-anglais', 1, 10], ['parle-anglais', 1, 3],
     ],
   },
 };

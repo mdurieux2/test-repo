@@ -260,4 +260,91 @@ export const epelleAnglais = {
   },
 };
 
-export const ANGLAIS_GAMES = [ecoute, lisAnglais, motAnglais, relieAnglais, compteAnglais, ouEst, epelleAnglais];
+// Parler anglais : saluer, répondre à une question simple, finir une comptine.
+
+const GREETINGS = [
+  { emoji: '👋', situation: 'Tu arrives à l’école. Tu dis…', en: 'Hello!' },
+  { emoji: '🚪', situation: 'Tu rentres chez toi. Tu dis à ta copine…', en: 'Goodbye!' },
+  { emoji: '🎁', situation: 'On te donne un cadeau. Tu dis…', en: 'Thank you!' },
+  { emoji: '🌙', situation: 'C’est l’heure de dormir. Tu dis…', en: 'Good night!' },
+  { emoji: '🌅', situation: 'C’est le matin. Tu dis…', en: 'Good morning!' },
+  { emoji: '🎂', situation: 'C’est l’anniversaire de ton ami. Tu dis…', en: 'Happy birthday!' },
+];
+const NURSERY = [
+  { line: 'Twinkle, twinkle, little…', word: 'star', emoji: '⭐', fr: 'étoile' },
+  { line: 'Baa, baa, black…', word: 'sheep', emoji: '🐑', fr: 'mouton' },
+  { line: 'Old MacDonald had a…', word: 'farm', emoji: '🚜', fr: 'ferme' },
+  { line: 'Head, shoulders, knees and…', word: 'toes', emoji: '🦶', fr: 'orteils' },
+  { line: 'Humpty Dumpty sat on a…', word: 'wall', emoji: '🧱', fr: 'mur' },
+  { line: 'Incy Wincy…', word: 'spider', emoji: '🕷️', fr: 'araignée' },
+  { line: 'Row, row, row your…', word: 'boat', emoji: '🚣', fr: 'bateau' },
+  { line: 'The wheels on the…', word: 'bus', emoji: '🚌', fr: 'bus' },
+];
+
+export const parleAnglais = {
+  id: 'parle-anglais',
+  domain: 'anglais',
+  title: 'Parle anglais',
+  icon: '💬',
+  skill: 'Saluer, se présenter, répondre en anglais ; connaître des comptines',
+  levels: ['Bonjour, merci, au revoir', 'Petites conversations', 'Les comptines'],
+  generate(level, rng, index = 0, context = {}) {
+    const name = context.name || 'Lou';
+    if (level === 1) {
+      const target = pick(rng, GREETINGS);
+      const options = shuffle(rng, [target, ...sample(rng, GREETINGS.filter((g) => g !== target), 2)]);
+      return {
+        key: `parle:salut:${target.en}`,
+        text: target.situation,
+        instruction: [target.situation, ...options.flatMap((o, i) => [i ? 'ou' : '', { text: o.en, lang: EN, rate: 0.85 }]).filter(Boolean)],
+        short: { key: 'parle:salut', text: target.situation },
+        stage: { type: 'picture', emoji: target.emoji },
+        choices: options.map((o) => ({ value: o.en, label: o.en, lang: 'en' })),
+        choiceStyle: 'answers',
+        answer: target.en,
+        success: { speak: [{ text: target.en, lang: EN }] },
+      };
+    }
+    if (level === 2) {
+      const age = 5 + Math.floor(rng() * 4);
+      const talks = [
+        { q: 'What’s your name?', a: `My name is ${name}.`, wrong: [`I’m ${age}.`, 'I’m fine, thank you.'] },
+        { q: 'How old are you?', a: `I’m ${age}.`, wrong: [`My name is ${name}.`, 'I like cats.'] },
+        { q: 'How are you?', a: 'I’m fine, thank you.', wrong: [`I’m ${age}.`, 'Goodbye!'] },
+        { q: 'What colour is it?', a: 'It’s red.', wrong: ['It’s a dog.', `My name is ${name}.`], emoji: '🍎' },
+        { q: 'What is it?', a: 'It’s a cat.', wrong: ['It’s blue.', 'I’m fine.'], emoji: '🐱' },
+        { q: 'Do you like ice cream?', a: 'Yes, I do!', wrong: ['It’s a cat.', 'Good night!'], emoji: '🍦' },
+      ];
+      const talk = pick(rng, talks);
+      const options = shuffle(rng, [talk.a, ...talk.wrong]);
+      return {
+        key: `parle:dialogue:${talk.q}`,
+        text: 'Écoute la question et choisis la bonne réponse.',
+        instruction: ['Écoute la question, et choisis la bonne réponse.', { text: talk.q, lang: EN, rate: 0.85 }],
+        short: { key: 'parle:dialogue', text: 'Quelle réponse ?', speak: [{ text: talk.q, lang: EN, rate: 0.85 }] },
+        replay: [{ text: talk.q, lang: EN, rate: 0.85 }],
+        stage: talk.emoji ? { type: 'picture', emoji: talk.emoji } : { type: 'listen' },
+        choices: options.map((o) => ({ value: o, label: o, lang: 'en' })),
+        choiceStyle: 'answers',
+        answer: talk.a,
+        success: { speak: [{ text: talk.q, lang: EN }, { text: talk.a, lang: EN }] },
+      };
+    }
+    const rhyme = pick(rng, NURSERY);
+    const options = shuffle(rng, [rhyme, ...sample(rng, NURSERY.filter((r) => r !== rhyme), 2)]);
+    return {
+      key: `parle:comptine:${rhyme.word}`,
+      text: 'Finis la comptine !',
+      instruction: ['Écoute la comptine, et trouve le mot qui manque.', { text: rhyme.line, lang: EN, rate: 0.8 }],
+      short: { key: 'parle:comptine', text: 'Finis la comptine !', speak: [{ text: rhyme.line, lang: EN, rate: 0.8 }] },
+      replay: [{ text: rhyme.line, lang: EN, rate: 0.8 }],
+      stage: { type: 'sentence', text: rhyme.line, lang: 'en' },
+      choices: options.map((o) => ({ value: o.word, label: o.emoji, name: o.fr })),
+      choiceStyle: 'pictures',
+      answer: rhyme.word,
+      success: { speak: [{ text: `${rhyme.line.replace('…', '')} ${rhyme.word}!`, lang: EN }] },
+    };
+  },
+};
+
+export const ANGLAIS_GAMES = [ecoute, lisAnglais, motAnglais, relieAnglais, compteAnglais, ouEst, epelleAnglais, parleAnglais];

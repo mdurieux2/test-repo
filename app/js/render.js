@@ -1,6 +1,7 @@
 // Fabrique des éléments DOM à partir des données des questions.
 
-import { avatarSvg } from './characters.js';
+import { ACCESSORIES, avatarSvg } from './characters.js';
+import { PIECES } from './games/logique.js';
 
 /** h('div', {class: 'x', onclick}, enfant1, enfant2…) */
 export function h(tag, attrs = {}, ...children) {
@@ -59,7 +60,7 @@ function operationStage({ a, b, op, emoji, hideEquation = false }) {
 /** Petit problème : l'histoire écrite, et des images pour les plus jeunes. */
 function storyStage({ text, picture }) {
   return h('div', { class: 'stage-story' },
-    h('p', { class: 'story-text' }, text),
+    h('p', { class: 'story-text' }, wordSpans(text)),
     picture ? operationStage({ ...picture, hideEquation: true }) : null);
 }
 
@@ -200,7 +201,7 @@ export function renderStage(stage, actions) {
     case 'swatch':
       return h('span', { class: 'stage-swatch', style: { background: stage.color } });
     case 'sentence':
-      return h('p', { class: 'stage-sentence', lang: stage.lang }, stage.text);
+      return h('p', { class: 'stage-sentence', lang: stage.lang }, wordSpans(stage.text));
     case 'text':
       return textStage(stage, actions);
     case 'word':
@@ -211,8 +212,24 @@ export function renderStage(stage, actions) {
       return storyStage(stage);
     case 'clock':
       return clockStage(stage);
+    case 'cubes':
+      return cubesStage(stage);
+    case 'money':
+      return h('div', { class: 'stage-money' }, stage.items.map(moneyItem));
+    case 'price':
+      return priceStage(stage);
+    case 'ruler':
+      return rulerStage(stage);
+    case 'balance':
+      return balanceStage(stage);
+    case 'calendar':
+      return calendarStage(stage);
+    case 'tangram':
+      return tangramStage(stage);
+    case 'karaoke':
+      return karaokeStage(stage, actions);
     case 'sequence':
-      return h('div', { class: 'sequence' },
+      return h('div', { class: `sequence${stage.items.some((n) => typeof n === 'string') ? ' words' : ''}` },
         stage.items.map((n) => h('span', { class: n === null ? 'seq-item gap' : 'seq-item' }, n === null ? '?' : n)));
     case 'frame':
       return frameStage(stage);
@@ -228,7 +245,7 @@ export function renderStage(stage, actions) {
 function textStage({ title, text }, actions) {
   return h('div', { class: 'stage-text' },
     title ? h('h2', { class: 'text-title' }, title) : null,
-    h('p', { class: 'text-body' }, text),
+    h('p', { class: 'text-body' }, wordSpans(text)),
     h('button', { class: 'text-listen', onclick: () => actions.speak?.([{ text: `${title ? `${title}. ` : ''}${text}`, rate: 0.9 }]) }, '🔊 Écouter le texte'));
 }
 
@@ -244,6 +261,118 @@ function sceneContent({ who, where }, label) {
   return el;
 }
 
+/**
+ * Des cubes empilés, dessinés en perspective (isométrique). heights[y][x] = nombre de cubes
+ * de la pile ; y grandit vers l'enfant, x vers la droite. On dessine du fond vers l'avant.
+ */
+export function cubesSvg(heights) {
+  const iso = (x, y, z) => [(x - y) * 0.866, (x + y) * 0.5 - z];
+  const cubes = [];
+  heights.forEach((row, y) => row.forEach((hgt, x) => { for (let z = 0; z < hgt; z++) cubes.push([x, y, z]); }));
+  cubes.sort((a, b) => a[0] + a[1] + a[2] - (b[0] + b[1] + b[2]));
+  const all = [];
+  const face = (cls, pts) => {
+    all.push(...pts);
+    return `<polygon class="${cls}" points="${pts.map(([X, Y]) => `${X.toFixed(3)},${Y.toFixed(3)}`).join(' ')}"/>`;
+  };
+  const faces = cubes.map(([x, y, z]) => [
+    face('cube-right', [iso(x + 1, y, z), iso(x + 1, y + 1, z), iso(x + 1, y + 1, z + 1), iso(x + 1, y, z + 1)]),
+    face('cube-left', [iso(x, y + 1, z), iso(x + 1, y + 1, z), iso(x + 1, y + 1, z + 1), iso(x, y + 1, z + 1)]),
+    face('cube-top', [iso(x, y, z + 1), iso(x + 1, y, z + 1), iso(x + 1, y + 1, z + 1), iso(x, y + 1, z + 1)]),
+  ].join('')).join('');
+  const xs = all.map((p) => p[0]);
+  const ys = all.map((p) => p[1]);
+  const [minX, minY] = [Math.min(...xs) - 0.1, Math.min(...ys) - 0.1];
+  const [w, hgt] = [Math.max(...xs) - minX + 0.1, Math.max(...ys) - minY + 0.1];
+  return `<svg viewBox="${minX.toFixed(2)} ${minY.toFixed(2)} ${w.toFixed(2)} ${hgt.toFixed(2)}" aria-hidden="true">${faces}</svg>`;
+}
+
+function cubesStage({ heights }) {
+  const el = h('div', { class: 'stage-cubes', role: 'img', 'aria-label': 'Des cubes empilés' });
+  el.innerHTML = cubesSvg(heights);
+  return el;
+}
+
+/** Une pièce ou un billet en euros (le montant est toujours écrit). */
+export function moneyItem(value) {
+  if (value <= 2) return h('span', { class: `coin coin-${value}`, 'aria-label': `${value} euro${value > 1 ? 's' : ''}` }, h('b', {}, value), '€');
+  return h('span', { class: `note note-${value}`, 'aria-label': `billet de ${value} euros` }, h('b', {}, value), ' €');
+}
+
+function priceStage({ emoji, price, paid }) {
+  return h('div', { class: 'stage-price' },
+    h('span', { class: 'price-item', 'aria-hidden': 'true' }, emoji),
+    h('span', { class: 'price-tag' }, `${price} €`),
+    paid ? h('span', { class: 'price-paid' }, 'Tu donnes ', moneyItem(paid)) : null);
+}
+
+/** Une règle graduée en centimètres, avec un crayon posé dessus. */
+function rulerStage({ start, length }) {
+  const el = h('div', { class: 'stage-ruler', role: 'img', 'aria-label': 'Un crayon sur une règle' });
+  const ticks = Array.from({ length: 11 }, (_, i) => `<line x1="${5 + i * 10}" y1="34" x2="${5 + i * 10}" y2="24" /><text x="${5 + i * 10}" y="46">${i}</text>`).join('');
+  const half = Array.from({ length: 10 }, (_, i) => `<line x1="${10 + i * 10}" y1="34" x2="${10 + i * 10}" y2="29" />`).join('');
+  const x0 = 5 + start * 10;
+  const x1 = x0 + length * 10;
+  el.innerHTML = `<svg viewBox="0 0 110 50">
+    <rect x="1" y="22" width="108" height="27" rx="3" class="ruler-body"/>
+    <g class="ruler-ticks">${ticks}${half}</g>
+    <rect x="${x0}" y="8" width="${length * 10 - 6}" height="9" class="pencil-body"/>
+    <polygon points="${x1 - 6},8 ${x1},12.5 ${x1 - 6},17" class="pencil-tip"/>
+    <rect x="${x0}" y="8" width="3" height="9" class="pencil-end"/>
+  </svg>`;
+  return el;
+}
+
+/** Une balance penchée du côté le plus lourd. */
+function balanceStage({ left, right, heavier }) {
+  const tilt = heavier === 'left' ? -12 : 12;
+  const el = h('div', { class: 'stage-balance', role: 'img', 'aria-label': 'Une balance' });
+  el.innerHTML = `<svg viewBox="0 0 120 80">
+    <polygon points="52,76 68,76 60,40" class="balance-foot"/>
+    <g transform="rotate(${tilt} 60 40)">
+      <rect x="12" y="37" width="96" height="5" rx="2" class="balance-beam"/>
+      <line x1="20" y1="40" x2="20" y2="52" class="balance-rope"/><line x1="100" y1="40" x2="100" y2="52" class="balance-rope"/>
+      <path d="M6 52 h28 a14 6 0 0 1 -28 0z" class="balance-pan"/><path d="M86 52 h28 a14 6 0 0 1 -28 0z" class="balance-pan"/>
+      <text x="20" y="50" class="balance-emoji">${left}</text><text x="100" y="50" class="balance-emoji">${right}</text>
+    </g>
+    <circle cx="60" cy="40" r="3.5" class="balance-pivot"/>
+  </svg>`;
+  return el;
+}
+
+/** Un mois du calendrier (lundi en premier), une date entourée. */
+function calendarStage({ month, days, firstWeekday, mark }) {
+  const head = ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d) => h('span', { class: 'cal-head' }, d));
+  const blanks = Array.from({ length: firstWeekday }, () => h('span', { class: 'cal-day empty' }));
+  const dates = Array.from({ length: days }, (_, i) => h('span', { class: i + 1 === mark ? 'cal-day mark' : 'cal-day' }, i + 1));
+  return h('div', { class: 'stage-calendar' },
+    h('div', { class: 'cal-month' }, month),
+    h('div', { class: 'cal-grid' }, head, blanks, dates));
+}
+
+/** Les pièces du carré : les triangles posés, et le trou (en pointillés). */
+function tangramStage({ grid, pieces, missing }) {
+  const cell = (c) => [(c % grid), Math.floor(c / grid)];
+  const poly = (shape, c, attrs) => {
+    const [cx, cy] = cell(c);
+    const pts = PIECES[shape].map(([x, y]) => `${(cx + x) * 50},${(cy + y) * 50}`).join(' ');
+    return `<polygon points="${pts}" ${attrs}/>`;
+  };
+  const size = grid * 50;
+  const el = h('div', { class: 'stage-tangram', role: 'img', 'aria-label': 'Un carré avec une pièce qui manque' });
+  el.innerHTML = `<svg viewBox="-3 -3 ${size + 6} ${size + 6}">
+    ${pieces.map((p) => poly(p.shape, p.cell, `fill="${p.color}" class="tangram-piece"`)).join('')}
+    ${poly(missing.shape, missing.cell, 'class="tangram-hole"')}
+  </svg>`;
+  return el;
+}
+
+function pieceContent(shape) {
+  const el = h('span', { class: 'tangram-choice', role: 'img', 'aria-label': 'pièce' });
+  el.innerHTML = `<svg viewBox="-4 -4 58 58"><polygon points="${PIECES[shape].map(([x, y]) => `${x * 50},${y * 50}`).join(' ')}" class="tangram-piece choice-piece"/></svg>`;
+  return el;
+}
+
 /** Silhouette noire d'un objet (jeu des ombres). */
 function shadowContent(emoji, label, transform) {
   return h('span', { class: 'shadow', role: 'img', 'aria-label': label || 'ombre', style: transform ? { transform } : undefined }, emoji);
@@ -252,6 +381,10 @@ function shadowContent(emoji, label, transform) {
 export function renderChoiceContent(choice) {
   if (choice.scene) return sceneContent(choice.scene, choice.name);
   if (choice.shadow) return shadowContent(choice.shadow, choice.name, choice.transform);
+  if (choice.piece) return pieceContent(choice.piece);
+  if (choice.bar) {
+    return h('span', { class: 'pencil-choice', role: 'img', 'aria-label': choice.name, style: { width: `${choice.bar.length * 10}%`, '--pencil': choice.bar.color } });
+  }
   if (choice.objects) return objectsGrid(choice.objects.emoji, choice.objects.count, 5, 'small');
   if (choice.shape) return shapeSvg(choice.shape, choice.color);
   if (choice.swatch) return h('span', { class: 'swatch', style: { background: choice.swatch }, role: 'img', 'aria-label': choice.name });
@@ -273,13 +406,36 @@ export function setProfiles(map) {
 
 /** Portrait d'un enfant : sa photo si elle existe, sinon son dessin avec son prénom sur le tee-shirt. */
 export function avatar(id, extraClass = '', override = null) {
-  const { name = '', look = 'fille', photo = null } = override || profiles[id] || {};
+  const { name = '', look = 'fille', photo = null, style = {} } = override || profiles[id] || {};
   if (photo) {
+    const extra = ACCESSORIES.find((a) => a.id === style?.accessory);
     return h('span', { class: `avatar avatar-photo avatar-${id} ${extraClass}` },
       h('img', { src: photo, alt: name }),
+      extra ? h('span', { class: 'avatar-extra', 'aria-hidden': 'true' }, extra.emoji) : null,
       h('span', { class: 'avatar-name', 'aria-hidden': 'true' }, name));
   }
   const el = h('span', { class: `avatar avatar-${id} ${extraClass}` });
-  el.innerHTML = avatarSvg(look, name);
+  el.innerHTML = avatarSvg(look, name, { style: style || {} });
   return el;
+}
+
+/** Les mots d'une phrase, chacun dans une étiquette (lecture facilitée, karaoké). */
+export function wordSpans(text) {
+  let pos = 0;
+  return text.split(' ').flatMap((word, i) => {
+    const span = h('span', { class: 'w', 'data-start': pos, 'data-end': pos + word.length }, word);
+    pos += word.length + 1;
+    return i ? [' ', span] : [span];
+  });
+}
+
+/** Histoire lue en karaoké : titre, image, phrases (chaque mot s'allume quand il est lu). */
+function karaokeStage({ title, emoji, sentences }, actions) {
+  return h('div', { class: 'stage-karaoke' },
+    h('div', { class: 'karaoke-head' }, h('span', { class: 'karaoke-emoji', 'aria-hidden': 'true' }, emoji), h('h2', { class: 'text-title' }, title)),
+    h('p', { class: 'karaoke-text' }, sentences.flatMap((sentence, i) => {
+      const el = h('span', { class: 'k-sentence', 'data-s': i }, wordSpans(sentence));
+      return i ? [' ', el] : [el];
+    })),
+    h('button', { class: 'text-listen karaoke-replay', onclick: () => actions.readAlong?.() }, '🔊 Relire l’histoire'));
 }

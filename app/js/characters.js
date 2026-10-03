@@ -7,12 +7,12 @@ export const LOOKS = {
   fille: {
     label: 'Fille',
     colors: { bg: '#ffd9e8', skin: '#f6c9a3', hair: '#7a4a2a', shirt: '#ff6fa8', accent: '#ff3d7f' },
-    voice: { voice: 'female', pitch: 1.05 },
+    voice: { pitch: 1 },
   },
   garcon: {
     label: 'Garçon',
     colors: { bg: '#d6ecff', skin: '#efbf98', hair: '#3d2b1f', shirt: '#3d9bff' },
-    voice: { voice: 'male', pitch: 1 },
+    voice: { pitch: 1 },
   },
 };
 
@@ -79,12 +79,32 @@ const DRAWINGS = {
     ${face()}`,
 };
 
+// Pour habiller son personnage : couleurs de tee-shirt et accessoires, débloqués avec les étoiles.
+export const SHIRTS = [
+  { id: 'rose', color: '#ff6fa8', stars: 0 }, { id: 'bleu', color: '#3d9bff', stars: 0 },
+  { id: 'vert', color: '#22b07d', stars: 15 }, { id: 'violet', color: '#8b5cf6', stars: 25 },
+  { id: 'orange', color: '#f97316', stars: 35 }, { id: 'rouge', color: '#e11d48', stars: 45 },
+];
+export const ACCESSORIES = [
+  { id: 'casquette', emoji: '🧢', label: 'Casquette', stars: 5, y: 26, size: 40 },
+  { id: 'noeud', emoji: '🎀', label: 'Nœud', stars: 10, y: 24, size: 30 },
+  { id: 'couronne', emoji: '👑', label: 'Couronne', stars: 20, y: 25, size: 38 },
+  { id: 'lunettes', emoji: '🕶️', label: 'Lunettes', stars: 30, y: 68, size: 34 },
+  { id: 'chapeau', emoji: '🎩', label: 'Chapeau', stars: 40, y: 24, size: 40 },
+  { id: 'toque', emoji: '🎓', label: 'Toque', stars: 60, y: 24, size: 38 },
+  { id: 'fleur', emoji: '🌼', label: 'Fleur', stars: 80, y: 30, size: 26, x: 84 },
+  { id: 'astronaute', emoji: '🪐', label: 'Planète', stars: 100, y: 22, size: 28, x: 92 },
+];
+
 /** Portrait SVG (chaîne de caractères) en buste, sur fond coloré, avec le prénom sur le tee-shirt. */
-export function avatarSvg(look, name = '', { background = true } = {}) {
+export function avatarSvg(look, name = '', { background = true, style = {} } = {}) {
   const key = LOOKS[look] ? look : 'fille';
-  const c = LOOKS[key].colors;
+  const shirt = SHIRTS.find((s) => s.id === style.shirt);
+  const c = { ...LOOKS[key].colors, ...(shirt ? { shirt: shirt.color } : {}) };
+  const extra = ACCESSORIES.find((a) => a.id === style.accessory);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="${escapeXml(name || LOOKS[key].label)}">
   ${background ? `<rect width="120" height="120" fill="${c.bg}"/>` : ''}
   ${DRAWINGS[key](c, name)}
+  ${extra ? `<text x="${extra.x || 60}" y="${extra.y}" font-size="${extra.size}" text-anchor="middle" dominant-baseline="central">${extra.emoji}</text>` : ''}
 </svg>`;
 }

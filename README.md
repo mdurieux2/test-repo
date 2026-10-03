@@ -7,7 +7,7 @@ Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la moye
 - Un profil par enfant (jusqu'à 6), avec son prénom, son personnage et sa photo.
 - Toutes les données restent **sur l'appareil**. Rien n'est envoyé ailleurs.
 
-👉 **Adresse de l'application : <https://mdurieux2.github.io/test-repo/>**
+👉 **Adresse de l'application : <https://mdurieux2.github.io/lire-compter-samuser/>**
 
 ---
 
@@ -39,8 +39,8 @@ dans le menu Partager, tout en bas. Si elle n'y est pas : *Modifier les actions�
 - **Firefox** : l'application fonctionne directement dans un onglet.
 
 Sur ordinateur, tout se fait à la souris : cliquer, glisser (labyrinthes, étiquettes à placer),
-tracer (relier, entourer). L'écran fonctionne **en portrait comme en paysage** sur tablette et
-ordinateur ; sur téléphone, le portrait est conseillé.
+tracer (relier, entourer). L'écran fonctionne **en portrait comme en paysage**, sur téléphone
+aussi : en paysage, le dessin est à gauche, la consigne et les réponses à droite.
 
 ---
 
@@ -50,8 +50,9 @@ ordinateur ; sur téléphone, le portrait est conseillé.
    (fille ou garçon) et classe. Le prénom est écrit sur le tee-shirt du personnage et sert à
    féliciter l'enfant (« Bravo Léa ! »). On peut ajouter une photo ensuite.
 2. **« Qui joue ? »** : l'enfant touche son portrait.
-3. Il choisit une matière (**Français**, **Maths**, **Anglais**) puis un jeu. Ses autocollants
-   sont dans **Mon album**.
+3. Il choisit le **Défi du jour** (5 questions variées, une série de jours 🔥) ou une matière
+   (**Français**, **Maths**, **Anglais**, **Le monde**) puis un jeu. Ses autocollants sont dans
+   **Mon album**.
 4. Chaque jeu montre le niveau atteint (les points). En touchant **Niveaux ▾**, on choisit
    directement un niveau.
 
@@ -62,12 +63,12 @@ ordinateur ; sur téléphone, le portrait est conseillé.
 Les jeux et les niveaux s'adaptent à la classe choisie pour chaque enfant (programmes
 officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/programs.js`.
 
-| Classe | Français | Maths | Anglais |
-|---|---|---|---|
-| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, labyrinthes | Écouter et toucher, compter en anglais, « Where is the cat? » |
-| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, labyrinthes | Écouter et toucher (5 thèmes), compter, in/on/under |
-| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, sudoku | Écouter (10 thèmes), lire, relier, compter, in/on/under |
-| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants | Nombres jusqu'à 1000, tables, problèmes en deux étapes, l'heure, moitiés, sudoku 6 × 6, labyrinthes 9 × 9 | Écouter, lire, relier, épeler, trouver le mot anglais |
+| Classe | Français | Maths | Anglais | Le monde |
+|---|---|---|---|---|
+| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons |
+| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes | Écouter et toucher (5 thèmes), compter, in/on/under | Les bébés des animaux, les moments de la journée |
+| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, sudoku, symétrie, cubes | Écouter (10 thèmes), lire, relier, compter, in/on/under | Ce que mangent les animaux, les jours, les pays d'Europe et du monde |
+| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants | Nombres jusqu'à 1000, tables, problèmes en deux étapes, l'heure, moitiés, sudoku 6 × 6, labyrinthes 9 × 9 | Écouter, lire, relier, épeler, trouver le mot anglais | Qui pond des œufs, les mois, les continents |
 
 ### Les jeux
 
@@ -90,7 +91,8 @@ officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/program
   (tracer un trait jusqu'au résultat), faire 10, ranger dans l'ordre, petits problèmes
   racontés avec le prénom de l'enfant, doubles et moitiés, les tables.
 - *Formes et logique* : les formes, les suites de motifs, l'intrus, les ombres, le **sudoku**
-  (4 × 4 en images, puis en chiffres, jusqu'au 6 × 6).
+  (4 × 4 en images, puis en chiffres, jusqu'au 6 × 6), la **symétrie** sur quadrillage,
+  **compte les cubes** (empilements en 3D, avec des cubes cachés).
 - *Heure et mesures* : lire l'heure (heures pile, et demie, et quart, de 5 en 5 minutes).
 - *Labyrinthes* : de 4 × 4 à 9 × 9 cases (doigt, flèches, ou toucher une case ; 💡 pour un
   indice) et le chemin des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours).
@@ -99,6 +101,14 @@ officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/program
 météo, émotions, famille)
 - Écoute et touche, lis et touche, le mot anglais, relie en anglais, compte en anglais,
   « Where is the cat? » (in, on, under, next to), épelle en anglais.
+
+**Le monde**
+- *Les animaux* : où ils vivent, leurs bébés, ce qu'ils mangent, qui pond des œufs.
+- *Le temps qui passe* : les saisons, les moments de la journée, les jours, les mois.
+- *Les pays du monde* : des pays d'Europe et du monde, les continents.
+
+**Défi du jour** : chaque jour, 5 questions tirées des jeux de l'enfant, à son niveau. Une étoile
+bonus et un jour de plus dans la série 🔥.
 
 ---
 
@@ -126,9 +136,9 @@ Il ouvre trois onglets :
 - **Enfants** : ajouter un enfant, changer son prénom, son personnage, sa classe ou sa photo
   (photothèque ou appareil photo, enregistrée automatiquement), effacer sa progression ou
   supprimer son profil. On y trouve aussi **Partager le lien**.
-- **Réglages** : consignes lues ou non, choix des voix (filles et garçons) avec un bouton
-  d'essai, petits sons, nombre de questions par partie, installation, version et journal des
-  modifications.
+- **Réglages** : consignes lues ou non, choix de la voix avec un bouton d'essai, petits sons,
+  musique douce, décors de saison, nombre de questions par partie, installation, version,
+  journal des modifications, et le contact pour vos remarques.
 
 ### Des voix plus naturelles
 
@@ -165,7 +175,7 @@ GitHub Actions*).
 npm install          # Playwright, pour le test de bout en bout et les icônes
 npm start            # http://localhost:8080
 npm test             # tests unitaires (node --test)
-npm run test:e2e     # parcours complet + mise en page sur 10 iPhone, 12 iPad et 7 Android
+npm run test:e2e     # parcours complet + mise en page sur 14 iPhone (dont 3 en paysage), 12 iPad et 8 Android
 npm run icons        # régénère les icônes
 ```
 

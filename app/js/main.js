@@ -4,19 +4,20 @@ import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
 import { canMove, solveMaze } from './games/labyrinthes.js';
 import { levelRange, programFor } from './programs.js';
-import { createRng, pick, randInt } from './random.js';
+import { createRng, pick, randInt, sample, shuffle } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import {
   addChild, cleanName, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild, resetChild, saveStore,
 } from './storage.js';
 import { listFrenchVoices, setSpeechEnabled, setVoicePreferences, speak, stopSpeaking } from './speech.js';
-import { playSound, setSoundsEnabled, unlockAudio } from './sounds.js';
-import { avatar, h, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
-import { LOOKS, makeCharacter } from './characters.js';
+import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
+import { avatar, h, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
+import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
 import { APP, CHANGELOG } from './config.js';
+import { seasonOf } from './themes.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
@@ -50,8 +51,24 @@ function save() {
 
 function show(...children) {
   stopSpeaking();
+  document.body.classList.toggle('easy-read', Boolean(child()?.easyRead));
+  document.body.dataset.season = store.settings.seasonal === false ? '' : currentSeason().id;
   app.replaceChildren(...children.filter(Boolean));
   window.scrollTo(0, 0);
+  const calm = app.querySelector('.screen.play, .screen.parents, .screen.gate');
+  if (store.settings.music && !calm) startMusic();
+  else stopMusic();
+}
+
+// ---------------------------------------------------------------- Saisons
+
+function currentSeason() {
+  return seasonOf(new Date());
+}
+
+function seasonDecor() {
+  if (store.settings.seasonal === false) return null;
+  return h('div', { class: 'season-decor', 'aria-hidden': 'true' }, currentSeason().deco.map((e) => h('span', {}, e)));
 }
 
 /**
@@ -237,14 +254,178 @@ function homeScreen() {
   show(h('main', { class: 'screen home' },
     h('header', { class: 'top-bar' }, profileChip(), h('span'), starCounter()),
     h('div', { class: 'home-hero' },
-      h('h1', { class: 'home-title' }, frenchSpacing(`Bonjour ${c.name} !`))),
+      seasonDecor(),
+      h('h1', { class: 'home-title' }, frenchSpacing(`Bonjour ${c.name} !`)),
+      goalBar()),
     h('nav', { class: 'home-menu' },
-      domains.map((d) => h('button', { class: `domain-btn domain-${d.id}`, 'data-domain': d.id, onclick: () => domainScreen(d.id) },
-        h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, d.icon), h('span', {}, d.title))),
-      h('button', { class: 'domain-btn domain-album', onclick: albumScreen },
-        h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🏆'),
-        h('span', {}, 'Mon album'),
-        h('span', { class: 'pill' }, `${stickersUnlocked(child().stars)}/${STICKERS.length}`)))));
+      h('div', { class: 'home-top' }, dailyButton(), reviewButton()),
+      h('div', { class: `home-grid n${domains.length}` },
+        domains.map((d) => h('button', { class: `domain-tile domain-${d.id}`, 'data-domain': d.id, onclick: () => domainScreen(d.id) },
+          h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, d.icon), h('span', { class: 'domain-name' }, d.title)))),
+      h('div', { class: 'home-bottom' },
+        h('button', { class: 'domain-btn domain-album', onclick: albumScreen },
+          h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🏆'),
+          h('span', {}, 'Mon album'),
+          h('span', { class: 'pill' }, `${stickersUnlocked(child().stars)}/${STICKERS.length}`)),
+        h('button', { class: 'domain-btn domain-dress', 'data-dress': '', onclick: characterScreen },
+          h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🎨'),
+          h('span', {}, 'Mon personnage'))))));
+}
+
+// ---------------------------------------------------------------- Défi du jour
+
+/** Date du jour (ou d'un autre jour, en décalage), au format AAAA-MM-JJ, à l'heure locale. */
+function dayKey(offset = 0, from = new Date()) {
+  const d = new Date(from);
+  d.setDate(d.getDate() + offset);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function hashText(text) {
+  let hash = 2166136261;
+  for (const ch of text) hash = Math.imul(hash ^ ch.codePointAt(0), 16777619);
+  return hash >>> 0;
+}
+
+/**
+ * Le défi du jour : 5 questions tirées des jeux de la classe, au niveau de l'enfant.
+ * Les mêmes jeux toute la journée ; une étoile bonus et un jour de plus dans la série.
+ */
+function dailyGame() {
+  const pool = programFor(child().grade).flatMap((d) => d.games).filter(({ game }) => !game.paliers);
+  const picks = sample(createRng(hashText(`${dayKey()}:${store.active}`)), pool, 5);
+  return {
+    id: 'defi',
+    domain: 'defi',
+    title: 'Défi du jour',
+    icon: '🔥',
+    levels: ['Défi du jour'],
+    range: { min: 1, max: 1 },
+    fixedLevel: true,
+    badge: () => 'Défi 🔥',
+    generate(_level, rng, index, context) {
+      const { game, min, max } = picks[index % picks.length];
+      const level = Math.min(max, Math.max(min, gameStats(child(), game.id, min).level));
+      const q = game.generate(level, rng, index, context);
+      return { ...q, key: `defi:${q.key}`, from: game.id, fromLevel: level };
+    },
+  };
+}
+
+// ---------------------------------------------------------------- Révisions espacées
+
+const REVIEW_STEPS = [1, 3, 7]; // jours avant la révision suivante
+
+/** Une erreur dans un jeu : on le révisera dès aujourd'hui, au niveau où l'erreur a eu lieu. */
+function scheduleReview(gameId, level) {
+  const kid = child();
+  if (!kid || !findGame(gameId) || findGame(gameId).paliers) return;
+  kid.review = { ...(kid.review || {}), [gameId]: { level, due: dayKey(), step: 0 } };
+}
+
+/** Réussi du premier coup pendant une révision : on espace (1, 3, puis 7 jours), puis c'est acquis. */
+function advanceReview(gameId) {
+  const kid = child();
+  const item = kid.review?.[gameId];
+  if (!item) return;
+  if (item.step >= REVIEW_STEPS.length - 1) delete kid.review[gameId];
+  else kid.review[gameId] = { ...item, step: item.step + 1, due: dayKey(REVIEW_STEPS[item.step + 1]) };
+}
+
+function dueReviews() {
+  return Object.entries(child().review || {}).filter(([id, r]) => findGame(id) && r.due <= dayKey());
+}
+
+function reviewGame() {
+  const due = dueReviews();
+  return {
+    id: 'revision',
+    domain: 'revision',
+    title: 'Je révise',
+    icon: '🔁',
+    levels: ['Révisions'],
+    range: { min: 1, max: 1 },
+    fixedLevel: true,
+    badge: () => 'Révision',
+    generate(_level, rng, index, context) {
+      const [gameId, item] = due[index % due.length];
+      const q = findGame(gameId).generate(item.level, rng, index, context);
+      return { ...q, key: `revision:${q.key}`, from: gameId, fromLevel: item.level };
+    },
+  };
+}
+
+function reviewButton() {
+  const due = dueReviews();
+  if (!due.length) return null;
+  return h('button', { class: 'domain-btn domain-revision', 'data-revision': '', onclick: () => startSession(reviewGame(), { back: homeScreen, total: 5 }) },
+    h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🔁'),
+    h('span', {}, 'Je révise'),
+    h('span', { class: 'pill' }, `${due.length} jeu${due.length > 1 ? 'x' : ''}`));
+}
+
+// ---------------------------------------------------------------- Objectif du jour et temps d'écran
+
+function todayStats(kid = child()) {
+  const today = dayKey();
+  const sessions = kid.history.filter((e) => e.at && dayKey(0, new Date(e.at)) === today);
+  const extra = kid.extraTime?.day === today ? kid.extraTime.minutes : 0;
+  return { parts: sessions.length, minutes: sessions.reduce((sum, e) => sum + (e.seconds || 0), 0) / 60, extra };
+}
+
+function goalBar() {
+  const goal = child().goals?.parts || 0;
+  if (!goal) return null;
+  const { parts } = todayStats();
+  const done = Math.min(parts, goal);
+  return h('div', { class: `goal-bar${done >= goal ? ' reached' : ''}`, 'aria-label': `Objectif du jour : ${done} partie${done > 1 ? 's' : ''} sur ${goal}` },
+    h('span', { class: 'goal-label' }, done >= goal ? '🎯 Objectif du jour atteint !' : `🎯 Objectif : ${done} / ${goal} parties`),
+    h('span', { class: 'goal-track' }, Array.from({ length: goal }, (_, i) => h('span', { class: i < done ? 'goal-step on' : 'goal-step' }))));
+}
+
+/** Temps maximum atteint ? (réglé par les parents, avec du temps en plus possible) */
+function timeIsUp() {
+  const limit = child().goals?.limit || 0;
+  if (!limit) return false;
+  const { minutes, extra } = todayStats();
+  return minutes >= limit + extra;
+}
+
+function pauseScreen() {
+  const c = me();
+  show(h('main', { class: 'screen pause' },
+    h('header', { class: 'top-bar' }, profileChip(), h('span'), starCounter()),
+    h('div', { class: 'pause-card' },
+      avatar(c.id, 'avatar-md'),
+      h('h1', {}, 'C’est l’heure de la pause !'),
+      h('p', {}, `Bravo ${c.name}, tu as bien travaillé aujourd’hui. Tu pourras rejouer demain.`),
+      h('div', { class: 'pause-ideas', 'aria-hidden': 'true' }, '🌳 🎨 📚 ⚽'),
+      h('button', { class: 'big-btn', onclick: albumScreen }, '🏆 Voir mon album'),
+      h('button', {
+        class: 'link-action pause-more',
+        onclick: () => parentGate(() => {
+          const kid = child();
+          const today = dayKey();
+          kid.extraTime = { day: today, minutes: (kid.extraTime?.day === today ? kid.extraTime.minutes : 0) + 10 };
+          save();
+          homeScreen();
+        }),
+      }, 'Parents : 10 minutes de plus'))));
+  say(c, `C’est l’heure de la pause, ${c.spoken} ! Tu as bien travaillé.`);
+}
+
+function dailyButton() {
+  const daily = child().daily;
+  const done = daily?.last === dayKey();
+  const streak = daily && (done || daily.last === dayKey(-1)) ? daily.streak : 0;
+  return h('button', {
+    class: `domain-btn domain-defi${done ? ' done' : ''}`,
+    'data-defi': '',
+    onclick: () => startSession(dailyGame(), { back: homeScreen, total: 5 }),
+  },
+  h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🔥'),
+  h('span', {}, 'Défi du jour'),
+  done || streak ? h('span', { class: 'pill' }, done ? '✓ fait' : `${streak} j.`) : null);
 }
 
 // ---------------------------------------------------------------- Choix du jeu
@@ -360,8 +541,9 @@ function palierMap(min = 1, max = CALC_PALIERS.length) {
 
 // ---------------------------------------------------------------- Partie
 
-function startSession(game, { level, back } = {}) {
-  const { min, max } = levelRange(child().grade, game.id);
+function startSession(game, { level, back, total } = {}) {
+  if (timeIsUp()) return pauseScreen();
+  const { min, max } = game.range || levelRange(child().grade, game.id);
   const stats = gameStats(child(), game.id, min);
   const startLevel = level || Math.min(max, Math.max(min, stats.level));
   const session = {
@@ -370,7 +552,7 @@ function startSession(game, { level, back } = {}) {
     max,
     back: back || (() => domainScreen(game.domain)),
     index: 0,
-    total: store.settings.sessionLength,
+    total: total || store.settings.sessionLength,
     correct: 0,
     recentKeys: [],
     briefed: new Set(), // consignes déjà dites en entier pendant cette partie
@@ -417,15 +599,16 @@ function nextQuestion(session) {
 
   let stage = null;
   let zone;
-  const custom = { build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone }[q.interaction];
+  const custom = { build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
   } else {
-    if (q.stage.type !== 'none') stage = h('div', { class: 'stage' }, renderStage(q.stage, { replay, speak: (parts) => say(guide, parts) }));
+    if (q.stage.type !== 'none') stage = h('div', { class: 'stage' }, renderStage(q.stage, { replay, speak: (parts) => say(guide, parts), readAlong: () => readAlong() }));
     if (q.interaction === 'keypad') zone = keypadZone(ctx);
     else if (q.interaction === 'match') zone = matchZone(ctx);
     else if (q.interaction === 'fill') zone = fillZone(ctx);
     else if (q.interaction === 'order') zone = orderZone(ctx);
+    else if (q.interaction === 'pay') zone = payZone(ctx);
     else zone = choiceZone(ctx);
   }
   if (stage) enableCounting(stage, guide);
@@ -440,7 +623,44 @@ function nextQuestion(session) {
     stage,
     zone,
     feedback));
-  say(guide, brief ? (q.short.speak ?? q.short.text) : q.instruction);
+  // histoire en karaoké : la voix lit l'histoire (chaque mot s'allume), puis pose la question
+  const readAlong = () => (q.karaoke ? karaoke(stage, guide, q.stage.sentences, q.instruction) : null);
+  if (q.karaoke) readAlong();
+  else say(guide, brief ? (q.short.speak ?? q.short.text) : q.instruction);
+}
+
+/** Lit des phrases en allumant chaque mot ; repli au rythme moyen si le navigateur ne suit pas les mots. */
+function karaoke(stageEl, guide, sentences, after = []) {
+  const sentenceEls = [...stageEl.querySelectorAll('.k-sentence')];
+  const clear = () => stageEl.querySelectorAll('.w.on').forEach((w) => w.classList.remove('on'));
+  let timer = null;
+  const parts = sentences.map((text, si) => {
+    const words = [...sentenceEls[si].querySelectorAll('.w')];
+    let tracked = false;
+    const light = (w) => { clear(); w?.classList.add('on'); };
+    return {
+      text,
+      rate: 0.85,
+      onStart: () => {
+        light(words[0]);
+        clearInterval(timer);
+        let i = 0;
+        timer = setInterval(() => {
+          if (tracked || ++i >= words.length) return clearInterval(timer);
+          light(words[i]);
+        }, 420);
+      },
+      onWord: (charIndex) => {
+        tracked = true;
+        clearInterval(timer);
+        light(words.find((w) => charIndex >= Number(w.dataset.start) && charIndex <= Number(w.dataset.end)));
+      },
+    };
+  });
+  return say(guide, [...parts, ...(Array.isArray(after) ? after : [after])]).then(() => {
+    clearInterval(timer);
+    clear();
+  });
 }
 
 /** Toucher les objets pour les compter un par un : la voix dit « un, deux, trois… ». */
@@ -474,9 +694,10 @@ function markWrong(ctx, { message = 'Essaie encore !', speech, given } = {}) {
   feedback.replaceChildren(h('p', { class: 'try-again' }, message));
   say(session.guide, speech || message);
   if (given !== undefined) {
-    logMistake(child(), { at: new Date().toISOString(), game: session.game.id, question: q.text, expected: q.answer, given });
-    save();
+    logMistake(child(), { at: new Date().toISOString(), game: q.from || session.game.id, question: q.text, expected: q.answer, given });
   }
+  scheduleReview(q.from || session.game.id, q.fromLevel || session.levelState.level);
+  save();
 }
 
 async function markCorrect(ctx) {
@@ -488,6 +709,7 @@ async function markCorrect(ctx) {
   playSound('success');
   app.querySelector('.guide-btn .avatar')?.classList.add('cheer');
   if (firstTry) session.correct++;
+  if (firstTry && game.id === 'revision') advanceReview(q.from);
 
   let change = null;
   if (!game.fixedLevel) {
@@ -528,7 +750,9 @@ async function markCorrect(ctx) {
 
 function choiceZone(ctx) {
   const { q } = ctx;
-  const zone = h('div', { class: `choices choices-${q.choiceStyle} n${q.choices.length}${q.stage.type === 'none' ? ' center' : ''}` });
+  // un mot très long (« l’éléphanteau ») doit tenir sur la largeur d'une colonne
+  const longWord = q.choices.some((c) => typeof c.label === 'string' && c.label.split(/\s+/).some((w) => w.length > 9));
+  const zone = h('div', { class: `choices choices-${q.choiceStyle} n${q.choices.length}${q.stage.type === 'none' ? ' center' : ''}${longWord ? ' long-words' : ''}` });
   for (const choice of q.choices) {
     const label = typeof choice.label === 'string' ? choice.label : '';
     const classes = ['choice'];
@@ -611,6 +835,14 @@ function keypadZone(ctx) {
 
 const PAIR_COLORS = ['#ff8a3d', '#22b07d', '#7b61ff', '#ff5fa2'];
 
+/** Luminance relative d'une couleur #rrggbb ou #rgb (0 = noir, 1 = blanc). */
+function luminance(hex) {
+  const full = hex.length === 4 ? hex.replace(/^#(.)(.)(.)$/, '#$1$1$2$2$3$3') : hex;
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(full.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
 function matchZone(ctx) {
   const { q } = ctx;
   let pending = { left: null, right: null };
@@ -641,8 +873,10 @@ function matchZone(ctx) {
   const drawLine = (a, b, color) => {
     const ra = a.getBoundingClientRect();
     const rb = b.getBoundingClientRect();
-    const [x1, y1] = local(ra.right, ra.top + ra.height / 2);
-    const [x2, y2] = local(rb.left, rb.top + rb.height / 2);
+    // deux colonnes (portrait) : de côté à côté ; deux lignes (paysage) : de haut en bas
+    const stacked = rb.top >= ra.bottom - 1;
+    const [x1, y1] = stacked ? local(ra.left + ra.width / 2, ra.bottom) : local(ra.right, ra.top + ra.height / 2);
+    const [x2, y2] = stacked ? local(rb.left + rb.width / 2, rb.top) : local(rb.left, rb.top + rb.height / 2);
     const line = svgEl('line', { x1, y1, x2, y2, stroke: color });
     lines.append(line);
     return line;
@@ -652,17 +886,22 @@ function matchZone(ctx) {
     const a = lefts[pending.left];
     const b = rights.find((r) => String(r.dataset.right) === String(pending.right) && !r.disabled);
     if (q.pairs[pending.left].right === pending.right) {
-      const color = q.vanish ? 'var(--good)' : PAIR_COLORS[matched % PAIR_COLORS.length];
+      // une couleur à relier (« pink ») : la paire prend cette couleur-là, pas une autre
+      const swatch = q.pairs[pending.left].swatch;
+      const color = q.vanish ? 'var(--good)' : swatch || PAIR_COLORS[matched % PAIR_COLORS.length];
+      const light = swatch ? luminance(swatch) > 0.45 : false;
       for (const el of [a, b]) {
         el.classList.remove('selected');
         el.classList.add('matched');
+        el.classList.toggle('light-pair', light);
         el.style.setProperty('--pair', color);
         el.disabled = true;
       }
+      const stroke = swatch && luminance(swatch) > 0.8 ? '#b8b2a5' : color;
       let line = trace;
       if (line) line.setAttribute('class', 'trace done');
-      else line = drawLine(a, b, color);
-      line.style.stroke = color;
+      else line = drawLine(a, b, stroke);
+      line.style.stroke = stroke;
       matched++;
       playSound('tap');
       if (q.pairs[pending.left].say) say(ctx.session.guide, q.pairs[pending.left].say);
@@ -984,6 +1223,99 @@ function sudokuZone(ctx) {
   const zone = h('div', { class: 'choices sudoku-palette', style: { '--n': size } }, palette);
   refresh();
   return { stage: h('div', { class: 'stage stage-sudoku' }, board), zone };
+}
+
+// ---- Symétrie : colorier les cases de l'autre côté du trait
+
+function symmetryZone(ctx) {
+  const { q } = ctx;
+  const { cols, rows, axis, model, solution } = q.stage;
+  const isTarget = (i) => (axis === 'v' ? i % cols >= cols / 2 : Math.floor(i / cols) >= rows / 2);
+  const filled = new Set();
+  const cells = Array.from({ length: cols * rows }, (_, i) => {
+    const target = isTarget(i);
+    const el = h(target ? 'button' : 'span', {
+      class: `sym-cell ${target ? 'target' : 'model'}${model.includes(i) ? ' on' : ''}`,
+      'data-cell': i,
+      'aria-label': target ? `Case ${Math.floor(i / cols) + 1}-${(i % cols) + 1}` : undefined,
+      'aria-pressed': target ? 'false' : undefined,
+    });
+    if (target) {
+      el.addEventListener('click', () => {
+        if (ctx.session.locked) return;
+        if (filled.has(i)) filled.delete(i);
+        else filled.add(i);
+        el.classList.toggle('on', filled.has(i));
+        el.classList.remove('wrong', 'hint');
+        el.setAttribute('aria-pressed', String(filled.has(i)));
+        playSound('tap');
+      });
+    }
+    return el;
+  });
+  const validate = () => {
+    if (ctx.session.locked) return;
+    const wrong = [...filled].filter((c) => !solution.includes(c));
+    const missing = solution.filter((c) => !filled.has(c));
+    if (!wrong.length && !missing.length) {
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    wrong.forEach((c) => cells[c].classList.add('wrong'));
+    setTimeout(() => wrong.forEach((c) => cells[c].classList.remove('wrong')), 1600);
+    if (ctx.session.attempts >= 1) missing.forEach((c) => cells[c].classList.add('hint'));
+    markWrong(ctx, {
+      message: wrong.length ? 'Regarde bien dans le miroir !' : `Il manque ${missing.length} case${missing.length > 1 ? 's' : ''} !`,
+      given: `${filled.size} cases`,
+    });
+  };
+  const grid = h('div', { class: `sym-grid axis-${axis}`, style: { '--cols': cols, '--rows': rows } }, cells);
+  const zone = h('div', { class: 'choices sym-zone' }, h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
+  return { stage: h('div', { class: 'stage stage-sym' }, grid), zone };
+}
+
+// ---- Payer le bon prix : toucher les pièces et les billets
+
+function payZone(ctx) {
+  const { q } = ctx;
+  const given = [];
+  const total = () => given.reduce((a, b) => a + b, 0);
+  const tray = h('div', { class: 'pay-tray', 'aria-live': 'polite' });
+  const render = () => {
+    tray.replaceChildren(...(given.length
+      ? given.map((v, i) => h('button', {
+        class: 'pay-coin',
+        'aria-label': `Reprendre ${v} euros`,
+        onclick: () => { given.splice(i, 1); render(); },
+      }, moneyItem(v)))
+      : [h('span', { class: 'pay-empty' }, 'Touche les pièces et les billets ↓')]));
+  };
+  const add = (v) => {
+    if (ctx.session.locked || total() + v > 50) return;
+    given.push(v);
+    playSound('tap');
+    render();
+  };
+  const validate = () => {
+    if (ctx.session.locked) return;
+    const t = total();
+    if (t === q.answer) {
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    markWrong(ctx, {
+      message: t > q.answer ? `C’est trop : tu donnes ${t} €.` : `Il manque de l’argent : tu donnes ${t} €.`,
+      given: `${t} €`,
+    });
+  };
+  render();
+  const zone = h('div', { class: 'choices pay' },
+    tray,
+    h('div', { class: 'pay-buttons' }, q.values.map((v) => h('button', { class: 'pay-add', 'data-pay': v, 'aria-label': `Ajouter ${v} euros`, onclick: () => add(v) }, moneyItem(v)))),
+    h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ Je paie'));
+  return zone;
 }
 
 // ---- Ranger dans l'ordre (tailles ou nombres)
@@ -1400,6 +1732,17 @@ function finishSession(session) {
   const stats = gameStats(kid, game.id, session.min);
   kid.games[game.id] = { ...stats, sessions: stats.sessions + 1, bestStars: Math.max(stats.bestStars, stars) };
   let palierLine = null;
+  let dailyLine = null;
+  if (game.id === 'defi') {
+    const firstToday = kid.daily?.last !== dayKey();
+    if (firstToday) {
+      const streak = kid.daily?.last === dayKey(-1) ? (kid.daily.streak || 0) + 1 : 1;
+      kid.daily = { last: dayKey(), streak, best: Math.max(streak, kid.daily?.best || 0) };
+      kid.stars += 1; // une étoile bonus par jour
+    }
+    dailyLine = h('p', { class: 'daily-result' }, `🔥 ${kid.daily.streak} jour${kid.daily.streak > 1 ? 's' : ''} d’affilée`,
+      firstToday ? h('b', {}, ' · +1 ⭐') : null);
+  }
   if (game.paliers) {
     const palier = CALC_PALIERS[session.levelState.level - 1];
     const previous = kid.paliers[palier.id]?.stars || 0;
@@ -1431,11 +1774,13 @@ function finishSession(session) {
     h('h1', {}, frenchSpacing(title)),
     h('p', { class: 'result-detail' }, `${session.correct} sur ${session.total} du premier coup`),
     palierLine,
+    dailyLine,
     unlocked.length
       ? h('div', { class: 'new-sticker' }, h('span', { class: 'sticker-big' }, unlocked.at(-1).emoji), h('p', {}, 'Nouvel autocollant !'))
       : null,
     h('div', { class: 'result-actions' },
-      h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers ? session.levelState.level : undefined, back: session.back }) }, '🔁 Rejouer'),
+      h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers ? session.levelState.level : undefined, back: session.back, total: game.id === 'defi' ? session.total : undefined }) }, '🔁 Rejouer'),
+      stars >= 2 ? h('button', { class: 'big-btn bonus-btn', 'data-bonus-open': '', onclick: () => bonusMenu(session.back) }, '🎁 Jeu bonus') : null,
       h('button', { class: 'big-btn', onclick: session.back }, game.paliers ? '🗺️ Les paliers' : '🎲 Autres jeux'))));
   playSound('fanfare');
   say(me(), [
@@ -1464,6 +1809,7 @@ function albumScreen() {
   const remaining = starsToNextSticker(child().stars);
   show(h('main', { class: 'screen album' },
     topBar({ onBack: homeScreen, title: '🏆 Mon album', right: starCounter() }),
+    h('button', { class: 'big-btn dress-btn', onclick: characterScreen }, '🎨 Habiller mon personnage'),
     h('p', { class: 'album-info' }, remaining === null
       ? 'Bravo, ton album est complet !'
       : frenchSpacing(`Encore ${remaining} ⭐ !`)),
@@ -1472,6 +1818,194 @@ function albumScreen() {
         ? h('button', { class: 'sticker', onclick: () => speak(s.name), 'aria-label': s.name }, s.emoji)
         : h('span', { class: 'sticker locked', 'aria-label': 'À gagner' }, '?'))))));
   speak(remaining === null ? 'Bravo, ton album est complet !' : `Encore ${remaining} étoile${remaining > 1 ? 's' : ''} pour le prochain autocollant.`);
+}
+
+// ---------------------------------------------------------------- Habiller son personnage
+
+/** Couleurs de tee-shirt et accessoires, débloqués au fil des étoiles gagnées. */
+function characterScreen(message = '') {
+  const kid = child();
+  const style = kid.style || {};
+  const stars = kid.stars;
+  const choose = (patch) => {
+    kid.style = { ...style, ...patch };
+    save();
+    applySettings();
+    characterScreen();
+    playSound('success');
+  };
+  const lock = (need) => h('span', { class: 'lock' }, `🔒 ${need} ⭐`);
+  show(h('main', { class: 'screen dress' },
+    topBar({ onBack: homeScreen, title: '🎨 Mon personnage', right: starCounter() }),
+    message ? h('p', { class: 'toast', role: 'status' }, message) : null,
+    h('div', { class: 'dress-preview' }, avatar(store.active, 'avatar-xl')),
+    kid.photo ? h('p', { class: 'muted small dress-note' }, 'Avec une photo, seuls les accessoires se voient.') : null,
+    h('section', { class: 'card' },
+      h('h2', {}, 'Mon tee-shirt'),
+      h('div', { class: 'shirt-row' }, SHIRTS.map((shirt) => {
+        const open = stars >= shirt.stars;
+        return h('button', {
+          class: `shirt-btn${style.shirt === shirt.id ? ' on' : ''}`,
+          'data-shirt': shirt.id,
+          disabled: !open,
+          'aria-label': open ? `Tee-shirt ${shirt.id}` : `Tee-shirt ${shirt.id}, ${shirt.stars} étoiles`,
+          'aria-pressed': String(style.shirt === shirt.id),
+          onclick: () => choose({ shirt: shirt.id }),
+        }, h('span', { class: 'shirt-swatch', style: { background: shirt.color } }, style.shirt === shirt.id ? '✓' : ''), open ? null : lock(shirt.stars));
+      }))),
+    h('section', { class: 'card' },
+      h('h2', {}, 'Mes accessoires'),
+      h('div', { class: 'accessory-grid' },
+        h('button', { class: `accessory-btn${!style.accessory ? ' on' : ''}`, onclick: () => choose({ accessory: null }), 'aria-pressed': String(!style.accessory) },
+          h('span', { class: 'accessory-emoji' }, '🚫'), h('span', {}, 'Rien')),
+        ACCESSORIES.map((item) => {
+          const open = stars >= item.stars;
+          return h('button', {
+            class: `accessory-btn${style.accessory === item.id ? ' on' : ''}`,
+            'data-accessory': item.id,
+            disabled: !open,
+            'aria-pressed': String(style.accessory === item.id),
+            onclick: () => choose({ accessory: item.id }),
+          }, h('span', { class: 'accessory-emoji' }, item.emoji), open ? h('span', {}, item.label) : lock(item.stars));
+        })))));
+  speak('Choisis ton tee-shirt et tes accessoires !');
+}
+
+// ---------------------------------------------------------------- Jeux bonus (récompenses)
+
+function bonusMenu(back) {
+  show(h('main', { class: 'screen bonus' },
+    topBar({ onBack: back, title: '🎁 Jeu bonus', right: starCounter() }),
+    h('p', { class: 'album-info' }, 'Choisis ton jeu bonus !'),
+    h('div', { class: 'bonus-grid' },
+      [['bulles', '🫧', 'Les bulles', bubblesGame], ['puzzle', '🧩', 'Le puzzle', puzzleGame], ['coloriage', '🎨', 'Le coloriage', coloringGame]]
+        .map(([id, icon, label, run]) => h('button', { class: 'game-card bonus-card', 'data-bonus': id, onclick: () => run(back) },
+          h('span', { class: 'game-icon', 'aria-hidden': 'true' }, icon), h('span', { class: 'game-title' }, label))))));
+  speak('Choisis ton jeu bonus !');
+}
+
+/** Éclate les bulles qui montent, pendant 20 secondes. */
+function bubblesGame(back) {
+  let popped = 0;
+  let left = 20;
+  const field = h('div', { class: 'bubble-field' });
+  const score = h('span', { class: 'bubble-score', 'aria-live': 'polite' }, '0');
+  const clock = h('span', { class: 'bubble-clock' }, '20 s');
+  const spawn = () => {
+    const b = h('button', {
+      class: 'pop-bubble',
+      'aria-label': 'Bulle',
+      style: { left: `${5 + Math.random() * 80}%`, animationDuration: `${4 + Math.random() * 3}s`, '--hue': Math.floor(Math.random() * 360) },
+    }, pick(rng, ['⭐', '🐟', '🍎', '🌸', '🦋', '']));
+    b.addEventListener('pointerdown', () => {
+      if (b.classList.contains('popped')) return;
+      b.classList.add('popped');
+      popped++;
+      score.textContent = String(popped);
+      playSound('tap');
+      setTimeout(() => b.remove(), 250);
+    });
+    b.addEventListener('animationend', () => b.remove());
+    field.append(b);
+  };
+  const timer = setInterval(() => {
+    if (!app.contains(field)) return clearInterval(timer);
+    left--;
+    clock.textContent = `${left} s`;
+    if (left <= 0) {
+      clearInterval(timer);
+      clearInterval(spawner);
+      field.replaceChildren(h('div', { class: 'bonus-end' },
+        h('p', {}, `🫧 ${popped} bulle${popped > 1 ? 's' : ''} éclatée${popped > 1 ? 's' : ''} !`),
+        h('button', { class: 'big-btn primary', onclick: back }, 'Continuer')));
+      say(me(), `Bravo, tu as éclaté ${popped} bulles !`);
+    }
+  }, 1000);
+  const spawner = setInterval(() => { if (app.contains(field)) spawn(); else clearInterval(spawner); }, 650);
+  show(h('main', { class: 'screen bonus-play' },
+    topBar({ onBack: () => { clearInterval(timer); clearInterval(spawner); back(); }, backLabel: 'Quitter', title: h('div', { class: 'bubble-hud' }, '🫧 ', score, ' · ⏱ ', clock) }),
+    field));
+  speak('Éclate les bulles !');
+}
+
+/** Remets le portrait dans l'ordre : toucher deux pièces pour les échanger. */
+function puzzleGame(back) {
+  const n = ['MS', 'GS'].includes(child().grade) ? 2 : 3;
+  const order = shuffle(rng, Array.from({ length: n * n }, (_, i) => i));
+  if (order.every((v, i) => v === i)) order.reverse();
+  let selected = null;
+  const board = h('div', { class: 'puzzle-board', style: { '--n': n } });
+  const draw = () => {
+    board.replaceChildren(...order.map((piece, pos) => {
+      const tile = h('button', { class: `puzzle-tile${selected === pos ? ' selected' : ''}`, 'data-pos': pos, 'aria-label': `Pièce ${pos + 1}` });
+      const img = avatar(store.active, 'puzzle-img');
+      img.style.setProperty('--x', piece % n);
+      img.style.setProperty('--y', Math.floor(piece / n));
+      tile.append(img);
+      tile.addEventListener('click', () => {
+        if (selected === null) selected = pos;
+        else {
+          [order[selected], order[pos]] = [order[pos], order[selected]];
+          selected = null;
+          playSound('tap');
+        }
+        draw();
+        if (order.every((v, i) => v === i)) {
+          board.classList.add('solved');
+          playSound('fanfare');
+          say(me(), 'Bravo, le puzzle est terminé !');
+          board.after(h('button', { class: 'big-btn primary bonus-done', onclick: back }, 'Continuer'));
+        }
+      });
+      return tile;
+    }));
+  };
+  draw();
+  show(h('main', { class: 'screen bonus-play' },
+    topBar({ onBack: back, backLabel: 'Quitter', title: '🧩 Le puzzle' }),
+    h('p', { class: 'album-info' }, 'Touche deux pièces pour les échanger.'),
+    board));
+  speak('Remets ton portrait dans l’ordre ! Touche deux pièces pour les échanger.');
+}
+
+// Dessins à colorier : chaque zone est un chemin SVG.
+const COLORING = {
+  maison: `<path data-zone d="M20 70 L60 35 L100 70 Z"/><rect data-zone x="28" y="70" width="64" height="44"/>
+    <rect data-zone x="52" y="86" width="16" height="28"/><rect data-zone x="34" y="78" width="13" height="13"/>
+    <rect data-zone x="73" y="78" width="13" height="13"/><circle data-zone cx="100" cy="22" r="11"/>
+    <path data-zone d="M0 114 H120 V120 H0 Z"/>`,
+  poisson: `<path data-zone d="M18 60 Q50 25 86 60 Q50 95 18 60 Z"/><path data-zone d="M86 60 L110 42 L110 78 Z"/>
+    <circle data-zone cx="34" cy="55" r="5"/><path data-zone d="M48 40 Q55 60 48 80"/><path data-zone d="M62 38 Q70 60 62 82"/>
+    <circle data-zone cx="20" cy="20" r="6"/><circle data-zone cx="30" cy="32" r="4"/>`,
+  fleur: `<circle data-zone cx="60" cy="44" r="10"/><circle data-zone cx="60" cy="24" r="12"/><circle data-zone cx="80" cy="44" r="12"/>
+    <circle data-zone cx="60" cy="64" r="12"/><circle data-zone cx="40" cy="44" r="12"/><path data-zone d="M57 76 H63 V116 H57 Z"/>
+    <path data-zone d="M60 96 Q80 80 92 92 Q78 104 60 98 Z"/><path data-zone d="M0 116 H120 V120 H0 Z"/>`,
+};
+const PALETTE = ['#ff5c5c', '#ffb020', '#ffe14d', '#2fbf5b', '#3d7dff', '#9b5cff', '#ff6fa8', '#8b5a2b'];
+
+function coloringGame(back) {
+  const name = pick(rng, Object.keys(COLORING));
+  let color = PALETTE[0];
+  const drawing = h('div', { class: 'coloring' });
+  drawing.innerHTML = `<svg viewBox="0 0 120 120">${COLORING[name]}</svg>`;
+  drawing.querySelectorAll('[data-zone]').forEach((zone) => {
+    zone.setAttribute('fill', '#ffffff');
+    zone.addEventListener('click', () => { zone.setAttribute('fill', color); playSound('tap'); });
+  });
+  const palette = h('div', { class: 'palette' }, PALETTE.map((c, i) => {
+    const btn = h('button', { class: i === 0 ? 'paint on' : 'paint', style: { background: c }, 'aria-label': `Couleur ${i + 1}`, 'data-color': c });
+    btn.addEventListener('click', () => {
+      color = c;
+      palette.querySelectorAll('.paint').forEach((p) => p.classList.toggle('on', p === btn));
+    });
+    return btn;
+  }));
+  show(h('main', { class: 'screen bonus-play' },
+    topBar({ onBack: back, backLabel: 'Quitter', title: '🎨 Le coloriage' }),
+    drawing,
+    palette,
+    h('button', { class: 'big-btn primary bonus-done', onclick: () => { playSound('fanfare'); say(me(), 'Quel joli dessin !'); setTimeout(back, 900); } }, '✔ J’ai fini')));
+  speak('Choisis une couleur, puis touche le dessin pour colorier.');
 }
 
 // ---------------------------------------------------------------- Espace parents
@@ -1507,6 +2041,17 @@ function toggle(label, value, onChange) {
   const box = h('input', { type: 'checkbox', checked: value, role: 'switch' });
   box.addEventListener('change', () => onChange(box.checked));
   return h('label', { class: 'setting' }, h('span', {}, label), box);
+}
+
+/** Un réglage à choix (boutons côte à côte). */
+function choiceSetting(label, key, options, value, onChange) {
+  const group = h('div', { class: 'segmented', role: 'radiogroup', 'aria-label': label });
+  const draw = (current) => group.replaceChildren(...options.map(([v, text]) => h('button', {
+    class: v === current ? 'seg on' : 'seg', role: 'radio', 'aria-checked': String(v === current), [`data-${key}`]: v,
+    onclick: () => { onChange(v); draw(v); },
+  }, text)));
+  draw(value);
+  return h('div', { class: 'setting setting-choice' }, h('span', {}, label), group);
 }
 
 const PARENT_TABS = [['suivi', 'Suivi'], ['enfants', 'Enfants'], ['reglages', 'Réglages']];
@@ -1663,6 +2208,14 @@ function childEditScreen(id, message = '') {
           childEditScreen(id, 'Enregistré ✓');
         },
       })),
+    h('section', { class: 'card' },
+      h('h2', {}, 'Lecture et temps de jeu'),
+      toggle('Lecture facilitée (dyslexie) : texte espacé, mots en couleurs alternées', Boolean(kid.easyRead), (v) => { kid.easyRead = v; save(); }),
+      choiceSetting('Objectif du jour', 'goal', [[0, 'Aucun'], [2, '2 parties'], [3, '3'], [5, '5']], kid.goals?.parts || 0,
+        (v) => { kid.goals = { ...(kid.goals || {}), parts: v }; save(); }),
+      choiceSetting('Temps maximum par jour', 'limit', [[0, 'Sans'], [10, '10 min'], [15, '15'], [20, '20'], [30, '30']], kid.goals?.limit || 0,
+        (v) => { kid.goals = { ...(kid.goals || {}), limit: v }; save(); }),
+      h('p', { class: 'muted small' }, 'Quand le temps est écoulé, la partie en cours se termine, puis une pause est proposée. Vous pouvez accorder 10 minutes de plus.')),
     h('section', { class: 'card danger-zone' },
       h('h2', {}, 'Données'),
       h('button', {
@@ -1689,23 +2242,22 @@ function childEditScreen(id, message = '') {
       }, 'Supprimer ce profil'))));
 }
 
-function voiceRow(look, voiceList) {
-  const { voice } = LOOKS[look];
-  const sample = makeCharacter(`voix-${look}`, { look, name: look === 'fille' ? 'Léa' : 'Hugo' });
-  const select = h('select', { class: 'select', 'aria-label': `Voix ${LOOKS[look].label.toLowerCase()}` },
+function voiceRow(voiceList) {
+  const sample = makeCharacter('voix', { name: 'Léa' });
+  const select = h('select', { class: 'select', 'aria-label': 'Voix de l’application' },
     h('option', { value: '' }, 'Automatique (la plus naturelle)'),
-    voiceList.map((v) => h('option', { value: v.id, selected: store.settings.voices[voice.voice] === v.id }, `${v.name} (${v.lang})`)));
+    voiceList.map((v) => h('option', { value: v.id, selected: (store.settings.voices.main || store.settings.voices.female) === v.id }, `${v.name} (${v.lang})`)));
   const test = () => say(sample, 'Bravo ! Tu as trouvé la bonne réponse.');
   select.addEventListener('change', () => {
-    store.settings.voices = { ...store.settings.voices, [voice.voice]: select.value || undefined };
+    store.settings.voices = { main: select.value || undefined };
     save();
     applySettings();
     test();
   });
   return h('div', { class: 'setting voice-row' },
-    h('span', {}, `Voix ${look === 'fille' ? 'des filles' : 'des garçons'}`),
+    h('span', {}, 'Voix'),
     h('div', { class: 'voice-ctrl' }, select,
-      h('button', { class: 'mini-btn', 'aria-label': `Écouter la voix ${LOOKS[look].label.toLowerCase()}`, onclick: test }, '▶')));
+      h('button', { class: 'mini-btn', 'aria-label': 'Écouter la voix', onclick: test }, '▶')));
 }
 
 function settingsTab() {
@@ -1723,8 +2275,10 @@ function settingsTab() {
     h('section', { class: 'card' },
       h('h2', {}, 'Voix et sons'),
       toggle('Consignes lues à voix haute', store.settings.voice, (v) => { store.settings.voice = v; applySettings(); save(); }),
-      voiceList.length ? Object.keys(LOOKS).map((look) => voiceRow(look, voiceList)) : null,
+      voiceList.length ? voiceRow(voiceList) : null,
       toggle('Petits sons', store.settings.sounds, (v) => { store.settings.sounds = v; applySettings(); save(); }),
+      toggle('Musique douce (accueil et menus)', Boolean(store.settings.music), (v) => { store.settings.music = v; save(); if (!v) stopMusic(); }),
+      toggle('Décors de saison (Noël, Halloween…)', store.settings.seasonal !== false, (v) => { store.settings.seasonal = v; save(); }),
       h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
       h('p', { class: 'muted small' }, 'Voix plus naturelles : Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
     isStandalone() ? null : h('section', { class: 'card' },
@@ -1743,12 +2297,15 @@ function settingsTab() {
           h('ul', { class: 'plain-list' }, entry.changes.map((c) => h('li', {}, c)))))),
       h('div', { class: 'credits' },
         h('p', {}, h('b', {}, APP.name), ' · conçue par ', h('b', {}, APP.author)),
+        h('p', { class: 'contact' }, 'Une remarque, un bug, une idée ? Écrivez à ',
+          h('a', { class: 'link-action', href: `mailto:${APP.contact}?subject=${encodeURIComponent(APP.name)}`, 'data-contact': '' }, APP.contact), '.'),
         h('p', { class: 'muted small' }, 'Police Andika © SIL International (licence OFL).'))));
 }
 
 // ---------------------------------------------------------------- Démarrage
 
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopMusic(); });
 document.addEventListener('pointerdown', (e) => {
   if (e.target.closest('button')) playSound('tap');
 });

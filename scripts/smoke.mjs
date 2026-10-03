@@ -2,18 +2,22 @@
 // chaque jeu sur un écran d'iPhone (en se trompant une fois), puis visite l'album et
 // l'espace parents. Vérifie aussi la mise en page de chaque niveau sur un petit iPhone.
 // Usage : npm run test:e2e   (SCREENSHOTS=dossier pour enregistrer des captures)
+//         ONLY=memory,points npm run test:e2e   (seulement la mise en page de ces jeux, sur tous les appareils)
+//         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
+//         PORT=8124 pour lancer plusieurs tests en même temps
 
 import { chromium } from 'playwright';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { startServer } from './serve.mjs';
-import { GAMES, findGame } from '../app/js/games/index.js';
+import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 
-const PORT = 8123;
+const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
 const SHOTS = process.env.SCREENSHOTS;
+const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
@@ -178,6 +182,11 @@ async function answer(page, q, wrongFirst) {
       for (let i = 0; i < q.pairs.length; i++) {
         await page.click(`[data-left="${i}"]`);
         await page.click(`[data-right="${q.pairs[i].right}"]:not([disabled])`);
+        if (q.pairs[i].swatch) {
+          // relier des couleurs : la paire prend la couleur reliée
+          const pair = await page.$eval(`[data-left="${i}"]`, (el) => el.style.getPropertyValue('--pair'));
+          if (pair !== q.pairs[i].swatch) fail(`relier les couleurs : ${pair} au lieu de ${q.pairs[i].swatch}`);
+        }
       }
       break;
     case 'fill':
@@ -253,6 +262,33 @@ async function answer(page, q, wrongFirst) {
       for (const item of sorted) await page.click(`.order-item[data-value="${item.value}"]:not([disabled])`);
       break;
     }
+    case 'pay': {
+      if (wrongFirst) {
+        await page.click('[data-pay="1"]');
+        if (q.answer === 1) await page.click('[data-pay="1"]');
+        await page.click('.pay .validate-btn');
+        await page.waitForSelector('.try-again');
+        while (await page.locator('.pay-coin').count()) await page.click('.pay-coin >> nth=0');
+      }
+      let rest = q.answer;
+      for (const v of [...q.values].sort((a, b) => b - a)) {
+        while (rest >= v) {
+          await page.click(`[data-pay="${v}"]`);
+          rest -= v;
+        }
+      }
+      await page.click('.pay .validate-btn');
+      break;
+    }
+    case 'symmetry': {
+      if (wrongFirst) {
+        await page.click('.sym-zone .validate-btn'); // rien de colorié : il manque des cases
+        await page.waitForSelector('.try-again');
+      }
+      for (const cell of q.stage.solution) await page.click(`.sym-cell[data-cell="${cell}"]`);
+      await page.click('.sym-zone .validate-btn');
+      break;
+    }
     case 'sudoku': {
       const { puzzle, solution } = q.stage;
       const empty = puzzle.map((v, i) => (v === null ? i : -1)).filter((i) => i >= 0);
@@ -293,6 +329,8 @@ async function answer(page, q, wrongFirst) {
 }
 
 // ---------------------------------------------------------------- Parcours complet (iPhone 13)
+
+async function scenario() {
 
 const context = await newContext({ width: 390, height: 844 });
 const page = await context.newPage();
@@ -335,7 +373,9 @@ const shotsWanted = {
   patates: '20-patates', labyrinthe: '21-labyrinthe', 'chemin-nombres': '22-chemin', ranger: '23-ranger',
   problemes: '24-probleme', heure: '25-heure', 'petits-textes': '26-texte', 'ou-est': '27-where', intrus: '28-intrus',
   ombres: '29-ombres', 'epelle-anglais': '30-epelle', relier: '31-relier', trous: '32-trous',
-  sudoku: '33-sudoku', 'relie-calculs': '34-relie-calculs',
+  sudoku: '33-sudoku', 'relie-calculs': '34-relie-calculs', symetrie: '36-symetrie', cubes: '37-cubes',
+  'animaux-monde': '38-animaux', saisons: '39-saisons', pays: '40-pays', histoires: '44-histoire', monnaie: '45-monnaie',
+  mesures: '46-mesures', calendrier: '47-calendrier', tangram: '48-tangram', reproduire: '49-reproduire', 'parle-anglais': '50-parle',
 };
 const bubbleText = (t) => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\u2011/g, '-').replace(/\s+/g, ' ').trim();
 for (const game of GAMES) {
@@ -404,6 +444,82 @@ const expected = Math.floor((GAMES.length * 2) / 5);
 const unlocked = await page.locator('.sticker:not(.locked)').count();
 if (unlocked !== expected) fail(`${unlocked} autocollants au lieu de ${expected}`);
 console.log(`✔ album : ${unlocked} autocollants`);
+
+// défi du jour : 5 questions de jeux variés, une série de jours et une étoile bonus
+await goProfile(page);
+await page.click('[data-defi]');
+const fromGames = new Set();
+for (let i = 0; i < 5; i++) {
+  const zone = await page.waitForSelector('.choices:not(.answered)');
+  const q = await page.evaluate(() => globalThis.__lc.question);
+  fromGames.add(q.from);
+  await answer(page, q, false);
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+}
+await page.waitForSelector('.daily-result');
+if (!(await page.textContent('.daily-result')).includes('1 jour')) fail('défi du jour : série de jours absente');
+if (fromGames.size < 3) fail(`défi du jour : seulement ${fromGames.size} jeux différents`);
+await shot('35-defi');
+await goProfile(page);
+if (!(await page.textContent('[data-defi] .pill')).includes('fait')) fail('défi du jour : non marqué comme fait');
+console.log(`✔ défi du jour (${fromGames.size} jeux différents, série de jours)`);
+
+// révisions : les jeux où l'enfant s'est trompé reviennent, puis s'espacent
+await goProfile(page);
+if (!(await page.locator('[data-revision]').count())) fail('révisions : bouton absent après des erreurs');
+await page.click('[data-revision]');
+const revised = new Set();
+for (let i = 0; i < 5; i++) {
+  const zone = await page.waitForSelector('.choices:not(.answered)');
+  const q = await page.evaluate(() => globalThis.__lc.question);
+  revised.add(q.from);
+  await answer(page, q, false);
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+}
+await page.waitForSelector('.results');
+const reviewSteps = await page.evaluate(([key, ids]) => {
+  const kid = JSON.parse(localStorage.getItem(key)).profiles['eva-rose'];
+  return ids.map((id) => kid.review[id]?.step ?? 'fini');
+}, [STORAGE_KEY, [...revised]]);
+if (reviewSteps.some((st) => st === 0)) fail(`révisions : pas espacées après une bonne réponse (${reviewSteps})`);
+console.log(`✔ révisions (${revised.size} jeux revus, prochaines dans 1 jour ou plus)`);
+
+// jeux bonus : après une partie à 2 étoiles ou plus
+await page.click('[data-bonus-open]');
+await page.click('[data-bonus="bulles"]');
+await page.waitForSelector('.pop-bubble');
+await page.click('.pop-bubble >> nth=0', { force: true });
+await page.waitForFunction(() => document.querySelector('.bubble-score')?.textContent !== '0');
+await shot('41-bulles');
+await goProfile(page);
+console.log('✔ jeu bonus : les bulles');
+
+// habiller son personnage
+await page.click('[data-dress]');
+await page.click('[data-shirt="vert"]');
+await page.click('[data-accessory="couronne"]');
+if (!(await page.locator('.dress-preview svg text').allTextContents()).includes('👑')) fail('personnage : la couronne n’apparaît pas');
+await shot('42-personnage');
+console.log('✔ personnage habillé (tee-shirt vert, couronne)');
+
+// objectif du jour et temps maximum (réglés par les parents)
+await setStore(page, "store.profiles['eva-rose'].goals = { parts: 2, limit: 1 };");
+await goProfile(page);
+if (!(await page.textContent('.goal-bar')).includes('atteint')) fail('objectif du jour : non atteint malgré les parties jouées');
+await page.click('[data-domain="maths"]');
+await page.click('[data-game="compter"]');
+await page.waitForSelector('.pause-card');
+await shot('43-pause');
+await setStore(page, "store.profiles['eva-rose'].goals = {};");
+console.log('✔ objectif du jour et pause quand le temps est écoulé');
+
+// lecture facilitée et décors de saison
+await setStore(page, "store.profiles['eva-rose'].easyRead = true;");
+await goProfile(page);
+if (!(await page.evaluate(() => document.body.classList.contains('easy-read')))) fail('lecture facilitée non appliquée');
+if (!(await page.evaluate(() => document.body.dataset.season))) fail('décor de saison absent');
+await setStore(page, "store.profiles['eva-rose'].easyRead = false;");
+console.log('✔ lecture facilitée et décor de saison');
 
 // profils séparés : Matteo n'a pas les étoiles d'Eva-Rose
 await goProfiles(page);
@@ -480,6 +596,7 @@ await page.waitForSelector('.settings');
 await shot('07-reglages');
 if ((await page.textContent('[data-version]')) !== pkg.version) fail('version affichée différente de package.json');
 if (!(await page.textContent('.credits')).includes('Michaël Durieux')) fail('crédits absents');
+if (!(await page.getAttribute('[data-contact]', 'href')).startsWith('mailto:')) fail('contact absent des crédits');
 if (!(await page.locator('.changelog-entry').count())) fail('journal des modifications absent');
 await page.click('[data-tab="enfants"]');
 await page.click('[data-edit="eva-rose"]');
@@ -499,21 +616,47 @@ await page.waitForSelector('.toast');
 if (await page.locator('[data-photo-row="eva-rose"] .avatar-photo').count()) fail('le dessin n’est pas revenu');
 console.log('✔ réglages (photo enregistrée automatiquement, version, journal, crédits)');
 
-// hors ligne : le service worker doit servir l'app sans réseau
-await page.goto(BASE);
-await page.evaluate(() => navigator.serviceWorker.ready);
-await page.reload();
-await context.setOffline(true);
-await page.reload();
-await page.waitForSelector('.profiles, .home');
-await context.setOffline(false);
+// hors ligne (mode avion) : le service worker doit servir l'app et tous les jeux sans réseau
+await checkOffline(context, page);
 await context.close();
-console.log('✔ fonctionne hors ligne');
+}
+
+/** Mode avion : après une première visite avec réseau, chaque jeu s'ouvre sans connexion. */
+async function checkOffline(context, page) {
+  await page.goto(BASE);
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload(); // la page est maintenant servie par le service worker
+  const failed = [];
+  const onFail = (request) => failed.push(request.url());
+  page.on('requestfailed', onFail);
+  await context.setOffline(true);
+  await page.reload();
+  await page.waitForSelector('.welcome, .profiles, .home');
+  for (const game of GAMES) {
+    await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor(game.id)}';`);
+    await openGame(page, game);
+    await page.waitForSelector('.choices');
+    if (await page.locator('.choices').count() !== 1) fail(`hors ligne : ${game.id} ne s'affiche pas`);
+  }
+  await context.setOffline(false);
+  page.off('requestfailed', onFail);
+  if (failed.length) fail(`hors ligne, fichiers introuvables : ${[...new Set(failed)].join(', ')}`);
+  console.log(`✔ mode avion : l'app et les ${GAMES.length} jeux s'ouvrent sans réseau`);
+}
+
+if (!ONLY) await scenario();
+else if (ONLY.includes('hors-ligne')) {
+  const context = await newContext({ width: 390, height: 844 });
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`hors ligne : ${e.message}`));
+  await checkOffline(context, page);
+  await context.close();
+}
 
 // ---------------------------------------------------------------- Mise en page : tous les iPhone
 
-// Tailles d'écran (points CSS) de l'iPhone 6 à l'iPhone 17 Pro Max, des iPad, et des
-// principaux Android (le plus étroit : 360 points).
+// Tailles d'écran (points CSS) de l'iPhone 6 à l'iPhone 17 Pro Max (portrait et paysage),
+// des iPad, et des principaux Android (le plus étroit : 360 points).
 const DEVICES = [
   { name: 'iPhone 6-7-8-SE', width: 375, height: 667 },
   { name: 'iPhone 6-7-8 Plus', width: 414, height: 736 },
@@ -525,6 +668,11 @@ const DEVICES = [
   { name: 'iPhone 14-15 Pro Max-15-16 Plus', width: 430, height: 932 },
   { name: 'iPhone 16-17 Pro-17', width: 402, height: 874 },
   { name: 'iPhone 16-17 Pro Max', width: 440, height: 956 },
+  // téléphones en paysage
+  { name: 'iPhone 6-7-8-SE paysage', width: 667, height: 375 },
+  { name: 'iPhone 12-13-14 paysage', width: 844, height: 390 },
+  { name: 'iPhone 16-17 Pro Max paysage', width: 956, height: 440 },
+  { name: 'Samsung Galaxy S20-S24 paysage', width: 800, height: 360 },
   // Android (Chrome), téléphones puis tablette
   { name: 'Samsung Galaxy S8-S9, A50', width: 360, height: 740 },
   { name: 'Samsung Galaxy S20-S24, A54', width: 360, height: 800 },
@@ -558,12 +706,17 @@ const STRESS = {
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
-    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol')) {
+    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell')) {
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
     const zone = document.querySelector('.choices, .home-menu, .profile-list');
     if (mustReach && zone && zone.getBoundingClientRect().bottom > window.innerHeight + 1) {
       return `boutons hors de l'écran (${Math.round(zone.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
+    }
+    // en paysage, le dessin est à côté des réponses : il doit aussi tenir dans l'écran
+    const stage = document.querySelector('.stage');
+    if (mustReach && stage && stage.getBoundingClientRect().bottom > window.innerHeight + 1) {
+      return `dessin hors de l'écran (${Math.round(stage.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
     }
     return null;
   }, reachable);
@@ -584,13 +737,14 @@ async function checkDevice(device, repeat) {
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
 
   // écrans fixes
+  if (!ONLY) {
   await goProfiles(page);
   await checkLayout(page, tag('Qui joue ?'));
   for (const [id, grade] of [['matteo', 'MS'], ['eva-rose', 'CP']]) {
     await setStore(page, `store.profiles['${id}'] = store.profiles['${id}'] || {}; store.profiles['${id}'].grade = '${grade}';`);
     await goProfile(page, id);
     await checkLayout(page, tag(`accueil ${id}`));
-    for (const domain of ['francais', 'maths', 'anglais']) {
+    for (const domain of DOMAINS.map((d) => d.id)) {
       await page.click(`[data-domain="${domain}"]`);
       await checkLayout(page, tag(`liste ${domain} ${id}`), { reachable: false });
       await page.click('.top-bar .icon-btn');
@@ -601,11 +755,15 @@ async function checkDevice(device, repeat) {
   await page.click('[data-levels="calcul"], [data-levels="compter"]');
   await page.waitForSelector('.level-list');
   await checkLayout(page, tag('choix du niveau'), { reachable: false });
-  checked += 10;
+  await goProfile(page);
+  await page.click('[data-dress]');
+  await checkLayout(page, tag('personnage'), { reachable: false });
+  checked += 16;
+  }
 
   // chaque niveau de chaque jeu
   for (const game of GAMES) {
-    if (game.paliers) continue;
+    if (game.paliers || ONLY && !ONLY.includes(game.id)) continue;
     for (let level = 1; level <= game.levels.length; level++) {
       const grade = gradeFor(game.id, level);
       await setStore(page, `store.profiles['eva-rose'].grade = '${grade}'; store.profiles['eva-rose'].games['${game.id}'] = { level: ${level} };`);
@@ -616,6 +774,10 @@ async function checkDevice(device, repeat) {
         checked++;
       }
     }
+  }
+  if (ONLY) {
+    await ctx.close();
+    return checked;
   }
   // calcul : un palier sur trois, les 4 formes d'exercice
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");

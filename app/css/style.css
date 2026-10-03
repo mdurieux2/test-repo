@@ -75,6 +75,8 @@ input { -webkit-user-select: text; user-select: text; }
 .domain-theme-francais { --accent: var(--lecture); --accent-dark: var(--lecture-dark); --accent-soft: var(--lecture-soft); }
 .domain-theme-maths { --accent: var(--maths); --accent-dark: var(--maths-dark); --accent-soft: var(--maths-soft); }
 .domain-theme-anglais { --accent: var(--anglais); --accent-dark: var(--anglais-dark); --accent-soft: var(--anglais-soft); }
+.domain-theme-monde { --accent: #0f8a7e; --accent-dark: #0b6b62; --accent-soft: #dff5f1; }
+.domain-theme-defi { --accent: #d6336c; --accent-dark: #a61e4d; --accent-soft: #ffe3ec; }
 
 .screen {
   /* sur iPad, tout l'écran est agrandi d'un coup (--zoom) : la hauteur est corrigée d'autant */
@@ -182,6 +184,9 @@ input { -webkit-user-select: text; user-select: text; }
 .domain-anglais { background: var(--anglais); box-shadow: 0 6px 0 var(--anglais-dark); }
 .domain-maths { background: var(--maths); box-shadow: 0 6px 0 var(--maths-dark); }
 .domain-album { background: var(--album); box-shadow: 0 6px 0 var(--album-dark); font-size: 1.5rem; min-height: 76px; }
+.domain-monde { background: #0f8a7e; box-shadow: 0 6px 0 #0b6b62; }
+.domain-defi { background: #d6336c; box-shadow: 0 6px 0 #a61e4d; font-size: 1.5rem; min-height: 72px; }
+.domain-defi.done { opacity: 0.85; }
 .domain-btn:active { box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25); }
 .pill { margin-left: auto; background: rgba(255, 255, 255, 0.25); border-radius: 999px; padding: 2px 12px; font-size: 1.1rem; }
 
@@ -967,8 +972,9 @@ input { -webkit-user-select: text; user-select: text; }
 .choices-answers.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .choices-answers .choice {
   font-size: min(1.2rem, 4.6vw); min-height: 64px; line-height: 1.2; padding: 6px 4px;
-  overflow-wrap: anywhere; hyphens: auto;
+  overflow-wrap: break-word; hyphens: auto;
 }
+.choices-answers.long-words .choice { font-size: min(1.2rem, 3.5vw); overflow-wrap: anywhere; }
 .stage-text {
   width: 100%; background: var(--card); border-radius: 22px; padding: 12px 16px 10px;
   box-shadow: 0 5px 0 var(--line); display: flex; flex-direction: column; gap: 6px;
@@ -1130,3 +1136,452 @@ input { -webkit-user-select: text; user-select: text; }
 /* illustration d'un calcul (5 + 5 objets) : toujours dans la largeur de l'écran */
 .operation-visual { flex-wrap: wrap; justify-content: center; max-width: 100%; }
 .operation-visual .objects.small .object { font-size: min(24px, 5.4vw); }
+
+/* =====================================================================
+   Téléphone en paysage : le dessin à gauche, la consigne et les réponses
+   à droite ; « Bravo ! » s'affiche en bulle flottante en haut.
+   ===================================================================== */
+@media (orientation: landscape) and (max-height: 520px) {
+  .screen {
+    max-width: 1000px;
+    padding: calc(var(--safe-top) + 2px) max(16px, env(safe-area-inset-right)) calc(var(--safe-bottom) + 6px) max(16px, env(safe-area-inset-left));
+  }
+  .top-bar { min-height: 46px; }
+  .icon-btn { width: 42px; height: 42px; font-size: 1.3rem; }
+
+  /* écran de jeu en deux colonnes */
+  .screen.play {
+    display: grid; column-gap: 24px; row-gap: 6px; align-items: center;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "top top" "instr zone" "instr zone";
+  }
+  .screen.play:has(> .stage) { grid-template-areas: "top top" "stage instr" "stage zone"; }
+  .screen.play.play-match:not(:has(> .stage)),
+  .screen.play.play-fill:not(:has(> .stage)),
+  .screen.play.play-order:not(:has(> .stage)) { grid-template-areas: "top top" "instr instr" "zone zone"; }
+  .play > .top-bar { grid-area: top; }
+  .play > .instruction { grid-area: instr; margin: 0; }
+  .play > .stage { grid-area: stage; min-height: 0; padding: 0; align-self: stretch; }
+  .play > .choices { grid-area: zone; margin: 0; min-height: 0; align-self: center; }
+  .play > .feedback {
+    position: fixed; z-index: 30; top: calc(var(--safe-top) + 4px); left: 50%; transform: translateX(-50%);
+    min-height: 0; max-width: min(70vw, 560px); padding: 2px 18px; border-radius: 18px;
+    background: rgba(255, 255, 255, 0.97); box-shadow: 0 4px 16px rgba(43, 45, 66, 0.2); pointer-events: none;
+  }
+  .play > .feedback:empty { display: none; }
+  .play-keypad .feedback, .play-fill .feedback, .play-match .feedback { min-height: 0; }
+  .instruction { gap: 10px; }
+  .instruction .avatar-sm { width: 48px; height: 48px; }
+  .instruction .bubble { font-size: 1rem; padding: 8px 12px; }
+
+  /* dessins : à la hauteur de l'écran */
+  .stage-picture { font-size: min(110px, 28dvh); padding: 2px 20px; }
+  .stage-listen { width: 104px; height: 104px; font-size: 50px; }
+  .object { font-size: min(40px, 9dvh); }
+  .objects.per-10 .object { font-size: min(26px, 6.4dvh); }
+  .scatter { width: min(100%, calc((100dvh - 80px) * 1.25)); }
+  .maze, .sudoku { width: min(100%, calc(100dvh - 80px)); }
+  .lasso-field, .path-grid, .path-grid.spell { width: min(100%, calc((100dvh - 80px) * var(--cols) / var(--rows))); }
+  .stage-clock { width: min(220px, calc(100dvh - 90px)); }
+  .equation { font-size: 2.4rem; }
+  .equation.big { font-size: 2.8rem; }
+  .stage-word { font-size: 2.6rem; padding: 10px 24px; }
+  .stage-sentence, .story-text { font-size: 1.2rem; padding: 12px 16px; }
+  .text-body { font-size: 1.05rem; line-height: 1.4; }
+  .stage-text { padding: 8px 14px 6px; gap: 4px; }
+  .spell-picture { font-size: 52px; }
+
+  /* réponses */
+  .choice { min-height: 64px; }
+  .choices-objects .choice { min-height: 100px; }
+  .choices-pictures .choice { min-height: 80px; }
+  .key { min-height: 48px; }
+  .keypad { gap: 8px; }
+  .maze-controls {
+    display: grid; grid-template-columns: repeat(3, 58px); grid-template-areas: ". up hint" "left . right" ". down .";
+    gap: 8px; justify-content: center;
+  }
+  .maze-controls .maze-arrow:nth-child(1) { grid-area: left; }
+  .maze-controls .maze-arrow:nth-child(2) { grid-area: up; }
+  .maze-controls .maze-arrow:nth-child(3) { grid-area: down; }
+  .maze-controls .maze-arrow:nth-child(4) { grid-area: right; }
+  .maze-controls .maze-arrow:nth-child(5) { grid-area: hint; }
+  .sudoku-palette { grid-template-columns: repeat(min(var(--n), 3), minmax(0, 1fr)); }
+
+  /* relier : les étiquettes sur deux lignes, les traits vont de haut en bas */
+  .match { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; row-gap: 64px; width: 100%; }
+  .match-col { flex-direction: row; justify-content: center; gap: 8px; }
+  .match-col .match-item { flex: 1 1 0; min-width: 0; max-width: 180px; min-height: 52px; }
+  .match.pairs-8 .match-item, .match.pairs-6 .match-item { min-height: 48px; font-size: 1.2rem; }
+
+  /* calculs à trous : les calculs à gauche, les étiquettes à droite */
+  .fill { flex-direction: row; align-items: center; gap: 24px; width: 100%; }
+  .fill-rows { flex: 1.2; gap: 6px; }
+  .tile-tray { flex: 1; }
+  .fill-row, .fill.rows-4 .fill-row, .fill.rows-5 .fill-row { padding: 2px 10px; font-size: 1.4rem; }
+  .fill-box, .fill.rows-4 .fill-box, .fill.rows-5 .fill-box { height: 40px; width: 56px; font-size: 1.4rem; }
+  .tile, .tile-tray.tiles-8 .tile, .tile-tray.tiles-10 .tile { min-height: 46px; font-size: 1.5rem; }
+
+  /* ranger */
+  .order { gap: 14px; width: 100%; }
+  .order-item.order-picture { min-height: 92px; }
+
+  /* accueil, profils, liste des jeux */
+  .home-hero { margin: 0 0 10px; }
+  .home-title { font-size: 1.8rem; }
+  .home-menu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .domain-btn { min-height: 64px; padding: 8px 16px; font-size: 1.5rem; }
+  .domain-icon { font-size: 1.9rem; }
+  .profiles-title { font-size: 1.8rem; margin: 0 0 10px; }
+  .profile-list { grid-template-columns: repeat(auto-fit, minmax(150px, 220px)); justify-content: center; }
+  .profile-card { padding: 10px 8px; }
+  .avatar-xl, .profile-list.n3 .avatar-xl, .profile-list.n4 .avatar-xl, .profile-list.n5 .avatar-xl, .profile-list.n6 .avatar-xl {
+    width: min(104px, 27dvh); height: min(104px, 27dvh);
+  }
+  .game-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  /* en paysage, la colonne des réponses est étroite : tailles fixes (pas en vw) */
+  .choices-numbers .choice { font-size: 1.9rem; }
+  .choices .choice.digits-3 { font-size: 1.55rem; }
+  .choices .choice.digits-4 { font-size: 1.3rem; }
+  .choices-letters .choice { font-size: 2.2rem; }
+  .choices-letters.n4 .choice { font-size: 1.7rem; }
+  .choices-words .choice { font-size: 1.45rem; min-height: 60px; }
+  .choices-words .choice.long { font-size: 1.15rem; }
+  .choices-pictures .choice { font-size: 2.1rem; }
+  .choices-objects .objects .object, .choices-objects.n3 .objects .object { font-size: 18px; }
+  .choices-objects.n3 { grid-template-columns: minmax(0, 1fr); }
+  .choices-objects.n3 .choice { min-height: 52px; padding: 4px; }
+  .choice .swatch { width: 44px; height: 44px; }
+  .choices-scenes.n4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .choices-scenes .scene, .choices-scenes.n4 .scene { max-width: 96px; }
+  .cell { width: min(40px, 10dvh); }
+  .frame { gap: 4px; padding: 6px; }
+  .seq-item { min-width: 48px; height: 58px; font-size: 1.7rem; }
+  .screen.play:has(> .stage) .path-grid { width: min(100%, calc((100dvh - 150px) * var(--cols) / var(--rows))); }
+}
+
+
+/* =====================================================================
+   Version 1.4 : défi du jour, le monde, symétrie, cubes
+   ===================================================================== */
+.daily-result { margin: 4px 0 0; font-weight: 700; font-size: 1.2rem; color: #a61e4d; }
+.choices-answers.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sequence.words .seq-item { font-size: 1.4rem; padding: 0 14px; }
+
+.stage-sym { padding: 4px 0; }
+.sym-grid {
+  position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 3px;
+  width: min(100%, 340px, calc(100vh / var(--zoom, 1) - 380px));
+  width: min(100%, 340px, calc(100dvh / var(--zoom, 1) - 380px));
+  aspect-ratio: var(--cols) / var(--rows); padding: 3px; border-radius: 12px; background: var(--line);
+}
+.sym-grid::after { content: ''; position: absolute; background: var(--ink); border-radius: 3px; pointer-events: none; }
+.sym-grid.axis-v::after { top: -8px; bottom: -8px; left: calc(50% - 2px); width: 4px; }
+.sym-grid.axis-h::after { left: 0; right: 0; top: calc(50% - 2px); height: 4px; }
+.sym-cell { position: relative; min-width: 0; min-height: 0; border-radius: 4px; background: #fff; }
+.sym-cell.model { background: #f1ebde; }
+.sym-cell.on { background: var(--accent); }
+.sym-cell.model.on { background: var(--accent-dark); }
+.sym-cell.target:active { transform: scale(0.94); }
+.sym-cell.wrong::after { content: '✕'; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 1.1rem; background: var(--bad); border-radius: 4px; }
+.sym-cell.hint { outline: 3px dashed var(--accent-dark); outline-offset: -4px; }
+.sym-zone { display: flex; justify-content: center; }
+
+.stage-cubes svg {
+  display: block; width: auto; max-width: 100%;
+  height: min(250px, 34vh); height: min(250px, 34dvh);
+  filter: drop-shadow(0 4px 0 var(--line));
+}
+.stage-cubes polygon { stroke: #6b3d10; stroke-width: 0.035; stroke-linejoin: round; }
+.cube-top { fill: #ffd35c; }
+.cube-left { fill: #f2a43a; }
+.cube-right { fill: #d97f27; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .sym-grid { width: min(100%, calc((100dvh - 90px) * var(--cols) / var(--rows))); }
+  .choices-answers .choice { font-size: 1.05rem; }
+  .stage-cubes svg { height: calc(100dvh - 110px); }
+}
+
+/* monnaie : pièces et billets (le montant est toujours écrit) */
+.stage-money { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; max-width: 360px; }
+.coin {
+  display: inline-grid; place-items: center; grid-auto-flow: column; gap: 1px;
+  width: 54px; height: 54px; border-radius: 50%; font-weight: 700; font-size: 0.85rem; color: #3b2a05;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18), inset 0 0 0 5px var(--ring);
+}
+.coin b { font-size: 1.35rem; }
+.coin-1 { background: #ffd34d; --ring: #c9ccd3; }
+.coin-2 { background: #c9ccd3; --ring: #f2c230; }
+.note {
+  display: inline-flex; align-items: center; justify-content: center; gap: 2px;
+  width: 84px; height: 46px; border-radius: 8px; font-weight: 700; color: #1d1d27;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18), inset 0 0 0 3px rgba(255, 255, 255, 0.55);
+}
+.note b { font-size: 1.3rem; }
+.note-5 { background: #c6ccd6; }
+.note-10 { background: #f4a7a0; }
+.note-20 { background: #9ec5f0; }
+.note-50 { background: #f6c27a; }
+.stage-price { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.price-item { font-size: min(90px, 22vw); line-height: 1.1; }
+.price-tag {
+  background: #fff; border: 3px solid var(--ink); border-radius: 10px 22px 22px 10px; padding: 2px 18px;
+  font-size: 1.7rem; font-weight: 700; box-shadow: 0 3px 0 var(--line);
+}
+.price-paid { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+.pay { display: flex; flex-direction: column; gap: 10px; }
+.pay-tray {
+  min-height: 70px; padding: 8px; border-radius: 18px; border: 3px dashed #e9c98f; background: #fff3dc;
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center;
+}
+.pay-empty { color: var(--muted); font-weight: 700; }
+.pay-coin { border-radius: 12px; }
+.pay-coin .coin, .pay-coin .note { transform: scale(0.85); }
+.pay-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.pay-add { border-radius: 14px; padding: 4px; }
+.pay-add:active { transform: translateY(3px); }
+/* téléphone en paysage : la caisse, les pièces et le bouton tiennent à côté du dessin */
+@media (orientation: landscape) and (max-height: 520px) {
+  .pay { gap: 6px; }
+  .pay-tray { min-height: 48px; padding: 4px; }
+  .pay-buttons { gap: 6px; }
+  .pay-add { padding: 2px; }
+  .pay-add .coin { width: 44px; height: 44px; }
+  .pay-add .coin b { font-size: 1.1rem; }
+  .pay-add .note { width: 70px; height: 38px; }
+  .pay .validate-btn { min-height: 48px; padding-top: 6px; padding-bottom: 6px; }
+}
+
+/* mesures : règle, crayons, balance */
+.stage-ruler svg { display: block; width: min(100%, 420px); height: auto; }
+.ruler-body { fill: #ffe9a8; stroke: #c99a2e; stroke-width: 0.8; }
+.ruler-ticks line { stroke: #6b4a10; stroke-width: 0.6; }
+.ruler-ticks text { font-size: 6px; text-anchor: middle; fill: #4a330b; font-weight: 700; font-family: inherit; }
+.pencil-body { fill: #3d7dff; }
+.pencil-tip { fill: #f2c17a; stroke: #b07a2a; stroke-width: 0.4; }
+.pencil-end { fill: #ff8fab; }
+.choices-bars.n3 { grid-template-columns: minmax(0, 1fr); }
+.choices-bars .choice { min-height: 56px; justify-items: start; padding: 8px 12px; }
+.pencil-choice {
+  display: block; height: 16px; border-radius: 3px 10px 10px 3px; background: var(--pencil);
+  box-shadow: inset -12px 0 0 #f2c17a;
+}
+.stage-balance svg { display: block; width: min(100%, 300px); height: auto; }
+.balance-foot { fill: #8a5426; }
+.balance-beam { fill: #b5753a; }
+.balance-rope { stroke: #6b3d10; stroke-width: 1; }
+.balance-pan { fill: #c9ccd3; stroke: #8a8f99; stroke-width: 0.8; }
+.balance-pivot { fill: var(--ink); }
+.balance-emoji { font-size: 14px; text-anchor: middle; }
+
+/* calendrier */
+.stage-calendar { background: var(--card); border-radius: 18px; padding: 8px 10px 10px; box-shadow: 0 4px 0 var(--line); width: min(100%, 330px); }
+.cal-month { text-align: center; font-weight: 700; font-size: 1.15rem; color: var(--accent-dark); text-transform: capitalize; margin-bottom: 4px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; text-align: center; }
+.cal-head { font-weight: 700; color: var(--muted); font-size: 0.85rem; }
+.cal-day { font-weight: 700; font-size: 0.95rem; padding: 3px 0; border-radius: 8px; }
+.cal-day.mark { outline: 3px solid var(--accent); background: var(--accent-soft); }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .price-item { font-size: min(80px, 20dvh); }
+  .stage-money { max-width: 100%; }
+  .cal-day { padding: 1px 0; font-size: 0.85rem; }
+}
+
+/* les pièces du carré */
+.stage-tangram svg { display: block; width: min(220px, 56vw); height: auto; }
+.tangram-piece { stroke: #fff; stroke-width: 1.5; stroke-linejoin: round; }
+.tangram-hole { fill: #fff; stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 4 3; }
+.tangram-choice svg { display: block; width: min(56px, 13vw); height: auto; }
+.choice-piece { fill: var(--accent); stroke: var(--accent-dark); stroke-width: 2; }
+@media (orientation: landscape) and (max-height: 520px) {
+  .stage-tangram svg { width: min(220px, calc(100dvh - 110px)); }
+}
+
+/* =====================================================================
+   Version 1.5 : révisions, objectifs, pause, personnage, jeux bonus,
+   histoires en karaoké, lecture facilitée, décors de saison
+   ===================================================================== */
+.domain-revision { background: #6741d9; box-shadow: 0 6px 0 #4c2fb0; font-size: 1.5rem; min-height: 64px; }
+.domain-theme-revision { --accent: #6741d9; --accent-dark: #4c2fb0; --accent-soft: #ece6ff; }
+.goal-bar { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 4px; font-weight: 700; color: var(--muted); }
+.goal-bar.reached { color: var(--good-dark); }
+.goal-track { display: flex; gap: 6px; }
+.goal-step { width: 26px; height: 10px; border-radius: 6px; background: var(--line); }
+.goal-step.on { background: var(--good); }
+.pause { justify-content: flex-start; }
+.pause-card {
+  margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+  background: var(--card); border-radius: 26px; padding: 22px 18px; box-shadow: 0 5px 0 var(--line);
+}
+.pause-card h1 { margin: 0; font-size: 1.7rem; }
+.pause-card p { margin: 0; color: var(--muted); }
+.pause-ideas { font-size: 2rem; letter-spacing: 0.3em; }
+.setting-choice { flex-wrap: wrap; }
+.setting-choice .segmented { flex-wrap: wrap; }
+
+/* habiller son personnage */
+.dress { gap: 12px; }
+.dress-btn { margin-bottom: 10px; }
+.dress-preview { display: flex; justify-content: center; }
+.dress-note { text-align: center; margin: 0; }
+.shirt-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.shirt-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 52px; }
+.shirt-swatch {
+  width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center;
+  color: #fff; font-weight: 700; font-size: 1.3rem; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
+}
+.shirt-btn.on .shirt-swatch { outline: 4px solid var(--ink); outline-offset: 2px; }
+.shirt-btn:disabled .shirt-swatch { opacity: 0.35; }
+.lock { font-size: 0.75rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.accessory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 10px; }
+.accessory-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; min-height: 84px;
+  border-radius: 16px; background: var(--bg); font-weight: 700; font-size: 0.85rem; box-shadow: 0 0 0 2px var(--line) inset;
+}
+.accessory-btn.on { background: #fff; box-shadow: 0 0 0 3px var(--lecture) inset; }
+.accessory-btn:disabled { opacity: 0.6; }
+.accessory-emoji { font-size: 2rem; line-height: 1.1; }
+.avatar-extra { position: absolute; top: -4%; left: 50%; transform: translateX(-50%); font-size: 38%; line-height: 1; }
+.avatar-xl .avatar-extra { font-size: 2.6rem; }
+.avatar-md .avatar-extra { font-size: 1.8rem; }
+.avatar-sm .avatar-extra, .avatar-xs .avatar-extra { font-size: 1rem; }
+
+/* jeux bonus */
+.bonus-btn { background: #fff6d6; }
+.bonus-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.bonus-play { gap: 10px; }
+.bubble-hud { font-weight: 700; font-size: 1.2rem; text-align: center; }
+.bubble-field {
+  position: relative; flex: 1; min-height: 60vh; overflow: hidden; border-radius: 24px;
+  background: linear-gradient(180deg, #d6f0ff, #eaf7ff); touch-action: manipulation;
+}
+.pop-bubble {
+  position: absolute; bottom: -90px; width: 76px; height: 76px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 2rem;
+  background: radial-gradient(circle at 30% 30%, #fff, hsl(var(--hue) 90% 75% / 0.6) 60%, hsl(var(--hue) 90% 60% / 0.5));
+  box-shadow: inset 0 0 0 2px hsl(var(--hue) 80% 60% / 0.6);
+  animation: rise linear forwards;
+}
+.pop-bubble.popped { animation: pop-out 0.25s ease-out forwards; }
+@keyframes rise { to { transform: translateY(calc(-60vh - 180px)); } }
+@keyframes pop-out { to { transform: scale(1.6); opacity: 0; } }
+.bonus-end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; font-size: 1.5rem; font-weight: 700; }
+.puzzle-board {
+  display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 4px;
+  width: min(100%, 360px, calc(100dvh - 260px)); aspect-ratio: 1; margin: 0 auto;
+}
+.puzzle-tile { position: relative; overflow: hidden; border-radius: 10px; background: var(--card); padding: 0; box-shadow: 0 3px 0 var(--line); }
+.puzzle-tile.selected { outline: 4px solid var(--hint); outline-offset: -4px; z-index: 1; }
+.puzzle-img {
+  position: absolute; width: calc(var(--n) * 100%); height: calc(var(--n) * 100%);
+  left: calc(var(--x) * -100%); top: calc(var(--y) * -100%); border-radius: 0;
+}
+.puzzle-board.solved { gap: 0; }
+.puzzle-board.solved .puzzle-tile { border-radius: 0; box-shadow: none; }
+.bonus-done { align-self: center; }
+.coloring { display: flex; justify-content: center; }
+.coloring svg { width: min(100%, 340px, calc(100dvh - 300px)); height: auto; background: #fff; border-radius: 22px; box-shadow: 0 5px 0 var(--line); }
+.coloring [data-zone] { stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; cursor: pointer; }
+.palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.paint { width: 46px; height: 46px; border-radius: 50%; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15); }
+.paint.on { outline: 4px solid var(--ink); outline-offset: 3px; }
+
+/* histoires en karaoké */
+.stage-karaoke {
+  width: 100%; background: var(--card); border-radius: 22px; padding: 10px 16px; box-shadow: 0 5px 0 var(--line);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.karaoke-head { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.karaoke-emoji { font-size: 2.2rem; line-height: 1; }
+.karaoke-text { margin: 0; font-size: 1.3rem; line-height: 1.55; font-weight: 700; }
+.w { border-radius: 6px; transition: background 0.15s; }
+.w.on { background: #ffe066; box-shadow: 0 0 0 3px #ffe066; }
+@media (max-height: 700px) {
+  .karaoke-text { font-size: 1.1rem; line-height: 1.4; }
+}
+
+/* lecture facilitée (dyslexie) : plus d'espace, mots en couleurs alternées */
+.easy-read .bubble, .easy-read .text-body, .easy-read .karaoke-text, .easy-read .stage-sentence, .easy-read .story-text,
+.easy-read .choices-answers .choice, .easy-read .choices-sentences .choice, .easy-read .choices-words .choice {
+  letter-spacing: 0.06em; word-spacing: 0.22em; line-height: 1.6;
+}
+.easy-read .text-body .w:nth-of-type(even), .easy-read .karaoke-text .w:nth-of-type(even),
+.easy-read .stage-sentence .w:nth-of-type(even), .easy-read .story-text .w:nth-of-type(even) { color: #1d4ed8; }
+
+/* décors de saison */
+.season-decor { display: flex; justify-content: center; gap: 14px; font-size: 1.5rem; }
+.season-decor span { animation: bob 3s ease-in-out infinite; }
+.season-decor span:nth-child(2) { animation-delay: 0.4s; }
+.season-decor span:nth-child(3) { animation-delay: 0.8s; }
+.season-decor span:nth-child(4) { animation-delay: 1.2s; }
+body[data-season="noel"] { background: #f4f8ff; }
+body[data-season="halloween"] { background: #fff4e8; }
+body[data-season="printemps"] { background: #fbfff1; }
+body[data-season="ete"] { background: #fffbea; }
+
+/* =====================================================================
+   Accueil en rubriques : le défi en haut, les rubriques en tuiles,
+   l'album et le personnage en bas
+   ===================================================================== */
+.domain-theme-histoires { --accent: #c026d3; --accent-dark: #9d1aab; --accent-soft: #fbe8fd; }
+.domain-theme-jeux { --accent: #0d9488; --accent-dark: #0a7068; --accent-soft: #dcf5f2; }
+.domain-theme-temps { --accent: #a16207; --accent-dark: #7c4a05; --accent-soft: #fdf1d8; }
+.domain-theme-monde { --accent: #4d7c0f; --accent-dark: #3a5e0b; --accent-soft: #ecf6dc; }
+.domain-histoires { background: #c026d3; box-shadow: 0 6px 0 #9d1aab; }
+.domain-jeux { background: #0d9488; box-shadow: 0 6px 0 #0a7068; }
+.domain-temps { background: #a16207; box-shadow: 0 6px 0 #7c4a05; }
+.domain-monde { background: #4d7c0f; box-shadow: 0 6px 0 #3a5e0b; }
+.domain-dress { background: #e8f0ff; color: var(--ink); box-shadow: 0 6px 0 #c9d8f5; font-size: 1.3rem; min-height: 64px; }
+.home-menu { display: flex; flex-direction: column; gap: 12px; }
+.home-top { display: flex; gap: 10px; }
+.home-top > * { flex: 1 1 0; min-width: 0; }
+.home-top .domain-btn { min-height: 64px; font-size: 1.35rem; padding: 8px 14px; }
+.home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.home-grid .domain-tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.domain-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 92px; padding: 8px 6px; border-radius: 22px; color: #fff; text-align: center;
+  font-weight: 700; font-size: 1.2rem; line-height: 1.15;
+}
+.domain-tile:active { transform: translateY(4px); }
+.domain-tile .domain-icon { font-size: 2.2rem; }
+.home-bottom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.home-bottom .domain-btn { min-height: 64px; font-size: 1.15rem; padding: 8px 10px; gap: 8px; }
+.home-bottom .domain-icon { font-size: 1.6rem; }
+.home-bottom .pill { padding: 2px 8px; font-size: 0.9rem; }
+@media (max-height: 760px) {
+  .domain-tile { min-height: 74px; font-size: 1.1rem; }
+  .domain-tile .domain-icon { font-size: 1.8rem; }
+  .home-menu { gap: 10px; }
+  .home-grid { gap: 10px; }
+  .home-hero { margin-bottom: 6px; }
+  .home-title { font-size: 1.7rem; }
+  .season-decor { font-size: 1.1rem; }
+}
+/* écran en paysage (tablette, ordinateur) : les rubriques sur 4 colonnes, tout tient sans défiler */
+@media (orientation: landscape) and (min-aspect-ratio: 5/4) {
+  .home-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .home-grid .domain-tile:last-child:nth-child(odd) { grid-column: auto; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .home-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .home-grid .domain-tile:last-child:nth-child(odd) { grid-column: auto; }
+  .domain-tile { min-height: 60px; flex-direction: row; gap: 8px; font-size: 1rem; }
+  .domain-tile .domain-icon { font-size: 1.5rem; }
+  .season-decor { display: none; }
+  .home-title { font-size: 1.5rem; }
+  .home-top .domain-btn, .home-bottom .domain-btn { min-height: 48px; }
+}
+
+/* relier des couleurs : la paire prend la couleur reliée, texte foncé sur les couleurs claires */
+.match-item.matched.light-pair { color: var(--ink); box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12), inset 0 0 0 3px rgba(0, 0, 0, 0.12); }
+.match-item.matched .swatch { box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 0 2px rgba(0, 0, 0, 0.15); }
+.home-bottom .domain-btn { font-size: 1rem; }
+.home-bottom .domain-btn span:nth-child(2) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+@media (max-height: 760px) {
+  .home-hero:has(.goal-bar) .season-decor { display: none; }
+}

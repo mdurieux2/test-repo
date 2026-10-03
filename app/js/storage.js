@@ -34,7 +34,7 @@ export function defaultStore() {
   return {
     active: null,
     order: [],
-    settings: { voice: true, sounds: true, sessionLength: 10, voices: {} },
+    settings: { voice: true, sounds: true, sessionLength: 10, voices: {}, seasonal: true, music: false },
     profiles: {},
   };
 }
@@ -93,6 +93,10 @@ function mergeChild(id, saved) {
     history: Array.isArray(saved.history) ? saved.history.slice(-HISTORY_LIMIT) : [],
     mistakes: Array.isArray(saved.mistakes) ? saved.mistakes.slice(-MISTAKES_LIMIT) : [],
     photo: isPhoto(saved.photo) ? saved.photo : null,
+    review: saved.review && typeof saved.review === 'object' ? saved.review : {},
+    goals: saved.goals && typeof saved.goals === 'object' ? saved.goals : {},
+    style: saved.style && typeof saved.style === 'object' ? saved.style : {},
+    easyRead: saved.easyRead === true,
   };
 }
 
@@ -149,7 +153,10 @@ export function logMistake(child, entry) {
 
 /** Efface la progression d'un enfant (prénom, dessin, classe et photo sont conservés). */
 export function resetChild(store, id) {
-  const { name, look, grade, photo, spoken } = store.profiles[id] || {};
-  store.profiles[id] = { ...defaultChild(grade || 'CP', { name, look }), photo: photo || null, ...(spoken ? { spoken } : {}) };
+  const { name, look, grade, photo, spoken, goals, easyRead } = store.profiles[id] || {};
+  store.profiles[id] = {
+    ...defaultChild(grade || 'CP', { name, look }), photo: photo || null, goals: goals || {}, easyRead: Boolean(easyRead),
+    ...(spoken ? { spoken } : {}),
+  };
   return store;
 }

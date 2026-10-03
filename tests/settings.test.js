@@ -70,8 +70,8 @@ test('personnage : le prénom choisi par la famille, échappé dans le dessin', 
   assert.ok(!svg.includes('<b>'));
   const c = makeCharacter('lea', { name: 'Léa', look: 'fille' });
   assert.equal(c.name, 'Léa');
-  assert.equal(c.voice.voice, 'female');
   assert.ok(c.hello.includes('Léa'));
-  assert.equal(makeCharacter('x', { name: 'Hugo', look: 'garcon' }).voice.voice, 'male');
+  // une seule voix pour toute l'app, quel que soit le personnage
+  assert.deepEqual(makeCharacter('x', { name: 'Hugo', look: 'garcon' }).voice, c.voice);
   assert.ok(!avatarSvg('fille', '').includes('<text'), 'pas de prénom : tee-shirt vide');
 });

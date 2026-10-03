@@ -45,3 +45,28 @@ export function playSound(name) {
     // le son est un bonus : on ignore toute erreur audio
   }
 }
+
+// Musique douce (désactivée par défaut) : une petite mélodie en boucle, très bas.
+const MELODY = [523, 659, 784, 659, 587, 698, 880, 698, 523, 659, 784, 1047, 880, 784, 659, 587];
+let musicTimer = null;
+
+export function startMusic() {
+  if (musicTimer || !ctx) return;
+  let step = 0;
+  musicTimer = setInterval(() => {
+    if (!ctx || ctx.state !== 'running') return;
+    try {
+      const note = MELODY[step % MELODY.length];
+      tone(note / 2, 0, 0.5, { volume: 0.03 });
+      if (step % 4 === 0) tone(note / 4, 0, 1.4, { type: 'triangle', volume: 0.025 });
+    } catch {
+      // la musique est un bonus
+    }
+    step++;
+  }, 520);
+}
+
+export function stopMusic() {
+  clearInterval(musicTimer);
+  musicTimer = null;
+}
