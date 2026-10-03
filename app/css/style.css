@@ -819,6 +819,8 @@ input { -webkit-user-select: text; user-select: text; }
   box-shadow: 0 6px 0 var(--line), 0 0 0 3px var(--line) inset;
 }
 .order-items.n5 .order-item { font-size: min(1.6rem, 6.4vw); }
+.order.words .order-item { font-size: min(1.4rem, 4.4vw); }
+.order.words .order-slot { font-size: min(1.3rem, 4.2vw); }
 .order-item.order-picture { min-height: 112px; }
 .order-item.placed { opacity: 0.25; transform: scale(0.92); }
 .order-item.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 6px 0 #e6b800, 0 0 0 4px var(--hint) inset; }

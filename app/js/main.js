@@ -1695,7 +1695,9 @@ function orderZone(ctx) {
     });
     return btn;
   });
-  const zone = h('div', { class: 'choices order center' },
+  // des mots entiers (une phrase à remettre dans l'ordre) : écrits un peu plus petit
+  const words = q.items.some((it) => (it.label || '').length > 2);
+  const zone = h('div', { class: `choices order center${words ? ' words' : ''}` },
     h('div', { class: `order-slots n${slots.length}` }, slots.flatMap((slot, i) => (i && sign ? [h('span', { class: 'order-sign', 'aria-hidden': 'true' }, sign), slot] : [slot]))),
     h('div', { class: `order-items n${q.items.length}` }, buttons));
   return zone;
