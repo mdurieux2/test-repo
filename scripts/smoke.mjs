@@ -265,6 +265,10 @@ const DEVICES = [
   { name: 'iPhone 16-17 Pro Max', width: 440, height: 956 },
 ];
 
+// Jeux dont la hauteur dépend du tirage (nombre de plaques, d'objets, de paquets) :
+// plus de questions tirées sur le plus petit écran pour attraper le pire cas.
+const STRESS = { dizaines: 15, compter: 8, tables: 8, 'vite-vu': 6, panier: 4 };
+
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
@@ -311,7 +315,7 @@ async function checkDevice(device, repeat) {
     for (let level = 1; level <= game.levels.length; level++) {
       const grade = gradeFor(game.id, level);
       await setStore(page, `store.profiles['eva-rose'].grade = '${grade}'; store.profiles['eva-rose'].games['${game.id}'] = { level: ${level} };`);
-      for (let k = 0; k < repeat; k++) {
+      for (let k = 0; k < (repeat > 1 ? STRESS[game.id] || repeat : repeat); k++) {
         await openGame(page, game);
         await page.waitForSelector('.choices');
         await checkLayout(page, tag(`${game.id} niveau ${level}`));

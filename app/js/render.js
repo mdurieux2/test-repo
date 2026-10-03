@@ -73,7 +73,7 @@ function diceStage({ value }) {
 /** Matériel de numération : plaques de 100, barres de 10 et cubes. */
 function blocksStage({ hundreds = 0, tens, units }) {
   const bar = () => h('span', { class: 'bar' }, Array.from({ length: 10 }, () => h('span', { class: 'cube' })));
-  return h('div', { class: 'blocks', role: 'img', 'aria-label': String(hundreds * 100 + tens * 10 + units) },
+  return h('div', { class: hundreds ? 'blocks has-hundreds' : 'blocks', role: 'img', 'aria-label': String(hundreds * 100 + tens * 10 + units) },
     hundreds ? h('div', { class: 'plates' }, Array.from({ length: hundreds }, () => h('span', { class: 'plate' }))) : null,
     tens ? h('div', { class: 'bars' }, Array.from({ length: tens }, bar)) : null,
     units ? h('div', { class: 'loose-cubes' }, Array.from({ length: units }, () => h('span', { class: 'cube' }))) : null);

@@ -622,6 +622,12 @@ input { -webkit-user-select: text; user-select: text; }
   background-image: linear-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.15) 1px, transparent 1px);
   background-size: 7px 7px; box-shadow: 0 3px 0 #d9661a;
 }
+/* avec des centaines (jusqu'à 9 plaques) : matériel plus compact pour tenir sur un iPhone 6 */
+.blocks.has-hundreds { gap: 10px; padding: 10px; }
+.blocks.has-hundreds .plates { display: grid; grid-template-columns: repeat(5, auto); gap: 4px; }
+.blocks.has-hundreds .plate { width: 44px; height: 44px; background-size: 4.4px 4.4px; box-shadow: 0 2px 0 #d9661a; }
+.blocks.has-hundreds .bar .cube { width: 10px; height: 10px; }
+.blocks.has-hundreds .loose-cubes .cube { width: 14px; height: 14px; }
 .flash-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .flash { position: relative; }
 .flash-cover {
