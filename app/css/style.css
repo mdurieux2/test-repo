@@ -1128,6 +1128,11 @@ input { -webkit-user-select: text; user-select: text; }
 .order-items.n6 { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .order-items.n6 .order-item { font-size: min(1.6rem, 6vw); min-height: 64px; }
 .order-slots.n6 .order-slot { height: 60px; font-size: min(1.5rem, 6vw); }
+/* dictée : jusqu'à 7 lettres et 2 lettres pièges, sur deux rangées */
+.order-items.n7, .order-items.n8 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.order-items.n9 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.order-items.n7 .order-item, .order-items.n8 .order-item, .order-items.n9 .order-item { min-height: 58px; font-size: min(1.6rem, 6.4vw); }
+.order-slots.n7 .order-slot { height: 56px; font-size: min(1.4rem, 5.4vw); }
 @media (max-height: 700px) {
   .stage-text { padding: 8px 12px 6px; gap: 4px; }
   .text-body { font-size: 1.1rem; line-height: 1.4; }

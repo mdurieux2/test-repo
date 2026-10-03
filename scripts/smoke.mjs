@@ -266,9 +266,13 @@ async function answer(page, q, wrongFirst) {
       break;
     }
     case 'order': {
-      const sorted = [...q.items].sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
+      const sorted = q.items.filter((it) => it.value !== null)
+        .sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
       if (wrongFirst) {
-        await page.click(`.order-item[data-value="${sorted[1].value}"]`);
+        // une lettre piège s'il y en a, sinon un élément différent du premier attendu
+        const wrong = q.items.find((it) => it.value === null)
+          || sorted.find((it) => (q.byLabel ? it.label !== sorted[0].label : it !== sorted[0]));
+        await page.click(wrong.value === null ? `.order-item[data-value="null"][data-label="${wrong.label}"]` : `.order-item[data-value="${wrong.value}"]`);
         await page.waitForSelector('.try-again');
       }
       for (const item of sorted) await page.click(`.order-item[data-value="${item.value}"]:not([disabled])`);

@@ -1735,7 +1735,11 @@ function payZone(ctx) {
 
 function orderZone(ctx) {
   const { q } = ctx;
-  const sorted = [...q.items].sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
+  // les éléments à placer ; ceux qui valent null sont des pièges (lettres en trop dans la dictée)
+  const sorted = q.items.filter((it) => it.value !== null)
+    .sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
+  // dictée : deux lettres identiques sont interchangeables (on compare ce qui est écrit)
+  const same = (a, b) => (q.byLabel ? a.label === b.label : a.value === b.value);
   let next = 0;
   const content = (item) => (item.emoji
     ? h('span', { class: 'order-emoji', style: { '--scale': item.scale } }, item.emoji)
@@ -1744,10 +1748,13 @@ function orderZone(ctx) {
   const sign = q.sign ?? (q.items[0].emoji ? '→' : q.order === 'desc' ? '>' : '<');
   const lang = q.lang ? { lang: q.lang } : {};
   const buttons = q.items.map((item) => {
-    const btn = h('button', { class: `order-item${item.emoji ? ' order-picture' : ''}`, 'data-value': String(item.value), 'aria-label': item.label || `Taille ${item.value + 1}`, ...lang }, content(item));
+    const btn = h('button', {
+      class: `order-item${item.emoji ? ' order-picture' : ''}`, 'data-value': String(item.value), 'data-label': item.label,
+      'aria-label': item.label || `Taille ${item.value + 1}`, ...lang,
+    }, content(item));
     btn.addEventListener('click', () => {
       if (ctx.session.locked || btn.disabled) return;
-      if (item.value === sorted[next].value) {
+      if (item.value !== null && same(item, sorted[next])) {
         btn.disabled = true;
         btn.classList.add('placed');
         slots[next].replaceChildren(content(item));
@@ -1764,7 +1771,7 @@ function orderZone(ctx) {
       btn.classList.add('shake');
       setTimeout(() => btn.classList.remove('shake'), 400);
       const hint = ctx.session.attempts >= 1;
-      if (hint) buttons[q.items.indexOf(sorted[next])].classList.add('hint');
+      if (hint) buttons.find((b, i) => !b.disabled && q.items[i].value !== null && same(q.items[i], sorted[next]))?.classList.add('hint');
       markWrong(ctx, { message: hint ? 'Touche celui qui brille !' : 'Essaie encore !', given: item.label || `taille ${item.value + 1}` });
     });
     return btn;

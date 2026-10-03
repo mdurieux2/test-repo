@@ -74,7 +74,8 @@ function checkQuestion(q, ctx) {
       break;
     }
     case 'order': {
-      const values = q.items.map((i) => i.value);
+      // les lettres pièges de la dictée valent null
+      const values = q.items.filter((i) => i.value !== null).map((i) => i.value);
       assert.ok(values.length >= 3, ctx);
       assert.equal(new Set(values).size, values.length, ctx);
       assert.ok(['asc', 'desc'].includes(q.order), ctx);
@@ -580,6 +581,24 @@ test('données anglais : chaque mot a une image, au moins 4 mots par thème', ()
     for (const { q } of questions(findGame(id))) {
       assert.ok(q.stage.emoji, `${id} : pas d'image pour ${q.key}`);
       for (const c of q.choices) assert.ok(c.label, `${id} : choix sans image`);
+    }
+  }
+});
+
+test('dictée : les lettres à placer forment le mot, les pièges n’en font pas partie', () => {
+  const game = findGame('dictee');
+  for (let level = 1; level <= game.levels.length; level++) {
+    const rng = createRng(level * 7);
+    for (let i = 0; i < 40; i++) {
+      const q = game.generate(level, rng, i);
+      const word = q.items.filter((it) => it.value !== null).sort((a, b) => a.value - b.value).map((it) => it.label).join('');
+      assert.equal(word, q.answer);
+      assert.ok(q.byLabel, 'deux lettres identiques sont interchangeables');
+      const traps = q.items.filter((it) => it.value === null);
+      for (const t of traps) assert.ok(!q.answer.includes(t.label), `piège ${t.label} dans ${q.answer}`);
+      if (level === 6) assert.ok(traps.length >= 1, `niveau 6 sans piège : ${q.answer}`);
+      if (level <= 4) assert.equal(q.stage.type, 'picture');
+      else assert.equal(q.stage.type, 'listen');
     }
   }
 });

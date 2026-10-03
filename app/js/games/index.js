@@ -15,11 +15,12 @@ import { MONDE_GAMES } from './monde.js';
 import { MESURES_GAMES } from './mesures.js';
 import { JEUX_GAMES } from './jeux.js';
 import { drapeaux } from './drapeaux.js';
+import { dictee } from './dictee.js';
 import { ANGLAIS_PLUS_GAMES } from './anglais-plus.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
-  ...LOGIQUE_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, ...ANGLAIS_GAMES,
+  ...LOGIQUE_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES,
 ];
 
@@ -28,7 +29,7 @@ const RUBRIQUES = [
     id: 'francais',
     title: 'Lire et écrire',
     icon: '📚',
-    games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'homophones', 'genre'],
+    games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'homophones', 'genre', 'dictee'],
   },
   { id: 'histoires', title: 'Histoires', icon: '📖', games: ['histoires', 'petits-textes'] },
   {
