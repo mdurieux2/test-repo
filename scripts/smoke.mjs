@@ -2,6 +2,7 @@
 // chaque jeu sur un écran d'iPhone (en se trompant une fois), puis visite l'album et
 // l'espace parents. Vérifie aussi la mise en page de chaque niveau sur un petit iPhone.
 // Usage : npm run test:e2e   (SCREENSHOTS=dossier pour enregistrer des captures)
+//         ONLY=memory,points npm run test:e2e   (seulement la mise en page de ces jeux, sur tous les appareils)
 
 import { chromium } from 'playwright';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -14,6 +15,7 @@ import { STORAGE_KEY } from '../app/js/storage.js';
 const PORT = 8123;
 const BASE = `http://localhost:${PORT}/`;
 const SHOTS = process.env.SCREENSHOTS;
+const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
@@ -326,6 +328,8 @@ async function answer(page, q, wrongFirst) {
 
 // ---------------------------------------------------------------- Parcours complet (iPhone 13)
 
+async function scenario() {
+
 const context = await newContext({ width: 390, height: 844 });
 const page = await context.newPage();
 page.on('pageerror', (e) => errors.push(e.message));
@@ -620,6 +624,8 @@ await page.waitForSelector('.profiles, .home');
 await context.setOffline(false);
 await context.close();
 console.log('✔ fonctionne hors ligne');
+}
+if (!ONLY) await scenario();
 
 // ---------------------------------------------------------------- Mise en page : tous les iPhone
 
@@ -705,6 +711,7 @@ async function checkDevice(device, repeat) {
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
 
   // écrans fixes
+  if (!ONLY) {
   await goProfiles(page);
   await checkLayout(page, tag('Qui joue ?'));
   for (const [id, grade] of [['matteo', 'MS'], ['eva-rose', 'CP']]) {
@@ -726,10 +733,11 @@ async function checkDevice(device, repeat) {
   await page.click('[data-dress]');
   await checkLayout(page, tag('personnage'), { reachable: false });
   checked += 16;
+  }
 
   // chaque niveau de chaque jeu
   for (const game of GAMES) {
-    if (game.paliers) continue;
+    if (game.paliers || ONLY && !ONLY.includes(game.id)) continue;
     for (let level = 1; level <= game.levels.length; level++) {
       const grade = gradeFor(game.id, level);
       await setStore(page, `store.profiles['eva-rose'].grade = '${grade}'; store.profiles['eva-rose'].games['${game.id}'] = { level: ${level} };`);
@@ -740,6 +748,10 @@ async function checkDevice(device, repeat) {
         checked++;
       }
     }
+  }
+  if (ONLY) {
+    await ctx.close();
+    return checked;
   }
   // calcul : un palier sur trois, les 4 formes d'exercice
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
