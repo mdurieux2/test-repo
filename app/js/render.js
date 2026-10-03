@@ -1,6 +1,6 @@
 // Fabrique des éléments DOM à partir des données des questions.
 
-import { avatarSvg, character } from './characters.js';
+import { avatarSvg } from './characters.js';
 
 /** h('div', {class: 'x', onclick}, enfant1, enfant2…) */
 export function h(tag, attrs = {}, ...children) {
@@ -265,21 +265,21 @@ export function revealWord(word, highlight = 0) {
     word.slice(highlight));
 }
 
-// Photos choisies dans les Réglages (data URL par profil) ; sinon, le dessin.
-let photos = {};
-export function setPhotos(map) {
-  photos = { ...map };
+// Profils des enfants (prénom, dessin, photo) pour dessiner les portraits.
+let profiles = {};
+export function setProfiles(map) {
+  profiles = { ...map };
 }
 
-/** Portrait d'Eva-Rose ou de Matteo : sa photo si elle existe, sinon le dessin SVG. */
-export function avatar(id, extraClass = '') {
-  const photo = photos[id];
+/** Portrait d'un enfant : sa photo si elle existe, sinon son dessin avec son prénom sur le tee-shirt. */
+export function avatar(id, extraClass = '', override = null) {
+  const { name = '', look = 'fille', photo = null } = override || profiles[id] || {};
   if (photo) {
     return h('span', { class: `avatar avatar-photo avatar-${id} ${extraClass}` },
-      h('img', { src: photo, alt: character(id).name }),
-      h('span', { class: 'avatar-name', 'aria-hidden': 'true' }, character(id).name));
+      h('img', { src: photo, alt: name }),
+      h('span', { class: 'avatar-name', 'aria-hidden': 'true' }, name));
   }
   const el = h('span', { class: `avatar avatar-${id} ${extraClass}` });
-  el.innerHTML = avatarSvg(id);
+  el.innerHTML = avatarSvg(look, name);
   return el;
 }

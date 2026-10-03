@@ -4,12 +4,24 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.2.0',
+  version: '1.3.0',
   author: 'Michaël Durieux',
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.3.0',
+    date: '2026-10-03',
+    changes: [
+      'Premier lancement : chaque famille crée ses profils (prénom, personnage fille ou garçon, classe, photo).',
+      'Le prénom est écrit sur le tee-shirt du personnage et sert à féliciter l’enfant dans les jeux.',
+      'Partager l’app : un lien à envoyer à d’autres familles ; chaque appareil garde ses propres enfants.',
+      'Espace parents réorganisé : un seul bouton « Parents », trois onglets (Suivi, Enfants, Réglages).',
+      'Ajouter, renommer ou supprimer un enfant (jusqu’à 6 profils).',
+      'Nouvelle icône, sans prénom.',
+    ],
+  },
   {
     version: '1.2.0',
     date: '2026-10-03',

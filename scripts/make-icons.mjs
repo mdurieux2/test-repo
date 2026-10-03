@@ -1,5 +1,6 @@
 // Génère les icônes PNG de l'app (iOS exige du PNG pour l'écran d'accueil) :
-// Eva-Rose et Matteo sur fond violet (lecture) et orange (maths).
+// une fille et un garçon (sans prénom, l'app se partage entre familles) sur fond
+// violet (lecture) et orange (maths).
 // Usage : npm run icons
 
 import { chromium } from 'playwright';
@@ -22,8 +23,8 @@ const page = (size) => `
   .matteo { right: 5%; bottom: 13%; }
 </style>
 <div class="icon">
-  <span class="eva">${avatarSvg('eva-rose')}</span>
-  <span class="matteo">${avatarSvg('matteo')}</span>
+  <span class="eva">${avatarSvg('fille')}</span>
+  <span class="matteo">${avatarSvg('garcon')}</span>
 </div>`;
 
 const browser = await chromium.launch();

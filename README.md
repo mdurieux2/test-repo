@@ -1,8 +1,10 @@
-# Lire & Compter, avec Eva-Rose et Matteo
+# Lire & Compter
 
 Application iPhone et iPad de jeux pour apprendre **le français, les maths et l'anglais**,
-de la moyenne section au CE1. Deux profils au lancement : **Eva-Rose** (CP, CE1) et **Matteo**
-(moyenne et grande section). Chaque enfant a sa progression, ses étoiles et son album.
+de la moyenne section au CE1. Conçue pour Eva-Rose (CP, CE1) et Matteo (moyenne et grande
+section), elle se partage avec d'autres familles : au premier lancement, chacun crée ses
+profils (prénom, personnage fille ou garçon, classe, photo). Chaque enfant a sa progression,
+ses étoiles et son album ; le prénom est écrit sur le tee-shirt et sert à le féliciter.
 
 C'est une web app installable : elle s'ouvre dans Safari, s'ajoute à l'écran d'accueil et
 fonctionne ensuite **sans Internet**. Pas besoin de Mac, d'Xcode ni de l'App Store.
@@ -19,15 +21,24 @@ fonctionne ensuite **sans Internet**. Pas besoin de Mac, d'Xcode ni de l'App Sto
 
 Sur iPad, l'interface s'agrandit automatiquement, en portrait comme en paysage.
 
-## Réglages
+## Partager l'app
 
-Le bouton ⚙️ de l'écran « Qui joue ? » ouvre les réglages, protégés par une multiplication :
+Envoyer simplement le lien `https://mdurieux2.github.io/test-repo/` (ou *Espace parents →
+Enfants → Partager le lien*). Chaque famille crée ses propres profils sur son appareil :
+rien n'est partagé entre les familles, aucune donnée ne quitte l'appareil.
 
-- **Photos des profils** : une photo pour chaque enfant, choisie dans la photothèque ou prise
-  avec l'appareil photo. Elle est enregistrée automatiquement et reste sur l'appareil.
-- **Voix et sons** : consignes lues ou non, voix d'Eva-Rose et de Matteo avec un bouton
-  d'essai, petits sons, nombre de questions par partie.
-- **À propos** : version, journal des modifications (`app/js/config.js`) et crédits.
+## Espace parents
+
+Le bouton **Parents** de l'écran « Qui joue ? » (protégé par une multiplication) ouvre un
+espace à trois onglets :
+
+- **Suivi** : l'activité de la semaine, les compétences et les erreurs fréquentes de chaque enfant.
+- **Enfants** : ajouter (jusqu'à 6), modifier ou supprimer un enfant : prénom, personnage,
+  classe, photo (photothèque ou appareil photo, enregistrée automatiquement), effacer la
+  progression ; partager le lien de l'app.
+- **Réglages** : consignes lues ou non, voix des filles et des garçons avec un bouton d'essai,
+  petits sons, nombre de questions par partie, installation, version, journal des
+  modifications (`app/js/config.js`) et crédits.
 
 Pour des voix plus naturelles, téléchargez une voix « Premium » ou « améliorée » dans
 *Réglages de l'iPhone → Accessibilité → Contenu énoncé → Voix → Français*. L'app choisit
@@ -77,7 +88,7 @@ chaque calcul juste devient vert (additions jusqu'à 5, puis + et − jusqu'à 1
 
 ## Suivi des parents
 
-Le bouton 👪 de l'écran « Qui joue ? » ouvre le suivi. Pour chaque enfant :
+L'onglet **Suivi** de l'espace parents montre, pour chaque enfant :
 - la classe ;
 - l'activité de la semaine (parties, minutes, réussite, jours d'affilée, graphique) ;
 - l'état de chaque compétence (pas commencé, en cours, acquis) et le niveau réglable ;
@@ -103,7 +114,7 @@ npm run icons        # régénère les icônes
 | `app/js/programs.js` | Programme par classe (jeux et niveaux) |
 | `app/js/main.js` | Écrans, profils et déroulement d'une partie |
 | `app/js/dashboard.js` | Tableau de bord des parents |
-| `app/js/characters.js` | Dessins d'Eva-Rose et de Matteo (SVG) |
+| `app/js/characters.js` | Personnages fille et garçon (SVG), prénom sur le tee-shirt |
 | `app/js/config.js` | Version, journal des modifications, crédits |
 | `app/sw.js` | Mode hors ligne : tout nouveau fichier doit être ajouté à `PRECACHE` |
 

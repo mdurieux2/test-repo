@@ -1,5 +1,7 @@
 // Données de l'app, conservées sur l'appareil (localStorage). Aucune donnée ne sort du téléphone.
-// Un profil par enfant (Eva-Rose, Matteo) : classe, étoiles, niveaux, paliers et historique.
+// Un profil par enfant, créé par la famille au premier lancement : prénom, dessin, photo,
+// classe, étoiles, niveaux, paliers et historique. Chaque appareil a donc ses propres enfants,
+// même quand le lien de l'app est partagé.
 
 import { createGameState } from './progress.js';
 import { isPhoto } from './photo.js';
@@ -15,29 +17,76 @@ export const GRADES = {
   CE1: 'CE1',
 };
 
-const DEFAULT_GRADES = { 'eva-rose': 'CP', matteo: 'MS' };
+export const MAX_CHILDREN = 6;
+export const NAME_MAX = 20;
 
-export function defaultChild(grade = 'CP') {
-  return { grade, stars: 0, games: {}, paliers: {}, history: [], mistakes: [], photo: null };
+// Profils créés avant la version 1.3 (sans prénom enregistré) : on les retrouve tels quels.
+const LEGACY = {
+  'eva-rose': { name: 'Eva-Rose', spoken: 'Éva-Rose', look: 'fille', grade: 'CP' },
+  matteo: { name: 'Matteo', spoken: 'Mattéo', look: 'garcon', grade: 'MS' },
+};
+
+export function defaultChild(grade = 'CP', { name = '', look = 'fille' } = {}) {
+  return { name, look, grade, stars: 0, games: {}, paliers: {}, history: [], mistakes: [], photo: null };
 }
 
 export function defaultStore() {
   return {
     active: null,
+    order: [],
     settings: { voice: true, sounds: true, sessionLength: 10, voices: {} },
-    profiles: Object.fromEntries(Object.entries(DEFAULT_GRADES).map(([id, grade]) => [id, defaultChild(grade)])),
+    profiles: {},
   };
+}
+
+/** Prénom nettoyé : espaces en trop retirés, longueur limitée. */
+export function cleanName(name) {
+  return String(name ?? '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX);
+}
+
+/** Identifiant stable tiré du prénom : « Éva-Rose » → « eva-rose ». */
+export function slugify(name) {
+  const slug = cleanName(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return slug || 'enfant';
+}
+
+/** Ajoute un enfant ; renvoie son identifiant (ou null si le prénom est vide ou s'il y en a trop). */
+export function addChild(store, { name, look = 'fille', grade = 'CP' }) {
+  const clean = cleanName(name);
+  if (!clean || store.order.length >= MAX_CHILDREN) return null;
+  let id = slugify(clean);
+  for (let n = 2; store.profiles[id]; n++) id = `${slugify(clean)}-${n}`;
+  store.profiles[id] = defaultChild(GRADES[grade] ? grade : 'CP', { name: clean, look: look === 'garcon' ? 'garcon' : 'fille' });
+  store.order = [...store.order, id];
+  return id;
+}
+
+/** Supprime un enfant et toute sa progression. */
+export function removeChild(store, id) {
+  delete store.profiles[id];
+  store.order = store.order.filter((x) => x !== id);
+  if (store.active === id) store.active = null;
+  return store;
 }
 
 export function defaultGameStats(level = 1) {
   return { ...createGameState(level), sessions: 0, answered: 0, correct: 0, bestStars: 0, lastPlayed: null };
 }
 
-function mergeChild(base, saved) {
-  if (!saved || typeof saved !== 'object') return base;
+function mergeChild(id, saved) {
+  if (!saved || typeof saved !== 'object') return null;
+  const legacy = LEGACY[id] || {};
+  const name = cleanName(saved.name) || legacy.name;
+  if (!name) return null; // profil sans prénom : inutilisable
+  const base = defaultChild(legacy.grade || 'CP');
   return {
     ...base,
     ...saved,
+    name,
+    look: saved.look === 'garcon' || saved.look === 'fille' ? saved.look : legacy.look || 'fille',
+    // la prononciation d'origine ne vaut que tant que le prénom n'a pas changé
+    ...(saved.name ? {} : legacy.spoken ? { spoken: legacy.spoken } : {}),
     grade: GRADES[saved.grade] ? saved.grade : base.grade,
     games: saved.games && typeof saved.games === 'object' ? saved.games : {},
     paliers: saved.paliers && typeof saved.paliers === 'object' ? saved.paliers : {},
@@ -56,9 +105,16 @@ export function loadStore(storage = globalThis.localStorage) {
     const saved = JSON.parse(raw);
     if (!saved || typeof saved !== 'object') return base;
     const profiles = {};
-    for (const [id, child] of Object.entries(base.profiles)) profiles[id] = mergeChild(child, saved.profiles?.[id]);
+    for (const [id, child] of Object.entries(saved.profiles && typeof saved.profiles === 'object' ? saved.profiles : {})) {
+      const merged = mergeChild(id, child);
+      if (merged) profiles[id] = merged;
+    }
+    const known = Array.isArray(saved.order) ? saved.order.filter((id) => profiles[id]) : [];
+    const order = [...new Set([...known, ...Object.keys(profiles)])].slice(0, MAX_CHILDREN);
+    for (const id of Object.keys(profiles)) if (!order.includes(id)) delete profiles[id];
     return {
       active: profiles[saved.active] ? saved.active : null,
+      order,
       settings: { ...base.settings, ...(saved.settings || {}) },
       profiles,
     };
@@ -91,9 +147,9 @@ export function logMistake(child, entry) {
   child.mistakes = [...child.mistakes, entry].slice(-MISTAKES_LIMIT);
 }
 
-/** Efface la progression d'un enfant (sa classe et sa photo sont conservées). */
+/** Efface la progression d'un enfant (prénom, dessin, classe et photo sont conservés). */
 export function resetChild(store, id) {
-  const { grade, photo } = store.profiles[id] || {};
-  store.profiles[id] = { ...defaultChild(grade || DEFAULT_GRADES[id]), photo: photo || null };
+  const { name, look, grade, photo, spoken } = store.profiles[id] || {};
+  store.profiles[id] = { ...defaultChild(grade || 'CP', { name, look }), photo: photo || null, ...(spoken ? { spoken } : {}) };
   return store;
 }

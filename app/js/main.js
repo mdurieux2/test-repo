@@ -7,11 +7,13 @@ import { levelRange, programFor } from './programs.js';
 import { createRng, pick, randInt } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
-import { GRADES, gameStats, loadStore, logMistake, logSession, resetChild, saveStore } from './storage.js';
+import {
+  addChild, cleanName, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild, resetChild, saveStore,
+} from './storage.js';
 import { listFrenchVoices, setSpeechEnabled, setVoicePreferences, speak, stopSpeaking } from './speech.js';
 import { playSound, setSoundsEnabled, unlockAudio } from './sounds.js';
-import { avatar, h, renderChoiceContent, renderStage, revealWord, setPhotos } from './render.js';
-import { CHARACTERS, character } from './characters.js';
+import { avatar, h, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
+import { LOOKS, makeCharacter } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
 import { APP, CHANGELOG } from './config.js';
@@ -30,15 +32,16 @@ function child() {
   return store.profiles[store.active];
 }
 
-function me() {
-  return character(store.active);
+/** Le personnage de l'enfant qui joue : son prénom, son dessin, sa voix. */
+function me(id = store.active) {
+  return makeCharacter(id, store.profiles[id]);
 }
 
 function applySettings() {
   setSpeechEnabled(store.settings.voice);
   setSoundsEnabled(store.settings.sounds);
   setVoicePreferences(store.settings.voices);
-  setPhotos(Object.fromEntries(Object.entries(store.profiles).map(([id, kid]) => [id, kid.photo])));
+  setProfiles(store.profiles);
 }
 
 function save() {
@@ -59,7 +62,7 @@ function frenchSpacing(text) {
   return text.replace(/ ([?!:;])/g, '\u00a0$1').replace(/(\p{L})-(\p{L})/gu, '$1\u2011$2');
 }
 
-/** Fait parler Eva-Rose ou Matteo, chacun avec sa voix. */
+/** Fait parler le personnage de l'enfant, avec sa voix (fille ou garçon). */
 function say(who, parts) {
   return speak(parts, who?.voice);
 }
@@ -98,29 +101,126 @@ function domainById(id) {
 
 // ---------------------------------------------------------------- Qui joue ?
 
+// Petits pictogrammes (traits fins, couleur du texte).
+const ICONS = {
+  parents: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.5"/><circle cx="9" cy="17" r="2.5"/>',
+  suivi: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  enfants: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.6c2.3.2 4 1.8 4.6 4.4"/>',
+  reglages: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M4.2 6.2l2.1 2.1M17.7 15.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 17.8l2.1-2.1M17.7 8.3l2.1-2.1"/>',
+  partager: '<path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+};
+
+function icon(name) {
+  const el = h('span', { class: `icon icon-${name}`, 'aria-hidden': 'true' });
+  el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
+  return el;
+}
+
+/** Le bouton unique de l'espace parents (protégé par une multiplication). */
+function parentButton() {
+  return h('button', { class: 'parent-btn', onclick: () => parentGate(() => parentsScreen()), 'aria-label': 'Espace parents' },
+    icon('parents'), h('span', {}, 'Parents'));
+}
+
 function profileScreen() {
+  if (!store.order.length) return welcomeScreen();
   show(h('main', { class: 'screen profiles' },
-    h('header', { class: 'top-bar' }, h('span'), h('span'),
-      h('div', { class: 'grown-up-btns' },
-        h('button', { class: 'parent-btn', onclick: () => parentGate(parentsScreen), 'aria-label': 'Suivi des parents' }, '👪'),
-        h('button', { class: 'parent-btn settings-btn', onclick: () => parentGate(settingsScreen), 'aria-label': 'Réglages' }, '⚙️'))),
+    h('header', { class: 'top-bar' }, h('span'), h('span'), parentButton()),
     h('h1', { class: 'profiles-title' }, 'Qui joue ?'),
-    h('div', { class: 'profile-list' },
-      CHARACTERS.map((c) => {
-        const kid = store.profiles[c.id];
-        return h('button', { class: `profile-card profile-${c.id}`, 'data-profile': c.id, onclick: () => chooseProfile(c) },
-          avatar(c.id, 'avatar-xl'),
-          h('span', { class: 'profile-name' }, frenchSpacing(c.name)),
+    h('div', { class: `profile-list n${store.order.length}` },
+      store.order.map((id) => {
+        const kid = store.profiles[id];
+        return h('button', { class: `profile-card look-${kid.look}`, 'data-profile': id, onclick: () => chooseProfile(id) },
+          avatar(id, 'avatar-xl'),
+          h('span', { class: 'profile-name' }, frenchSpacing(kid.name)),
           h('span', { class: 'profile-grade' }, GRADES[kid.grade]),
           h('span', { class: 'profile-stars' }, '⭐ ', kid.stars));
       }))));
 }
 
-function chooseProfile(c) {
-  store.active = c.id;
+function chooseProfile(id) {
+  store.active = id;
   save();
   homeScreen();
-  say(c, `Bonjour ${c.spoken} !`);
+  say(me(), `Bonjour ${me().spoken} !`);
+}
+
+// ---------------------------------------------------------------- Premier lancement
+
+/**
+ * Formulaire d'un enfant : prénom, dessin (fille ou garçon, avec le prénom sur le tee-shirt)
+ * et classe. Le prénom sert ensuite partout : « Bravo Léa ! », les petits problèmes…
+ */
+function childForm({ initial = {}, submitLabel, onSubmit }) {
+  const state = { name: initial.name || '', look: initial.look || 'fille', grade: initial.grade || 'CP' };
+  const input = h('input', {
+    type: 'text', class: 'text-input', 'data-field': 'name', maxlength: NAME_MAX, value: state.name,
+    autocomplete: 'off', autocapitalize: 'words', enterkeyhint: 'done', placeholder: 'Prénom', 'aria-label': 'Prénom de l’enfant',
+  });
+  const looks = h('div', { class: 'look-picker', role: 'radiogroup', 'aria-label': 'Dessin' });
+  const grades = h('div', { class: 'segmented grade-picker', role: 'radiogroup', 'aria-label': 'Classe' });
+  const error = h('p', { class: 'form-error', 'aria-live': 'polite' });
+  const draw = () => {
+    looks.replaceChildren(...Object.entries(LOOKS).map(([look, { label }]) => h('button', {
+      type: 'button', class: state.look === look ? 'look-option on' : 'look-option', 'data-look': look,
+      role: 'radio', 'aria-checked': String(state.look === look), onclick: () => { state.look = look; draw(); },
+    }, avatar(`apercu-${look}`, 'avatar-md', { name: cleanName(state.name), look }), h('span', {}, label))));
+    grades.replaceChildren(...Object.keys(GRADES).map((g) => h('button', {
+      type: 'button', class: state.grade === g ? 'seg on' : 'seg', 'data-grade': g,
+      role: 'radio', 'aria-checked': String(state.grade === g), onclick: () => { state.grade = g; draw(); },
+    }, g)));
+  };
+  input.addEventListener('input', () => { state.name = input.value; error.textContent = ''; draw(); });
+  draw();
+  const submit = (e) => {
+    e.preventDefault();
+    if (!cleanName(state.name)) {
+      error.textContent = 'Écrivez le prénom de l’enfant.';
+      input.focus();
+      return;
+    }
+    onSubmit({ ...state, name: cleanName(state.name) });
+  };
+  return h('form', { class: 'child-form', onsubmit: submit },
+    h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Prénom'), input),
+    h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Son personnage'), looks),
+    h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Classe'), grades),
+    error,
+    h('button', { type: 'submit', class: 'big-btn primary child-submit' }, submitLabel));
+}
+
+/** Premier lancement (ou lien partagé à une autre famille) : on crée les profils des enfants. */
+function welcomeScreen(adding = !store.order.length) {
+  const added = store.order.map((id) => h('span', { class: 'child-chip', 'data-child': id }, avatar(id, 'avatar-xs'), store.profiles[id].name));
+  show(h('main', { class: 'screen welcome' },
+    h('div', { class: 'welcome-hero' },
+      h('div', { class: 'welcome-avatars', 'aria-hidden': 'true' },
+        avatar('apercu-fille', 'avatar-md', { look: 'fille' }), avatar('apercu-garcon', 'avatar-md', { look: 'garcon' })),
+      h('h1', { class: 'welcome-title' }, 'Bienvenue !'),
+      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la moyenne section au CE1.')),
+    added.length ? h('section', { class: 'card' }, h('h2', {}, 'Ils vont jouer'), h('div', { class: 'child-chips' }, added)) : null,
+    adding
+      ? h('section', { class: 'card' },
+        h('h2', {}, added.length ? 'Ajouter un autre enfant' : 'Qui va jouer ?'),
+        h('p', { class: 'muted small' }, 'Le prénom est écrit sur le tee-shirt du personnage et sert à féliciter l’enfant. Tout reste sur cet appareil.'),
+        childForm({
+          submitLabel: 'Ajouter',
+          onSubmit: (data) => {
+            addChild(store, data);
+            save();
+            applySettings();
+            welcomeScreen(false);
+          },
+        }))
+      : null,
+    added.length
+      ? h('div', { class: 'welcome-actions' },
+        !adding && store.order.length < MAX_CHILDREN
+          ? h('button', { class: 'big-btn add-another', onclick: () => welcomeScreen(true) }, icon('plus'), 'Ajouter un autre enfant')
+          : null,
+        h('button', { class: 'big-btn primary start-btn', onclick: () => profileScreen() }, 'C’est parti !'))
+      : null));
 }
 
 // ---------------------------------------------------------------- Accueil de l'enfant
@@ -1404,68 +1504,106 @@ function parentGate(next) {
 }
 
 function toggle(label, value, onChange) {
-  const box = h('input', { type: 'checkbox', checked: value });
+  const box = h('input', { type: 'checkbox', checked: value, role: 'switch' });
   box.addEventListener('change', () => onChange(box.checked));
   return h('label', { class: 'setting' }, h('span', {}, label), box);
 }
 
-function parentsScreen(selectedId = store.active || CHARACTERS[0].id) {
-  const tabs = h('div', { class: 'segmented tabs' }, CHARACTERS.map((c) => h('button', {
-    class: c.id === selectedId ? 'seg on' : 'seg',
-    'data-child': c.id,
-    onclick: () => parentsScreen(c.id),
-  }, avatar(c.id, 'avatar-xs'), c.name)));
+const PARENT_TABS = [['suivi', 'Suivi'], ['enfants', 'Enfants'], ['reglages', 'Réglages']];
+const leaveParents = () => (store.active && store.profiles[store.active] ? homeScreen() : profileScreen());
 
-  const kid = store.profiles[selectedId];
-  const gradeSelect = h('select', { class: 'select', 'aria-label': 'Classe' },
-    Object.entries(GRADES).map(([id, label]) => h('option', { value: id, selected: kid.grade === id }, label)));
-  gradeSelect.addEventListener('change', () => {
-    kid.grade = gradeSelect.value;
-    save();
-    parentsScreen(selectedId);
-  });
-
+/** Espace parents : un seul écran, trois onglets (suivi, enfants, réglages). */
+function parentsScreen({ tab = 'suivi', childId, message = '' } = {}) {
+  if (!store.order.length) return welcomeScreen();
+  const tabs = h('nav', { class: 'parent-tabs', role: 'tablist' }, PARENT_TABS.map(([id, label]) => h('button', {
+    class: id === tab ? 'parent-tab on' : 'parent-tab', role: 'tab', 'aria-selected': String(id === tab), 'data-tab': id,
+    onclick: () => parentsScreen({ tab: id, childId }),
+  }, icon(id), h('span', {}, label))));
+  const content = tab === 'enfants' ? childrenTab() : tab === 'reglages' ? settingsTab() : followTab(childId);
   show(h('main', { class: 'screen parents' },
-    topBar({
-      onBack: () => (store.active ? homeScreen() : profileScreen()),
-      title: '👪 Suivi',
-      right: h('button', { class: 'parent-btn settings-btn', onclick: () => settingsScreen(), 'aria-label': 'Réglages' }, '⚙️'),
-    }),
+    topBar({ onBack: leaveParents, title: 'Espace parents' }),
     tabs,
-    h('section', { class: 'card' },
-      h('h2', {}, `Profil de ${character(selectedId).name}`),
-      h('label', { class: 'setting' }, h('span', {}, 'Classe'), gradeSelect)),
+    message ? h('p', { class: 'toast', role: 'status' }, message) : null,
+    content));
+}
+
+function followTab(childId) {
+  const selected = store.profiles[childId] ? childId : store.profiles[store.active] ? store.active : store.order[0];
+  const kid = store.profiles[selected];
+  return h('div', { class: 'tab-panel' },
+    store.order.length > 1
+      ? h('div', { class: 'segmented tabs child-tabs' }, store.order.map((id) => h('button', {
+        class: id === selected ? 'seg on' : 'seg', 'data-child': id, onclick: () => parentsScreen({ tab: 'suivi', childId: id }),
+      }, avatar(id, 'avatar-xs'), store.profiles[id].name)))
+      : null,
+    h('p', { class: 'muted follow-grade' }, `${kid.name} · ${GRADES[kid.grade]} · `,
+      h('button', { class: 'link-action', onclick: () => childEditScreen(selected) }, 'Modifier')),
     dashboard({ kid, grade: kid.grade, onChange: save }),
-    isStandalone() ? null : h('section', { class: 'card' },
-      h('h2', {}, 'Installer sur l’iPhone ou l’iPad'),
-      h('p', { class: 'muted' }, 'Dans Safari : Partager, puis « Sur l’écran d’accueil ». L’app fonctionne ensuite sans Internet.')),
     h('details', { class: 'card tips' },
       h('summary', {}, 'Conseils'),
       h('ul', {},
         h('li', {}, '10 à 15 minutes par jour valent mieux qu’une longue séance.'),
-        h('li', {}, 'Le niveau s’adapte seul pour viser 80 % de réussite.'),
-        h('li', {}, 'Dans « Combien ? », faites toucher chaque objet en comptant.'))),
-    h('section', { class: 'card' },
-      h('h2', {}, 'Données'),
-      h('p', { class: 'muted' }, 'Tout reste sur cet appareil.'),
-      h('button', {
-        class: 'big-btn danger',
-        onclick: () => {
-          if (confirm(`Effacer toute la progression de ${character(selectedId).name} ?`)) {
-            resetChild(store, selectedId);
-            save();
-            parentsScreen(selectedId);
-          }
-        },
-      }, `Effacer la progression de ${character(selectedId).name}`))));
+        h('li', {}, 'Le niveau s’adapte seul pour viser 80 % de réussite ; l’enfant peut aussi choisir son niveau.'),
+        h('li', {}, 'Dans « Combien ? », faites toucher chaque objet en comptant.'))));
 }
 
-// ---------------------------------------------------------------- Réglages
+function childrenTab() {
+  return h('div', { class: 'tab-panel' },
+    h('section', { class: 'card child-list' },
+      store.order.map((id) => {
+        const kid = store.profiles[id];
+        return h('div', { class: 'child-row', 'data-child-card': id },
+          avatar(id, 'avatar-sm'),
+          h('div', { class: 'child-row-text' }, h('b', {}, kid.name), h('span', { class: 'muted small' }, `${GRADES[kid.grade]} · ⭐ ${kid.stars}`)),
+          h('button', { class: 'pill-btn', 'data-edit': id, onclick: () => childEditScreen(id) }, 'Modifier'));
+      }),
+      store.order.length < MAX_CHILDREN
+        ? h('button', { class: 'big-btn add-child', onclick: () => childAddScreen() }, icon('plus'), 'Ajouter un enfant')
+        : null),
+    shareCard());
+}
 
-function photoRow(c) {
-  const kid = store.profiles[c.id];
+function shareCard() {
+  const url = location.href.split(/[?#]/)[0];
+  const status = h('p', { class: 'muted small', 'aria-live': 'polite' });
+  const share = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: APP.name, text: `${APP.name} : des jeux pour apprendre à lire, à compter et l’anglais.`, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      status.textContent = 'Lien copié ✓';
+    } catch {
+      status.textContent = url;
+    }
+  };
+  return h('section', { class: 'card share-card' },
+    h('h2', {}, 'Partager l’app'),
+    h('p', { class: 'muted small' }, 'Envoyez le lien à une autre famille : chacun crée ses propres profils (prénom, photo) sur son appareil. Rien n’est partagé entre les familles.'),
+    h('button', { class: 'big-btn primary share-btn', onclick: share }, icon('partager'), 'Partager le lien'),
+    status);
+}
+
+function childAddScreen() {
+  show(h('main', { class: 'screen parents' },
+    topBar({ onBack: () => parentsScreen({ tab: 'enfants' }), title: 'Nouvel enfant' }),
+    h('section', { class: 'card' },
+      childForm({
+        submitLabel: 'Ajouter',
+        onSubmit: (data) => {
+          const id = addChild(store, data);
+          save();
+          applySettings();
+          parentsScreen({ tab: 'enfants', message: id ? `${data.name} est ajouté·e ✓` : '' });
+        },
+      }))));
+}
+
+function photoRow(id) {
+  const kid = store.profiles[id];
   const status = h('p', { class: 'photo-status muted small', 'aria-live': 'polite' });
-  const input = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden', 'data-photo-input': c.id });
+  const input = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden', 'data-photo-input': id });
   input.addEventListener('change', async () => {
     const file = input.files?.[0];
     if (!file) return;
@@ -1479,15 +1617,14 @@ function photoRow(c) {
         return;
       }
       applySettings();
-      settingsScreen(`Photo de ${c.name} enregistrée ✓`);
+      childEditScreen(id, `Photo de ${kid.name} enregistrée ✓`);
     } catch {
       status.textContent = 'Impossible de lire cette image.';
     }
   });
-  return h('div', { class: 'photo-row', 'data-photo-row': c.id },
-    avatar(c.id, 'avatar-md'),
+  return h('div', { class: 'photo-row', 'data-photo-row': id },
+    avatar(id, 'avatar-md'),
     h('div', { class: 'photo-actions' },
-      h('span', { class: 'game-row-title' }, c.name),
       h('label', { class: 'big-btn primary photo-btn' }, '📷 Choisir une photo', input),
       kid.photo
         ? h('button', {
@@ -1496,30 +1633,82 @@ function photoRow(c) {
             kid.photo = null;
             save();
             applySettings();
-            settingsScreen(`${c.name} retrouve son dessin.`);
+            childEditScreen(id, `${kid.name} retrouve son dessin.`);
           },
         }, 'Revenir au dessin')
         : null,
       status));
 }
 
-function voiceRow(c, voiceList) {
-  const select = h('select', { class: 'select', 'aria-label': `Voix de ${c.name}` },
-    h('option', { value: '' }, 'Automatique (la plus naturelle)'),
-    voiceList.map((v) => h('option', { value: v.id, selected: store.settings.voices[c.voice.voice] === v.id }, `${v.name} (${v.lang})`)));
-  select.addEventListener('change', () => {
-    store.settings.voices = { ...store.settings.voices, [c.voice.voice]: select.value || undefined };
-    save();
-    applySettings();
-    say(c, c.hello);
-  });
-  return h('div', { class: 'setting voice-row' },
-    h('span', {}, c.name),
-    h('div', { class: 'voice-ctrl' }, select,
-      h('button', { class: 'mini-btn', 'aria-label': `Écouter la voix de ${c.name}`, onclick: () => say(c, c.hello) }, '▶')));
+function childEditScreen(id, message = '') {
+  const kid = store.profiles[id];
+  if (!kid) return parentsScreen({ tab: 'enfants' });
+  show(h('main', { class: 'screen parents child-edit' },
+    topBar({ onBack: () => parentsScreen({ tab: 'enfants' }), title: kid.name }),
+    message ? h('p', { class: 'toast', role: 'status' }, message) : null,
+    h('section', { class: 'card' },
+      h('h2', {}, 'Photo'),
+      h('p', { class: 'muted small' }, 'Photothèque ou appareil photo. Enregistrement automatique ; la photo reste sur l’appareil.'),
+      photoRow(id)),
+    h('section', { class: 'card' },
+      h('h2', {}, 'Profil'),
+      childForm({
+        initial: kid,
+        submitLabel: 'Enregistrer',
+        onSubmit: ({ name, look, grade }) => {
+          if (name !== kid.name) delete kid.spoken; // la prononciation suit le nouveau prénom
+          Object.assign(kid, { name, look, grade });
+          save();
+          applySettings();
+          childEditScreen(id, 'Enregistré ✓');
+        },
+      })),
+    h('section', { class: 'card danger-zone' },
+      h('h2', {}, 'Données'),
+      h('button', {
+        class: 'big-btn danger reset-child',
+        onclick: () => {
+          if (confirm(`Effacer toute la progression de ${kid.name} ? Le prénom et la photo sont conservés.`)) {
+            resetChild(store, id);
+            save();
+            childEditScreen(id, 'Progression effacée.');
+          }
+        },
+      }, 'Effacer la progression'),
+      h('button', {
+        class: 'big-btn danger delete-child',
+        onclick: () => {
+          if (confirm(`Supprimer le profil de ${kid.name} et toute sa progression ?`)) {
+            removeChild(store, id);
+            save();
+            applySettings();
+            if (store.order.length) parentsScreen({ tab: 'enfants', message: 'Profil supprimé.' });
+            else welcomeScreen();
+          }
+        },
+      }, 'Supprimer ce profil'))));
 }
 
-function settingsScreen(message = '') {
+function voiceRow(look, voiceList) {
+  const { voice } = LOOKS[look];
+  const sample = makeCharacter(`voix-${look}`, { look, name: look === 'fille' ? 'Léa' : 'Hugo' });
+  const select = h('select', { class: 'select', 'aria-label': `Voix ${LOOKS[look].label.toLowerCase()}` },
+    h('option', { value: '' }, 'Automatique (la plus naturelle)'),
+    voiceList.map((v) => h('option', { value: v.id, selected: store.settings.voices[voice.voice] === v.id }, `${v.name} (${v.lang})`)));
+  const test = () => say(sample, 'Bravo ! Tu as trouvé la bonne réponse.');
+  select.addEventListener('change', () => {
+    store.settings.voices = { ...store.settings.voices, [voice.voice]: select.value || undefined };
+    save();
+    applySettings();
+    test();
+  });
+  return h('div', { class: 'setting voice-row' },
+    h('span', {}, `Voix ${look === 'fille' ? 'des filles' : 'des garçons'}`),
+    h('div', { class: 'voice-ctrl' }, select,
+      h('button', { class: 'mini-btn', 'aria-label': `Écouter la voix ${LOOKS[look].label.toLowerCase()}`, onclick: test }, '▶')));
+}
+
+function settingsTab() {
   const lengthSelect = h('div', { class: 'segmented' }, [5, 10, 15].map((n) => {
     const btn = h('button', { class: store.settings.sessionLength === n ? 'seg on' : 'seg' }, n);
     btn.addEventListener('click', () => {
@@ -1530,21 +1719,20 @@ function settingsScreen(message = '') {
     return btn;
   }));
   const voiceList = listFrenchVoices();
-
-  show(h('main', { class: 'screen parents settings' },
-    topBar({ onBack: () => (store.active ? homeScreen() : profileScreen()), title: '⚙️ Réglages' }),
-    message ? h('p', { class: 'toast', role: 'status' }, message) : null,
-    h('section', { class: 'card' },
-      h('h2', {}, 'Photos des profils'),
-      h('p', { class: 'muted small' }, 'Photothèque ou appareil photo. Enregistrement automatique, la photo reste sur l’appareil.'),
-      CHARACTERS.map(photoRow)),
+  return h('div', { class: 'tab-panel settings' },
     h('section', { class: 'card' },
       h('h2', {}, 'Voix et sons'),
       toggle('Consignes lues à voix haute', store.settings.voice, (v) => { store.settings.voice = v; applySettings(); save(); }),
-      voiceList.length ? CHARACTERS.map((c) => voiceRow(c, voiceList)) : null,
+      voiceList.length ? Object.keys(LOOKS).map((look) => voiceRow(look, voiceList)) : null,
       toggle('Petits sons', store.settings.sounds, (v) => { store.settings.sounds = v; applySettings(); save(); }),
       h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
       h('p', { class: 'muted small' }, 'Voix plus naturelles : Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
+    isStandalone() ? null : h('section', { class: 'card' },
+      h('h2', {}, 'Installer sur l’écran d’accueil'),
+      h('ol', { class: 'plain-list' },
+        h('li', {}, 'Touchez Partager (le carré avec une flèche).'),
+        h('li', {}, 'Faites défiler, puis touchez « Sur l’écran d’accueil ».'),
+        h('li', {}, 'Touchez « Ajouter » : l’icône apparaît, l’app marche sans Internet.'))),
     h('section', { class: 'card about' },
       h('h2', {}, 'À propos'),
       h('div', { class: 'setting' }, h('span', {}, 'Version'), h('b', { 'data-version': APP.version }, APP.version)),
@@ -1555,7 +1743,7 @@ function settingsScreen(message = '') {
           h('ul', { class: 'plain-list' }, entry.changes.map((c) => h('li', {}, c)))))),
       h('div', { class: 'credits' },
         h('p', {}, h('b', {}, APP.name), ' · conçue par ', h('b', {}, APP.author)),
-        h('p', { class: 'muted small' }, 'Avec Eva-Rose et Matteo. Police Andika © SIL International (licence OFL).')))));
+        h('p', { class: 'muted small' }, 'Police Andika © SIL International (licence OFL).'))));
 }
 
 // ---------------------------------------------------------------- Démarrage

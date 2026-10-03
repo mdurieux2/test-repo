@@ -4,7 +4,8 @@ import { createGameState, palierStarsAfter, recordAnswer, starsFor, LEVEL_UP_STR
 import { createRng, randInt, sample, shuffle } from '../app/js/random.js';
 import { newStickers, starsToNextSticker, stickersUnlocked, STICKERS, STARS_PER_STICKER } from '../app/js/rewards.js';
 import {
-  defaultStore, gameStats, GRADES, loadStore, logMistake, logSession, resetChild, saveStore, STORAGE_KEY,
+  addChild, cleanName, defaultStore, gameStats, GRADES, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX,
+  removeChild, resetChild, saveStore, slugify, STORAGE_KEY,
 } from '../app/js/storage.js';
 
 function play(state, answers, maxLevel = 3) {
@@ -86,17 +87,34 @@ function fakeStorage(initial = {}) {
   };
 }
 
-test('données : deux profils (Eva-Rose en CP, Matteo en maternelle) par défaut', () => {
+test('données : aucun profil au premier lancement, chaque famille crée les siens', () => {
   const store = defaultStore();
-  assert.deepEqual(Object.keys(store.profiles), ['eva-rose', 'matteo']);
-  assert.equal(store.profiles['eva-rose'].grade, 'CP');
-  assert.ok(['MS', 'GS'].includes(store.profiles.matteo.grade));
+  assert.deepEqual(store.profiles, {});
+  assert.deepEqual(store.order, []);
   assert.equal(store.active, null);
+  assert.equal(addChild(store, { name: '  Éva-Rose ', look: 'fille', grade: 'CP' }), 'eva-rose');
+  assert.equal(addChild(store, { name: 'Eva Rose', look: 'garcon', grade: 'XX' }), 'eva-rose-2');
+  assert.equal(addChild(store, { name: '   ' }), null);
+  assert.deepEqual(store.order, ['eva-rose', 'eva-rose-2']);
+  assert.equal(store.profiles['eva-rose'].name, 'Éva-Rose');
+  assert.equal(store.profiles['eva-rose-2'].look, 'garcon');
+  assert.equal(store.profiles['eva-rose-2'].grade, 'CP');
+  assert.equal(slugify('Zoé  Lou'), 'zoe-lou');
+  assert.equal(slugify('👶'), 'enfant');
+  for (let i = 0; i < 10; i++) addChild(store, { name: `Enfant ${i}` });
+  assert.equal(store.order.length, MAX_CHILDREN);
+  assert.equal(cleanName('x'.repeat(50)).length, NAME_MAX);
+  store.active = 'eva-rose';
+  removeChild(store, 'eva-rose');
+  assert.equal(store.active, null);
+  assert.ok(!store.profiles['eva-rose'] && !store.order.includes('eva-rose'));
 });
 
 test('données : sauvegarde puis relecture, progression séparée par enfant', () => {
   const storage = fakeStorage();
   const store = defaultStore();
+  addChild(store, { name: 'Eva-Rose', look: 'fille', grade: 'CP' });
+  addChild(store, { name: 'Matteo', look: 'garcon', grade: 'MS' });
   store.active = 'matteo';
   store.profiles.matteo.stars = 12;
   store.profiles['eva-rose'].games.compter = { level: 4, streak: 1, recent: [true], sessions: 3 };
@@ -104,11 +122,24 @@ test('données : sauvegarde puis relecture, progression séparée par enfant', (
   assert.ok(saveStore(store, storage));
   const loaded = loadStore(storage);
   assert.equal(loaded.active, 'matteo');
+  assert.deepEqual(loaded.order, ['eva-rose', 'matteo']);
+  assert.equal(loaded.profiles.matteo.name, 'Matteo');
   assert.equal(loaded.profiles.matteo.stars, 12);
   assert.equal(loaded.profiles.matteo.history.length, 1);
   assert.equal(gameStats(loaded.profiles['eva-rose'], 'compter').level, 4);
   assert.equal(gameStats(loaded.profiles.matteo, 'compter').level, 1);
   assert.equal(gameStats(loaded.profiles.matteo, 'calcul', 4).level, 4);
+});
+
+test('données : les profils Eva-Rose et Matteo d’avant la version 1.3 sont retrouvés', () => {
+  const old = { active: 'eva-rose', profiles: { 'eva-rose': { grade: 'CE1', stars: 40 }, matteo: { grade: 'GS', stars: 3 }, fantome: { stars: 2 } } };
+  const loaded = loadStore(fakeStorage({ [STORAGE_KEY]: JSON.stringify(old) }));
+  assert.deepEqual(loaded.order, ['eva-rose', 'matteo']);
+  assert.equal(loaded.active, 'eva-rose');
+  assert.deepEqual([loaded.profiles['eva-rose'].name, loaded.profiles['eva-rose'].look, loaded.profiles['eva-rose'].stars], ['Eva-Rose', 'fille', 40]);
+  assert.deepEqual([loaded.profiles.matteo.name, loaded.profiles.matteo.look, loaded.profiles.matteo.grade], ['Matteo', 'garcon', 'GS']);
+  assert.equal(loaded.profiles.matteo.spoken, 'Mattéo');
+  assert.ok(!loaded.profiles.fantome, 'un profil sans prénom est ignoré');
 });
 
 test('données : abîmées ou stockage indisponible → valeurs par défaut', () => {
@@ -131,6 +162,8 @@ test('données : classe inconnue ou profil incomplet → complété avec les val
 
 test('données : effacer un enfant ne touche pas l’autre', () => {
   const store = defaultStore();
+  addChild(store, { name: 'Eva-Rose', look: 'fille', grade: 'CP' });
+  addChild(store, { name: 'Matteo', look: 'garcon', grade: 'MS' });
   store.profiles['eva-rose'].stars = 7;
   store.profiles.matteo.stars = 9;
   store.profiles.matteo.grade = 'GS';
@@ -138,6 +171,8 @@ test('données : effacer un enfant ne touche pas l’autre', () => {
   resetChild(store, 'matteo');
   assert.equal(store.profiles.matteo.stars, 0);
   assert.equal(store.profiles.matteo.grade, 'GS');
+  assert.equal(store.profiles.matteo.name, 'Matteo');
+  assert.equal(store.profiles.matteo.look, 'garcon');
   assert.equal(store.profiles['eva-rose'].stars, 7);
 });
 

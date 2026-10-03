@@ -300,9 +300,28 @@ page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 const shot = async (name) => SHOTS && page.screenshot({ path: `${SHOTS}/${name}.png` });
 
+// premier lancement : la famille crée les profils (prénom, dessin, classe)
 await page.goto(BASE);
+await page.waitForSelector('.welcome');
+await shot('00-bienvenue');
+await page.click('.child-submit');
+await page.waitForSelector('.form-error:not(:empty)'); // prénom obligatoire
+await page.fill('[data-field="name"]', 'Eva-Rose');
+await page.click('[data-look="fille"]');
+await page.click('[data-grade="CP"]');
+if ((await page.textContent('.look-option.on svg text')) !== 'Eva-Rose') fail('le prénom n’est pas écrit sur le tee-shirt');
+await page.click('.child-submit');
+await page.click('.add-another');
+await page.fill('[data-field="name"]', 'Matteo');
+await page.click('[data-look="garcon"]');
+await page.click('[data-grade="MS"]');
+await page.click('.child-submit');
+await page.click('.start-btn');
 await page.waitForSelector('.profiles');
-if ((await page.locator('.profile-card').count()) !== 2) fail('il faut deux profils au lancement');
+if ((await page.locator('.profile-card').count()) !== 2) fail('il faut deux profils après la création');
+if (!(await page.locator('[data-profile="eva-rose"]').count()) || !(await page.locator('[data-profile="matteo"]').count())) fail('identifiants de profil inattendus');
+if ((await page.locator('.parent-btn').count()) !== 1) fail('un seul bouton pour les parents');
+console.log('✔ premier lancement : profils créés (prénom, dessin, classe)');
 await setStore(page, 'store.settings = { sessionLength: 5 };');
 await page.reload();
 await shot('01-qui-joue');
@@ -408,25 +427,62 @@ await page.click('.gate-form button');
 await page.waitForSelector('.parents');
 await page.click('[data-child="eva-rose"]');
 if ((await page.locator('.stat-tile').count()) !== 4) fail('chiffres clés absents');
-const grade = await page.inputValue('.parents select.select >> nth=0');
 const rows = await page.locator('.game-row').count();
-const programGames = Object.values(PROGRAMS[grade]).flat().length;
+const programGames = Object.values(PROGRAMS.CP).flat().length;
 if (rows !== programGames) fail(`${rows} jeux suivis au lieu de ${programGames}`);
 if ((await page.locator('.chart-col').count()) !== 7) fail('graphique de la semaine absent');
 await shot('06-parents');
 const gamesBefore = await page.$$eval('.game-row', (els) => els.map((el) => el.textContent).join('|'));
-await page.selectOption('.parents select.select >> nth=0', grade === 'CP' ? 'CE1' : 'CP');
+// onglet Enfants : changer la classe et le prénom
+await page.click('[data-tab="enfants"]');
+await shot('06b-enfants');
+await page.click('[data-edit="eva-rose"]');
+await page.click('[data-grade="CE1"]');
+await page.fill('[data-field="name"]', 'Lou');
+await page.click('.child-submit');
+await page.waitForSelector('.toast');
+await shot('06c-modifier');
+await page.click('.top-bar .icon-btn');
+await page.click('[data-tab="suivi"]');
+await page.click('[data-child="eva-rose"]');
 await page.waitForFunction((before) => [...document.querySelectorAll('.game-row')].map((el) => el.textContent).join('|') !== before, gamesBefore);
-console.log('✔ espace parents (barrière, suivi, changement de classe)');
+await goProfiles(page);
+if (!(await page.textContent('[data-profile="eva-rose"] .profile-name')).includes('Lou')) fail('nouveau prénom absent de « Qui joue ? »');
+if ((await page.textContent('[data-profile="eva-rose"] svg text')) !== 'Lou') fail('nouveau prénom absent du tee-shirt');
+await page.click('[data-profile="eva-rose"]');
+await page.waitForSelector('.home');
+if (!(await page.textContent('.home-title')).includes('Lou')) fail('nouveau prénom absent de l’accueil');
+// ajouter puis supprimer un enfant
+page.on('dialog', (dialog) => dialog.accept());
+await goProfiles(page);
+await page.click('.parent-btn');
+await page.click('[data-tab="enfants"]');
+await page.click('.add-child');
+await page.fill('[data-field="name"]', 'Zoé');
+await page.click('.child-submit');
+await page.waitForSelector('[data-child-card="zoe"]');
+await page.click('[data-edit="zoe"]');
+await page.click('.delete-child');
+await page.waitForSelector('[data-child-card="matteo"]');
+if (await page.locator('[data-child-card="zoe"]').count()) fail('le profil supprimé est toujours là');
+// remettre le prénom d'origine
+await page.click('[data-edit="eva-rose"]');
+await page.fill('[data-field="name"]', 'Eva-Rose');
+await page.click('.child-submit');
+await page.waitForSelector('.toast');
+console.log('✔ espace parents (barrière, suivi, classe et prénom modifiés, enfant ajouté puis supprimé)');
 
 // réglages : photo depuis l'iPhone (enregistrée automatiquement), version, journal, crédits
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-await page.click('.settings-btn');
+await page.click('.top-bar .icon-btn');
+await page.click('[data-tab="reglages"]');
 await page.waitForSelector('.settings');
 await shot('07-reglages');
 if ((await page.textContent('[data-version]')) !== pkg.version) fail('version affichée différente de package.json');
 if (!(await page.textContent('.credits')).includes('Michaël Durieux')) fail('crédits absents');
 if (!(await page.locator('.changelog-entry').count())) fail('journal des modifications absent');
+await page.click('[data-tab="enfants"]');
+await page.click('[data-edit="eva-rose"]');
 await page.setInputFiles('[data-photo-input="eva-rose"]', 'app/icons/icon-512.png');
 await page.waitForSelector('.toast');
 if (!(await page.locator('[data-photo-row="eva-rose"] .avatar-photo img').count())) fail('photo non affichée');
@@ -435,8 +491,9 @@ await goProfiles(page);
 if (!(await page.locator('[data-profile="eva-rose"] .avatar-photo img').count())) fail('photo non conservée après rechargement');
 if (await page.locator('[data-profile="matteo"] .avatar-photo').count()) fail('la photo d’Eva-Rose est apparue chez Matteo');
 await shot('08-qui-joue-photo');
-await page.click('.settings-btn'); // barrière déjà franchie pendant cette séance
-await page.waitForSelector('.settings');
+await page.click('.parent-btn'); // barrière déjà franchie pendant cette séance
+await page.click('[data-tab="enfants"]');
+await page.click('[data-edit="eva-rose"]');
 await page.click('[data-photo-row="eva-rose"] .link-action');
 await page.waitForSelector('.toast');
 if (await page.locator('[data-photo-row="eva-rose"] .avatar-photo').count()) fail('le dessin n’est pas revenu');
@@ -492,7 +549,7 @@ const STRESS = {
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
-    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol')) {
+    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol')) {
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
     const zone = document.querySelector('.choices, .home-menu, .profile-list');
@@ -501,8 +558,10 @@ async function checkLayout(page, label, { reachable = true } = {}) {
     }
     return null;
   }, reachable);
-  if (problem) fail(`${label} : ${problem}`);
+  // on note tous les problèmes de mise en page, et on échoue à la fin avec la liste complète
+  if (problem) layoutProblems.push(`${label} : ${problem}`);
 }
+const layoutProblems = [];
 
 async function checkDevice(device, repeat) {
   const ctx = await newContext({ width: device.width, height: device.height });
@@ -511,6 +570,8 @@ async function checkDevice(device, repeat) {
   const tag = (label) => `${label} (${device.name}, ${device.width}×${device.height})`;
   let checked = 0;
   await page.goto(BASE);
+  await page.waitForSelector('.welcome');
+  await checkLayout(page, tag('bienvenue'), { reachable: false });
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
 
   // écrans fixes
@@ -570,10 +631,15 @@ async function checkDevice(device, repeat) {
   await page.click('.gate-form button');
   await page.waitForSelector('.parents');
   await checkLayout(page, tag('espace parents'), { reachable: false });
-  await page.click('.settings-btn');
+  await page.click('[data-tab="enfants"]');
+  await checkLayout(page, tag('enfants'), { reachable: false });
+  await page.click('[data-edit="eva-rose"]');
+  await checkLayout(page, tag('modifier un enfant'), { reachable: false });
+  await page.click('.top-bar .icon-btn');
+  await page.click('[data-tab="reglages"]');
   await page.waitForSelector('.settings');
   await checkLayout(page, tag('réglages'), { reachable: false });
-  checked += 3;
+  checked += 6;
   await ctx.close();
   return checked;
 }
@@ -585,6 +651,7 @@ for (let i = 0; i < DEVICES.length; i += 6) {
   counts.push(...await Promise.all(DEVICES.slice(i, i + 6).map((d, k) => checkDevice(d, i + k === 0 ? 3 : 1))));
 }
 DEVICES.forEach((d, i) => console.log(`✔ ${d.name} (${d.width}×${d.height}) : ${counts[i]} écrans vérifiés`));
+if (layoutProblems.length) fail(`mise en page :\n${layoutProblems.join('\n')}`);
 
 await browser.close();
 server.close();
