@@ -20,6 +20,7 @@ export const CHANGELOG = [
       'Anglais : 8 nouveaux jeux pour les nombres jusqu’à 100, calculer en anglais, mélanger les couleurs, colorier en lisant les couleurs, le memory, l’intrus, les contraires et les petites phrases.',
       'Trois niveaux de plus dans chaque jeu, de plus en plus difficiles.',
       'Rubriques « Jeux et logique » et « Anglais » rangées en sections.',
+      'Mon personnage : tous les tee-shirts et accessoires sont disponibles tout de suite, sans attendre les étoiles.',
       'Mode avion vérifié : tous les jeux s’ouvrent sans réseau ; hors connexion, la voix passe sur une voix installée sur l’appareil.',
       'Sécurité renforcée : la page n’accepte que ses propres fichiers.',
     ],

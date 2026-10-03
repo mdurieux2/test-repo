@@ -79,21 +79,21 @@ const DRAWINGS = {
     ${face()}`,
 };
 
-// Pour habiller son personnage : couleurs de tee-shirt et accessoires, débloqués avec les étoiles.
+// Pour habiller son personnage : couleurs de tee-shirt et accessoires, tous disponibles dès le début.
 export const SHIRTS = [
-  { id: 'rose', color: '#ff6fa8', stars: 0 }, { id: 'bleu', color: '#3d9bff', stars: 0 },
-  { id: 'vert', color: '#22b07d', stars: 15 }, { id: 'violet', color: '#8b5cf6', stars: 25 },
-  { id: 'orange', color: '#f97316', stars: 35 }, { id: 'rouge', color: '#e11d48', stars: 45 },
+  { id: 'rose', color: '#ff6fa8' }, { id: 'bleu', color: '#3d9bff' },
+  { id: 'vert', color: '#22b07d' }, { id: 'violet', color: '#8b5cf6' },
+  { id: 'orange', color: '#f97316' }, { id: 'rouge', color: '#e11d48' },
 ];
 export const ACCESSORIES = [
-  { id: 'casquette', emoji: '🧢', label: 'Casquette', stars: 5, y: 26, size: 40 },
-  { id: 'noeud', emoji: '🎀', label: 'Nœud', stars: 10, y: 24, size: 30 },
-  { id: 'couronne', emoji: '👑', label: 'Couronne', stars: 20, y: 25, size: 38 },
-  { id: 'lunettes', emoji: '🕶️', label: 'Lunettes', stars: 30, y: 68, size: 34 },
-  { id: 'chapeau', emoji: '🎩', label: 'Chapeau', stars: 40, y: 24, size: 40 },
-  { id: 'toque', emoji: '🎓', label: 'Toque', stars: 60, y: 24, size: 38 },
-  { id: 'fleur', emoji: '🌼', label: 'Fleur', stars: 80, y: 30, size: 26, x: 84 },
-  { id: 'astronaute', emoji: '🪐', label: 'Planète', stars: 100, y: 22, size: 28, x: 92 },
+  { id: 'casquette', emoji: '🧢', label: 'Casquette', y: 26, size: 40 },
+  { id: 'noeud', emoji: '🎀', label: 'Nœud', y: 24, size: 30 },
+  { id: 'couronne', emoji: '👑', label: 'Couronne', y: 25, size: 38 },
+  { id: 'lunettes', emoji: '🕶️', label: 'Lunettes', y: 68, size: 34 },
+  { id: 'chapeau', emoji: '🎩', label: 'Chapeau', y: 24, size: 40 },
+  { id: 'toque', emoji: '🎓', label: 'Toque', y: 24, size: 38 },
+  { id: 'fleur', emoji: '🌼', label: 'Fleur', y: 30, size: 26, x: 84 },
+  { id: 'astronaute', emoji: '🪐', label: 'Planète', y: 22, size: 28, x: 92 },
 ];
 
 /** Portrait SVG (chaîne de caractères) en buste, sur fond coloré, avec le prénom sur le tee-shirt. */

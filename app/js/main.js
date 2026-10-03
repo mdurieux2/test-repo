@@ -2163,11 +2163,10 @@ function albumScreen() {
 
 // ---------------------------------------------------------------- Habiller son personnage
 
-/** Couleurs de tee-shirt et accessoires, débloqués au fil des étoiles gagnées. */
+/** Couleurs de tee-shirt et accessoires : l'enfant choisit librement, sans attendre d'avoir des étoiles. */
 function characterScreen() {
   const kid = child();
   const style = kid.style || {};
-  const stars = kid.stars;
   const choose = (patch) => {
     kid.style = { ...style, ...patch };
     save();
@@ -2175,39 +2174,30 @@ function characterScreen() {
     characterScreen();
     playSound('success');
   };
-  const lock = (need) => h('span', { class: 'lock' }, `🔒 ${need} ⭐`);
   show(h('main', { class: 'screen dress' },
     topBar({ onBack: homeScreen, title: '🎨 Mon personnage', right: starCounter() }),
     h('div', { class: 'dress-preview' }, avatar(store.active, 'avatar-xl')),
     kid.photo ? h('p', { class: 'muted small dress-note' }, 'Avec une photo, seuls les accessoires se voient.') : null,
     h('section', { class: 'card' },
       h('h2', {}, 'Mon tee-shirt'),
-      h('div', { class: 'shirt-row' }, SHIRTS.map((shirt) => {
-        const open = stars >= shirt.stars;
-        return h('button', {
-          class: `shirt-btn${style.shirt === shirt.id ? ' on' : ''}`,
-          'data-shirt': shirt.id,
-          disabled: !open,
-          'aria-label': open ? `Tee-shirt ${shirt.id}` : `Tee-shirt ${shirt.id}, ${shirt.stars} étoiles`,
-          'aria-pressed': String(style.shirt === shirt.id),
-          onclick: () => choose({ shirt: shirt.id }),
-        }, h('span', { class: 'shirt-swatch', style: { background: shirt.color } }, style.shirt === shirt.id ? '✓' : ''), open ? null : lock(shirt.stars));
-      }))),
+      h('div', { class: 'shirt-row' }, SHIRTS.map((shirt) => h('button', {
+        class: `shirt-btn${style.shirt === shirt.id ? ' on' : ''}`,
+        'data-shirt': shirt.id,
+        'aria-label': `Tee-shirt ${shirt.id}`,
+        'aria-pressed': String(style.shirt === shirt.id),
+        onclick: () => choose({ shirt: shirt.id }),
+      }, h('span', { class: 'shirt-swatch', style: { background: shirt.color } }, style.shirt === shirt.id ? '✓' : ''))))),
     h('section', { class: 'card' },
       h('h2', {}, 'Mes accessoires'),
       h('div', { class: 'accessory-grid' },
         h('button', { class: `accessory-btn${!style.accessory ? ' on' : ''}`, onclick: () => choose({ accessory: null }), 'aria-pressed': String(!style.accessory) },
           h('span', { class: 'accessory-emoji' }, '🚫'), h('span', {}, 'Rien')),
-        ACCESSORIES.map((item) => {
-          const open = stars >= item.stars;
-          return h('button', {
-            class: `accessory-btn${style.accessory === item.id ? ' on' : ''}`,
-            'data-accessory': item.id,
-            disabled: !open,
-            'aria-pressed': String(style.accessory === item.id),
-            onclick: () => choose({ accessory: item.id }),
-          }, h('span', { class: 'accessory-emoji' }, item.emoji), open ? h('span', {}, item.label) : lock(item.stars));
-        })))));
+        ACCESSORIES.map((item) => h('button', {
+          class: `accessory-btn${style.accessory === item.id ? ' on' : ''}`,
+          'data-accessory': item.id,
+          'aria-pressed': String(style.accessory === item.id),
+          onclick: () => choose({ accessory: item.id }),
+        }, h('span', { class: 'accessory-emoji' }, item.emoji), h('span', {}, item.label)))))));
   speak('Choisis ton tee-shirt et tes accessoires !');
 }
 

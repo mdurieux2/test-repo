@@ -569,6 +569,7 @@ console.log('✔ jeu bonus : les bulles');
 // habiller son personnage
 await page.click('[data-dress]');
 await assertNoJunk(page, 'personnage'); // l'écran ne doit pas afficher l'événement du toucher
+if (await page.locator('.dress [disabled], .dress .lock').count()) fail('personnage : des tee-shirts ou accessoires sont encore verrouillés');
 await page.click('[data-shirt="vert"]');
 await page.click('[data-accessory="couronne"]');
 if (!(await page.locator('.dress-preview svg text').allTextContents()).includes('👑')) fail('personnage : la couronne n’apparaît pas');
