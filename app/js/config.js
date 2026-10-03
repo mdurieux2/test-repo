@@ -6,7 +6,7 @@ export const APP = {
   name: 'Lire & Compter',
   version: '1.5.0',
   author: 'Michaël Durieux',
-  contact: 'michael.jurier@gmail.com', // remarques, bugs, idées d'évolution
+  contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */

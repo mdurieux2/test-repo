@@ -750,7 +750,9 @@ async function markCorrect(ctx) {
 
 function choiceZone(ctx) {
   const { q } = ctx;
-  const zone = h('div', { class: `choices choices-${q.choiceStyle} n${q.choices.length}${q.stage.type === 'none' ? ' center' : ''}` });
+  // un mot très long (« l’éléphanteau ») doit tenir sur la largeur d'une colonne
+  const longWord = q.choices.some((c) => typeof c.label === 'string' && c.label.split(/\s+/).some((w) => w.length > 9));
+  const zone = h('div', { class: `choices choices-${q.choiceStyle} n${q.choices.length}${q.stage.type === 'none' ? ' center' : ''}${longWord ? ' long-words' : ''}` });
   for (const choice of q.choices) {
     const label = typeof choice.label === 'string' ? choice.label : '';
     const classes = ['choice'];
