@@ -1,6 +1,8 @@
 # Lire & Compter
 
-Web app iPhone et iPad (PWA) de jeux éducatifs pour deux enfants : Eva-Rose (CP/CE1) et Matteo (MS/GS).
+Web app iPhone et iPad (PWA) de jeux éducatifs, conçue pour Eva-Rose (CP/CE1) et Matteo (MS/GS) et partageable :
+chaque famille crée ses profils au premier lancement (prénom, personnage, classe, photo), stockés sur l'appareil.
+Aucun prénom en dur dans les jeux : utiliser le prénom du profil (`me().name`, 4e argument de `generate`).
 Interface et commentaires en français.
 
 - Pas de build : `app/` est servi tel quel (modules ES). Pas de dépendance à l'exécution.
@@ -12,7 +14,7 @@ Interface et commentaires en français.
   et `VERSION` doit être incrémentée à chaque mise en production.
 - Nouvelle version : mettre à jour `version` dans `package.json` et `APP.version` dans `app/js/config.js`,
   et ajouter une entrée en tête de `CHANGELOG` dans ce même fichier (les tests vérifient la cohérence).
-- Vérifier avant de pousser : `npm test` puis `npm run test:e2e` (mise en page sur 10 iPhone et 12 iPad,
+- Vérifier avant de pousser : `npm test` puis `npm run test:e2e` (mise en page sur 10 iPhone, 12 iPad et 7 Android,
   portrait et paysage).
 - Couleurs : texte blanc seulement sur des fonds à contraste ≥ 3:1 (gros textes) ; jamais d'information
   portée par la couleur seule.

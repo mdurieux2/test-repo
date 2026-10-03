@@ -1,82 +1,171 @@
-# Lire & Compter, avec Eva-Rose et Matteo
+# Lire & Compter
 
-Application iPhone et iPad de jeux pour apprendre **le français, les maths et l'anglais**,
-de la moyenne section au CE1. Deux profils au lancement : **Eva-Rose** (CP, CE1) et **Matteo**
-(moyenne et grande section). Chaque enfant a sa progression, ses étoiles et son album.
+Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la moyenne section au CE1.
 
-C'est une web app installable : elle s'ouvre dans Safari, s'ajoute à l'écran d'accueil et
-fonctionne ensuite **sans Internet**. Pas besoin de Mac, d'Xcode ni de l'App Store.
+- Sur **téléphone, tablette et ordinateur** : iPhone, iPad, Android, Windows, Mac.
+- **Sans compte ni publicité**, et **sans Internet** une fois installée.
+- Un profil par enfant (jusqu'à 6), avec son prénom, son personnage et sa photo.
+- Toutes les données restent **sur l'appareil**. Rien n'est envoyé ailleurs.
 
-## Installer sur l'iPhone ou l'iPad
+👉 **Adresse de l'application : <https://mdurieux2.github.io/test-repo/>**
 
-1. Activer GitHub Pages (une seule fois) : *Settings → Pages → Source : GitHub Actions*.
-2. Après fusion sur `master`, l'app est publiée sur `https://mdurieux2.github.io/test-repo/`.
-3. Sur l'iPhone ou l'iPad, ouvrir cette adresse dans **Safari**, toucher **Partager**, puis
-   **Sur l'écran d'accueil**.
+---
 
-Sur iPad, l'interface s'agrandit automatiquement, en portrait comme en paysage.
+## Installer l'application
 
-## Réglages
+L'application s'ouvre dans le navigateur. Une fois ajoutée à l'écran d'accueil, elle s'ouvre
+en plein écran, comme une application classique, avec son icône.
 
-Le bouton ⚙️ de l'écran « Qui joue ? » ouvre les réglages, protégés par une multiplication :
+### iPhone et iPad
 
-- **Photos des profils** : une photo pour chaque enfant, choisie dans la photothèque ou prise
-  avec l'appareil photo. Elle est enregistrée automatiquement et reste sur l'appareil.
-- **Voix et sons** : consignes lues ou non, voix d'Eva-Rose et de Matteo avec un bouton
-  d'essai, petits sons, nombre de questions par partie.
-- **À propos** : version, journal des modifications (`app/js/config.js`) et crédits.
+1. Ouvrir l'adresse dans **Safari**.
+2. Toucher **Partager** (le carré avec une flèche vers le haut).
+3. Faire défiler la liste, puis toucher **Sur l'écran d'accueil**, puis **Ajouter**.
 
-Pour des voix plus naturelles, téléchargez une voix « Premium » ou « améliorée » dans
-*Réglages de l'iPhone → Accessibilité → Contenu énoncé → Voix → Français*. L'app choisit
-toujours la plus naturelle disponible.
+Dans un autre navigateur (Chrome, Brave…), l'option **Sur l'écran d'accueil** se trouve aussi
+dans le menu Partager, tout en bas. Si elle n'y est pas : *Modifier les actions…* puis l'ajouter.
 
-## Le programme
+### Android
 
-Construit à partir des programmes officiels (BO n°41 du 31/10/2024, en vigueur à la rentrée
-2025, et langues vivantes, BO n°12 du 19/03/2026). Détail dans `app/js/programs.js`.
+1. Ouvrir l'adresse dans **Chrome**.
+2. Toucher le menu **⋮** (en haut à droite).
+3. Toucher **Ajouter à l'écran d'accueil** (ou **Installer l'application**), puis **Installer**.
+
+### Ordinateur (Windows, Mac, Linux)
+
+- **Chrome** ou **Edge** : ouvrir l'adresse, puis cliquer sur l'icône **Installer** à droite de
+  la barre d'adresse (ou menu ⋮ → *Installer Lire & Compter*).
+- **Safari (Mac)** : menu *Fichier* → *Ajouter au Dock*.
+- **Firefox** : l'application fonctionne directement dans un onglet.
+
+Sur ordinateur, tout se fait à la souris : cliquer, glisser (labyrinthes, étiquettes à placer),
+tracer (relier, entourer). L'écran fonctionne **en portrait comme en paysage** sur tablette et
+ordinateur ; sur téléphone, le portrait est conseillé.
+
+---
+
+## Premiers pas
+
+1. **Au premier lancement**, l'adulte crée le profil de chaque enfant : prénom, personnage
+   (fille ou garçon) et classe. Le prénom est écrit sur le tee-shirt du personnage et sert à
+   féliciter l'enfant (« Bravo Léa ! »). On peut ajouter une photo ensuite.
+2. **« Qui joue ? »** : l'enfant touche son portrait.
+3. Il choisit une matière (**Français**, **Maths**, **Anglais**) puis un jeu. Ses autocollants
+   sont dans **Mon album**.
+4. Chaque jeu montre le niveau atteint (les points). En touchant **Niveaux ▾**, on choisit
+   directement un niveau.
+
+---
+
+## Ce qu'on apprend
+
+Les jeux et les niveaux s'adaptent à la classe choisie pour chaque enfant (programmes
+officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/programs.js`.
 
 | Classe | Français | Maths | Anglais |
 |---|---|---|---|
-| MS | Frappe les syllabes, rimes, lettres capitales | Compter jusqu'à 10, dé, panier, comparer, faire 5, formes, suites de motifs | Écoute et touche (couleurs, nombres, animaux) |
-| GS | Syllabes, rimes, lettres (nom et son), premier son | Compter jusqu'à 20, décompositions, calcul ±5 et ±10, formes, motifs | Écoute et touche (5 thèmes) |
-| CP | Premier son, syllabes, lire un mot, mots-outils, un/une | Dénombrement (4 séries), dizaines, comparer, suite, **calcul en 36 paliers**, faire 10 | Écoute, lis et touche (8 thèmes) |
-| CE1 | Lire des mots et des phrases, homophones (a/à, et/est…), déterminants | Nombres jusqu'à 1000, tables de 2 à 10, calcul jusqu'à 100 | Écoute, lis, trouve le mot anglais |
+| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, labyrinthes | Écouter et toucher, compter en anglais, « Where is the cat? » |
+| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, labyrinthes | Écouter et toucher (5 thèmes), compter, in/on/under |
+| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, sudoku | Écouter (10 thèmes), lire, relier, compter, in/on/under |
+| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants | Nombres jusqu'à 1000, tables, problèmes en deux étapes, l'heure, moitiés, sudoku 6 × 6, labyrinthes 9 × 9 | Écouter, lire, relier, épeler, trouver le mot anglais |
 
-**Dénombrement** : *Combien ?* (pointer chaque objet, la voix compte), *Vite vu !* (dé,
-boîtes de 10, dizaines en vue éclair), *Le panier* (fabriquer une collection, sachets de 10),
-*Dizaines et unités*.
+### Les jeux
 
-**Calcul** : une carte de 36 paliers (+5, −5, ±5, +10 … ±100) avec 5 étoiles de maîtrise
-par palier, et trois formes d'exercice : pavé numérique, « Relie », « Complète » (□ + □ = 8).
+**Français**
+- *Écouter les sons* : frappe les syllabes, les rimes.
+- *Lettres et sons* : les lettres, le premier son, les syllabes.
+- *Lire* : le bon mot, les petits mots, la bonne phrase, **petits textes** avec des questions
+  de compréhension.
+- *Grammaire* : le bon petit mot (a/à, et/est, son/sont, on/ont), le, la, les, un, une.
+- *Labyrinthes* : le chemin des lettres (alphabet, épeler un mot).
+
+**Maths**
+- *Dénombrement* : *Combien ?* (on touche chaque objet, la voix compte), *Vite vu !* (dé,
+  boîtes de 10, dizaines en vue éclair), *Le panier* (listes de courses : « 6 bananes,
+  3 pommes et 2 fraises »), *Fais des patates* (entourer au doigt des paquets de 2, 5 ou 10,
+  puis compter le tout), *Relie les quantités*, *Dizaines et unités*.
+- *Nombres et calcul* : comparer, la suite des nombres, **le calcul en 36 paliers** (+5, −5,
+  ±5, +10 … ±100, avec pavé numérique, « Relie » et « Complète »), *les calculs à trous*
+  (glisser les nombres dans les cases, chaque calcul juste devient vert), *relie les calculs*
+  (tracer un trait jusqu'au résultat), faire 10, ranger dans l'ordre, petits problèmes
+  racontés avec le prénom de l'enfant, doubles et moitiés, les tables.
+- *Formes et logique* : les formes, les suites de motifs, l'intrus, les ombres, le **sudoku**
+  (4 × 4 en images, puis en chiffres, jusqu'au 6 × 6).
+- *Heure et mesures* : lire l'heure (heures pile, et demie, et quart, de 5 en 5 minutes).
+- *Labyrinthes* : de 4 × 4 à 9 × 9 cases (doigt, flèches, ou toucher une case ; 💡 pour un
+  indice) et le chemin des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours).
+
+**Anglais** (10 thèmes : couleurs, nombres, animaux, nourriture, corps, vêtements, école,
+météo, émotions, famille)
+- Écoute et touche, lis et touche, le mot anglais, relie en anglais, compte en anglais,
+  « Where is the cat? » (in, on, under, next to), épelle en anglais.
+
+---
 
 ## Pédagogie
 
-- Toutes les consignes sont lues à voix haute (voix françaises de l'iPhone, voix anglaise
-  pour l'anglais). On réécoute en touchant le personnage ou la bulle.
-- Niveau adaptatif pour viser environ 80 % de réussite : 5 bonnes réponses d'affilée font
+- **Tout est lu à voix haute** (voix française, et voix anglaise pour l'anglais). On réécoute
+  en touchant le personnage ou la bulle.
+- **Consigne complète** à la première question, puis une **consigne courte** pour ne pas lasser.
+- **Niveau adaptatif** pour viser environ 80 % de réussite : 5 bonnes réponses d'affilée font
   monter d'un niveau, 3 erreurs sur 5 font redescendre, dans la fourchette de la classe.
-- Pas d'échec : après une erreur, « Essaie encore » ; après deux, la bonne réponse brille.
-- Récompenses : étoiles, autocollants, étoiles de palier.
+- **Pas d'échec** : après une erreur, « Essaie encore ! » ; après deux, la bonne réponse brille.
+- **Récompenses** : étoiles, autocollants à collectionner, étoiles de maîtrise des paliers.
+- Des parties courtes (5, 10 ou 15 questions) : 10 à 15 minutes par jour suffisent.
 
-## Suivi des parents
+---
 
-Le bouton 👪 de l'écran « Qui joue ? » ouvre le suivi. Pour chaque enfant :
-- la classe ;
-- l'activité de la semaine (parties, minutes, réussite, jours d'affilée, graphique) ;
-- l'état de chaque compétence (pas commencé, en cours, acquis) et le niveau réglable ;
-- ce qui est à retravailler et les erreurs fréquentes.
+## Espace parents
 
-Les données restent sur l'iPhone.
+Le bouton **Parents** de l'écran « Qui joue ? » est protégé par une petite multiplication.
+Il ouvre trois onglets :
 
-## Développement
+- **Suivi** : pour chaque enfant, l'activité de la semaine (parties, minutes, réussite, jours
+  d'affilée), l'état de chaque compétence, le niveau de chaque jeu (réglable), ce qui est à
+  retravailler et les erreurs fréquentes.
+- **Enfants** : ajouter un enfant, changer son prénom, son personnage, sa classe ou sa photo
+  (photothèque ou appareil photo, enregistrée automatiquement), effacer sa progression ou
+  supprimer son profil. On y trouve aussi **Partager le lien**.
+- **Réglages** : consignes lues ou non, choix des voix (filles et garçons) avec un bouton
+  d'essai, petits sons, nombre de questions par partie, installation, version et journal des
+  modifications.
 
-Aucune étape de compilation : HTML, CSS et JavaScript (modules ES) dans `app/`.
+### Des voix plus naturelles
+
+L'application choisit toujours la voix la plus naturelle de l'appareil. Pour l'améliorer :
+
+- **iPhone, iPad, Mac** : *Réglages → Accessibilité → Contenu énoncé → Voix → Français*, puis
+  télécharger une voix « Premium » ou « améliorée » (et une voix anglaise pour l'anglais).
+- **Android** : *Paramètres → Accessibilité → Synthèse vocale* : moteur Google, langue
+  française, et télécharger la voix de meilleure qualité.
+- **Windows** : avec Edge, les voix « Natural » de Microsoft sont proposées.
+
+---
+
+## Partager avec d'autres familles
+
+Il suffit d'envoyer l'adresse (ou *Espace parents → Enfants → Partager le lien*). Chaque
+famille crée ses propres profils sur son appareil : rien n'est partagé entre les familles.
+
+## Confidentialité
+
+- Aucune inscription, aucune publicité, aucun traceur.
+- Les prénoms, photos et progrès restent dans le navigateur de l'appareil (stockage local).
+- Effacer les données du site dans le navigateur supprime les profils.
+
+---
+
+## Pour les développeurs
+
+Aucune étape de compilation : HTML, CSS et JavaScript (modules ES) dans `app/`, publiés sur
+GitHub Pages à chaque fusion sur `master` (à activer une fois : *Settings → Pages → Source :
+GitHub Actions*).
 
 ```bash
 npm install          # Playwright, pour le test de bout en bout et les icônes
 npm start            # http://localhost:8080
 npm test             # tests unitaires (node --test)
-npm run test:e2e     # parcours complet + mise en page sur 10 iPhone (6 → 17 Pro Max) et 12 iPad
+npm run test:e2e     # parcours complet + mise en page sur 10 iPhone, 12 iPad et 7 Android
 npm run icons        # régénère les icônes
 ```
 
@@ -85,10 +174,14 @@ npm run icons        # régénère les icônes
 | `app/js/games/*.js` | Les jeux : chacun génère des questions décrites par des données |
 | `app/js/programs.js` | Programme par classe (jeux et niveaux) |
 | `app/js/main.js` | Écrans, profils et déroulement d'une partie |
+| `app/js/render.js` | Dessin des questions (objets, horloge, scènes…) |
 | `app/js/dashboard.js` | Tableau de bord des parents |
-| `app/js/characters.js` | Dessins d'Eva-Rose et de Matteo (SVG) |
+| `app/js/characters.js` | Personnages fille et garçon (SVG), prénom sur le tee-shirt |
+| `app/js/storage.js` | Profils et progression, enregistrés sur l'appareil |
 | `app/js/config.js` | Version, journal des modifications, crédits |
 | `app/sw.js` | Mode hors ligne : tout nouveau fichier doit être ajouté à `PRECACHE` |
+
+## Crédits
 
 Conçue par **Michaël Durieux**. Police : [Andika](https://software.sil.org/andika/)
 (SIL Open Font License), conçue pour l'apprentissage de la lecture.

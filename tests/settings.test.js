@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { APP, CHANGELOG } from '../app/js/config.js';
 import { voiceScore } from '../app/js/speech.js';
-import { defaultStore, loadStore, resetChild, saveStore } from '../app/js/storage.js';
+import { addChild, defaultStore, loadStore, resetChild, saveStore } from '../app/js/storage.js';
+import { avatarSvg, makeCharacter } from '../app/js/characters.js';
 
 test('la version affichée est celle du projet', () => {
   const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -33,6 +34,8 @@ test('voix : Premium > améliorée > compacte, voix gadget écartées, accent de
   assert.ok(voiceScore(v('Rocko (français (France))')) < compact);
   assert.ok(voiceScore(v('Amélie', 'fr-CA')) < compact);
   assert.ok(voiceScore(v('Audrey', 'fr-FR', 'com.apple.voice.premium.fr-FR.Audrey')) > compact);
+  const edge = { ...v('Microsoft Denise Online (Natural) - French (France)'), localService: false };
+  assert.ok(voiceScore(edge) > voiceScore(v('Microsoft Hortense - French (France)')));
 });
 
 function memoryStorage() {
@@ -43,6 +46,8 @@ function memoryStorage() {
 test('photo de profil : enregistrée, conservée après « effacer la progression », refusée si invalide', () => {
   const storage = memoryStorage();
   const store = defaultStore();
+  addChild(store, { name: 'Eva-Rose', look: 'fille' });
+  addChild(store, { name: 'Matteo', look: 'garcon' });
   store.profiles.matteo.photo = 'data:image/jpeg;base64,AAAA';
   store.profiles.matteo.stars = 8;
   store.profiles['eva-rose'].photo = 'javascript:alert(1)';
@@ -57,4 +62,16 @@ test('photo de profil : enregistrée, conservée après « effacer la progressio
 
 test('réglages : les préférences de voix existent par défaut', () => {
   assert.deepEqual(defaultStore().settings.voices, {});
+});
+
+test('personnage : le prénom choisi par la famille, échappé dans le dessin', () => {
+  const svg = avatarSvg('garcon', '<b>Léo & Zoé</b>');
+  assert.ok(svg.includes('&lt;b&gt;Léo &amp; Zoé&lt;/b&gt;'));
+  assert.ok(!svg.includes('<b>'));
+  const c = makeCharacter('lea', { name: 'Léa', look: 'fille' });
+  assert.equal(c.name, 'Léa');
+  assert.equal(c.voice.voice, 'female');
+  assert.ok(c.hello.includes('Léa'));
+  assert.equal(makeCharacter('x', { name: 'Hugo', look: 'garcon' }).voice.voice, 'male');
+  assert.ok(!avatarSvg('fille', '').includes('<text'), 'pas de prénom : tee-shirt vide');
 });

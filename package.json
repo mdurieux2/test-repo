@@ -1,8 +1,8 @@
 {
   "name": "lire-et-compter",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "private": true,
-  "description": "Application iPhone et iPad (web app installable) de jeux de français, maths et anglais, de la moyenne section au CE1",
+  "description": "Jeux de français, de maths et d'anglais, de la moyenne section au CE1 : web app installable sur téléphone, tablette et ordinateur",
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
