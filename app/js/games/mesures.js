@@ -22,9 +22,8 @@ const SHOP = [
   { emoji: '🚗', name: 'la petite voiture' }, { emoji: '🎲', name: 'le jeu' },
 ];
 
-// Pièces et billets pour payer : trois boutons, qui tiennent sur une ligne même sur un
-// petit téléphone en paysage (avec le billet de 10 €, la ligne se coupait en deux).
-const PAY_VALUES = [1, 2, 5];
+// Pièces et billets pour payer (en paysage sur téléphone, la zone est compacte : voir .pay dans le CSS).
+const PAY_VALUES = [1, 2, 5, 10];
 
 /** Une somme en pièces et billets, du plus grand au plus petit (sans dépasser un nombre de pièces raisonnable). */
 export function makeChange(total, values) {
