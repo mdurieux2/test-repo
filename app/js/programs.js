@@ -82,7 +82,7 @@ export const PROGRAMS = {
       ['histoires', 1, 2], ['petits-textes', 1, 2],
     ],
     maths: [
-      ['compter', 1, 6], ['vite-vu', 1, 4], ['panier', 1, 7], ['patates', 2, 4], ['dizaines', 1, 4],
+      ['compter', 1, 9], ['vite-vu', 1, 7], ['panier', 1, 10], ['patates', 2, 4], ['dizaines', 1, 4],
       ['comparer', 1, 3], ['suite', 1, 4], ['calcul', 1, 36], ['trous', 1, 4], ['relie-calculs', 1, 5],
       ['faire-dix', 1, 3], ['ranger', 3, 5], ['problemes', 1, 5], ['doubles', 1, 3],
     ],
@@ -114,8 +114,8 @@ export const PROGRAMS = {
       ['histoires', 2, 3], ['petits-textes', 2, 3],
     ],
     maths: [
-      ['patates', 4, 5], ['dizaines', 2, 5], ['comparer', 2, 4], ['suite', 3, 5], ['calcul', 4, 36],
-      ['trous', 3, 6], ['relie-calculs', 3, 6], ['faire-dix', 2, 3], ['tables', 1, 6], ['ranger', 5, 7],
+      ['patates', 4, 8], ['dizaines', 2, 8], ['comparer', 2, 7], ['suite', 3, 8], ['calcul', 4, 36],
+      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 6], ['tables', 1, 6], ['ranger', 5, 7],
       ['problemes', 4, 7], ['doubles', 2, 4],
     ],
     jeux: [

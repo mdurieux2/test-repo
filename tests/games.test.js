@@ -185,6 +185,7 @@ test('premier-son : le mot commence par le son, jamais par un distracteur', () =
 test('compter : nombre d’objets dans les bornes du niveau, positions sans chevauchement', () => {
   const bounds = { 1: [1, 5], 2: [1, 10], 3: [3, 10], 4: [10, 20], 5: [8, 20], 6: [20, 30] };
   for (const { level, q } of questions(findGame('compter'))) {
+    if (!bounds[level]) continue; // niveaux 7 à 9 : voir maths-niveaux.test.js
     const [min, max] = bounds[level];
     assert.equal(q.stage.count, q.answer);
     assert.ok(q.answer >= min && q.answer <= max);
@@ -198,12 +199,14 @@ test('compter : nombre d’objets dans les bornes du niveau, positions sans chev
 });
 
 test('vite-vu, dizaines : la quantité montrée est la réponse', () => {
-  for (const { q } of questions(findGame('vite-vu'))) {
+  for (const { level, q } of questions(findGame('vite-vu'))) {
+    if (level > 4) continue; // calcul flash : voir maths-niveaux.test.js
     const inner = q.stage.inner;
     const shown = inner.type === 'dice' ? inner.value : inner.type === 'frames' ? inner.filled : inner.tens * 10 + inner.units;
     assert.equal(shown, q.answer);
   }
   for (const { q } of questions(findGame('dizaines'))) {
+    if (q.stage.type !== 'blocks') continue;
     const { hundreds = 0, tens, units } = q.stage;
     assert.equal(hundreds * 100 + tens * 10 + units, q.answer);
   }
@@ -212,6 +215,7 @@ test('vite-vu, dizaines : la quantité montrée est la réponse', () => {
 test('panier : listes de courses à 2 et 3 fruits, sachets de 10 au niveau 6 seulement', () => {
   const kinds = { 1: 1, 2: 1, 3: 2, 4: 3, 5: 1, 6: 1, 7: 3 };
   for (const { level, q } of questions(findGame('panier'))) {
+    if (!kinds[level]) continue; // niveaux 8 à 10 : voir maths-niveaux.test.js
     assert.equal(q.stage.tens, level === 6);
     assert.equal(q.stage.items.length, kinds[level]);
     if (kinds[level] > 1) assert.ok(q.text.includes(' et '), q.text);
@@ -223,6 +227,7 @@ test('panier : listes de courses à 2 et 3 fruits, sachets de 10 au niveau 6 seu
 test('calculs à trous : 3 à 5 calculs, deux étiquettes par calcul, résultats dans le niveau', () => {
   const levels = { 1: [3, 5], 2: [4, 10], 3: [5, 10], 4: [5, 20], 5: [4, 50], 6: [4, 100] };
   for (const { level, q } of questions(findGame('trous'))) {
+    if (!levels[level]) continue; // niveaux 7 à 9 : voir maths-niveaux.test.js
     const [count, max] = levels[level];
     assert.equal(q.interaction, 'fill');
     assert.equal(q.equations.length, count);
@@ -255,6 +260,7 @@ test('sudoku : grille juste, une seule solution, nombre de cases à trouver du n
 test('relie les calculs : 4 à 8 paires, résultats tous différents et justes', () => {
   const counts = { 1: 4, 2: 6, 3: 8, 4: 6, 5: 8, 6: 6 };
   for (const { level, q } of questions(findGame('relie-calculs'))) {
+    if (!counts[level]) continue; // niveaux 7 à 9 : voir maths-niveaux.test.js
     assert.equal(q.pairs.length, counts[level]);
     for (const p of q.pairs) {
       const [a, op, b] = p.left.split(' ');
@@ -343,8 +349,8 @@ test('décors de saison selon la date', () => {
   assert.equal(seasonOf(new Date(2026, 0, 15)).id, 'hiver');
 });
 
-test('patates : paquets de 2, 5 ou 10, la réponse est le nombre d’objets', () => {
-  const groups = { 1: 2, 2: 5, 3: 10, 4: 10, 5: 10 };
+test('patates : paquets de 2, 3, 4, 5 ou 10, la réponse est le nombre d’objets', () => {
+  const groups = { 1: 2, 2: 5, 3: 10, 4: 10, 5: 10, 6: 3, 7: 4, 8: 5 };
   for (const { level, q } of questions(findGame('patates'))) {
     assert.equal(q.stage.group, groups[level]);
     assert.equal(q.stage.positions.length, q.answer);
@@ -472,7 +478,7 @@ test('comparer : jamais deux valeurs égales, la bonne réponse est la bonne', (
       const [g, d] = q.choices.map((c) => c.objects.count);
       assert.notEqual(g, d);
       assert.equal(q.answer, g > d ? 'gauche' : 'droite');
-    } else {
+    } else if (level <= 4) { // niveaux 5 à 7 : voir maths-niveaux.test.js
       const [a, b] = q.choices.map((c) => c.value);
       assert.notEqual(a, b);
       const expected = q.text.includes('grand') ? Math.max(a, b) : Math.min(a, b);
@@ -492,12 +498,13 @@ test('suite : le trou correspond à la réponse', () => {
     const step = (known[1][0] - known[0][0]) / (known[1][1] - known[0][1]);
     const start = known[0][0] - known[0][1] * step;
     assert.equal(q.answer, start + gap * step);
-    assert.ok(Math.max(...known.map(([n]) => n), q.answer) <= (level === 5 ? 1000 : 100));
+    assert.ok(Math.max(...known.map(([n]) => n), q.answer) <= (level === 5 || level === 8 ? 1000 : 100));
   }
 });
 
 test('faire-dix et tables : résultats justes', () => {
   for (const { level, q } of questions(findGame('faire-dix'))) {
+    if (level > 3) continue; // niveaux 4 à 6 : voir maths-niveaux.test.js
     const total = level === 1 ? 5 : 10;
     const filled = q.stage.type === 'frame' ? q.stage.filled : q.stage.parts[0];
     assert.equal(filled + q.answer, total);
