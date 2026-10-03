@@ -42,7 +42,7 @@ function save() {
 
 function show(...children) {
   stopSpeaking();
-  app.replaceChildren(...children);
+  app.replaceChildren(...children.filter(Boolean));
   window.scrollTo(0, 0);
 }
 
@@ -130,11 +130,6 @@ function homeScreen() {
   show(h('main', { class: 'screen home' },
     h('header', { class: 'top-bar' }, profileChip(), h('span'), starCounter()),
     h('div', { class: 'home-hero' },
-      h('div', { class: 'duo' }, CHARACTERS.map((k) => h('button', {
-        class: k.id === c.id ? 'duo-member me' : 'duo-member',
-        onclick: () => say(k, k.hello),
-        'aria-label': k.name,
-      }, avatar(k.id, 'avatar-lg')))),
       h('h1', { class: 'home-title' }, frenchSpacing(`Bonjour ${c.name} !`))),
     h('nav', { class: 'home-menu' },
       domains.map((d) => h('button', { class: `domain-btn domain-${d.id}`, 'data-domain': d.id, onclick: () => domainScreen(d.id) },
@@ -362,9 +357,11 @@ async function markCorrect(ctx) {
 
   const name = me().name;
   const praise = firstTry ? (rng() < 0.3 ? `Bravo ${name} !` : pick(rng, PRAISES)) : 'Oui, c’est ça !';
-  feedback.replaceChildren(
+  // replaceChildren(null) afficherait le texte « null » : on ne passe que de vrais éléments
+  feedback.replaceChildren(...[
     h('p', { class: 'praise' }, praise),
-    q.success?.reveal ? revealWord(q.success.reveal, q.success.highlight) : null);
+    q.success?.reveal ? revealWord(q.success.reveal, q.success.highlight) : null,
+  ].filter(Boolean));
   const toSay = [praise];
   if (q.success?.speak) toSay.push(...(Array.isArray(q.success.speak) ? q.success.speak : [q.success.speak]));
   if (change === 'up') {

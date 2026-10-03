@@ -85,6 +85,12 @@ async function openGame(page, game, { palier, format = 0 } = {}) {
   if (game.paliers) await page.click(palier ? `[data-palier="${palier}"]` : '.palier-tile.recommended', { force: true });
 }
 
+/** Aucun « null », « undefined » ou « NaN » ne doit apparaître à l'écran. */
+async function assertNoJunk(page, label) {
+  const junk = await page.evaluate(() => document.body.innerText.match(/\b(null|undefined|NaN)\b/)?.[0]);
+  if (junk) fail(`${label} : « ${junk} » affiché à l'écran`);
+}
+
 async function typeNumber(page, n) {
   for (const digit of String(n)) await page.click(`.key[data-key="${digit}"]`);
   await page.click('.key[data-key="✔"]');
@@ -186,9 +192,11 @@ for (const game of GAMES) {
     if (game.id === 'calcul' && i === 1) await shot('15-relie');
     if (game.id === 'calcul' && i === 3) await shot('16-complete');
     await answer(page, q, i === 1 && q.interaction !== 'fill');
+    await assertNoJunk(page, `${game.id} question ${i + 1}`);
     await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
   }
   await page.waitForSelector('.results');
+  await assertNoJunk(page, `${game.id} résultats`);
   const stars = await page.locator('.big-star.on').count();
   if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (4 bonnes sur 5)`);
   if (game.id === 'calcul') {
