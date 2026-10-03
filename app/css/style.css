@@ -1718,3 +1718,11 @@ body[data-season="ete"] { background: #fffbea; }
   .dots-drawing { width: min(100%, calc(100dvh - 76px)); }
   .stage-flag .flag { width: min(100%, 240px, calc((100dvh - 130px) * 1.5)); }
 }
+
+/* inviter à installer l'icône (sous « Qui joue ? ») */
+.install-hint { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.install-hint h2 { margin: 0; font-size: 1.2rem; }
+.install-hint p { margin: 0; line-height: 1.4; }
+.install-how summary { cursor: pointer; font-weight: 700; color: var(--accent-dark); }
+.install-steps { margin: 6px 0 0; }
+.install-actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }

@@ -437,6 +437,14 @@ console.log('✔ premier lancement : profils créés (prénom, dessin, classe)')
 await setStore(page, 'store.settings = { sessionLength: 5 };');
 await page.reload();
 await shot('01-qui-joue');
+// inviter à installer l'icône : visible dans le navigateur, « Plus tard » le cache (et c'est retenu)
+if (!(await page.locator('[data-install-hint]').count())) fail('installer l’icône : l’invitation est absente');
+if (!(await page.textContent('[data-install-hint]')).includes('7 jours') && (await page.evaluate(() => /iPhone|iPad/.test(navigator.userAgent)))) fail('installer l’icône : explication des 7 jours absente');
+await page.click('[data-install-later]');
+await page.reload();
+await page.waitForSelector('.profiles');
+if (await page.locator('[data-install-hint]').count()) fail('installer l’icône : « Plus tard » n’est pas retenu');
+console.log('✔ invitation à installer l’icône (masquée avec « Plus tard »)');
 await page.click('[data-profile="eva-rose"]');
 await page.waitForSelector('.home');
 if (!(await page.textContent('.home-title')).replace('\u2011', '-').includes('Eva-Rose')) fail('prénom absent de l’accueil');

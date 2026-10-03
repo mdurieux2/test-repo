@@ -153,7 +153,81 @@ function profileScreen() {
           h('span', { class: 'profile-name' }, frenchSpacing(kid.name)),
           h('span', { class: 'profile-grade' }, GRADES[kid.grade]),
           h('span', { class: 'profile-stars' }, '⭐ ', kid.stars));
-      }))));
+      })),
+    installHint()));
+}
+
+// ---------------------------------------------------------------- Installer l'icône
+
+// Android et ordinateur (Chrome, Edge) : le navigateur propose lui-même l'installation.
+let installPrompt = null;
+addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPrompt = e;
+});
+
+function platform() {
+  const ua = navigator.userAgent;
+  // l'iPad se présente comme un Mac, mais il a un écran tactile
+  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/Android/.test(ua)) return 'android';
+  return 'desktop';
+}
+
+/** Les étapes pour mettre l'icône sur l'écran d'accueil, selon l'appareil. */
+function installSteps() {
+  const steps = {
+    ios: [
+      'Touchez Partager (le carré avec une flèche vers le haut).',
+      'Faites défiler, puis touchez « Sur l’écran d’accueil ».',
+      'Touchez « Ajouter » : l’icône apparaît, l’app marche sans Internet.',
+    ],
+    android: [
+      'Touchez le menu ⋮ du navigateur, en haut à droite.',
+      'Touchez « Installer l’application » ou « Ajouter à l’écran d’accueil ».',
+      'Confirmez : l’icône apparaît, l’app marche sans Internet.',
+    ],
+    desktop: [
+      'Cliquez sur l’icône d’installation dans la barre d’adresse, ou ouvrez le menu du navigateur.',
+      'Choisissez « Installer Lire & Compter ».',
+      'L’app s’ouvre alors dans sa propre fenêtre, même sans Internet.',
+    ],
+  };
+  return h('ol', { class: 'plain-list install-steps' }, steps[platform()].map((step) => h('li', {}, step)));
+}
+
+/**
+ * Sous « Qui joue ? » : inviter à installer l'icône. Sur iPhone et iPad, le navigateur peut effacer
+ * les données d'un site qu'on n'a pas ouvert depuis 7 jours ; l'app installée est protégée.
+ */
+function installHint() {
+  const settings = store.settings;
+  if (isStandalone() || settings.installHintDone || Date.now() < (settings.installHintUntil || 0)) return null;
+  const hide = (patch) => {
+    Object.assign(store.settings, patch);
+    save();
+    profileScreen();
+  };
+  const install = installPrompt
+    ? h('button', {
+      class: 'big-btn primary', 'data-install': '',
+      onclick: async () => {
+        installPrompt.prompt();
+        const { outcome } = await installPrompt.userChoice.catch(() => ({}));
+        installPrompt = null;
+        if (outcome === 'accepted') hide({ installHintDone: true });
+      },
+    }, '📲 Installer l’app')
+    : null;
+  return h('section', { class: 'card install-hint', 'data-install-hint': '' },
+    h('h2', {}, '📲 Mettez l’icône sur l’écran d’accueil'),
+    h('p', {}, platform() === 'ios'
+      ? 'Sur iPhone et iPad, le navigateur peut effacer les prénoms et les progrès d’un site qu’on n’ouvre pas pendant 7 jours. Avec l’icône, tout est protégé, et l’app s’ouvre en plein écran, même sans Internet.'
+      : 'Avec l’icône, l’app s’ouvre en plein écran, même sans Internet, et les prénoms et les progrès sont mieux protégés.'),
+    install || h('details', { class: 'install-how' }, h('summary', {}, 'Comment faire ?'), installSteps()),
+    h('div', { class: 'install-actions' },
+      h('button', { class: 'link-action', 'data-install-later': '', onclick: () => hide({ installHintUntil: Date.now() + 14 * 24 * 3600 * 1000 }) }, 'Plus tard'),
+      h('button', { class: 'link-action', 'data-install-done': '', onclick: () => hide({ installHintDone: true }) }, 'J’ai déjà l’icône')));
 }
 
 function chooseProfile(id) {
@@ -2613,10 +2687,8 @@ function settingsTab() {
       h('p', { class: 'muted small' }, 'Voix plus naturelles : Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
-      h('ol', { class: 'plain-list' },
-        h('li', {}, 'Touchez Partager (le carré avec une flèche).'),
-        h('li', {}, 'Faites défiler, puis touchez « Sur l’écran d’accueil ».'),
-        h('li', {}, 'Touchez « Ajouter » : l’icône apparaît, l’app marche sans Internet.'))),
+      installSteps(),
+      h('p', { class: 'muted small' }, 'Sur iPhone et iPad, l’app installée est protégée : le navigateur ne peut pas effacer ses données.')),
     h('section', { class: 'card about' },
       h('h2', {}, 'À propos'),
       h('div', { class: 'setting' }, h('span', {}, 'Version'), h('b', { 'data-version': APP.version }, APP.version)),
@@ -2643,6 +2715,8 @@ document.addEventListener('pointerdown', (e) => {
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
+// demander au navigateur de ne pas effacer les données de l'app (profils, progrès) quand il manque de place
+if (store.order.length) navigator.storage?.persist?.().catch(() => {});
 
 // Au lancement : « Qui joue ? » (sauf si l'app est rouverte pendant la même séance).
 if (store.active && sessionFlag('playing')) homeScreen();
