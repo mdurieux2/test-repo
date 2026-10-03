@@ -97,7 +97,7 @@ export const PROGRAMS = {
       ['puzzle', 2, 5], ['memory', 3, 6], ['coloriage-magique', 2, 5], ['points', 2, 5],
     ],
     temps: [
-      ['heure', 1, 2], ['calendrier', 1, 2], ['saisons', 1, 3], ['monnaie', 1, 3], ['mesures', 1, 4],
+      ['heure', 1, 2], ['regle-horloge', 1, 4], ['calendrier', 1, 2], ['saisons', 1, 3], ['monnaie', 1, 3], ['mesures', 1, 4],
     ],
     monde: [
       ['animaux-monde', 1, 3], ['pays', 1, 2],
@@ -121,8 +121,8 @@ export const PROGRAMS = {
     ],
     maths: [
       ['patates', 4, 8], ['dizaines', 2, 8], ['comparer', 2, 7], ['suite', 3, 8], ['calcul', 4, 36],
-      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 6], ['tables', 1, 9], ['ranger', 5, 10],
-      ['problemes', 4, 10], ['doubles', 2, 7],
+      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 6], ['tables', 1, 9], ['tables-chrono', 1, 6],
+      ['ranger', 5, 10], ['problemes', 4, 10], ['doubles', 2, 7],
     ],
     jeux: [
       ['intrus', 2, 6], ['ombres', 3, 6], ['sudoku', 3, 9], ['symetrie', 2, 7], ['reproduire', 2, 6],
@@ -131,7 +131,7 @@ export const PROGRAMS = {
       ['puzzle', 3, 6], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
     ],
     temps: [
-      ['heure', 2, 7], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
+      ['heure', 2, 7], ['regle-horloge', 1, 6], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
     ],
     monde: [
       ['animaux-monde', 2, 7], ['pays', 1, 6],

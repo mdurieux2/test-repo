@@ -14,6 +14,7 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { startServer } from './serve.mjs';
 import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
+import { formatChrono } from '../app/js/games/chrono.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 
@@ -199,6 +200,40 @@ async function testTrace(page, q) {
   await page.waitForSelector('.try-again');
   if (!(await page.textContent('.try-again')).includes('chemin gris')) fail('écris au doigt : pas de message hors du chemin');
   console.log('  ✔ écris au doigt : trait à l’envers refusé, « Reste sur le chemin gris ! » hors du chemin');
+}
+
+// Règle l'horloge : l'heure montrée par le cadran (attributs data-h et data-m du cadran).
+let clockDragTested = false;
+const clockMinutes = ({ h, m }) => (h % 12) * 60 + m;
+async function clockTime(page) {
+  return page.$eval('.setclock-dial', (el) => ({ h: Number(el.dataset.h), m: Number(el.dataset.m) }));
+}
+
+/** Règle l'horloge avec les boutons « +1 h », « −5 min »… (par le chemin le plus court). */
+async function setClockWithButtons(page, target) {
+  let diff = (((clockMinutes(target) - clockMinutes(await clockTime(page))) % 720) + 720) % 720;
+  if (diff > 360) diff -= 720;
+  const sign = diff < 0 ? -1 : 1;
+  for (let k = 0; k < Math.floor(Math.abs(diff) / 60); k++) await page.click(`[data-shift="${sign * 60}"]`);
+  for (let k = 0; k < (Math.abs(diff) % 60) / 5; k++) await page.click(`[data-shift="${sign * 5}"]`);
+  const now = await clockTime(page);
+  if (clockMinutes(now) !== clockMinutes(target)) fail(`régler l’horloge : ${now.h} h ${now.m} au lieu de ${target.h} h ${target.m}`);
+}
+
+/** Glisser la grande aiguille à la souris de 2 h 50 jusqu'à 3 h 10 : elle passe le 12 et l'heure avance. */
+async function testClockDrag(page) {
+  clockDragTested = true;
+  await setClockWithButtons(page, { h: 2, m: 50 });
+  const box = await page.locator('.setclock-dial svg').boundingBox();
+  const [cx, cy, r] = [box.x + box.width / 2, box.y + box.height / 2, box.width * 0.3];
+  const at = (deg) => [cx + r * Math.sin((deg * Math.PI) / 180), cy - r * Math.cos((deg * Math.PI) / 180)];
+  await page.mouse.move(...at(300));
+  await page.mouse.down();
+  for (const deg of [315, 330, 345, 360, 15, 30, 45, 60]) await page.mouse.move(...at(deg), { steps: 3 });
+  await page.mouse.up();
+  const now = await clockTime(page);
+  if (now.h !== 3 || now.m !== 10) fail(`régler l’horloge : après le glisser de la grande aiguille, ${now.h} h ${now.m} au lieu de 3 h 10`);
+  console.log('  ✔ règle l’horloge : grande aiguille glissée à la souris (elle passe le 12, l’heure avance)');
 }
 
 async function answer(page, q, wrongFirst) {
@@ -447,6 +482,23 @@ async function answer(page, q, wrongFirst) {
       for (const st of q.stage.strokes) await drag(page, await tracePoints(page, st));
       break;
     }
+    case 'setclock': {
+      if (wrongFirst) {
+        // une mauvaise heure : un conseil ; une deuxième : l'heure attendue est montrée
+        if (clockMinutes(await clockTime(page)) === clockMinutes(q.target)) await page.click('[data-shift="5"]');
+        await page.click('.setclock-zone .validate-btn');
+        await page.waitForSelector('.try-again');
+        if (!(await page.textContent('.try-again')).includes('aiguille')) fail('régler l’horloge : pas de conseil après une erreur');
+        await page.click('.setclock-zone .validate-btn');
+        await page.waitForSelector('.setclock-dial.show-hint');
+        if (!(await page.textContent('.try-again')).includes(q.answer)) fail(`régler l’horloge : l’heure attendue (${q.answer}) n’est pas montrée`);
+      } else if (!clockDragTested) {
+        await testClockDrag(page);
+      }
+      await setClockWithButtons(page, q.target);
+      await page.click('.setclock-zone .validate-btn');
+      break;
+    }
     default:
       if (wrongFirst) {
         const wrong = q.choices.find((c) => c.value !== q.answer);
@@ -455,6 +507,41 @@ async function answer(page, q, wrongFirst) {
       }
       await page.click(`.choice[data-value="${q.answer}"]`);
   }
+}
+
+// ---------------------------------------------------------------- Défi chrono
+
+/** Le record enregistré sur le profil pour ce jeu : { niveau: secondes }. */
+async function savedRecords(page, gameId) {
+  return page.evaluate(([key, id]) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'].records?.[id] || {}, [STORAGE_KEY, gameId]);
+}
+
+/** Pendant la partie : 10 points de progression, le chronomètre (mm:ss) dans le badge en haut à droite. */
+async function checkChronoBadge(page, game, i) {
+  const steps = await page.locator('.progress .step').count();
+  if (steps !== game.questions) fail(`${game.id} : ${steps} questions au lieu de ${game.questions}`);
+  const shown = (await page.textContent('.level-badge .chrono-clock')).trim();
+  if (!/^⏱ \d{2}:\d{2}$/.test(shown)) fail(`${game.id} : chronomètre « ${shown} »`);
+  if (i > 0 && shown === '⏱ 00:00') fail(`${game.id} : le chronomètre ne tourne pas`);
+}
+
+/** À la fin : le temps (mm:ss), le record du niveau (battu ou non), et ce qui est enregistré. */
+async function checkChronoResults(page, game, { level = null, record = null } = {}) {
+  const time = (await page.textContent('.chrono-time b')).trim();
+  if (!/^\d{2}:\d{2}$/.test(time)) fail(`${game.id} : temps affiché « ${time} »`);
+  const line = (await page.textContent('.chrono-record')).replace(/\s+/g, ' ');
+  const saved = await savedRecords(page, game.id);
+  if (record === null) {
+    // premier défi : c'est un record, enregistré en secondes pour le niveau joué
+    if (!line.includes('Nouveau record')) fail(`${game.id} : « Nouveau record » absent (${line})`);
+    const levels = Object.keys(saved);
+    if (levels.length !== 1 || formatChrono(saved[levels[0]]) !== time) fail(`${game.id} : record enregistré ${JSON.stringify(saved)} pour un temps de ${time}`);
+    return Number(levels[0]);
+  }
+  // record imbattable : il est affiché et conservé
+  if (line.includes('Nouveau') || !line.includes(`Ton record : ${formatChrono(record)}`)) fail(`${game.id} : record non conservé (${line})`);
+  if (saved[level] !== record) fail(`${game.id} : record ${saved[level]} au lieu de ${record}`);
+  return level;
 }
 
 // ---------------------------------------------------------------- Parcours complet (iPhone 13)
@@ -515,6 +602,7 @@ const shotsWanted = {
   mesures: '46-mesures', calendrier: '47-calendrier', tangram: '48-tangram', reproduire: '49-reproduire', 'parle-anglais': '50-parle',
 };
 const bubbleText = (t) => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\u2011/g, '-').replace(/\s+/g, ' ').trim();
+let extraStars = 0; // étoiles gagnées en plus des 2 étoiles par jeu (deuxième défi chrono)
 for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
   const grade = gradeFor(game.id);
   await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`);
@@ -531,7 +619,11 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
     await openGame(page, game);
   }
   const briefed = new Set();
-  for (let i = 0; i < 5; i++) {
+  // une partie de 5 questions (réglage) avec une erreur : 2 étoiles ; le défi chrono a toujours
+  // 10 questions : deux erreurs pour garder 2 étoiles (8 sur 10)
+  const count = game.questions || 5;
+  const wrongAt = game.questions ? [1, 6] : [1];
+  for (let i = 0; i < count; i++) {
     const zone = await page.waitForSelector('.choices:not(.answered)');
     const q = await page.evaluate(() => globalThis.__lc.question);
     // consigne complète la première fois, puis la consigne courte
@@ -545,14 +637,32 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
     if (game.id === 'calcul' && i === 1) await shot('15-relie');
     if (game.id === 'calcul' && i === 3) await shot('16-complete');
     if (!(await page.locator('.guide-btn .avatar-eva-rose').count())) fail(`${game.id} : la question n’est pas posée par Eva-Rose`);
-    await answer(page, q, i === 1);
+    if (game.timed && (i === 0 || i === count - 1)) await checkChronoBadge(page, game, i);
+    await answer(page, q, wrongAt.includes(i));
     await assertNoJunk(page, `${game.id} question ${i + 1}`);
     await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
   }
   await page.waitForSelector('.results');
   await assertNoJunk(page, `${game.id} résultats`);
   const stars = await page.locator('.big-star.on').count();
-  if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (4 bonnes sur 5)`);
+  if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (${count - wrongAt.length} bonnes sur ${count})`);
+  if (game.timed) {
+    const level = await checkChronoResults(page, game);
+    await shot('51-chrono');
+    // deuxième défi avec un record imbattable (1 seconde) : il n'est pas battu, il est conservé
+    await setStore(page, `const kid = store.profiles['eva-rose']; kid.records = { '${game.id}': { ${level}: 1 } };
+      kid.games['${game.id}'] = { ...kid.games['${game.id}'], level: ${level} };`);
+    await openGame(page, game);
+    for (let i = 0; i < count; i++) {
+      const zone = await page.waitForSelector('.choices:not(.answered)');
+      await answer(page, await page.evaluate(() => globalThis.__lc.question), wrongAt.includes(i));
+      await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+    }
+    await page.waitForSelector('.results');
+    await checkChronoResults(page, game, { level, record: 1 });
+    extraStars += await page.locator('.big-star.on').count();
+    console.log(`  ✔ ${game.id} : 10 questions, chronomètre, temps et record (battu, puis conservé)`);
+  }
   if (game.id === 'calcul') {
     await page.waitForTimeout(2500);
     await shot('17-resultats');
@@ -580,7 +690,7 @@ console.log('✔ choix direct du niveau');
 // album : 2 étoiles par partie, un autocollant toutes les 5 étoiles
 await goProfile(page);
 await page.click('.domain-album');
-const expected = Math.floor((GAMES.length * 2) / 5);
+const expected = Math.floor((GAMES.length * 2 + extraStars) / 5);
 const unlocked = await page.locator('.sticker:not(.locked)').count();
 if (unlocked !== expected) fail(`${unlocked} autocollants au lieu de ${expected}`);
 console.log(`✔ album : ${unlocked} autocollants`);

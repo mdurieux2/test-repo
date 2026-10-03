@@ -3,6 +3,13 @@
 import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
 import { canMove, solveMaze } from './games/labyrinthes.js';
+import { clockLabel } from './games/maths-extra.js';
+import {
+  clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
+} from './games/horloge.js';
+import {
+  chronoLevelAfter, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono,
+} from './games/chrono.js';
 import { levelRange, programFor } from './programs.js';
 import { createRng, pick, randInt, sample, shuffle } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
@@ -12,7 +19,7 @@ import {
 } from './storage.js';
 import { listFrenchVoices, setSpeechEnabled, setVoicePreferences, speak, stopSpeaking } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
-import { avatar, h, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
+import { avatar, clockSvg, h, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
@@ -73,10 +80,11 @@ function seasonDecor() {
 
 /**
  * Typographie française : espace insécable avant ? ! : ; et trait d'union insécable
- * (« Eva-Rose » ne se coupe jamais en fin de ligne).
+ * (« Eva-Rose » ne se coupe jamais en fin de ligne, « sera-t-il » non plus : la lettre qui
+ * suit le trait d'union n'est pas consommée, pour traiter aussi le trait d'union suivant).
  */
 function frenchSpacing(text) {
-  return text.replace(/ ([?!:;])/g, '\u00a0$1').replace(/(\p{L})-(\p{L})/gu, '$1\u2011$2');
+  return text.replace(/ ([?!:;])/g, '\u00a0$1').replace(/(\p{L})-(?=\p{L})/gu, '$1\u2011');
 }
 
 /** Fait parler le personnage de l'enfant, avec sa voix (fille ou garçon). */
@@ -364,9 +372,10 @@ function hashText(text) {
 /**
  * Le défi du jour : 5 questions tirées des jeux de la classe, au niveau de l'enfant.
  * Les mêmes jeux toute la journée ; une étoile bonus et un jour de plus dans la série.
+ * Les défis chrono (game.timed) n'y sont pas : leur partie a son propre format.
  */
 function dailyGame() {
-  const pool = programFor(child().grade).flatMap((d) => d.games).filter(({ game }) => !game.paliers);
+  const pool = programFor(child().grade).flatMap((d) => d.games).filter(({ game }) => !game.paliers && !game.timed);
   const picks = sample(createRng(hashText(`${dayKey()}:${store.active}`)), pool, 5);
   return {
     id: 'defi',
@@ -390,10 +399,10 @@ function dailyGame() {
 
 const REVIEW_STEPS = [1, 3, 7]; // jours avant la révision suivante
 
-/** Une erreur dans un jeu : on le révisera dès aujourd'hui, au niveau où l'erreur a eu lieu. */
+/** Une erreur dans un jeu : on le révisera dès aujourd'hui, au niveau où l'erreur a eu lieu (sauf calcul et défis chrono). */
 function scheduleReview(gameId, level) {
   const kid = child();
-  if (!kid || !findGame(gameId) || findGame(gameId).paliers) return;
+  if (!kid || !findGame(gameId) || findGame(gameId).paliers || findGame(gameId).timed) return;
   kid.review = { ...(kid.review || {}), [gameId]: { level, due: dayKey(), step: 0 } };
 }
 
@@ -407,7 +416,7 @@ function advanceReview(gameId) {
 }
 
 function dueReviews() {
-  return Object.entries(child().review || {}).filter(([id, r]) => findGame(id) && r.due <= dayKey());
+  return Object.entries(child().review || {}).filter(([id, r]) => findGame(id) && !findGame(id).timed && r.due <= dayKey());
 }
 
 function reviewGame() {
@@ -626,7 +635,7 @@ function startSession(game, { level, back, total } = {}) {
     max,
     back: back || (() => domainScreen(game.domain)),
     index: 0,
-    total: total || store.settings.sessionLength,
+    total: questionsPerSession(game, total, store.settings.sessionLength), // défi chrono : toujours 10
     correct: 0,
     recentKeys: [],
     briefed: new Set(), // consignes déjà dites en entier pendant cette partie
@@ -675,7 +684,7 @@ function nextQuestion(session) {
   let zone;
   const custom = {
     build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
-    swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone,
+    swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -690,9 +699,14 @@ function nextQuestion(session) {
   }
   if (stage) enableCounting(stage, guide);
 
-  const badge = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
+  const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
+  // défi chrono : le chronomètre (mm:ss) s'affiche sous le niveau, en haut à droite
+  const clock = game.timed ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
+  const badge = clock
+    ? h('span', { class: 'level-badge chrono-badge' }, h('span', { class: 'chrono-level' }, levelText), clock)
+    : h('span', { class: 'level-badge' }, levelText);
   show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}` },
-    topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: h('span', { class: 'level-badge' }, badge) }),
+    topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
     h('div', { class: 'instruction' },
       h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
         avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')),
@@ -700,10 +714,34 @@ function nextQuestion(session) {
     stage,
     zone,
     feedback));
+  if (clock) runChrono(session, clock);
   // histoire en karaoké : la voix lit l'histoire (chaque mot s'allume), puis pose la question
   const readAlong = () => (q.karaoke ? karaoke(stage, guide, q.stage.sentences, q.instruction) : null);
   if (q.karaoke) readAlong();
   else say(guide, brief ? (q.short.speak ?? q.short.text) : q.instruction);
+}
+
+// ---- Défi chrono : le temps court de l'affichage de la 1re question à la dernière bonne réponse
+
+let chronoTimer = null;
+
+function chronoNow(session) {
+  return elapsedSeconds(session.chronoStart, session.chronoEnd || Date.now());
+}
+
+/** Démarre le chrono à la 1re question, puis met à jour l'affichage (il s'arrête seul quand l'écran change). */
+function runChrono(session, el) {
+  if (!session.chronoStart) session.chronoStart = Date.now();
+  clearInterval(chronoTimer);
+  const tick = () => {
+    if (!el.isConnected) {
+      clearInterval(chronoTimer); // partie finie ou quittée
+      return;
+    }
+    el.textContent = `⏱ ${formatChrono(chronoNow(session))}`;
+  };
+  tick();
+  chronoTimer = setInterval(tick, 250);
 }
 
 /** Lit des phrases en allumant chaque mot ; repli au rythme moyen si le navigateur ne suit pas les mots. */
@@ -789,7 +827,8 @@ async function markCorrect(ctx) {
   if (firstTry && game.id === 'revision') advanceReview(q.from);
 
   let change = null;
-  if (!game.fixedLevel) {
+  // défi chrono : le niveau ne change pas pendant la partie (le record est celui du niveau joué)
+  if (!game.fixedLevel && !game.timed) {
     const result = recordAnswer(session.levelState, firstTry, session.max, session.min);
     session.levelState = result.state;
     change = result.change;
@@ -804,6 +843,7 @@ async function markCorrect(ctx) {
   };
   save();
   session.index++;
+  if (game.timed && session.index >= session.total) session.chronoEnd = Date.now(); // dernière bonne réponse : le chrono s'arrête
 
   const name = me().name;
   const praise = firstTry ? (rng() < 0.3 ? `Bravo ${name} !` : pick(rng, PRAISES)) : 'Oui, c’est ça !';
@@ -819,7 +859,13 @@ async function markCorrect(ctx) {
     toSay.push('Tu passes au niveau suivant !');
     setTimeout(() => playSound('levelUp'), 300);
   }
-  await Promise.all([sleep(1300), Promise.race([say(session.guide, toSay), sleep(4500)])]);
+  if (game.timed) {
+    // défi chrono : on enchaîne vite, le temps tourne
+    say(session.guide, praise);
+    await sleep(800);
+  } else {
+    await Promise.all([sleep(1300), Promise.race([say(session.guide, toSay), sleep(4500)])]);
+  }
   if (app.contains(feedback)) nextQuestion(session);
 }
 
@@ -1994,6 +2040,120 @@ function traceZone(ctx) {
   return { stage: h('div', { class: 'stage stage-trace' }, svg), zone };
 }
 
+// ---- Règle l'horloge : déplacer les aiguilles au doigt (ou avec les boutons), puis valider
+
+function setClockZone(ctx) {
+  const { q } = ctx;
+  const target = toClockMinutes(q.target);
+  let time = toClockMinutes(q.stage.start);
+  const dial = h('div', { class: 'setclock-dial', role: 'img' });
+  dial.innerHTML = clockSvg(q.stage.start.h, q.stage.start.m);
+  const svg = dial.querySelector('svg');
+  const svgEl = (tag, attrs) => {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  };
+  // l'heure attendue en pointillés, montrée en indice après deux erreurs (sous les vraies aiguilles)
+  const goal = handAngles(target);
+  const hourHand = svg.querySelector('.hand-hour');
+  const minuteHand = svg.querySelector('.hand-minute');
+  hourHand.before(
+    svgEl('line', { class: 'ghost-hand ghost-hour', x1: 50, y1: 50, x2: 50, y2: 29, transform: `rotate(${goal.hour} 50 50)` }),
+    svgEl('line', { class: 'ghost-hand ghost-minute', x1: 50, y1: 50, x2: 50, y2: 13, transform: `rotate(${goal.minute} 50 50)` }));
+  // une poignée au bout de chaque aiguille : on voit qu'on peut les attraper
+  const hourKnob = svgEl('circle', { class: 'hand-knob knob-hour', cx: 50, cy: 29, r: 4 });
+  const minuteKnob = svgEl('circle', { class: 'hand-knob knob-minute', cx: 50, cy: 13, r: 3.4 });
+  hourHand.after(hourKnob);
+  minuteHand.after(minuteKnob);
+
+  const render = () => {
+    const { hour, minute } = handAngles(time);
+    for (const el of [hourHand, hourKnob]) el.setAttribute('transform', `rotate(${hour} 50 50)`);
+    for (const el of [minuteHand, minuteKnob]) el.setAttribute('transform', `rotate(${minute} 50 50)`);
+    const shown = fromClockMinutes(time);
+    dial.dataset.h = shown.h;
+    dial.dataset.m = shown.m;
+    dial.setAttribute('aria-label', `Horloge à régler : elle montre ${clockLabel(shown.h, shown.m)}`);
+  };
+  const setTime = (next) => {
+    if (ctx.session.locked || next === time) return;
+    time = next;
+    playSound('tap');
+    render();
+  };
+
+  // au doigt (ou à la souris) : on attrape l'aiguille la plus proche et on la fait tourner
+  let grabbed = null;
+  const pointer = (e) => {
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return { angle: pointerAngle(p.x - 50, p.y - 50), radius: Math.hypot(p.x - 50, p.y - 50) };
+  };
+  const follow = (p) => setTime(grabbed === 'minute' ? dragMinuteHand(time, p.angle) : dragHourHand(time, p.angle));
+  svg.addEventListener('pointerdown', (e) => {
+    if (ctx.session.locked) return;
+    const p = pointer(e);
+    if (p.radius > 50 || p.radius < 4) return; // hors du cadran, ou au centre (pas de direction)
+    e.preventDefault();
+    grabbed = pickHand(time, p.angle, p.radius);
+    dial.classList.add(`grab-${grabbed}`);
+    try {
+      svg.setPointerCapture(e.pointerId);
+    } catch {
+      // sans capture, le glisser marche tant que le doigt reste sur le cadran
+    }
+    follow(p);
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (grabbed) follow(pointer(e));
+  });
+  const release = () => {
+    grabbed = null;
+    dial.classList.remove('grab-minute', 'grab-hour');
+  };
+  svg.addEventListener('pointerup', release);
+  svg.addEventListener('pointercancel', release);
+
+  const validate = () => {
+    if (ctx.session.locked) return;
+    if (time === target) {
+      dial.classList.add('right');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    dial.classList.add('shake');
+    setTimeout(() => dial.classList.remove('shake'), 400);
+    // après deux erreurs, l'heure attendue est montrée (aiguilles en pointillés et texte)
+    const hint = ctx.session.attempts >= 1;
+    if (hint) dial.classList.add('show-hint');
+    const advice = clockAdvice(time, target);
+    const shown = fromClockMinutes(time);
+    markWrong(ctx, {
+      message: hint ? `Il faut ${q.answer} : suis les pointillés !` : advice,
+      speech: hint ? `Il faut ${q.answerSpeech}. Mets les aiguilles sur les pointillés.` : advice,
+      given: clockLabel(shown.h, shown.m),
+    });
+  };
+  // les boutons, pour les petits doigts (et l'accessibilité) : l'heure et les minutes séparément
+  const shiftButton = (minutes, label, aria) => h('button', {
+    class: `clock-btn ${Math.abs(minutes) === 60 ? 'clock-btn-hour' : 'clock-btn-minute'}`,
+    'data-shift': minutes,
+    'aria-label': aria,
+    onclick: () => setTime(shiftClock(time, minutes)),
+  }, label);
+  const zone = h('div', { class: 'choices setclock-zone' },
+    h('div', { class: 'clock-btns' },
+      shiftButton(-60, '−1 h', 'Reculer d’une heure'), shiftButton(60, '+1 h', 'Avancer d’une heure'),
+      shiftButton(-5, '−5 min', 'Reculer de 5 minutes'), shiftButton(5, '+5 min', 'Avancer de 5 minutes')),
+    h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ C’est l’heure'));
+  render();
+  return { stage: h('div', { class: 'stage stage-setclock' }, dial), zone };
+}
+
 // ---- Payer le bon prix : toucher les pièces et les billets
 
 function payZone(ctx) {
@@ -2481,6 +2641,27 @@ function finishSession(session) {
       h('span', { class: 'palier-stars' }, Array.from({ length: PALIER_MAX_STARS }, (_, i) => h('span', { class: i < now ? 'pstar on' : 'pstar' }, '★'))),
       now > previous ? h('b', {}, ' +1 !') : null);
   }
+  // défi chrono : le temps, le record du niveau (battu ou non) et le niveau du prochain défi
+  let chronoLine = null;
+  let chronoSpeech = [];
+  let newRecord = false;
+  if (game.timed && session.chronoStart) {
+    const level = session.levelState.level;
+    const seconds = Math.max(1, chronoNow(session));
+    const record = recordAfter(kid.records, game.id, level, seconds);
+    kid.records = record.records;
+    newRecord = record.isNew;
+    const next = chronoLevelAfter(level, session.correct, session.total, session.min, session.max);
+    kid.games[game.id] = { ...kid.games[game.id], level: next, streak: 0, recent: [] };
+    chronoLine = h('div', { class: 'chrono-result' },
+      h('p', { class: 'chrono-time' }, frenchSpacing('⏱ Ton temps : '), h('b', {}, formatChrono(seconds))),
+      record.isNew
+        ? h('p', { class: 'chrono-record new' }, frenchSpacing('🏆 Nouveau record !'))
+        : h('p', { class: 'chrono-record' }, frenchSpacing('🏅 Ton record : '), h('b', {}, formatChrono(record.best))),
+      record.isNew && record.previous ? h('p', { class: 'chrono-before' }, frenchSpacing(`Ancien record : ${formatChrono(record.previous)}`)) : null,
+      next > level ? h('p', { class: 'chrono-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')) : null);
+    chronoSpeech = [`Ton temps : ${spokenChrono(seconds)}.`, record.isNew ? 'Nouveau record !' : `Ton record : ${spokenChrono(record.best)}.`];
+  }
   logSession(kid, {
     at: new Date().toISOString(),
     game: game.id,
@@ -2495,24 +2676,27 @@ function finishSession(session) {
   const title = stars === 3 ? `Bravo ${me().name} !` : stars === 2 ? `Très bien ${me().name} !` : `Bien joué ${me().name} !`;
 
   show(h('main', { class: `screen results domain-theme-${game.domain}` },
-    confetti(stars),
+    confetti(newRecord ? 3 : stars),
     h('div', { class: 'duo duo-results' }, avatar(me().id, 'avatar-md cheer')),
     h('div', { class: 'result-stars', 'aria-label': `${stars} étoiles sur 3` },
       [1, 2, 3].map((i) => h('span', { class: i <= stars ? 'big-star on' : 'big-star', style: { animationDelay: `${i * 0.25}s` } }, '⭐'))),
     h('h1', {}, frenchSpacing(title)),
     h('p', { class: 'result-detail' }, `${session.correct} sur ${session.total} du premier coup`),
+    chronoLine,
     palierLine,
     dailyLine,
     unlocked.length
       ? h('div', { class: 'new-sticker' }, h('span', { class: 'sticker-big' }, unlocked.at(-1).emoji), h('p', {}, 'Nouvel autocollant !'))
       : null,
     h('div', { class: 'result-actions' },
-      h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers ? session.levelState.level : undefined, back: session.back, total: game.id === 'defi' ? session.total : undefined }) }, '🔁 Rejouer'),
+      // Rejouer : le même palier, ou le même niveau du défi chrono (pour battre son record)
+      h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers || game.timed ? session.levelState.level : undefined, back: session.back, total: game.id === 'defi' ? session.total : undefined }) }, '🔁 Rejouer'),
       stars >= 2 ? h('button', { class: 'big-btn bonus-btn', 'data-bonus-open': '', onclick: () => bonusMenu(session.back) }, '🎁 Jeu bonus') : null,
       h('button', { class: 'big-btn', onclick: session.back }, game.paliers ? '🗺️ Les paliers' : '🎲 Autres jeux'))));
-  playSound('fanfare');
+  playSound(newRecord ? 'record' : 'fanfare'); // une fanfare plus longue pour un record battu
   say(me(), [
     `${title} ${stars} étoile${stars > 1 ? 's' : ''} !`,
+    ...chronoSpeech,
     ...(unlocked.length ? [`Nouvel autocollant : ${unlocked.at(-1).name} !`] : []),
   ]);
 }

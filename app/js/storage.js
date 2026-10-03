@@ -1,7 +1,7 @@
 // Données de l'app, conservées sur l'appareil (localStorage). Aucune donnée ne sort du téléphone.
 // Un profil par enfant, créé par la famille au premier lancement : prénom, dessin, photo,
-// classe, étoiles, niveaux, paliers et historique. Chaque appareil a donc ses propres enfants,
-// même quand le lien de l'app est partagé.
+// classe, étoiles, niveaux, paliers, records (défis chrono) et historique. Chaque appareil a
+// donc ses propres enfants, même quand le lien de l'app est partagé.
 
 import { createGameState } from './progress.js';
 import { isPhoto } from './photo.js';
@@ -27,7 +27,7 @@ const LEGACY = {
 };
 
 export function defaultChild(grade = 'CP', { name = '', look = 'fille' } = {}) {
-  return { name, look, grade, stars: 0, games: {}, paliers: {}, history: [], mistakes: [], photo: null };
+  return { name, look, grade, stars: 0, games: {}, paliers: {}, records: {}, history: [], mistakes: [], photo: null };
 }
 
 export function defaultStore() {
@@ -74,6 +74,18 @@ export function defaultGameStats(level = 1) {
   return { ...createGameState(level), sessions: 0, answered: 0, correct: 0, bestStars: 0, lastPlayed: null };
 }
 
+/** Records des défis chrono : { 'tables-chrono': { 1: 42 } } (secondes) ; les valeurs abîmées sont écartées. */
+function cleanRecords(records) {
+  if (!records || typeof records !== 'object') return {};
+  const out = {};
+  for (const [gameId, levels] of Object.entries(records)) {
+    if (!levels || typeof levels !== 'object') continue;
+    const kept = Object.entries(levels).filter(([, seconds]) => Number.isFinite(seconds) && seconds > 0);
+    if (kept.length) out[gameId] = Object.fromEntries(kept);
+  }
+  return out;
+}
+
 function mergeChild(id, saved) {
   if (!saved || typeof saved !== 'object') return null;
   const legacy = LEGACY[id] || {};
@@ -90,6 +102,7 @@ function mergeChild(id, saved) {
     grade: GRADES[saved.grade] ? saved.grade : base.grade,
     games: saved.games && typeof saved.games === 'object' ? saved.games : {},
     paliers: saved.paliers && typeof saved.paliers === 'object' ? saved.paliers : {},
+    records: cleanRecords(saved.records),
     history: Array.isArray(saved.history) ? saved.history.slice(-HISTORY_LIMIT) : [],
     mistakes: Array.isArray(saved.mistakes) ? saved.mistakes.slice(-MISTAKES_LIMIT) : [],
     photo: isPhoto(saved.photo) ? saved.photo : null,
@@ -151,7 +164,10 @@ export function logMistake(child, entry) {
   child.mistakes = [...child.mistakes, entry].slice(-MISTAKES_LIMIT);
 }
 
-/** Efface la progression d'un enfant (prénom, dessin, classe et photo sont conservés). */
+/**
+ * Efface la progression d'un enfant : étoiles, niveaux, paliers, records des défis chrono,
+ * historique (prénom, dessin, classe, photo et réglages des parents sont conservés).
+ */
 export function resetChild(store, id) {
   const { name, look, grade, photo, spoken, goals, easyRead } = store.profiles[id] || {};
   store.profiles[id] = {

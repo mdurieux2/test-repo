@@ -1791,3 +1791,64 @@ body[data-season="ete"] { background: #fffbea; }
   .trace-btn { width: 48px; height: 48px; }
   .trace-word.long { font-size: 1rem; letter-spacing: 0; }
 }
+
+/* ===================================================================== Règle l'horloge, défi chrono des tables */
+
+/* règle l'horloge : un grand cadran (aiguilles déplaçables au doigt), les boutons dessous */
+.stage.stage-setclock { min-height: 0; padding: 4px 0; }
+.setclock-dial {
+  width: min(100%, 360px, calc(100vh / var(--zoom, 1) - 400px));
+  width: min(100%, 360px, calc(100dvh / var(--zoom, 1) - 400px));
+  aspect-ratio: 1;
+}
+.setclock-dial svg { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; filter: drop-shadow(0 5px 0 var(--line)); }
+.knob-hour { fill: #2b2d42; }
+.knob-minute { fill: #e8650c; }
+.setclock-dial.grab-hour .hand-hour { stroke-width: 6.5; }
+.setclock-dial.grab-minute .hand-minute { stroke-width: 3.8; }
+.setclock-dial.grab-hour svg, .setclock-dial.grab-minute svg { cursor: grabbing; }
+.ghost-hand { visibility: hidden; fill: none; stroke: var(--good); stroke-linecap: round; stroke-dasharray: 2.5 2.5; }
+.ghost-hour { stroke-width: 4; }
+.ghost-minute { stroke-width: 2.4; }
+.setclock-dial.show-hint .ghost-hand { visibility: visible; }
+.setclock-dial.shake { animation: shake 0.4s; }
+.setclock-dial.right svg > circle:first-of-type { stroke: var(--good); }
+.setclock-zone { display: flex; flex-direction: column; gap: 10px; }
+.clock-btns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.clock-btn {
+  min-width: 0; min-height: 52px; padding: 0 4px; border-radius: 16px; background: var(--card);
+  font-size: 1.15rem; font-weight: 700; white-space: nowrap;
+  box-shadow: 0 4px 0 var(--line), inset 0 0 0 3px var(--line);
+}
+.clock-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line), inset 0 0 0 3px var(--line); }
+/* « h » et « min » sont écrits : la couleur (celle de l'aiguille) n'est qu'un repère en plus */
+.clock-btn-hour { color: var(--ink); }
+.clock-btn-minute { color: #b94c05; }
+.setclock-zone .validate-btn { min-height: 56px; }
+
+/* défi chrono : le chronomètre sous le niveau, puis le temps et le record à la fin */
+.chrono-badge { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.15; padding: 2px 10px; border-radius: 14px; }
+.chrono-level { font-size: 0.75rem; }
+.chrono-clock { font-size: 1.05rem; min-width: 4.4em; text-align: center; font-variant-numeric: tabular-nums; }
+.chrono-result { background: var(--card); border-radius: 18px; padding: 6px 20px; box-shadow: 0 4px 0 var(--line); margin-top: 4px; }
+.chrono-result p { margin: 2px 0; font-size: 1.15rem; font-weight: 700; }
+.chrono-result b { font-variant-numeric: tabular-nums; }
+.chrono-record { color: var(--muted); }
+.chrono-record.new { color: #a61e4d; font-size: 1.3rem; animation: pop 0.6s 0.6s both; }
+.chrono-result .chrono-before { font-size: 0.95rem; color: var(--muted); }
+.chrono-result .chrono-next { font-size: 1rem; color: var(--accent-dark); }
+/* sur un téléphone peu haut, les résultats d'un défi chrono restent compacts (les boutons visibles) */
+@media (max-height: 760px) {
+  .results:has(.chrono-result) .big-star { font-size: 56px; }
+  .results:has(.chrono-result) h1 { font-size: 2rem; }
+  .chrono-result p { font-size: 1.05rem; }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .setclock-dial { width: min(100%, calc(100dvh - 80px)); }
+  .setclock-zone { gap: 8px; }
+  .clock-btn { min-height: 46px; font-size: 1.05rem; }
+  .setclock-zone .validate-btn { min-height: 50px; }
+  .chrono-result p { font-size: 1rem; }
+  .chrono-record.new { font-size: 1.15rem; }
+}

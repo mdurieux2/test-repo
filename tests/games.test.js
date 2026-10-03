@@ -174,6 +174,21 @@ function checkQuestion(q, ctx) {
       for (const [x, y] of points) assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100, ctx);
       break;
     }
+    case 'setclock': {
+      // l'heure à régler et l'heure de départ du cadran : de 1 h à 12 h, minutes de 5 en 5
+      const { start } = q.stage;
+      assert.equal(q.stage.type, 'setclock', ctx);
+      for (const t of [start, q.target]) {
+        assert.ok(Number.isInteger(t.h) && t.h >= 1 && t.h <= 12, `heure hors du cadran : ${ctx}`);
+        assert.ok(Number.isInteger(t.m) && t.m >= 0 && t.m < 60 && t.m % 5 === 0, `minutes pas de 5 en 5 : ${ctx}`);
+      }
+      const minutes = ({ h, m }) => (h % 12) * 60 + m;
+      assert.notEqual(minutes(start), minutes(q.target), `le cadran est déjà à la bonne heure : ${ctx}`);
+      assert.equal(q.answer, clockLabel(q.target.h, q.target.m), ctx);
+      assert.ok(q.answerSpeech, ctx);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
     default: {
       const values = q.choices.map((c) => c.value);
       assert.ok(values.length >= 2, ctx);
