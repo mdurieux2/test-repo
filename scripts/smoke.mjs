@@ -191,6 +191,7 @@ for (const game of GAMES) {
     if (game.id === 'calcul' && i === 0) await shot('14-calcul');
     if (game.id === 'calcul' && i === 1) await shot('15-relie');
     if (game.id === 'calcul' && i === 3) await shot('16-complete');
+    if (!(await page.locator('.guide-btn .avatar-eva-rose').count())) fail(`${game.id} : la question n’est pas posée par Eva-Rose`);
     await answer(page, q, i === 1 && q.interaction !== 'fill');
     await assertNoJunk(page, `${game.id} question ${i + 1}`);
     await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });

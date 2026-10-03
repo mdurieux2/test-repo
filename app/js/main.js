@@ -163,7 +163,7 @@ function palierSummary(min, max) {
 function domainScreen(domainId) {
   const domain = domainById(domainId);
   if (!domain) return homeScreen();
-  const guide = pick(rng, CHARACTERS);
+  const guide = me();
   const blocks = [];
   let section = null;
   for (const { game, min, max } of domain.games) {
@@ -198,7 +198,7 @@ function palierMap(min = 1, max = CALC_PALIERS.length) {
   const game = findGame('calcul');
   const range = CALC_PALIERS.slice(min - 1, max);
   const recommended = range.find((p) => (child().paliers[p.id]?.stars || 0) < 3) || range.at(-1);
-  const guide = character('matteo');
+  const guide = me();
   const tiles = range.map((p) => {
     const index = CALC_PALIERS.indexOf(p) + 1;
     const stars = child().paliers[p.id]?.stars || 0;
@@ -238,7 +238,6 @@ function startSession(game, { level, back } = {}) {
     recentKeys: [],
     startedAt: Date.now(),
     levelState: { level: startLevel, streak: game.paliers ? 0 : stats.streak, recent: game.paliers ? [] : stats.recent },
-    guideOffset: randInt(rng, 0, 1), // Eva-Rose et Matteo posent les questions à tour de rôle
     formatOffset: Number(new URLSearchParams(location.search).get('format') || 0),
   };
   nextQuestion(session);
@@ -263,7 +262,7 @@ function nextQuestion(session) {
   globalThis.__lc = { question: q }; // utilisé par les tests de bout en bout
 
   const { game } = session;
-  const guide = CHARACTERS[(session.index + session.guideOffset) % CHARACTERS.length];
+  const guide = me(); // seul l'enfant qui joue apparaît, avec sa photo ou son dessin et sa voix
   session.guide = guide;
   const replay = () => say(guide, q.replay || q.instruction);
   const progress = h('div', { class: 'progress', 'aria-label': `Question ${session.index + 1} sur ${session.total}` },
@@ -703,7 +702,7 @@ function finishSession(session) {
 
   show(h('main', { class: `screen results domain-theme-${game.domain}` },
     confetti(stars),
-    h('div', { class: 'duo duo-results' }, CHARACTERS.map((c) => avatar(c.id, 'avatar-md cheer'))),
+    h('div', { class: 'duo duo-results' }, avatar(me().id, 'avatar-md cheer')),
     h('div', { class: 'result-stars', 'aria-label': `${stars} étoiles sur 3` },
       [1, 2, 3].map((i) => h('span', { class: i <= stars ? 'big-star on' : 'big-star', style: { animationDelay: `${i * 0.25}s` } }, '⭐'))),
     h('h1', {}, frenchSpacing(title)),
@@ -716,10 +715,9 @@ function finishSession(session) {
       h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers ? session.levelState.level : undefined, back: session.back }) }, '🔁 Rejouer'),
       h('button', { class: 'big-btn', onclick: session.back }, game.paliers ? '🗺️ Les paliers' : '🎲 Autres jeux'))));
   playSound('fanfare');
-  const [first, second] = CHARACTERS;
-  speak([
-    { text: `${title} ${stars} étoile${stars > 1 ? 's' : ''} !`, ...first.voice },
-    ...(unlocked.length ? [{ text: `Nouvel autocollant : ${unlocked.at(-1).name} !`, ...second.voice }] : []),
+  say(me(), [
+    `${title} ${stars} étoile${stars > 1 ? 's' : ''} !`,
+    ...(unlocked.length ? [`Nouvel autocollant : ${unlocked.at(-1).name} !`] : []),
   ]);
 }
 

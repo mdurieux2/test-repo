@@ -20,6 +20,7 @@ export const CHANGELOG = [
       'Version, journal des modifications et crédits dans les Réglages.',
       'Correction : le mot « null » ne s’affiche plus après une bonne réponse.',
       'Accueil plus simple, sans les deux portraits.',
+      'Pendant le jeu, seul l’enfant qui joue apparaît, avec sa photo ou son dessin et sa voix.',
     ],
   },
   {
