@@ -1,0 +1,16 @@
+{
+  "name": "lire-et-compter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Application iPhone (web app installable) de jeux de lecture et de maths pour le CP",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test \"tests/*.test.js\"",
+    "test:e2e": "node scripts/smoke.mjs",
+    "icons": "node scripts/make-icons.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
