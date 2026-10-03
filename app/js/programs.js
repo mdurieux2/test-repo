@@ -19,6 +19,7 @@ export const PROGRAMS = {
   MS: {
     francais: [
       ['syllabes-rythme', 1, 2], ['rimes', 1, 1], ['lettres', 1, 2],
+      ['ecrire', 1, 3],
     ],
     histoires: [
       ['histoires', 1, 1],
@@ -46,7 +47,7 @@ export const PROGRAMS = {
   GS: {
     francais: [
       ['syllabes-rythme', 1, 6], ['rimes', 1, 5], ['lettres', 2, 7], ['premier-son', 1, 2],
-      ['syllabes', 1, 1],
+      ['syllabes', 1, 1], ['ecrire', 1, 5],
       ['dictee', 1, 1],
     ],
     histoires: [
@@ -78,6 +79,7 @@ export const PROGRAMS = {
   CP: {
     francais: [
       ['premier-son', 1, 6], ['syllabes', 1, 6], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
+      ['ecrire', 2, 5],
       ['dictee', 1, 5],
     ],
     histoires: [
@@ -111,6 +113,7 @@ export const PROGRAMS = {
   CE1: {
     francais: [
       ['bon-mot', 2, 6], ['petits-mots', 2, 6], ['phrase', 1, 5], ['homophones', 1, 5], ['genre', 1, 6],
+      ['ecrire', 4, 5],
       ['dictee', 2, 6],
     ],
     histoires: [

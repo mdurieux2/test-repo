@@ -272,7 +272,7 @@ export const rimes = {
 
 // ---------------------------------------------------------------- Les lettres
 
-const LETTER_NAMES = {
+export const LETTER_NAMES = {
   a: 'a', b: 'bé', c: 'cé', d: 'dé', e: 'e', f: 'effe', g: 'gé', h: 'ache', i: 'i', j: 'ji', k: 'ka',
   l: 'elle', m: 'emme', n: 'enne', o: 'o', p: 'pé', q: 'cu', r: 'erre', s: 'esse', t: 'té', u: 'u',
   v: 'vé', w: 'double vé', x: 'ixe', y: 'i grec', z: 'zède',

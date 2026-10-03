@@ -158,6 +158,49 @@ async function testLasso(page, q) {
   console.log('  ✔ patates : boucle dessinée au doigt (refusée autour d’un objet, acceptée autour de deux)');
 }
 
+/** Positions à l'écran des points d'un trait (carré 0–100 du dessin, avec sa marge de 8). */
+async function tracePoints(page, points) {
+  return page.$eval('.trace-drawing', (svg, pts) => {
+    const r = svg.getBoundingClientRect();
+    const scale = Math.min(r.width, r.height) / 116;
+    const left = r.left + (r.width - 116 * scale) / 2;
+    const top = r.top + (r.height - 116 * scale) / 2;
+    return pts.map(([x, y]) => [left + (x + 8) * scale, top + (y + 8) * scale]);
+  }, points);
+}
+
+/** Glisse le doigt (souris) par ces positions de la page. */
+async function drag(page, points, steps = 2) {
+  await page.mouse.move(...points[0]);
+  await page.mouse.down();
+  for (const p of points.slice(1)) await page.mouse.move(...p, { steps });
+  await page.mouse.up();
+}
+
+// Écris au doigt : tracer à l'envers ne compte pas, s'éloigner du chemin donne un petit mot.
+let traceTested = false;
+async function testTrace(page, q) {
+  traceTested = true;
+  const first = q.stage.strokes[0];
+  await drag(page, await tracePoints(page, [...first].reverse()));
+  const state = await page.evaluate(() => ({
+    finished: document.querySelector('.trace-drawing.finished') !== null,
+    number: document.querySelector('.trace-start-num').textContent,
+  }));
+  if (state.finished || state.number !== '1') fail('écris au doigt : un trait tracé à l’envers a été accepté');
+  const far = await tracePoints(page, [[-6, 106], [-4, 104], [-6, 102], [-3, 105]]);
+  await page.mouse.move(...far[0]);
+  await page.mouse.down();
+  for (const p of far.slice(1)) {
+    await page.waitForTimeout(150);
+    await page.mouse.move(...p);
+  }
+  await page.mouse.up();
+  await page.waitForSelector('.try-again');
+  if (!(await page.textContent('.try-again')).includes('chemin gris')) fail('écris au doigt : pas de message hors du chemin');
+  console.log('  ✔ écris au doigt : trait à l’envers refusé, « Reste sur le chemin gris ! » hors du chemin');
+}
+
 async function answer(page, q, wrongFirst) {
   switch (q.interaction) {
     case 'keypad':
@@ -394,6 +437,14 @@ async function answer(page, q, wrongFirst) {
       await page.mouse.down();
       for (const c of centers.slice(1)) await page.mouse.move(...c, { steps: 4 });
       await page.mouse.up();
+      break;
+    }
+    case 'trace': {
+      // l'aide (💡) compte comme une aide : la question n'est plus « du premier coup »
+      if (wrongFirst) await page.click('.trace-hint');
+      else if (!traceTested) await testTrace(page, q);
+      // chaque trait, en passant par ses points, dans l'ordre et dans le bon sens
+      for (const st of q.stage.strokes) await drag(page, await tracePoints(page, st));
       break;
     }
     default:

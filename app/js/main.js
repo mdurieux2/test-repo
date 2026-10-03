@@ -675,7 +675,7 @@ function nextQuestion(session) {
   let zone;
   const custom = {
     build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
-    swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone,
+    swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -1686,6 +1686,312 @@ function dotsZone(ctx) {
   const zone = h('div', { class: 'choices dots-zone' },
     h('span', { class: 'dots-help' }, `Commence au ${labels[0]}, puis glisse ton doigt jusqu’au ${labels[1]}…`));
   return { stage: h('div', { class: 'stage stage-dots' }, svg), zone };
+}
+
+// ---- Écris au doigt : suivre le chemin gris, trait après trait, en partant du point vert
+
+const TRACE_REACH = 10; // distance (unités du dessin) à laquelle un point de contrôle est atteint
+const TRACE_LOST = 25; // au-delà, le doigt n'est plus sur le chemin
+const TRACE_VIEW = { x: -8, size: 116 }; // le carré 0–100 avec une marge pour l'épaisseur du trait
+
+const tracePoint = (p) => `${p[0]} ${p[1]}`;
+
+/** Chemin SVG lisse qui suit les points (courbes passant par le milieu de chaque segment). */
+function traceCurve(points) {
+  if (points.length < 3) return `M${points.map(tracePoint).join(' L')}`;
+  let d = `M${tracePoint(points[0])}`;
+  for (let i = 1; i < points.length - 1; i++) {
+    const [x, y] = points[i];
+    const [nx, ny] = points[i + 1];
+    d += ` Q${x} ${y} ${(x + nx) / 2} ${(y + ny) / 2}`;
+  }
+  return `${d} L${tracePoint(points.at(-1))}`;
+}
+
+/** Points de contrôle d'un trait (indices) : environ tous les 8 unités, le premier et le dernier compris. */
+function traceCheckpoints(points) {
+  const out = [0];
+  let run = 0;
+  for (let i = 1; i < points.length; i++) {
+    run += Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]);
+    if (run >= 8 || i === points.length - 1) {
+      out.push(i);
+      run = 0;
+    }
+  }
+  return out;
+}
+
+/** Distance d'un point à une ligne brisée. */
+function distanceToLine([px, py], points) {
+  let best = Infinity;
+  for (let i = 0; i < points.length; i++) {
+    const [ax, ay] = points[i];
+    const [bx, by] = points[Math.min(i + 1, points.length - 1)];
+    const len = (bx - ax) ** 2 + (by - ay) ** 2;
+    const t = len ? Math.max(0, Math.min(1, ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / len)) : 0;
+    best = Math.min(best, Math.hypot(px - (ax + t * (bx - ax)), py - (ay + t * (by - ay))));
+  }
+  return best;
+}
+
+function traceZone(ctx) {
+  const { q, session } = ctx;
+  const { strokes, lines, set, glyph, word, position } = q.stage;
+  const el = (tag, attrs = {}) => {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  };
+  const what = { graphisme: 'Chemin', chiffres: `Chiffre ${glyph}`, capitales: `Lettre ${glyph}`, cursive: `Lettre ${glyph} attachée` }[set];
+  const svg = el('svg', {
+    viewBox: `${TRACE_VIEW.x} ${TRACE_VIEW.x} ${TRACE_VIEW.size} ${TRACE_VIEW.size}`,
+    class: `trace-drawing trace-${set}`, role: 'img', 'aria-label': `${what} à tracer`,
+  });
+  // lignes d'écriture de la cursive : ligne de base (pleine) et hauteur des minuscules (pointillés)
+  if (lines) {
+    svg.append(
+      el('line', { class: 'trace-line trace-line-x', x1: -8, x2: 108, y1: lines.x, y2: lines.x }),
+      el('line', { class: 'trace-line trace-line-base', x1: -8, x2: 108, y1: lines.base, y2: lines.base }));
+  }
+  const guides = strokes.map((st) => el('path', { class: 'trace-guide', d: traceCurve(st) }));
+  const done = strokes.map(() => el('path', { class: 'trace-done', d: '' }));
+  const inkLayer = el('g', { class: 'trace-inks' });
+  // départ du trait en cours : rond vert numéroté et petite flèche dans le sens du geste
+  const start = el('g', { class: 'trace-start' });
+  const startNumber = el('text', { class: 'trace-start-num' });
+  start.append(el('circle', { class: 'trace-start-dot', r: 5.4 }), startNumber);
+  const arrow = el('path', { class: 'trace-arrow', d: 'M-2.6 -3.4 L3.6 0 L-2.6 3.4 Z' });
+  const here = el('circle', { class: 'trace-here', r: 3.4, visibility: 'hidden' });
+  const hintDot = el('circle', { class: 'trace-hint-dot', r: 4.4, visibility: 'hidden' });
+  svg.append(...guides, ...done, inkLayer, arrow, start, here, hintDot);
+
+  const checkpoints = strokes.map(traceCheckpoints);
+  let current = 0; // trait en cours
+  let reached = 0; // points de contrôle déjà atteints sur ce trait
+  let finished = false;
+  let drawing = false;
+  let waitLift = false; // trait fini : on lève le doigt avant le suivant
+  let ink = null;
+  let inkPoints = [];
+  let last = null;
+  let lostSince = 0;
+  let lostAt = 0;
+  let lostMessage = null;
+
+  const steps = word
+    ? null
+    : strokes.map((_, i) => h('span', { class: 'trace-step', 'aria-hidden': 'true' }, String(i + 1)));
+  const stepsLabel = h('span', { class: 'visually-hidden', 'aria-live': 'polite' });
+  const refresh = () => {
+    done.forEach((path, i) => {
+      if (i < current) path.setAttribute('d', traceCurve(strokes[i]));
+      else if (i === current && reached > 1) path.setAttribute('d', traceCurve(strokes[i].slice(0, checkpoints[i][reached - 1] + 1)));
+      else path.setAttribute('d', '');
+    });
+    const show = !finished && current < strokes.length;
+    start.setAttribute('visibility', show ? 'visible' : 'hidden');
+    arrow.setAttribute('visibility', 'hidden');
+    here.setAttribute('visibility', 'hidden');
+    if (show) {
+      const st = strokes[current];
+      start.setAttribute('transform', `translate(${tracePoint(st[0])})`);
+      start.classList.toggle('started', reached > 0);
+      startNumber.textContent = String(current + 1);
+      // la flèche, un peu après le départ, dans la direction du trait
+      let k = 1;
+      for (let run = 0; k < st.length - 1 && run < 12; k++) run += Math.hypot(st[k][0] - st[k - 1][0], st[k][1] - st[k - 1][1]);
+      const [a, b] = [st[k - 1], st[k]];
+      if (reached === 0 && st.length > 3) {
+        const angle = (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
+        arrow.setAttribute('transform', `translate(${tracePoint(a)}) rotate(${angle.toFixed(1)})`);
+        arrow.setAttribute('visibility', 'visible');
+      }
+      // doigt levé au milieu d'un trait : on montre où reprendre
+      if (reached > 0 && !drawing) {
+        const p = st[checkpoints[current][reached - 1]];
+        here.setAttribute('cx', p[0]);
+        here.setAttribute('cy', p[1]);
+        here.setAttribute('visibility', 'visible');
+      }
+    }
+    steps?.forEach((s, i) => {
+      s.classList.toggle('done', i < current);
+      s.classList.toggle('current', i === current && !finished);
+      s.textContent = i < current ? '✓' : String(i + 1);
+    });
+    stepsLabel.textContent = finished ? 'Terminé' : `Trait ${current + 1} sur ${strokes.length}`;
+  };
+
+  const finish = () => {
+    finished = true;
+    drawing = false;
+    stopHint();
+    svg.classList.add('finished'); // le glyphe se remplit de couleur
+    refresh();
+    zone.classList.add('answered');
+    setTimeout(() => { if (svg.isConnected) markCorrect(ctx); }, 600);
+  };
+  const strokeDone = () => {
+    playSound('tap');
+    current++;
+    reached = 0;
+    waitLift = true;
+    stopHint();
+    if (lostMessage?.isConnected) ctx.feedback.replaceChildren();
+    if (current === strokes.length) finish();
+    else refresh();
+  };
+  /** Le doigt passe en p : on avance tant que le point de contrôle suivant est assez près. */
+  const reach = (p) => {
+    if (finished || waitLift) return;
+    const st = strokes[current];
+    const cps = checkpoints[current];
+    let moved = false;
+    while (reached < cps.length && Math.hypot(p[0] - st[cps[reached]][0], p[1] - st[cps[reached]][1]) <= TRACE_REACH) {
+      reached++;
+      moved = true;
+    }
+    if (!moved) return;
+    if (reached === cps.length) strokeDone();
+    else refresh();
+  };
+  /** Suit le doigt de last à p par petits pas (un doigt rapide ne saute aucun point de contrôle). */
+  const follow = (p) => {
+    const from = last || p;
+    const n = Math.max(1, Math.ceil(Math.hypot(p[0] - from[0], p[1] - from[1]) / 2));
+    for (let i = 1; i <= n && !finished && !waitLift; i++) reach([from[0] + ((p[0] - from[0]) * i) / n, from[1] + ((p[1] - from[1]) * i) / n]);
+    last = p;
+    // loin du chemin un moment : un petit mot, sans compter d'erreur
+    if (finished || waitLift) return;
+    const now = Date.now();
+    if (distanceToLine(p, strokes[current]) > TRACE_LOST) {
+      if (!lostSince) lostSince = now;
+      else if (now - lostSince > 300 && now - lostAt > 3000) {
+        lostAt = now;
+        nudge(ctx, 'Reste sur le chemin gris !');
+        lostMessage = ctx.feedback.firstChild;
+      }
+    } else {
+      lostSince = 0;
+      if (lostMessage?.isConnected) ctx.feedback.replaceChildren();
+    }
+  };
+  const toSvg = (e) => {
+    const r = svg.getBoundingClientRect();
+    const scale = Math.min(r.width, r.height) / TRACE_VIEW.size || 1;
+    const left = r.left + (r.width - TRACE_VIEW.size * scale) / 2;
+    const top = r.top + (r.height - TRACE_VIEW.size * scale) / 2;
+    return [TRACE_VIEW.x + (e.clientX - left) / scale, TRACE_VIEW.x + (e.clientY - top) / scale];
+  };
+  const drawInk = (p) => {
+    const prev = inkPoints.at(-1);
+    if (prev && Math.hypot(p[0] - prev[0], p[1] - prev[1]) < 0.8) return;
+    inkPoints.push(p);
+    ink.setAttribute('points', inkPoints.map((pt) => `${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' '));
+  };
+  svg.addEventListener('pointerdown', (e) => {
+    if (session.locked || finished) return;
+    e.preventDefault();
+    try { svg.setPointerCapture(e.pointerId); } catch { /* pointeur déjà relâché */ }
+    drawing = true;
+    waitLift = false;
+    lostSince = 0;
+    const p = toSvg(e);
+    ink = el('polyline', { class: 'trace-ink', points: '' });
+    inkLayer.append(ink);
+    inkPoints = [];
+    drawInk(p);
+    last = null;
+    follow(p);
+    refresh();
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (!drawing || finished) return;
+    const p = toSvg(e);
+    drawInk(p);
+    follow(p);
+  });
+  const lift = () => {
+    if (!drawing) return;
+    drawing = false;
+    lostSince = 0;
+    refresh();
+  };
+  svg.addEventListener('pointerup', lift);
+  svg.addEventListener('pointercancel', lift);
+
+  // 💡 : un point parcourt le trait en cours (une aide : pas d'étoile du premier coup)
+  let hintFrame = 0;
+  let hintRun = 0;
+  function stopHint() {
+    hintRun++;
+    cancelAnimationFrame(hintFrame);
+    hintDot.setAttribute('visibility', 'hidden');
+  }
+  const hint = () => {
+    if (session.locked || finished) return;
+    session.attempts++;
+    stopHint();
+    const st = strokes[current].slice(reached ? checkpoints[current][reached - 1] : 0);
+    const lengths = [0];
+    for (let i = 1; i < st.length; i++) lengths.push(lengths[i - 1] + Math.hypot(st[i][0] - st[i - 1][0], st[i][1] - st[i - 1][1]));
+    const total = lengths.at(-1);
+    const duration = Math.min(2600, Math.max(900, total * 22));
+    const begin = performance.now();
+    const run = hintRun;
+    const step = (now) => {
+      if (run !== hintRun) return;
+      const target = Math.min(1, (now - begin) / duration) * total;
+      let i = 1;
+      while (i < st.length - 1 && lengths[i] < target) i++;
+      const span = lengths[i] - lengths[i - 1] || 1;
+      const t = Math.max(0, Math.min(1, (target - lengths[i - 1]) / span));
+      const [a, b] = [st[i - 1], st[Math.min(i, st.length - 1)]];
+      hintDot.setAttribute('cx', a[0] + (b[0] - a[0]) * t);
+      hintDot.setAttribute('cy', a[1] + (b[1] - a[1]) * t);
+      hintDot.setAttribute('visibility', 'visible');
+      if (target < total) hintFrame = requestAnimationFrame(step);
+      else setTimeout(() => { if (run === hintRun) hintDot.setAttribute('visibility', 'hidden'); }, 500);
+    };
+    hintFrame = requestAnimationFrame(step);
+    say(session.guide, 'Regarde le point jaune, puis fais pareil avec ton doigt !');
+  };
+  // ↺ : on efface et on recommence le glyphe
+  const restart = () => {
+    if (session.locked || finished) return;
+    current = 0;
+    reached = 0;
+    drawing = false;
+    waitLift = false;
+    inkLayer.replaceChildren();
+    stopHint();
+    if (lostMessage?.isConnected) ctx.feedback.replaceChildren();
+    refresh();
+  };
+
+  // « Ton prénom » : le prénom par morceaux (il passe à la ligne après un espace ou un tiret),
+  // la lettre à écrire encadrée et soulignée
+  const parts = [{ letters: [], spaced: false }];
+  [...(word || '')].forEach((ch, i) => {
+    if (ch === ' ') parts.push({ letters: [], spaced: true });
+    else {
+      parts.at(-1).letters.push(h('span', { class: i === position ? 'on' : '' }, ch));
+      if (ch === '-') parts.push({ letters: [], spaced: false });
+    }
+  });
+  const middle = word
+    ? h('span', { class: `trace-word${word.length > 10 ? ' long' : ''}`, role: 'img', 'aria-label': word },
+      parts.filter((p) => p.letters.length)
+        .map((p) => h('span', { class: `trace-word-part${p.spaced ? ' spaced' : ''}`, 'aria-hidden': 'true' }, p.letters)))
+    : h('span', { class: 'trace-steps' }, steps);
+  const zone = h('div', { class: 'choices trace-zone' },
+    h('button', { class: 'trace-btn trace-hint', onclick: hint, 'aria-label': 'Aide : montre-moi le chemin' }, '💡'),
+    middle,
+    stepsLabel,
+    h('button', { class: 'trace-btn trace-reset', onclick: restart, 'aria-label': 'Effacer et recommencer' }, '↺'));
+  refresh();
+  return { stage: h('div', { class: 'stage stage-trace' }, svg), zone };
 }
 
 // ---- Payer le bon prix : toucher les pièces et les billets

@@ -14,6 +14,9 @@ import {
   FIRST_SOUNDS, PICTURES, READING_WORDS, SIGHT_WORDS, SYLLABLE_LEVELS,
 } from '../app/js/data/lecture-data.js';
 import { ENGLISH_THEMES } from '../app/js/data/anglais-data.js';
+import {
+  CAPITALES, CHIFFRES, CURSIVE, GLYPHS, GRAPHISMES, WRITING_LINES, capitalName, nameLetters, signedArea,
+} from '../app/js/data/ecriture-data.js';
 
 const RUNS = 200;
 
@@ -148,6 +151,20 @@ function checkQuestion(q, ctx) {
         assert.equal(value, legend[z.c].n, `${z.label} ≠ ${legend[z.c].n} : ${ctx}`);
       }
       assert.ok(new Set(zones.map((z) => z.c)).size >= 2, ctx);
+      break;
+    }
+    case 'trace': {
+      const { set, glyph, strokes } = q.stage;
+      assert.ok(Array.isArray(strokes) && strokes.length >= 1, `aucun trait : ${ctx}`);
+      for (const st of strokes) {
+        assert.ok(st.length >= 2, `trait vide : ${ctx}`);
+        for (const [x, y] of st) assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100, `point hors du carré : ${ctx}`);
+      }
+      // le glyphe attendu existe, et ce sont bien ses traits qu'on fait tracer
+      const expected = GLYPHS[set]?.[glyph];
+      assert.ok(expected, `glyphe inconnu : ${ctx}`);
+      assert.deepEqual(strokes, expected.strokes || expected, ctx);
+      assert.equal(q.answer, glyph, ctx);
       break;
     }
     case 'dots': {
@@ -599,6 +616,121 @@ test('dictée : les lettres à placer forment le mot, les pièges n’en font pa
       if (level === 6) assert.ok(traps.length >= 1, `niveau 6 sans piège : ${q.answer}`);
       if (level <= 4) assert.equal(q.stage.type, 'picture');
       else assert.equal(q.stage.type, 'listen');
+    }
+  }
+});
+
+// ---------------------------------------------------------------- Écris au doigt
+
+const allStrokes = () => Object.entries(GLYPHS).flatMap(([set, glyphs]) =>
+  Object.entries(glyphs).flatMap(([name, g]) => (g.strokes || g).map((st, i) => ({ label: `${set} ${name} trait ${i + 1}`, st }))));
+
+test('écriture : tous les chiffres et toutes les capitales, points réguliers dans le carré', () => {
+  assert.deepEqual(Object.keys(CHIFFRES), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  assert.deepEqual(Object.keys(CAPITALES), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''));
+  for (const l of 'leiutcoadmnsrp') assert.ok(CURSIVE[l], `minuscule attachée absente : ${l}`);
+  for (const id of ['verticaux', 'horizontaux', 'obliques', 'vagues', 'ponts', 'boucles', 'rond']) assert.ok(GRAPHISMES[id], id);
+  for (const { label, st } of allStrokes()) {
+    assert.ok(st.length >= 2, label);
+    for (const [x, y] of st) assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100, `${label} : [${x}, ${y}] hors du carré`);
+    for (let i = 1; i < st.length; i++) {
+      const d = Math.hypot(st[i][0] - st[i - 1][0], st[i][1] - st[i - 1][1]);
+      assert.ok(d <= 6.5, `${label} : points trop espacés (${d.toFixed(1)})`);
+    }
+  }
+});
+
+test('écriture : traits verticaux de haut en bas, horizontaux de gauche à droite', () => {
+  let verticals = 0;
+  let horizontals = 0;
+  for (const { label, st } of allStrokes()) {
+    const xs = st.map((p) => p[0]);
+    const ys = st.map((p) => p[1]);
+    const [first, last] = [st[0], st.at(-1)];
+    if (Math.max(...xs) - Math.min(...xs) < 1 && Math.max(...ys) - Math.min(...ys) > 10) {
+      verticals++;
+      assert.ok(last[1] > first[1], `${label} : un trait vertical se trace de haut en bas`);
+    }
+    if (Math.max(...ys) - Math.min(...ys) < 1 && Math.max(...xs) - Math.min(...xs) > 10) {
+      horizontals++;
+      assert.ok(last[0] > first[0], `${label} : un trait horizontal se trace de gauche à droite`);
+    }
+  }
+  assert.ok(verticals >= 15 && horizontals >= 10, `${verticals} verticaux, ${horizontals} horizontaux`);
+});
+
+test('écriture : les ronds commencent en haut et tournent vers la gauche', () => {
+  const rounds = {
+    'O': CAPITALES.O[0], 'Q': CAPITALES.Q[0], 'C': CAPITALES.C[0], 'G': CAPITALES.G[0], 'S (haut)': CAPITALES.S[0].slice(0, 20),
+    '0': CHIFFRES[0][0], '6': CHIFFRES[6][0], '9': CHIFFRES[9][0], 'rond': GRAPHISMES.rond.strokes[0],
+    'o': CURSIVE.o[0], 'a': CURSIVE.a[0], 'c': CURSIVE.c[0], 'd': CURSIVE.d[0], 'q': CURSIVE.q[0],
+  };
+  // y vers le bas : une aire signée négative = sens inverse des aiguilles d'une montre
+  for (const [name, st] of Object.entries(rounds)) assert.ok(signedArea(st) < 0, `${name} tourne dans le mauvais sens`);
+  // le rond du O, du 0 et du graphisme part du haut, vers la gauche
+  for (const st of [CAPITALES.O[0], CHIFFRES[0][0], GRAPHISMES.rond.strokes[0]]) {
+    assert.ok(st[0][1] <= Math.min(...st.map((p) => p[1])) + 0.5, 'le rond commence en haut');
+    assert.ok(st[1][0] < st[0][0], 'le rond part vers la gauche');
+  }
+  // les boucles du l et du e tournent aussi vers la gauche ; celle du bas du g, du j et du y vers la droite
+  for (const l of ['l', 'e']) assert.ok(signedArea(CURSIVE[l][0]) < 0, l);
+});
+
+test('écriture : la cursive part de la ligne d’écriture, avec un trait d’attaque qui monte vers la droite', () => {
+  for (const [letter, strokes] of Object.entries(CURSIVE)) {
+    const [start, next] = strokes[0];
+    const lines = WRITING_LINES[letter];
+    assert.ok(lines && lines.x < lines.base, letter);
+    assert.ok(Math.abs(start[1] - lines.base) <= 4, `${letter} : départ loin de la ligne (${start})`);
+    assert.ok(next[1] < start[1], `${letter} : le trait d’attaque monte`);
+    // tout le glyphe tient dans le carré, entre le haut des boucles et le bas des jambages
+    for (const st of strokes) for (const [, y] of st) assert.ok(y >= 4 && y <= 97, `${letter} : ${y}`);
+  }
+});
+
+test('écriture : les lettres du prénom, en capitales et sans accent', () => {
+  assert.equal(nameLetters('Éva-Rose'), 'EVAROSE');
+  assert.equal(capitalName('Éva-Rose'), 'EVA-ROSE');
+  assert.equal(nameLetters('Zoë'), 'ZOE');
+  assert.equal(nameLetters('Maël Noël'), 'MAELNOEL');
+  assert.equal(nameLetters('Françoise'), 'FRANCOISE');
+  assert.equal(nameLetters('Chloé'), 'CHLOE');
+  assert.equal(nameLetters('123'), '');
+  const game = findGame('ecrire');
+  assert.ok(game.levels.every((label) => label.length <= 26));
+  const rng = createRng(7);
+  const letters = Array.from({ length: 9 }, (_, i) => game.generate(5, rng, i, { name: 'Éva-Rose' }));
+  assert.deepEqual(letters.map((q) => q.answer).join(''), 'EVAROSEEV');
+  assert.equal(letters[0].text, 'Écris le E de EVA-ROSE.');
+  assert.equal(letters[3].text, 'Écris le R de EVA-ROSE.');
+  // la lettre à écrire est repérée dans le prénom (le R est après le tiret)
+  assert.equal(letters[3].stage.word, 'EVA-ROSE');
+  assert.equal(letters[3].stage.position, 4);
+  for (const q of letters) {
+    assert.deepEqual(q.stage.strokes, CAPITALES[q.answer]);
+    assert.equal(q.stage.word[q.stage.position], q.answer);
+  }
+  assert.equal(new Set(letters.map((q) => q.key)).size, 7, 'les deux E du prénom sont deux questions différentes');
+  // pas de lettre dans le prénom : des capitales au hasard
+  for (const name of ['', '123', undefined]) {
+    const q = game.generate(5, createRng(3), 0, { name });
+    assert.ok(CAPITALES[q.answer], q.key);
+  }
+  assert.ok(CAPITALES[game.generate(5, createRng(3), 0).answer], 'sans contexte');
+});
+
+test('écriture : la consigne parle à l’enfant', () => {
+  const game = findGame('ecrire');
+  const rng = createRng(11);
+  for (let level = 1; level <= 5; level++) {
+    for (let i = 0; i < 30; i++) {
+      const q = game.generate(level, rng, i, { name: 'Léo' });
+      const said = [q.instruction].flat().map((p) => (typeof p === 'string' ? p : p.text)).join(' ');
+      assert.ok(said.includes('en partant du point vert'), said);
+      if (level === 2) assert.match(q.text, /^Écris le chiffre \d\.$/);
+      if (level === 4) assert.deepEqual(q.stage.lines, WRITING_LINES[q.answer]);
+      if (level !== 4) assert.equal(q.stage.lines, null);
+      if (level === 5) assert.match(q.text, /^Écris le [LEO] de LEO\.$/);
     }
   }
 });

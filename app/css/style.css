@@ -1731,3 +1731,63 @@ body[data-season="ete"] { background: #fffbea; }
 .install-how summary { cursor: pointer; font-weight: 700; color: var(--accent-dark); }
 .install-steps { margin: 6px 0 0; }
 .install-actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* ===================================================================== Écris au doigt */
+
+/* le chemin gris à suivre, le départ vert numéroté et sa flèche, l'encre de l'enfant */
+.stage-trace { padding: 4px 0; min-height: 0; }
+.trace-drawing {
+  display: block; width: min(100%, 400px, calc(100vh / var(--zoom, 1) - 330px)); width: min(100%, 400px, calc(100dvh / var(--zoom, 1) - 330px));
+  height: auto; aspect-ratio: 1; background: #fff; border-radius: 20px; box-shadow: 0 5px 0 var(--line); touch-action: none;
+}
+.trace-line { stroke: #8d93a5; stroke-width: 0.7; }
+.trace-line-x { stroke-dasharray: 2.4 2; }
+.trace-guide { fill: none; stroke: #d9d3c6; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.5s; }
+.trace-done {
+  fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55;
+  transition: stroke-width 0.5s, opacity 0.5s;
+}
+.trace-ink { fill: none; stroke: var(--accent-dark); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; transition: opacity 0.5s; }
+.trace-inks, .trace-start, .trace-arrow, .trace-here, .trace-hint-dot { pointer-events: none; }
+/* texte blanc sur vert foncé : contraste 5,3:1 */
+.trace-start-dot { fill: #0b7a53; stroke: #fff; stroke-width: 1.2; }
+.trace-start-num { font-size: 7px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: central; }
+.trace-start.started { opacity: 0.45; }
+.trace-arrow { fill: #0b7a53; stroke: #fff; stroke-width: 0.8; stroke-linejoin: round; }
+/* doigt levé au milieu d'un trait : un anneau montre où reprendre */
+.trace-here { fill: #fff; stroke: var(--accent-dark); stroke-width: 1.8; animation: glow 1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.trace-hint-dot { fill: var(--hint); stroke: var(--ink); stroke-width: 1; }
+/* tous les traits sont faits : le glyphe se remplit de couleur */
+.trace-drawing.finished .trace-guide { stroke: var(--accent-soft); }
+.trace-drawing.finished .trace-done { opacity: 1; stroke-width: 8; }
+.trace-drawing.finished .trace-ink { opacity: 0.2; }
+
+.trace-zone { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 52px; }
+.trace-btn {
+  flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--card); font-size: 1.6rem;
+  box-shadow: 0 4px 0 var(--line), inset 0 0 0 3px var(--line);
+}
+.trace-btn:active { transform: translateY(3px); }
+.trace-reset { font-size: 1.8rem; font-weight: 700; color: var(--ink); }
+.trace-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; min-width: 0; }
+.trace-step {
+  display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; font-weight: 700;
+  color: var(--muted); background: var(--card); box-shadow: inset 0 0 0 2px var(--line);
+}
+.trace-step.current { color: #fff; background: #0b7a53; box-shadow: none; transform: scale(1.12); }
+.trace-step.done { color: var(--good-dark); box-shadow: inset 0 0 0 2px var(--good); }
+/* « Ton prénom » : la lettre à écrire est encadrée et soulignée dans le prénom */
+.trace-word {
+  flex: 0 1 auto; min-width: 0; display: flex; flex-wrap: wrap; justify-content: center;
+  font-size: min(1.5rem, 5.6vw); font-weight: 700; color: var(--muted); letter-spacing: 1px; line-height: 1.25;
+}
+.trace-word.long { font-size: min(1.15rem, 4.4vw); }
+.trace-word-part { display: inline-flex; flex-wrap: wrap; justify-content: center; min-width: 0; }
+.trace-word-part.spaced { margin-left: 0.45em; }
+.trace-word .on { color: var(--accent-dark); background: var(--accent-soft); border-bottom: 4px solid currentColor; border-radius: 6px 6px 0 0; padding: 0 3px; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .trace-drawing { width: min(100%, calc(100dvh - 76px)); }
+  .trace-btn { width: 48px; height: 48px; }
+  .trace-word.long { font-size: 1rem; letter-spacing: 0; }
+}
