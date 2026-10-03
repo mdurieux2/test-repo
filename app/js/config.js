@@ -20,6 +20,7 @@ export const CHANGELOG = [
       'Espace parents réorganisé : un seul bouton « Parents », trois onglets (Suivi, Enfants, Réglages).',
       'Ajouter, renommer ou supprimer un enfant (jusqu’à 6 profils).',
       'Nouvelle icône, sans prénom.',
+      'Vérifiée aussi sur les principaux téléphones et tablettes Android (Chrome).',
     ],
   },
   {

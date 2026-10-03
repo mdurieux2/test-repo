@@ -1125,3 +1125,8 @@ input { -webkit-user-select: text; user-select: text; }
   .text-body { font-size: 1.1rem; line-height: 1.4; }
   .text-listen { min-height: 40px; }
 }
+.choices-objects.n3 .choice { padding: 8px 2px; }
+.choices-objects.n3 .objects .object { font-size: min(17px, 3.8vw); }
+/* illustration d'un calcul (5 + 5 objets) : toujours dans la largeur de l'écran */
+.operation-visual { flex-wrap: wrap; justify-content: center; max-width: 100%; }
+.operation-visual .objects.small .object { font-size: min(24px, 5.4vw); }

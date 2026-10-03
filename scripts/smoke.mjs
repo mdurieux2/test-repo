@@ -512,7 +512,8 @@ console.log('✔ fonctionne hors ligne');
 
 // ---------------------------------------------------------------- Mise en page : tous les iPhone
 
-// Tailles d'écran (points CSS) de l'iPhone 6 à l'iPhone 17 Pro Max.
+// Tailles d'écran (points CSS) de l'iPhone 6 à l'iPhone 17 Pro Max, des iPad, et des
+// principaux Android (le plus étroit : 360 points).
 const DEVICES = [
   { name: 'iPhone 6-7-8-SE', width: 375, height: 667 },
   { name: 'iPhone 6-7-8 Plus', width: 414, height: 736 },
@@ -524,6 +525,14 @@ const DEVICES = [
   { name: 'iPhone 14-15 Pro Max-15-16 Plus', width: 430, height: 932 },
   { name: 'iPhone 16-17 Pro-17', width: 402, height: 874 },
   { name: 'iPhone 16-17 Pro Max', width: 440, height: 956 },
+  // Android (Chrome), téléphones puis tablette
+  { name: 'Samsung Galaxy S8-S9, A50', width: 360, height: 740 },
+  { name: 'Samsung Galaxy S20-S24, A54', width: 360, height: 800 },
+  { name: 'Samsung Galaxy S23-S24 Ultra', width: 384, height: 824 },
+  { name: 'Google Pixel 8a, Xiaomi Redmi', width: 393, height: 873 },
+  { name: 'Google Pixel 7-8 Pro', width: 412, height: 915 },
+  { name: 'Samsung Galaxy Tab S9', width: 800, height: 1280 },
+  { name: 'Samsung Galaxy Tab S9 paysage', width: 1280, height: 800 },
   // iPad, en portrait puis en paysage
   { name: 'iPad mini', width: 744, height: 1133 },
   { name: 'iPad mini paysage', width: 1133, height: 744 },
@@ -648,7 +657,8 @@ if (SHOTS) mkdirSync(`${SHOTS}/devices`, { recursive: true });
 // 6 appareils à la fois, pour ne pas saturer la machine de test
 const counts = [];
 for (let i = 0; i < DEVICES.length; i += 6) {
-  counts.push(...await Promise.all(DEVICES.slice(i, i + 6).map((d, k) => checkDevice(d, i + k === 0 ? 3 : 1))));
+  // plus de tirages sur les deux écrans les plus petits (iPhone SE, Android 360 points)
+  counts.push(...await Promise.all(DEVICES.slice(i, i + 6).map((d, k) => checkDevice(d, i + k === 0 || d.width === 360 && d.height === 740 ? 3 : 1))));
 }
 DEVICES.forEach((d, i) => console.log(`✔ ${d.name} (${d.width}×${d.height}) : ${counts[i]} écrans vérifiés`));
 if (layoutProblems.length) fail(`mise en page :\n${layoutProblems.join('\n')}`);

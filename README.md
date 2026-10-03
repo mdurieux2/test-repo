@@ -104,7 +104,7 @@ Aucune étape de compilation : HTML, CSS et JavaScript (modules ES) dans `app/`.
 npm install          # Playwright, pour le test de bout en bout et les icônes
 npm start            # http://localhost:8080
 npm test             # tests unitaires (node --test)
-npm run test:e2e     # parcours complet + mise en page sur 10 iPhone (6 → 17 Pro Max) et 12 iPad
+npm run test:e2e     # parcours complet + mise en page sur 10 iPhone (6 → 17 Pro Max), 12 iPad et 7 Android
 npm run icons        # régénère les icônes
 ```
 
