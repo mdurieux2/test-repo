@@ -4,13 +4,20 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.5.0',
+  version: '1.5.1',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.5.1',
+    date: '2026-10-03',
+    changes: [
+      'Correction : l’écran « Mon personnage » affichait un message incompréhensible ([object PointerEvent]).',
+    ],
+  },
   {
     version: '1.5.0',
     date: '2026-10-03',
