@@ -730,7 +730,7 @@ async function checkDevice(device, repeat) {
   await page.click('[data-levels="calcul"], [data-levels="compter"]');
   await page.waitForSelector('.level-list');
   await checkLayout(page, tag('choix du niveau'), { reachable: false });
-  await page.click('.top-bar .icon-btn');
+  await goProfile(page);
   await page.click('[data-dress]');
   await checkLayout(page, tag('personnage'), { reachable: false });
   checked += 16;
