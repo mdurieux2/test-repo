@@ -10,12 +10,14 @@ import {
 import {
   chronoLevelAfter, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono,
 } from './games/chrono.js';
-import { levelRange, programFor } from './programs.js';
+import { featuredGames, levelRange, MAX_FEATURED, programFor, programForChild } from './programs.js';
+import { dailyPicks, dueReviews as reviewsDue, duoPlan, drawPool } from './picks.js';
 import { createRng, pick, randInt, sample, shuffle } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import {
-  addChild, cleanName, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild, resetChild, saveStore,
+  addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
+  resetChild, saveStore,
 } from './storage.js';
 import { listFrenchVoices, setSpeechEnabled, setVoicePreferences, speak, stopSpeaking } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
@@ -120,8 +122,17 @@ function sessionFlag(key, set = false) {
   }
 }
 
+function clearSessionFlag(key) {
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    // navigation privée
+  }
+}
+
+/** Une rubrique de l'enfant qui joue (absente si les parents l'ont masquée). */
 function domainById(id) {
-  return programFor(child().grade).find((d) => d.id === id);
+  return programForChild(child()).find((d) => d.id === id);
 }
 
 // ---------------------------------------------------------------- Qui joue ?
@@ -151,7 +162,7 @@ function parentButton() {
 function profileScreen() {
   if (!store.order.length) return welcomeScreen();
   show(h('main', { class: 'screen profiles' },
-    h('header', { class: 'top-bar' }, h('span'), h('span'), parentButton()),
+    h('header', { class: 'top-bar' }, duoButton(), h('span'), parentButton()),
     h('h1', { class: 'profiles-title' }, 'Qui joue ?'),
     h('div', { class: `profile-list n${store.order.length}` },
       store.order.map((id) => {
@@ -245,6 +256,170 @@ function chooseProfile(id) {
   say(me(), `Bonjour ${me().spoken} !`);
 }
 
+// ---------------------------------------------------------------- Jouer à deux
+
+/** Sur « Qui joue ? », dès qu'il y a deux enfants : une partie de 10 questions chacun son tour. */
+function duoButton() {
+  if (store.order.length < 2) return h('span');
+  return h('button', { class: 'duo-btn', 'data-duo': '', onclick: () => duoPickScreen() },
+    h('span', { class: 'duo-btn-icon', 'aria-hidden': 'true' }, '👫'), h('span', {}, 'Jouer à deux'));
+}
+
+/** On touche deux portraits (le premier commence), puis « C'est parti ! ». */
+function duoPickScreen({ picked = [], message = '', speech = message } = {}) {
+  if (store.order.length < 2) return profileScreen();
+  let chosen = picked.filter((id) => store.profiles[id]).slice(0, 2);
+  const hint = h('p', { class: 'duo-hint', 'aria-live': 'polite' });
+  const go = h('button', { class: 'big-btn primary duo-go', onclick: () => tryDuo(chosen) }, 'C’est parti !');
+  const cards = store.order.map((id) => {
+    const kid = store.profiles[id];
+    return h('button', { class: `profile-card duo-card look-${kid.look}`, 'data-pick': id, onclick: () => choose(id) },
+      h('span', { class: 'duo-order', 'aria-hidden': 'true' }),
+      avatar(id, 'avatar-xl'),
+      h('span', { class: 'profile-name' }, frenchSpacing(kid.name)),
+      h('span', { class: 'profile-grade' }, GRADES[kid.grade]));
+  });
+  const draw = (text = '') => {
+    for (const card of cards) {
+      const n = chosen.indexOf(card.dataset.pick);
+      card.classList.toggle('picked', n >= 0);
+      card.setAttribute('aria-pressed', String(n >= 0));
+      card.querySelector('.duo-order').textContent = n >= 0 ? `✓ ${n + 1}` : '';
+    }
+    go.disabled = chosen.length < 2;
+    hint.classList.toggle('warning', Boolean(text));
+    hint.textContent = frenchSpacing(text || ['Touchez deux portraits', 'Et le deuxième joueur ?', 'Prêts ? Touchez « C’est parti ! »'][chosen.length]);
+  };
+  // toucher un portrait le choisit (ou le retire) ; un troisième remplace le deuxième
+  const choose = (id) => {
+    if (chosen.includes(id)) chosen = chosen.filter((x) => x !== id);
+    else chosen = chosen.length < 2 ? [...chosen, id] : [chosen[0], id];
+    draw();
+  };
+  show(h('main', { class: 'screen profiles duo-pick' },
+    topBar({ onBack: profileScreen, title: '👫 Jouer à deux' }),
+    hint,
+    h('div', { class: `profile-list n${store.order.length}` }, cards),
+    go));
+  draw(message);
+  speak(speech || 'Qui joue ensemble ? Touchez deux portraits.');
+}
+
+/** Avant de commencer : si l'un des deux a fini son temps du jour, on le dit simplement. */
+function tryDuo(players) {
+  const tired = players.filter((id) => timeIsUp(store.profiles[id]));
+  if (tired.length) {
+    const verb = tired.length > 1 ? 'ont' : 'a';
+    const names = (key) => tired.map((id) => me(id)[key]).join(' et ');
+    return duoPickScreen({
+      picked: players,
+      message: `${names('name')} ${verb} assez joué aujourd’hui : c’est l’heure de la pause !`,
+      speech: `${names('spoken')} ${verb} assez joué aujourd’hui. C’est l’heure de la pause !`,
+    });
+  }
+  const plan = duoPlan(store.profiles, players, rng);
+  if (!plan) return duoPickScreen({ picked: players, message: 'Chacun doit avoir au moins un jeu affiché (Espace parents).' });
+  beginDuo(store, players);
+  sessionFlag('duo', true);
+  store.active = players[0];
+  startSession(duoGame(plan), {
+    total: plan.length,
+    back: quitDuo,
+    duo: { players, plan, scores: Object.fromEntries(players.map((id) => [id, 0])) },
+  });
+}
+
+/** Abandon (ou fin) : l'enfant actif redevient celui d'avant, retour à « Qui joue ? ». */
+function quitDuo() {
+  endDuo(store);
+  clearSessionFlag('duo');
+  save();
+  profileScreen();
+}
+
+/**
+ * La partie à deux, sur le modèle du défi du jour : chaque question vient d'un jeu de l'enfant dont
+ * c'est le tour, à son niveau (q.from), et les niveaux de ses jeux ne changent pas (fixedLevel).
+ */
+function duoGame(plan) {
+  return {
+    id: 'duo',
+    domain: 'duo',
+    title: 'Jouer à deux',
+    icon: '👫',
+    levels: ['Jouer à deux'],
+    range: { min: 1, max: 1 },
+    fixedLevel: true,
+    generate(_level, rng, index, context) {
+      const { game, level } = plan[index % plan.length];
+      const q = game.generate(level, rng, index, context);
+      return { ...q, key: `duo:${q.key}`, from: game.id, fromLevel: level };
+    },
+  };
+}
+
+/** En haut de l'écran : les deux portraits et leurs bonnes réponses ; celui dont c'est le tour est mis en avant. */
+function duoScoreboard(session, progress) {
+  const { players, scores } = session.duo;
+  const label = players.map((id) => `${store.profiles[id].name} : ${scores[id]}`).join(', ');
+  return h('div', { class: 'duo-score', 'aria-label': `${label}. À ${me().name} de jouer.` },
+    h('div', { class: 'duo-players' }, players.map((id) => {
+      const turn = id === store.active;
+      return h('span', { class: turn ? 'duo-player turn' : 'duo-player', 'data-duo-player': id, 'aria-current': turn ? 'true' : undefined },
+        avatar(id, 'avatar-xs'),
+        h('span', { class: 'duo-name' }, store.profiles[id].name),
+        h('b', { class: 'duo-points', 'aria-label': `${scores[id]} bonnes réponses` }, `✓ ${scores[id]}`));
+    })),
+    progress);
+}
+
+/** Fin de la partie à deux : les résultats des deux, des étoiles pour chacun selon ses réponses. */
+function finishDuo(session) {
+  const { players, plan, scores } = session.duo;
+  const seconds = Math.round((Date.now() - session.startedAt) / 1000);
+  const results = players.map((id) => {
+    const kid = store.profiles[id];
+    const total = plan.filter((turn) => turn.player === id).length;
+    const correct = scores[id];
+    const stars = starsFor(correct, total);
+    const before = kid.stars;
+    kid.stars += stars;
+    const stats = gameStats(kid, 'duo', 1);
+    kid.games.duo = { ...stats, sessions: stats.sessions + 1, bestStars: Math.max(stats.bestStars, stars) };
+    // une partie pour chacun (objectif du jour) ; le temps compte pour les deux
+    logSession(kid, { at: new Date().toISOString(), game: 'duo', level: 1, correct, total, stars, seconds });
+    return { id, correct, stars, unlocked: newStickers(before, kid.stars) };
+  });
+  endDuo(store);
+  clearSessionFlag('duo');
+  save();
+
+  const team = results.reduce((sum, r) => sum + r.correct, 0) / session.total;
+  const title = team >= 0.9 ? 'Bravo l’équipe !' : team >= 0.6 ? 'Très bien l’équipe !' : 'Bien joué l’équipe !';
+  const answers = (n) => `${n} bonne${n > 1 ? 's' : ''} réponse${n > 1 ? 's' : ''}`;
+  show(h('main', { class: 'screen results duo-end domain-theme-duo' },
+    confetti(Math.max(...results.map((r) => r.stars))),
+    topBar({ onBack: profileScreen, backLabel: 'Qui joue ?', title: '👫 Jouer à deux' }),
+    h('h2', { class: 'duo-team' }, frenchSpacing(title)),
+    h('div', { class: 'duo-final' }, results.map(({ id, correct, stars, unlocked }) => h('section', { class: 'duo-final-card', 'data-duo-result': id },
+      avatar(id, 'avatar-md cheer'),
+      h('h3', { class: 'duo-final-name' }, frenchSpacing(store.profiles[id].name)),
+      h('p', { class: 'duo-final-detail' }, answers(correct)),
+      h('div', { class: 'result-stars', 'aria-label': `${stars} étoile${stars > 1 ? 's' : ''} sur 3` },
+        [1, 2, 3].map((i) => h('span', { class: i <= stars ? 'big-star on' : 'big-star', style: { animationDelay: `${i * 0.25}s` } }, '⭐'))),
+      h('p', { class: 'duo-final-gain' }, `+${stars} ⭐`),
+      unlocked.length ? h('p', { class: 'duo-final-sticker' }, unlocked.at(-1).emoji, frenchSpacing(' Nouvel autocollant !')) : null))),
+    h('div', { class: 'result-actions duo-actions' },
+      h('button', { class: 'big-btn primary', 'data-duo-again': '', onclick: () => tryDuo(players) }, '🔁 Rejouer à deux'),
+      h('button', { class: 'big-btn', 'data-duo-home': '', onclick: profileScreen }, '👫 Qui joue ?'))));
+  playSound('fanfare');
+  speak([
+    title,
+    results.map(({ id, correct }, i) => `${me(id).spoken} : ${i ? correct : answers(correct)}`).join(', ') + '.',
+    ...results.filter((r) => r.unlocked.length).map((r) => `Nouvel autocollant pour ${me(r.id).spoken} !`),
+  ]);
+}
+
 // ---------------------------------------------------------------- Premier lancement
 
 /**
@@ -332,18 +507,22 @@ function profileChip() {
 
 function homeScreen() {
   const c = me();
-  const domains = programFor(child().grade);
-  show(h('main', { class: 'screen home' },
+  const domains = programForChild(child());
+  const featured = featuredBlock();
+  show(h('main', { class: `screen home${featured ? ' has-featured' : ''}` },
     h('header', { class: 'top-bar' }, profileChip(), h('span'), starCounter()),
     h('div', { class: 'home-hero' },
       seasonDecor(),
       h('h1', { class: 'home-title' }, frenchSpacing(`Bonjour ${c.name} !`)),
       goalBar()),
     h('nav', { class: 'home-menu' },
+      featured,
       h('div', { class: 'home-top' }, dailyButton(), reviewButton()),
-      h('div', { class: `home-grid n${domains.length}` },
-        domains.map((d) => h('button', { class: `domain-tile domain-${d.id}`, 'data-domain': d.id, onclick: () => domainScreen(d.id) },
-          h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, d.icon), h('span', { class: 'domain-name' }, d.title)))),
+      domains.length
+        ? h('div', { class: `home-grid n${domains.length}` },
+          domains.map((d) => h('button', { class: `domain-tile domain-${d.id}`, 'data-domain': d.id, onclick: () => domainScreen(d.id) },
+            h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, d.icon), h('span', { class: 'domain-name' }, d.title))))
+        : h('p', { class: 'muted home-empty' }, 'Pas de jeux pour le moment : demande à un parent.'),
       h('div', { class: 'home-bottom' },
         h('button', { class: 'domain-btn domain-album', onclick: albumScreen },
           h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🏆'),
@@ -352,6 +531,22 @@ function homeScreen() {
         h('button', { class: 'domain-btn domain-dress', 'data-dress': '', onclick: () => characterScreen() },
           h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🎨'),
           h('span', {}, 'Mon personnage'))))));
+}
+
+/** « ⭐ Conseillé pour toi » : les jeux choisis par les parents, en haut de l'accueil. */
+function featuredBlock() {
+  const list = featuredGames(child()).slice(0, MAX_FEATURED);
+  if (!list.length) return null;
+  return h('section', { class: 'home-featured', 'aria-labelledby': 'featured-label' },
+    h('h2', { class: 'featured-label', id: 'featured-label' }, '⭐ Conseillé pour toi'),
+    h('div', { class: `featured-list n${list.length}` },
+      list.map(({ game, min, max }) => h('button', {
+        class: `featured-game domain-theme-${game.domain}`,
+        'data-featured': game.id,
+        onclick: () => (game.paliers ? palierMap(min, max) : startSession(game, { back: homeScreen })),
+      },
+      h('span', { class: 'featured-icon', 'aria-hidden': 'true' }, game.icon),
+      h('span', { class: 'featured-title' }, game.title)))));
 }
 
 // ---------------------------------------------------------------- Défi du jour
@@ -363,20 +558,13 @@ function dayKey(offset = 0, from = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function hashText(text) {
-  let hash = 2166136261;
-  for (const ch of text) hash = Math.imul(hash ^ ch.codePointAt(0), 16777619);
-  return hash >>> 0;
-}
-
 /**
- * Le défi du jour : 5 questions tirées des jeux de la classe, au niveau de l'enfant.
- * Les mêmes jeux toute la journée ; une étoile bonus et un jour de plus dans la série.
- * Les défis chrono (game.timed) n'y sont pas : leur partie a son propre format.
+ * Le défi du jour : 5 questions tirées des jeux de la classe, au niveau de l'enfant (jamais un
+ * jeu masqué par les parents, ni un défi chrono, qui a son propre format). Les mêmes jeux toute
+ * la journée ; une étoile bonus et un jour de plus dans la série.
  */
 function dailyGame() {
-  const pool = programFor(child().grade).flatMap((d) => d.games).filter(({ game }) => !game.paliers && !game.timed);
-  const picks = sample(createRng(hashText(`${dayKey()}:${store.active}`)), pool, 5);
+  const picks = dailyPicks(child(), `${dayKey()}:${store.active}`);
   return {
     id: 'defi',
     domain: 'defi',
@@ -415,8 +603,9 @@ function advanceReview(gameId) {
   else kid.review[gameId] = { ...item, step: item.step + 1, due: dayKey(REVIEW_STEPS[item.step + 1]) };
 }
 
+/** Les révisions du jour (sans les jeux masqués par les parents). */
 function dueReviews() {
-  return Object.entries(child().review || {}).filter(([id, r]) => findGame(id) && !findGame(id).timed && r.due <= dayKey());
+  return reviewsDue(child(), dayKey());
 }
 
 function reviewGame() {
@@ -467,10 +656,10 @@ function goalBar() {
 }
 
 /** Temps maximum atteint ? (réglé par les parents, avec du temps en plus possible) */
-function timeIsUp() {
-  const limit = child().goals?.limit || 0;
+function timeIsUp(kid = child()) {
+  const limit = kid.goals?.limit || 0;
   if (!limit) return false;
-  const { minutes, extra } = todayStats();
+  const { minutes, extra } = todayStats(kid);
   return minutes >= limit + extra;
 }
 
@@ -498,6 +687,7 @@ function pauseScreen() {
 }
 
 function dailyButton() {
+  if (!drawPool(child()).length) return null; // tous les jeux sont masqués
   const daily = child().daily;
   const done = daily?.last === dayKey();
   const streak = daily && (done || daily.last === dayKey(-1)) ? daily.streak : 0;
@@ -529,6 +719,7 @@ function domainScreen(domainId) {
   const domain = domainById(domainId);
   if (!domain) return homeScreen();
   const guide = me();
+  const featured = new Set(featuredGames(child()).map(({ game }) => game.id));
   const blocks = [];
   let section = null;
   for (const { game, min, max } of domain.games) {
@@ -540,12 +731,13 @@ function domainScreen(domainId) {
     const level = Math.min(max, Math.max(min, stats.level));
     // La carte lance le jeu ; le bas de la carte (les points de niveau) permet de choisir le niveau.
     const pickable = !game.paliers && max > min;
-    blocks.push(h('div', { class: 'game-card' },
+    blocks.push(h('div', { class: featured.has(game.id) ? 'game-card featured' : 'game-card' },
       h('button', {
         class: 'game-play',
         'data-game': game.id,
         onclick: () => (game.paliers ? palierMap(min, max) : startSession(game)),
       },
+      featured.has(game.id) ? h('span', { class: 'featured-badge' }, '⭐ Conseillé') : null,
       h('span', { class: 'game-icon', 'aria-hidden': 'true' }, game.icon),
       h('span', { class: 'game-title' }, game.title),
       game.paliers ? palierSummary(min, max) : null,
@@ -624,8 +816,8 @@ function palierMap(min = 1, max = CALC_PALIERS.length) {
 
 // ---------------------------------------------------------------- Partie
 
-function startSession(game, { level, back, total } = {}) {
-  if (timeIsUp()) return pauseScreen();
+function startSession(game, { level, back, total, duo } = {}) {
+  if (!duo && timeIsUp()) return pauseScreen(); // à deux, le temps de chacun est vérifié avant (tryDuo)
   const { min, max } = game.range || levelRange(child().grade, game.id);
   const stats = gameStats(child(), game.id, min);
   const startLevel = level || Math.min(max, Math.max(min, stats.level));
@@ -643,6 +835,7 @@ function startSession(game, { level, back, total } = {}) {
     // un niveau choisi à la main repart d'une série vierge
     levelState: { level: startLevel, streak: game.paliers || level ? 0 : stats.streak, recent: game.paliers || level ? [] : stats.recent },
     formatOffset: Number(new URLSearchParams(location.search).get('format') || 0),
+    duo, // partie à deux : { players, plan, scores }
   };
   nextQuestion(session);
 }
@@ -659,6 +852,8 @@ function newQuestion(session) {
 
 function nextQuestion(session) {
   if (session.index >= session.total) return finishSession(session);
+  // à deux : la question est celle de l'enfant dont c'est le tour (son prénom, son personnage, sa voix)
+  if (session.duo) store.active = session.duo.plan[session.index].player;
   const q = newQuestion(session);
   session.question = q;
   session.attempts = 0;
@@ -669,8 +864,9 @@ function nextQuestion(session) {
   const guide = me(); // seul l'enfant qui joue apparaît, avec sa photo ou son dessin et sa voix
   session.guide = guide;
   // La consigne complète est dite la première fois ; ensuite, une version courte
-  // (q.short) évite de répéter la même phrase à chaque question.
-  const briefKey = q.short && (q.short.key ?? q.short.text);
+  // (q.short) évite de répéter la même phrase à chaque question (à deux : pour chaque enfant).
+  const shortKey = q.short && (q.short.key ?? q.short.text);
+  const briefKey = session.duo && q.short ? `${store.active}:${shortKey}` : shortKey;
   const brief = Boolean(q.short) && session.briefed.has(briefKey);
   if (q.short) session.briefed.add(briefKey);
   const replay = () => say(guide, q.replay || q.instruction);
@@ -705,8 +901,10 @@ function nextQuestion(session) {
   const badge = clock
     ? h('span', { class: 'level-badge chrono-badge' }, h('span', { class: 'chrono-level' }, levelText), clock)
     : h('span', { class: 'level-badge' }, levelText);
-  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}` },
-    topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
+  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}` },
+    session.duo
+      ? topBar({ onBack: session.back, backLabel: 'Quitter', title: duoScoreboard(session, progress) })
+      : topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
     h('div', { class: 'instruction' },
       h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
         avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')),
@@ -716,9 +914,10 @@ function nextQuestion(session) {
     feedback));
   if (clock) runChrono(session, clock);
   // histoire en karaoké : la voix lit l'histoire (chaque mot s'allume), puis pose la question
-  const readAlong = () => (q.karaoke ? karaoke(stage, guide, q.stage.sentences, q.instruction) : null);
-  if (q.karaoke) readAlong();
-  else say(guide, brief ? (q.short.speak ?? q.short.text) : q.instruction);
+  const readAlong = (before = []) => (q.karaoke ? karaoke(stage, guide, q.stage.sentences, q.instruction, before) : null);
+  const turn = session.duo ? [`À toi, ${guide.spoken} !`] : []; // à deux : « À toi, Matteo ! »
+  if (q.karaoke) readAlong(turn);
+  else say(guide, [...turn, ...[brief ? (q.short.speak ?? q.short.text) : q.instruction].flat()]);
 }
 
 // ---- Défi chrono : le temps court de l'affichage de la 1re question à la dernière bonne réponse
@@ -745,7 +944,7 @@ function runChrono(session, el) {
 }
 
 /** Lit des phrases en allumant chaque mot ; repli au rythme moyen si le navigateur ne suit pas les mots. */
-function karaoke(stageEl, guide, sentences, after = []) {
+function karaoke(stageEl, guide, sentences, after = [], before = []) {
   const sentenceEls = [...stageEl.querySelectorAll('.k-sentence')];
   const clear = () => stageEl.querySelectorAll('.w.on').forEach((w) => w.classList.remove('on'));
   let timer = null;
@@ -772,7 +971,7 @@ function karaoke(stageEl, guide, sentences, after = []) {
       },
     };
   });
-  return say(guide, [...parts, ...(Array.isArray(after) ? after : [after])]).then(() => {
+  return say(guide, [...before, ...parts, ...(Array.isArray(after) ? after : [after])]).then(() => {
     clearInterval(timer);
     clear();
   });
@@ -824,6 +1023,7 @@ async function markCorrect(ctx) {
   playSound('success');
   app.querySelector('.guide-btn .avatar')?.classList.add('cheer');
   if (firstTry) session.correct++;
+  if (firstTry && session.duo) session.duo.scores[store.active]++;
   if (firstTry && game.id === 'revision') advanceReview(q.from);
 
   let change = null;
@@ -2612,6 +2812,7 @@ function buildZone(ctx) {
 // ---- Fin de partie
 
 function finishSession(session) {
+  if (session.duo) return finishDuo(session);
   const { game } = session;
   const kid = child();
   const stars = starsFor(session.correct, session.total);
@@ -3117,6 +3318,7 @@ function childEditScreen(id, message = '') {
       choiceSetting('Temps maximum par jour', 'limit', [[0, 'Sans'], [10, '10 min'], [15, '15'], [20, '20'], [30, '30']], kid.goals?.limit || 0,
         (v) => { kid.goals = { ...(kid.goals || {}), limit: v }; save(); }),
       h('p', { class: 'muted small' }, 'Quand le temps est écoulé, la partie en cours se termine, puis une pause est proposée. Vous pouvez accorder 10 minutes de plus.')),
+    kidGamesCard(id),
     h('section', { class: 'card danger-zone' },
       h('h2', {}, 'Données'),
       h('button', {
@@ -3141,6 +3343,86 @@ function childEditScreen(id, message = '') {
           }
         },
       }, 'Supprimer ce profil'))));
+}
+
+/**
+ * « Ses jeux » : les parents masquent une rubrique entière ou un jeu, et conseillent jusqu'à
+ * MAX_FEATURED jeux (bloc « ⭐ Conseillé pour toi » en haut de l'accueil, badge dans la rubrique).
+ * Enregistré sur le profil : child.hiddenDomains, child.hiddenGames, child.featured.
+ */
+function kidGamesCard(id) {
+  const kid = store.profiles[id];
+  const open = new Set(); // rubriques dépliées (gardées ouvertes quand la carte se redessine)
+  const card = h('section', { class: 'card kid-games', 'data-kid-games': id });
+  const setIn = (key, value, on) => {
+    const list = new Set(kid[key] || []);
+    if (on) list.add(value);
+    else list.delete(value);
+    kid[key] = [...list];
+  };
+  const change = (fn) => () => {
+    // le bouton touché est redessiné : on lui rend le focus (clavier, VoiceOver)
+    const focused = ['data-domain-switch', 'data-show-game', 'data-feature-game']
+      .map((attr) => document.activeElement?.hasAttribute?.(attr) && `[${attr}="${document.activeElement.getAttribute(attr)}"]`).find(Boolean);
+    fn();
+    save();
+    draw();
+    if (focused) card.querySelector(focused)?.focus();
+  };
+  const draw = () => {
+    const hiddenDomains = new Set(kid.hiddenDomains || []);
+    const hiddenGames = new Set(kid.hiddenGames || []);
+    const featured = new Set(featuredGames(kid).map(({ game }) => game.id));
+    const full = featured.size >= MAX_FEATURED;
+    // replaceChildren(null) afficherait « null » : on ne passe que de vrais éléments
+    card.replaceChildren(...[
+      h('h2', {}, 'Ses jeux'),
+      h('p', { class: 'muted small' }, `Masquez une rubrique ou un jeu. Conseillez jusqu’à ${MAX_FEATURED} jeux ⭐ : ils apparaissent en haut de son accueil.`),
+      ...programFor(kid.grade).map((domain) => {
+        const domainHidden = hiddenDomains.has(domain.id);
+        const nHidden = domain.games.filter(({ game }) => hiddenGames.has(game.id)).length;
+        const nFeatured = domain.games.filter(({ game }) => featured.has(game.id)).length;
+        const allHidden = nHidden === domain.games.length;
+        const toggleBox = h('input', {
+          type: 'checkbox', role: 'switch', checked: !domainHidden, 'data-domain-switch': domain.id, 'aria-label': `Afficher la rubrique ${domain.title}`,
+        });
+        toggleBox.addEventListener('change', change(() => setIn('hiddenDomains', domain.id, !toggleBox.checked)));
+        const summary = domainHidden ? 'Rubrique masquée'
+          : [`${domain.games.length} jeu${domain.games.length > 1 ? 'x' : ''}`, nHidden ? `${nHidden} masqué${nHidden > 1 ? 's' : ''}` : '',
+            nFeatured ? `${nFeatured} ⭐` : ''].filter(Boolean).join(' · ');
+        const details = h('details', { class: 'kid-domain-games', 'data-domain-games': domain.id, open: open.has(domain.id) },
+          h('summary', {}, summary),
+          domain.games.map(({ game }) => {
+            const hidden = hiddenGames.has(game.id);
+            const star = featured.has(game.id);
+            return h('div', { class: hidden ? 'kid-game off' : 'kid-game', 'data-kid-game': game.id },
+              h('span', { class: 'kid-game-title' }, h('span', { 'aria-hidden': 'true' }, game.icon), ' ', game.title),
+              h('span', { class: 'kid-game-ctrls' },
+                h('button', {
+                  class: hidden ? 'kid-toggle' : 'kid-toggle on', 'data-show-game': game.id, 'aria-pressed': String(!hidden),
+                  'aria-label': `Afficher ${game.title}`, disabled: domainHidden,
+                  // un jeu masqué n'est plus conseillé
+                  onclick: change(() => { setIn('hiddenGames', game.id, !hidden); if (!hidden) setIn('featured', game.id, false); }),
+                }, hidden ? '🚫 Masqué' : '👁 Affiché'),
+                h('button', {
+                  class: star ? 'kid-toggle star on' : 'kid-toggle star', 'data-feature-game': game.id, 'aria-pressed': String(star),
+                  'aria-label': `Conseiller ${game.title}`, disabled: domainHidden || hidden || (!star && full),
+                  onclick: change(() => setIn('featured', game.id, !star)),
+                }, star ? '⭐ Conseillé' : '☆ Conseiller')));
+          }));
+        details.addEventListener('toggle', () => (details.open ? open.add(domain.id) : open.delete(domain.id)));
+        return h('div', { class: domainHidden || allHidden ? 'kid-domain off' : 'kid-domain', 'data-kid-domain': domain.id },
+          h('label', { class: 'setting kid-domain-head' },
+            h('span', { class: 'kid-domain-title' }, h('span', { 'aria-hidden': 'true' }, domain.icon), ' ', domain.title),
+            h('span', { class: 'kid-domain-state', 'aria-hidden': 'true' }, domainHidden ? 'Masquée' : allHidden ? 'Aucun jeu' : 'Affichée'),
+            toggleBox),
+          details);
+      }),
+      full ? h('p', { class: 'muted small kid-games-full' }, `${MAX_FEATURED} jeux conseillés : retirez-en un pour en choisir un autre.`) : null,
+    ].filter(Boolean));
+  };
+  draw();
+  return card;
 }
 
 function voiceRow(voiceList) {
@@ -3215,7 +3497,10 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 // demander au navigateur de ne pas effacer les données de l'app (profils, progrès) quand il manque de place
 if (store.order.length) navigator.storage?.persist?.().catch(() => {});
 
-// Au lancement : « Qui joue ? » (sauf si l'app est rouverte pendant la même séance).
-if (store.active && sessionFlag('playing')) homeScreen();
+// Au lancement : « Qui joue ? » (sauf si l'app est rouverte pendant la même séance). Une partie à
+// deux interrompue (rechargement) ramène aussi à « Qui joue ? », avec l'enfant actif d'avant la partie.
+const duoInterrupted = sessionFlag('duo');
+clearSessionFlag('duo');
+if (store.active && sessionFlag('playing') && !duoInterrupted) homeScreen();
 else profileScreen();
 sessionFlag('playing', true);

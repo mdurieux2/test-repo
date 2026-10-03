@@ -163,3 +163,34 @@ export function levelRange(grade, gameId) {
   }
   return { min: 1, max: findGame(gameId).levels.length };
 }
+
+// ---------------------------------------------------------------- Jeux choisis par les parents
+
+/** Nombre maximum de jeux conseillés (ils tiennent en haut de l'accueil, sans faire défiler). */
+export const MAX_FEATURED = 3;
+
+/**
+ * Le programme d'un enfant : celui de sa classe, sans les rubriques ni les jeux masqués par les
+ * parents (child.hiddenDomains, child.hiddenGames). Une rubrique dont tous les jeux sont masqués
+ * disparaît aussi. Sans réglage, c'est exactement le programme de la classe.
+ */
+export function programForChild(child) {
+  const hiddenDomains = new Set(child?.hiddenDomains || []);
+  const hiddenGames = new Set(child?.hiddenGames || []);
+  return programFor(child?.grade)
+    .filter((domain) => !hiddenDomains.has(domain.id))
+    .map((domain) => ({ ...domain, games: domain.games.filter(({ game }) => !hiddenGames.has(game.id)) }))
+    .filter((domain) => domain.games.length);
+}
+
+/** Jeu masqué pour cet enfant (lui-même ou toute sa rubrique), ou jeu inconnu. */
+export function isGameHidden(child, gameId) {
+  const game = findGame(gameId);
+  return !game || (child?.hiddenGames || []).includes(gameId) || (child?.hiddenDomains || []).includes(game.domain);
+}
+
+/** Les jeux conseillés par les parents (child.featured), dans l'ordre du programme, sauf s'ils sont masqués. */
+export function featuredGames(child) {
+  const featured = new Set(child?.featured || []);
+  return programForChild(child).flatMap((domain) => domain.games).filter(({ game }) => featured.has(game.id));
+}

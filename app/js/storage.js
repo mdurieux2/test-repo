@@ -70,6 +70,25 @@ export function removeChild(store, id) {
   return store;
 }
 
+/** Liste d'identifiants (rubriques ou jeux) nettoyée : seulement des textes, sans doublon. */
+function idList(value) {
+  return Array.isArray(value) ? [...new Set(value.filter((v) => typeof v === 'string' && v))] : [];
+}
+
+/**
+ * Réglages des parents qui suivent l'enfant partout (et survivent à « effacer la progression ») :
+ * objectifs, personnage, rubriques et jeux masqués, jeux conseillés.
+ */
+function keptSettings(child = {}) {
+  return {
+    goals: child.goals && typeof child.goals === 'object' ? child.goals : {},
+    style: child.style && typeof child.style === 'object' ? child.style : {},
+    hiddenDomains: idList(child.hiddenDomains),
+    hiddenGames: idList(child.hiddenGames),
+    featured: idList(child.featured),
+  };
+}
+
 export function defaultGameStats(level = 1) {
   return { ...createGameState(level), sessions: 0, answered: 0, correct: 0, bestStars: 0, lastPlayed: null };
 }
@@ -107,8 +126,7 @@ function mergeChild(id, saved) {
     mistakes: Array.isArray(saved.mistakes) ? saved.mistakes.slice(-MISTAKES_LIMIT) : [],
     photo: isPhoto(saved.photo) ? saved.photo : null,
     review: saved.review && typeof saved.review === 'object' ? saved.review : {},
-    goals: saved.goals && typeof saved.goals === 'object' ? saved.goals : {},
-    style: saved.style && typeof saved.style === 'object' ? saved.style : {},
+    ...keptSettings(saved),
     easyRead: saved.easyRead === true,
   };
 }
@@ -129,8 +147,10 @@ export function loadStore(storage = globalThis.localStorage) {
     const known = Array.isArray(saved.order) ? saved.order.filter((id) => profiles[id]) : [];
     const order = [...new Set([...known, ...Object.keys(profiles)])].slice(0, MAX_CHILDREN);
     for (const id of Object.keys(profiles)) if (!order.includes(id)) delete profiles[id];
+    // une partie à deux interrompue (onglet fermé, rechargement) : on retrouve l'enfant d'avant
+    const active = saved.duo && typeof saved.duo === 'object' ? saved.duo.home : saved.active;
     return {
-      active: profiles[saved.active] ? saved.active : null,
+      active: profiles[active] ? active : null,
       order,
       settings: { ...base.settings, ...(saved.settings || {}) },
       profiles,
@@ -142,7 +162,10 @@ export function loadStore(storage = globalThis.localStorage) {
 
 export function saveStore(store, storage = globalThis.localStorage) {
   try {
-    storage?.setItem(STORAGE_KEY, JSON.stringify(store));
+    // pendant une partie à deux, l'enfant actif change à chaque question : on enregistre toujours
+    // celui d'avant la partie, pour le retrouver même si l'app est fermée au milieu
+    const data = store.duo ? { ...store, active: duoHome(store), duo: undefined } : store;
+    storage?.setItem(STORAGE_KEY, JSON.stringify(data));
     return true;
   } catch {
     return false;
@@ -165,14 +188,37 @@ export function logMistake(child, entry) {
 }
 
 /**
- * Efface la progression d'un enfant : étoiles, niveaux, paliers, records des défis chrono,
- * historique (prénom, dessin, classe, photo et réglages des parents sont conservés).
+ * Efface la progression d'un enfant : étoiles, niveaux, paliers, records des défis chrono, historique.
+ * Prénom, dessin, classe et photo sont conservés, ainsi que les réglages des parents (objectifs,
+ * lecture facilitée, jeux masqués ou conseillés) et son personnage.
  */
 export function resetChild(store, id) {
-  const { name, look, grade, photo, spoken, goals, easyRead } = store.profiles[id] || {};
+  const kid = store.profiles[id] || {};
+  const { name, look, grade, photo, spoken, easyRead } = kid;
   store.profiles[id] = {
-    ...defaultChild(grade || 'CP', { name, look }), photo: photo || null, goals: goals || {}, easyRead: Boolean(easyRead),
+    ...defaultChild(grade || 'CP', { name, look }), photo: photo || null, ...keptSettings(kid), easyRead: Boolean(easyRead),
     ...(spoken ? { spoken } : {}),
   };
+  return store;
+}
+
+// ---------------------------------------------------------------- Jouer à deux
+
+/** L'enfant qui jouait avant la partie à deux (s'il existe encore). */
+function duoHome(store) {
+  return store.profiles[store.duo?.home] ? store.duo.home : null;
+}
+
+/** Début d'une partie à deux : on retient l'enfant actif, qui sera rendu à la fin. */
+export function beginDuo(store, players) {
+  store.duo = { players: [...players], home: store.duo ? store.duo.home : store.active };
+  return store;
+}
+
+/** Fin (ou abandon) d'une partie à deux : l'enfant actif redevient celui d'avant. */
+export function endDuo(store) {
+  if (!store.duo) return store;
+  store.active = duoHome(store);
+  delete store.duo;
   return store;
 }

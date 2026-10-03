@@ -4,6 +4,7 @@
 // Usage : npm run test:e2e   (SCREENSHOTS=dossier pour enregistrer des captures)
 //         ONLY=memory,points npm run test:e2e   (seulement la mise en page de ces jeux, sur tous les appareils)
 //         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
+//         ONLY=ecrans npm run test:e2e          (seulement la mise en page des écrans fixes : accueil, listes, duo, parents)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
 //         PARTS=scenario | PARTS=layout SHARD=1/4   (une partie du test, comme dans la CI)
 //         PORT=8124 pour lancer plusieurs tests en même temps
@@ -16,6 +17,7 @@ import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
 import { formatChrono } from '../app/js/games/chrono.js';
 import { PROGRAMS } from '../app/js/programs.js';
+import { starsFor } from '../app/js/progress.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 
 const PORT = Number(process.env.PORT) || 8123;
@@ -100,6 +102,22 @@ async function openGame(page, game, { palier, format = 0 } = {}) {
   await page.click(`[data-game="${game.id}"]`);
   // la tuile conseillée est animée en continu : clic forcé
   if (game.paliers) await page.click(palier ? `[data-palier="${palier}"]` : '.palier-tile.recommended', { force: true });
+}
+
+/** L'enfant actif et les étoiles de chacun, tels qu'enregistrés sur l'appareil. */
+async function savedState(page) {
+  return page.evaluate((key) => {
+    const store = JSON.parse(localStorage.getItem(key));
+    return { active: store.active, stars: Object.fromEntries(Object.entries(store.profiles).map(([id, kid]) => [id, kid.stars])) };
+  }, STORAGE_KEY);
+}
+
+/** Ouvre « Jouer à deux » depuis « Qui joue ? » et choisit les deux joueurs (le premier commence). */
+async function pickDuo(page, players) {
+  await goProfiles(page);
+  await page.click('[data-duo]');
+  await page.waitForSelector('.duo-pick');
+  for (const id of players) await page.click(`[data-pick="${id}"]`);
 }
 
 /** Aucun « null », « undefined » ou « NaN » ne doit apparaître à l'écran. */
@@ -782,6 +800,70 @@ await page.waitForSelector('.home');
 await shot('05-accueil-matteo');
 console.log('✔ profils séparés');
 
+// jouer à deux : Eva-Rose et Matteo, chacun son tour, 10 questions
+const beforeDuo = await savedState(page);
+await pickDuo(page, []);
+if (!(await page.locator('.duo-go').isDisabled())) fail('duo : « C’est parti ! » possible sans avoir choisi deux enfants');
+await page.click('[data-pick="eva-rose"]');
+await page.click('[data-pick="matteo"]');
+if (await page.locator('.duo-go').isDisabled()) fail('duo : « C’est parti ! » impossible avec deux enfants choisis');
+await shot('51-duo-choix');
+await page.click('.duo-go');
+const programOf = (grade) => new Set(Object.values(PROGRAMS[grade]).flat().map(([id]) => id));
+const duoPrograms = { 'eva-rose': programOf('CP'), matteo: programOf('MS') };
+for (let i = 0; i < 10; i++) {
+  const zone = await page.waitForSelector('.choices:not(.answered)');
+  const q = await page.evaluate(() => globalThis.__lc.question);
+  const turn = i % 2 === 0 ? 'eva-rose' : 'matteo';
+  if (!(await page.locator(`.guide-btn .avatar-${turn}`).count())) fail(`duo question ${i + 1} : la question n’est pas posée par ${turn}`);
+  if ((await page.locator('.duo-player').count()) !== 2) fail(`duo question ${i + 1} : les deux portraits ne sont pas en haut`);
+  if (!(await page.locator(`.duo-player.turn[data-duo-player="${turn}"]`).count())) fail(`duo question ${i + 1} : le tour de ${turn} n’est pas mis en avant`);
+  if (!duoPrograms[turn].has(q.from)) fail(`duo question ${i + 1} : ${q.from} n’est pas au programme de ${turn}`);
+  if (i === 0) await shot('52-duo');
+  await answer(page, q, false);
+  await assertNoJunk(page, `duo question ${i + 1}`);
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+}
+await page.waitForSelector('.duo-end');
+await assertNoJunk(page, 'duo résultats');
+await shot('53-duo-resultats');
+if (!(await page.textContent('.duo-team')).includes('équipe')) fail('duo : pas de message pour l’équipe');
+const afterDuo = await savedState(page);
+const duoLines = [];
+for (const id of ['eva-rose', 'matteo']) {
+  const card = page.locator(`[data-duo-result="${id}"]`);
+  const text = (await card.textContent()).replace(/\u2011/g, '-');
+  const good = Number(text.match(/(\d+) bonnes? réponses?/)?.[1]);
+  if (!text.includes(id === 'matteo' ? 'Matteo' : 'Eva-Rose') || Number.isNaN(good)) fail(`duo : résultats de ${id} absents`);
+  const won = afterDuo.stars[id] - beforeDuo.stars[id];
+  if (won < 1 || won !== starsFor(good, 5) || (await card.locator('.big-star.on').count()) !== won) {
+    fail(`duo : ${id} gagne ${won} étoile(s) pour ${good} bonnes réponses sur 5`);
+  }
+  duoLines.push(`${id} ${good}/5, +${won} ⭐`);
+}
+if (afterDuo.active !== beforeDuo.active) fail(`duo : enfant actif « ${afterDuo.active} » au lieu de « ${beforeDuo.active} » après la partie`);
+// rechargement au milieu d'une partie, puis abandon : « Qui joue ? » et l'enfant actif d'avant
+await page.click('[data-duo-again]');
+await page.waitForSelector('.duo-play');
+await page.reload();
+await page.waitForSelector('.profiles');
+if ((await savedState(page)).active !== beforeDuo.active) fail('duo : enfant actif non restauré après un rechargement');
+await pickDuo(page, ['matteo', 'eva-rose']);
+await page.click('.duo-go');
+await page.waitForSelector('.duo-play');
+if (!(await page.locator('.guide-btn .avatar-matteo').count())) fail('duo : le premier enfant choisi ne commence pas');
+await page.click('.top-bar .icon-btn');
+await page.waitForSelector('.profiles');
+if ((await savedState(page)).active !== beforeDuo.active) fail('duo : enfant actif non restauré après un abandon');
+// temps du jour écoulé pour l'un des deux : on le dit, et la partie ne commence pas
+await setStore(page, "store.profiles.matteo.goals = { limit: 10 }; store.profiles.matteo.history.push({ at: new Date().toISOString(), game: 'saisons', level: 1, correct: 5, total: 5, stars: 3, seconds: 900 });");
+await pickDuo(page, ['eva-rose', 'matteo']);
+await page.click('.duo-go');
+await page.waitForSelector('.duo-hint.warning');
+if (!(await page.textContent('.duo-hint')).includes('Matteo') || await page.locator('.duo-play').count()) fail('duo : lancé alors que Matteo a fini son temps du jour');
+await setStore(page, 'store.profiles.matteo.goals = {}; store.profiles.matteo.history.pop();');
+console.log(`✔ jouer à deux (10 questions en alternance, ${duoLines.join(', ')} ; enfant actif rendu ; temps du jour respecté)`);
+
 // espace parents : barrière, tableau de bord, changement de classe
 await goProfiles(page);
 await page.click('.parent-btn');
@@ -839,6 +921,44 @@ await page.fill('[data-field="name"]', 'Eva-Rose');
 await page.click('.child-submit');
 await page.waitForSelector('.toast');
 console.log('✔ espace parents (barrière, suivi, classe et prénom modifiés, enfant ajouté puis supprimé)');
+
+// ses jeux : masquer un jeu et en conseiller un autre pour Eva-Rose (CE1), masquer une rubrique
+await page.click('[data-domain-games="maths"] summary');
+await page.click('[data-show-game="tables"]');
+await page.waitForSelector('[data-show-game="tables"][aria-pressed="false"]');
+if (!(await page.locator('[data-feature-game="tables"]').isDisabled())) fail('ses jeux : un jeu masqué peut être conseillé');
+await page.click('[data-feature-game="problemes"]');
+await page.waitForSelector('[data-feature-game="problemes"][aria-pressed="true"]');
+await page.click('[data-domain-switch="monde"]');
+await page.waitForSelector('[data-kid-domain="monde"].off');
+await shot('54-ses-jeux');
+const kidSettings = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'], STORAGE_KEY);
+if (!kidSettings.hiddenGames.includes('tables') || !kidSettings.featured.includes('problemes') || !kidSettings.hiddenDomains.includes('monde')) {
+  fail(`ses jeux : réglages non enregistrés (${JSON.stringify([kidSettings.hiddenGames, kidSettings.featured, kidSettings.hiddenDomains])})`);
+}
+await goProfile(page, 'eva-rose');
+if (!(await page.textContent('.home-featured')).includes('Conseillé pour toi')) fail('accueil : bloc « Conseillé pour toi » absent');
+if (!(await page.locator('.home-featured [data-featured="problemes"]').count())) fail('accueil : le jeu conseillé est absent');
+if (await page.locator('[data-domain="monde"]').count()) fail('accueil : la rubrique masquée est affichée');
+await shot('55-accueil-conseille');
+await page.click('[data-domain="maths"]');
+if (await page.locator('[data-game="tables"]').count()) fail('rubrique : le jeu masqué est affiché');
+if (!(await page.locator('.game-card.featured [data-game="problemes"] .featured-badge').count())) fail('rubrique : pas de badge ⭐ sur le jeu conseillé');
+await goProfile(page, 'eva-rose');
+await page.click('[data-featured="problemes"]');
+await page.waitForSelector('.choices');
+if (!(await page.evaluate(() => globalThis.__lc.question.key))) fail('accueil : le jeu conseillé ne s’ouvre pas');
+// on remet le jeu et la rubrique (le jeu conseillé reste) pour la suite du parcours
+await goProfiles(page);
+await page.click('.parent-btn');
+await page.click('[data-tab="enfants"]');
+await page.click('[data-edit="eva-rose"]');
+await page.click('[data-domain-games="maths"] summary');
+await page.click('[data-show-game="tables"]');
+await page.click('[data-domain-switch="monde"]');
+await page.waitForSelector('[data-show-game="tables"][aria-pressed="true"]');
+await page.waitForSelector('[data-kid-domain="monde"]:not(.off)');
+console.log('✔ ses jeux (jeu masqué, jeu conseillé en haut de l’accueil et avec un badge, rubrique masquée)');
 
 // réglages : photo depuis l'iPhone (enregistrée automatiquement), version, journal, crédits
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -958,12 +1078,17 @@ const STRESS = {
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
-    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell')) {
+    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game')) {
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
     const zone = document.querySelector('.choices, .home-menu, .profile-list');
     if (mustReach && zone && zone.getBoundingClientRect().bottom > window.innerHeight + 1) {
       return `boutons hors de l'écran (${Math.round(zone.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
+    }
+    // « Jouer à deux » : le bouton « C'est parti ! » sous les portraits doit aussi être visible
+    const go = document.querySelector('.duo-go');
+    if (mustReach && go && go.getBoundingClientRect().bottom > window.innerHeight + 1) {
+      return `« C’est parti ! » hors de l'écran (${Math.round(go.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
     }
     // en paysage, le dessin est à côté des réponses : il doit aussi tenir dans l'écran
     const stage = document.querySelector('.stage');
@@ -992,7 +1117,8 @@ async function checkDevice(device, repeat, deviceIndex) {
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
 
   // écrans fixes
-  if (!ONLY && mine(deviceIndex)) {
+  const screens = !ONLY || ONLY.includes('ecrans');
+  if (screens && mine(deviceIndex)) {
   await goProfiles(page);
   await checkLayout(page, tag('Qui joue ?'));
   for (const [id, grade] of [['matteo', 'MS'], ['eva-rose', 'CP']]) {
@@ -1005,6 +1131,19 @@ async function checkDevice(device, repeat, deviceIndex) {
       await page.click('.top-bar .icon-btn');
     }
   }
+  // accueil avec des jeux conseillés : un seul (Matteo), puis trois aux titres longs (Eva-Rose)
+  await setStore(page, "store.profiles.matteo.featured = ['coloriage-magique'];");
+  await goProfile(page, 'matteo');
+  await checkLayout(page, tag('accueil conseillé matteo'));
+  await setStore(page, "store.profiles['eva-rose'].featured = ['relie-calculs', 'petits-textes', 'chemin-nombres'];");
+  await goProfile(page, 'eva-rose');
+  await checkLayout(page, tag('accueil conseillé eva-rose'));
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-accueil-conseille.png` });
+  await setStore(page, "store.profiles.matteo.featured = []; store.profiles['eva-rose'].featured = [];");
+  // jouer à deux : le choix des deux joueurs
+  await pickDuo(page, ['eva-rose', 'matteo']);
+  await checkLayout(page, tag('choix du duo'));
+  await goProfile(page);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-accueil.png` });
   await page.click('[data-domain="maths"]');
   await page.click('[data-levels="calcul"], [data-levels="compter"]');
@@ -1013,7 +1152,7 @@ async function checkDevice(device, repeat, deviceIndex) {
   await goProfile(page);
   await page.click('[data-dress]');
   await checkLayout(page, tag('personnage'), { reachable: false });
-  checked += 16;
+  checked += 22;
   }
 
   // chaque niveau de chaque jeu
@@ -1030,13 +1169,13 @@ async function checkDevice(device, repeat, deviceIndex) {
       }
     }
   }
-  if (ONLY || !mine(deviceIndex)) {
+  if ((ONLY && !screens) || !mine(deviceIndex)) {
     await ctx.close();
     return checked;
   }
-  // calcul : un palier sur trois, les 4 formes d'exercice
+  // calcul : un palier sur trois, les 4 formes d'exercice (pas avec ONLY=ecrans)
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
-  for (const palier of CALC_PALIERS.filter((_, i) => i % 3 === 2)) {
+  for (const palier of ONLY ? [] : CALC_PALIERS.filter((_, i) => i % 3 === 2)) {
     for (let format = 0; format < 4; format++) {
       await openGame(page, findGame('calcul'), { palier: palier.id, format });
       await page.waitForSelector('.choices');
@@ -1060,6 +1199,7 @@ async function checkDevice(device, repeat, deviceIndex) {
   await page.click('[data-tab="enfants"]');
   await checkLayout(page, tag('enfants'), { reachable: false });
   await page.click('[data-edit="eva-rose"]');
+  await page.click('[data-domain-games="maths"] summary'); // « Ses jeux » : une rubrique dépliée
   await checkLayout(page, tag('modifier un enfant'), { reachable: false });
   await page.click('.top-bar .icon-btn');
   await page.click('[data-tab="reglages"]');

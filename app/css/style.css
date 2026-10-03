@@ -1852,3 +1852,198 @@ body[data-season="ete"] { background: #fffbea; }
   .chrono-result p { font-size: 1rem; }
   .chrono-record.new { font-size: 1.15rem; }
 }
+
+/* =====================================================================
+   1.7 : jouer à deux, jeux choisis par les parents
+   ===================================================================== */
+.featured-icon, .duo-btn-icon, .duo-final-sticker, .featured-badge {
+  font-family: 'Andika', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+}
+
+/* « Qui joue ? » : le bouton « Jouer à deux » à gauche, « Parents » à droite */
+.profiles .top-bar { grid-template-columns: auto 1fr auto; }
+.duo-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px 0 12px; border-radius: 999px;
+  background: #5a40e0; color: #fff; font-weight: 700; font-size: 1rem; white-space: nowrap; box-shadow: 0 3px 0 #3f2aa8;
+}
+.duo-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #3f2aa8; }
+.duo-btn-icon { font-size: 1.3rem; line-height: 1; }
+
+/* choix des deux joueurs : le numéro indique qui commence (pas seulement le contour) */
+.duo-pick .top-bar { grid-template-columns: 52px minmax(0, 1fr) 52px; }
+.duo-hint { margin: 6px 0 16px; min-height: 1.3em; text-align: center; font-size: 1.3rem; font-weight: 700; }
+.duo-hint.warning { margin-left: auto; margin-right: auto; padding: 8px 14px; border-radius: 16px; background: #ffe3ec; color: #a61e4d; font-size: 1.2rem; }
+.duo-card { position: relative; }
+.profile-card.duo-card.picked { box-shadow: 0 7px 0 var(--ink), inset 0 0 0 5px var(--ink); }
+.duo-order {
+  position: absolute; top: 10px; left: 10px; padding: 2px 10px; border-radius: 999px;
+  background: var(--ink); color: #fff; font-weight: 700; font-size: 1.05rem;
+}
+.duo-order:empty { display: none; }
+.duo-go { align-self: center; width: min(100%, 360px); margin-top: 20px; }
+.duo-go:disabled { opacity: 0.45; cursor: default; transform: none; }
+
+/* pendant la partie : les deux portraits et les bonnes réponses ; l'enfant dont c'est le tour est plus grand et entouré */
+.domain-theme-duo { --accent: #4f46e5; --accent-dark: #3730a3; --accent-soft: #e0e7ff; }
+.duo-score { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.duo-players { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; max-width: 100%; }
+.duo-player {
+  display: flex; align-items: center; gap: 4px; min-width: 0; padding: 2px 8px 2px 2px; border-radius: 999px;
+  font-weight: 700; color: var(--muted); white-space: nowrap;
+}
+.duo-player .avatar { width: 28px; height: 28px; opacity: 0.75; }
+.duo-player.turn { flex: 0 1 auto; padding: 3px 10px 3px 3px; background: var(--card); color: var(--ink); box-shadow: 0 3px 0 var(--line), inset 0 0 0 3px var(--accent); }
+.duo-player.turn .avatar { width: 38px; height: 38px; opacity: 1; }
+.duo-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; }
+.duo-player:not(.turn) .duo-name { display: none; }
+.duo-points { flex: none; font-size: 0.95rem; }
+.duo-score .progress { gap: 3px; }
+.duo-score .step { width: 8px; height: 8px; }
+.duo-score .step.current { box-shadow: 0 0 0 2px var(--accent) inset; }
+@media (min-width: 440px) {
+  .duo-player:not(.turn) .duo-name { display: inline; }
+}
+
+/* résultats des deux enfants */
+.duo-end { justify-content: flex-start; gap: 6px; }
+.duo-end > .top-bar { align-self: stretch; }
+.duo-end .top-title { margin: 0; font-size: 1.35rem; }
+.duo-team { margin: 0; font-size: 2.1rem; }
+.duo-final { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; margin-top: 8px; }
+.duo-final-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 12px 8px;
+  border-radius: 22px; background: var(--card); box-shadow: 0 5px 0 var(--line);
+}
+.duo-final-name { margin: 2px 0 0; font-size: 1.3rem; overflow-wrap: anywhere; }
+.duo-final-detail { margin: 0; font-weight: 700; }
+.duo-final .result-stars { gap: 2px; }
+.duo-final .big-star { font-size: 34px; }
+.duo-final-gain { margin: 0; font-weight: 700; font-size: 1.15rem; color: var(--good-dark); }
+.duo-final-sticker { margin: 0; font-weight: 700; font-size: 0.9rem; color: var(--album-dark); }
+.duo-actions { margin-top: 14px; }
+
+/* accueil : « ⭐ Conseillé pour toi » (texte foncé sur fond blanc, la couleur de la rubrique n'est qu'un décor) */
+.home-featured { display: flex; flex-direction: column; gap: 6px; }
+.featured-label { margin: 0; font-size: 1.05rem; color: var(--ink); }
+.featured-list { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); gap: 10px; }
+.featured-list.n2 { --n: 2; }
+.featured-list.n3 { --n: 3; }
+.featured-game {
+  display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 52px; padding: 6px 12px;
+  border-radius: 18px; background: var(--card); color: var(--ink); text-align: left; font-weight: 700; font-size: 1rem; line-height: 1.15;
+  box-shadow: 0 4px 0 var(--accent-soft), inset 0 0 0 3px var(--accent);
+}
+.featured-game:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-soft), inset 0 0 0 3px var(--accent); }
+.featured-icon { flex: none; font-size: 1.7rem; line-height: 1; }
+.featured-title {
+  min-width: 0; overflow: hidden; overflow-wrap: break-word;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.featured-list.n3 .featured-game { flex-direction: column; justify-content: center; gap: 3px; min-height: 64px; padding: 6px; text-align: center; font-size: 0.85rem; }
+.featured-list.n3 .featured-icon { font-size: 1.5rem; }
+.home-empty { text-align: center; }
+
+/* accueil avec des jeux conseillés : tuiles plus basses (icône à côté du nom), tout tient sans défiler */
+.home.has-featured .season-decor { display: none; }
+.home.has-featured .home-hero { margin-bottom: 10px; }
+.home.has-featured .home-menu, .home.has-featured .home-grid { gap: 10px; }
+.home.has-featured .domain-tile { min-height: 60px; flex-direction: row; gap: 8px; padding: 6px 10px; font-size: 1.1rem; }
+.home.has-featured .domain-tile .domain-icon { font-size: 1.7rem; }
+.home.has-featured .home-top .domain-btn, .home.has-featured .home-bottom .domain-btn { min-height: 56px; }
+@media (min-height: 800px) {
+  .home.has-featured .domain-tile { min-height: 72px; }
+}
+
+/* téléphone en portrait, « Défi du jour » et « Je révise » côte à côte : la pastille (« 1 jeu »,
+   « ✓ fait ») passe dans le coin du bouton pour que le texte tienne dans la largeur */
+@media (max-width: 480px) {
+  .home-top > .domain-btn:not(:only-child) { position: relative; gap: 8px; padding: 8px 10px; font-size: 1.2rem; }
+  .home-top > .domain-btn:not(:only-child) .domain-icon { font-size: 1.7rem; }
+  .home-top > .domain-btn:not(:only-child) .pill {
+    position: absolute; top: 4px; right: 4px; margin: 0; padding: 0 7px; font-size: 0.75rem; line-height: 1.5; background: rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* badge dans la liste des jeux de la rubrique */
+.game-card.featured { box-shadow: 0 5px 0 var(--accent-soft), 0 0 0 3px #e6b800 inset; }
+.featured-badge {
+  padding: 2px 10px; border-radius: 999px; background: #fff1c2; color: var(--ink);
+  font-size: 0.8rem; font-weight: 700; white-space: nowrap; box-shadow: inset 0 0 0 2px #e6b800;
+}
+
+/* espace parents : « Ses jeux » (l'état est écrit sur chaque bouton, pas seulement en couleur) */
+.kid-games { display: flex; flex-direction: column; }
+.kid-domain { border-top: 1px solid var(--line); padding: 2px 0 4px; }
+.kid-domain-head.setting { border-top: 0; padding: 8px 0 2px; }
+.kid-domain-title { flex: 1; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+.kid-domain-state { font-size: 0.85rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.kid-domain.off .kid-domain-title { color: var(--muted); }
+.kid-domain-games summary {
+  display: flex; align-items: center; min-height: 40px; cursor: pointer;
+  font-size: 0.95rem; font-weight: 700; color: var(--lecture-dark);
+}
+.kid-game { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 0; border-top: 1px dashed var(--line); }
+.kid-game-title { flex: 1 1 150px; min-width: 0; overflow-wrap: anywhere; font-weight: 700; }
+.kid-game.off .kid-game-title { color: var(--muted); text-decoration: line-through; }
+.kid-game-ctrls { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.kid-toggle {
+  min-height: 40px; padding: 0 12px; border-radius: 999px; background: var(--bg); color: var(--ink);
+  font-size: 0.9rem; font-weight: 700; white-space: nowrap; box-shadow: inset 0 0 0 2px var(--line);
+}
+.kid-toggle.on { background: #d8f5e6; box-shadow: inset 0 0 0 2px var(--good); }
+.kid-toggle.star.on { background: #fff1c2; box-shadow: inset 0 0 0 2px #e6b800; }
+.kid-toggle:disabled { opacity: 0.45; cursor: default; }
+.kid-games-full { margin-top: 8px; }
+
+/* téléphone en paysage */
+@media (orientation: landscape) and (max-height: 520px) {
+  /* accueil avec des jeux conseillés : le bonjour monte dans la barre du haut, les conseils sur une ligne */
+  .screen.home.has-featured {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-content: start; column-gap: 12px; row-gap: 8px;
+  }
+  .home.has-featured > .top-bar { display: contents; }
+  .home.has-featured > .top-bar > * { grid-row: 1; align-self: center; }
+  .home.has-featured > .top-bar > :nth-child(2) { display: none; }
+  .home.has-featured > .top-bar > :last-child { grid-column: 3; }
+  .home.has-featured > .home-hero {
+    grid-row: 1; grid-column: 2; margin: 0; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 2px 14px;
+  }
+  .home.has-featured .home-title { margin: 0; font-size: 1.4rem; }
+  .home.has-featured .goal-bar { margin: 0; flex-direction: row; gap: 8px; }
+  .home.has-featured > .home-menu { grid-column: 1 / -1; gap: 8px; }
+  .home.has-featured .home-grid { gap: 8px; }
+  .home.has-featured .domain-tile { min-height: 52px; font-size: 1rem; }
+  .home.has-featured .domain-tile .domain-icon { font-size: 1.5rem; }
+  .home.has-featured .home-top .domain-btn, .home.has-featured .home-bottom .domain-btn { min-height: 44px; }
+  .home-featured { flex-direction: row; align-items: center; gap: 12px; }
+  .featured-label { flex: none; font-size: 1rem; white-space: nowrap; }
+  .featured-list { flex: 1; min-width: 0; }
+  .featured-game, .featured-list.n3 .featured-game {
+    flex-direction: row; justify-content: flex-start; min-height: 44px; padding: 4px 10px; gap: 6px; text-align: left; font-size: 0.9rem;
+  }
+  .featured-icon, .featured-list.n3 .featured-icon { font-size: 1.4rem; }
+
+  /* choix des deux joueurs */
+  .duo-hint { margin: 0 0 8px; font-size: 1.2rem; }
+  .duo-hint.warning { padding: 4px 12px; font-size: 1rem; }
+  .duo-pick .avatar-xl { width: min(84px, 22dvh); height: min(84px, 22dvh); }
+  .duo-go { min-height: 48px; margin-top: 10px; }
+
+  /* pendant la partie */
+  .duo-player .avatar { width: 24px; height: 24px; }
+  .duo-player.turn .avatar { width: 32px; height: 32px; }
+  .duo-score { gap: 2px; }
+
+  /* résultats : les deux enfants à gauche, les boutons à droite */
+  .screen.duo-end {
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-content: start; align-items: center; column-gap: 20px; row-gap: 6px;
+  }
+  .duo-end > .top-bar, .duo-team { grid-column: 1 / -1; }
+  .duo-team { font-size: 1.6rem; }
+  .duo-final { margin: 0; }
+  .duo-final-card { padding: 8px 6px; gap: 2px; }
+  .duo-final .avatar-md { width: 56px; height: 56px; }
+  .duo-final .big-star { font-size: 26px; }
+  .duo-actions { margin: 0; }
+  .duo-actions .big-btn { min-height: 52px; font-size: 1.2rem; }
+}

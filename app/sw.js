@@ -42,6 +42,7 @@ const PRECACHE = [
   './js/games/textes.js',
   './js/main.js',
   './js/photo.js',
+  './js/picks.js',
   './js/programs.js',
   './js/progress.js',
   './js/random.js',
