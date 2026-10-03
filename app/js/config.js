@@ -4,12 +4,30 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.4.0',
+  version: '1.5.0',
   author: 'Michaël Durieux',
+  contact: 'michael.jurier@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.5.0',
+    date: '2026-10-03',
+    changes: [
+      'Nouvel accueil en rubriques : Lire et écrire, Histoires, Nombres et calcul, Jeux de logique, Temps et mesures, Le monde, Anglais.',
+      'Histoires lues en karaoké : chaque mot s’allume quand il est lu, puis une question.',
+      'Monnaie (compter, payer le bon prix, rendre la monnaie), mesures (règle, balance, unités) et calendrier.',
+      'Géométrie : reproduire un dessin sur quadrillage, les pièces du carré (tangram).',
+      'Anglais parlé : saluer, petites conversations avec le prénom de l’enfant, comptines.',
+      'Je révise : les jeux ratés reviennent, puis de plus en plus espacés (1, 3 et 7 jours).',
+      'Objectif du jour et temps maximum par enfant, avec une pause douce.',
+      'Habiller son personnage avec les étoiles gagnées ; jeux bonus (bulles, puzzle, coloriage) après une bonne partie.',
+      'Lecture facilitée (dyslexie), décors de saison et musique douce (à activer).',
+      'Relier des couleurs : la paire reliée prend sa propre couleur.',
+      'Une seule voix pour toute l’app, réglable ; contact pour les remarques dans « À propos ».',
+    ],
+  },
   {
     version: '1.4.0',
     date: '2026-10-03',

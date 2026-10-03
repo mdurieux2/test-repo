@@ -136,9 +136,9 @@ Il ouvre trois onglets :
 - **Enfants** : ajouter un enfant, changer son prénom, son personnage, sa classe ou sa photo
   (photothèque ou appareil photo, enregistrée automatiquement), effacer sa progression ou
   supprimer son profil. On y trouve aussi **Partager le lien**.
-- **Réglages** : consignes lues ou non, choix des voix (filles et garçons) avec un bouton
-  d'essai, petits sons, nombre de questions par partie, installation, version et journal des
-  modifications.
+- **Réglages** : consignes lues ou non, choix de la voix avec un bouton d'essai, petits sons,
+  musique douce, décors de saison, nombre de questions par partie, installation, version,
+  journal des modifications, et le contact pour vos remarques.
 
 ### Des voix plus naturelles
 

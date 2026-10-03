@@ -1,7 +1,7 @@
 // Jeux de logique et d'espace (inspirés des applis d'énigmes) : la symétrie sur
 // quadrillage, et compter des cubes empilés (certains sont cachés).
 
-import { randInt, sample } from '../random.js';
+import { pick, randInt, sample, shuffle } from '../random.js';
 import { numberChoices } from './helpers.js';
 
 // ---------------------------------------------------------------- La symétrie
@@ -104,4 +104,94 @@ export const cubes = {
   },
 };
 
-export const LOGIQUE_GAMES = [symetrie, cubes];
+// ---------------------------------------------------------------- Reproduire une figure
+
+const COPY_LEVELS = [
+  { label: 'Quadrillage 4 × 4, 3 cases', cols: 4, rows: 4, cells: 3 },
+  { label: 'Quadrillage 6 × 6, 5 cases', cols: 6, rows: 6, cells: 5 },
+  { label: 'Quadrillage 8 × 8, 8 cases', cols: 8, rows: 8, cells: 8 },
+];
+
+export const reproduire = {
+  id: 'reproduire',
+  domain: 'maths',
+  section: 'Formes et logique',
+  title: 'Reproduis le dessin',
+  icon: '✏️',
+  skill: 'Se repérer sur un quadrillage : reproduire une figure',
+  levels: COPY_LEVELS.map((l) => l.label),
+  generate(level, rng) {
+    const { cols, rows, cells } = COPY_LEVELS[level - 1];
+    const left = Array.from({ length: cols * rows }, (_, i) => i).filter((i) => i % cols < cols / 2);
+    const model = sample(rng, left, cells).sort((a, b) => a - b);
+    const solution = model.map((c) => c + cols / 2);
+    return {
+      key: `reproduire:${level}:${model.join('-')}`,
+      interaction: 'symmetry',
+      text: 'Fais le même dessin de l’autre côté.',
+      instruction: 'Colorie les cases pour faire exactement le même dessin de l’autre côté du trait. Puis touche « J’ai fini ».',
+      short: { key: 'reproduire', text: 'Le même dessin !' },
+      stage: { type: 'symmetry', cols, rows, axis: 'v', model, solution, mode: 'copy' },
+      choices: [],
+      answer: null,
+      success: { speak: 'Bravo, c’est le même dessin !' },
+    };
+  },
+};
+
+// ---------------------------------------------------------------- Les pièces du carré (tangram simplifié)
+
+// Triangles dans une case de côté 1 : par les deux diagonales (niveau 1) ou par une seule (niveau 2).
+export const PIECES = {
+  haut: [[0, 0], [1, 0], [0.5, 0.5]],
+  droite: [[1, 0], [1, 1], [0.5, 0.5]],
+  bas: [[0, 1], [1, 1], [0.5, 0.5]],
+  gauche: [[0, 0], [0, 1], [0.5, 0.5]],
+  'coin-hg': [[0, 0], [1, 0], [0, 1]],
+  'coin-hd': [[0, 0], [1, 0], [1, 1]],
+  'coin-bg': [[0, 0], [0, 1], [1, 1]],
+  'coin-bd': [[1, 0], [0, 1], [1, 1]],
+};
+const PIECE_COLORS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f43', '#2ec4b6', '#f368e0'];
+
+export const tangram = {
+  id: 'tangram',
+  domain: 'maths',
+  section: 'Formes et logique',
+  title: 'Les pièces du carré',
+  icon: '🔷',
+  skill: 'Reconnaître une forme et son orientation pour compléter une figure',
+  levels: ['Un carré en 4 triangles', 'Quatre carrés coupés en deux'],
+  generate(level, rng) {
+    let pieces;
+    let missing;
+    const colors = shuffle(rng, PIECE_COLORS);
+    let options;
+    if (level === 1) {
+      const shapes = ['haut', 'droite', 'bas', 'gauche'];
+      missing = { cell: 0, shape: pick(rng, shapes) };
+      pieces = shapes.filter((sh) => sh !== missing.shape).map((shape, i) => ({ cell: 0, shape, color: colors[i] }));
+      options = shapes;
+    } else {
+      // chaque case est coupée par une diagonale « \ » (coin-hd + coin-bg) ou « / » (coin-hg + coin-bd)
+      const cuts = Array.from({ length: 4 }, () => (rng() < 0.5 ? ['coin-hd', 'coin-bg'] : ['coin-hg', 'coin-bd']));
+      const all = cuts.flatMap((pair, cell) => pair.map((shape) => ({ cell, shape })));
+      missing = pick(rng, all);
+      pieces = all.filter((p) => p !== missing).map((p, i) => ({ ...p, color: colors[i % colors.length] }));
+      options = ['coin-hg', 'coin-hd', 'coin-bg', 'coin-bd'];
+    }
+    return {
+      key: `tangram:${level}:${missing.cell}:${missing.shape}:${pieces.map((p) => p.shape[0]).join('')}`,
+      text: 'Quelle pièce bouche le trou ?',
+      instruction: 'Regarde le trou dans le carré. Quelle pièce le bouche exactement ?',
+      short: { key: 'tangram', text: 'Quelle pièce ?' },
+      stage: { type: 'tangram', grid: level === 1 ? 1 : 2, pieces, missing },
+      choices: shuffle(rng, options).map((shape) => ({ value: shape, piece: shape, name: 'pièce' })),
+      choiceStyle: 'pictures',
+      answer: missing.shape,
+      success: { speak: 'Oui, c’est la bonne pièce !' },
+    };
+  },
+};
+
+export const LOGIQUE_GAMES = [symetrie, reproduire, tangram, cubes];

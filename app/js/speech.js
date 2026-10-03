@@ -3,16 +3,14 @@
 //
 // Pour une voix plus naturelle, on choisit automatiquement la meilleure voix installée :
 // « Premium », puis « améliorée », puis la voix compacte. Les voix gadget (Grand-mère,
-// Rocko…) sont écartées. Le parent peut aussi choisir une voix dans les Réglages.
+// Rocko…) sont écartées. Une seule voix pour toute l'app ; le parent peut la choisir dans les Réglages.
 
 const synth = globalThis.speechSynthesis;
 let enabled = true;
-let voices = { female: null, male: null, any: null, en: null };
-let preferences = {}; // { female: voiceURI, male: voiceURI } choisis dans les Réglages
+let voices = { main: null, en: null };
+let preferences = {}; // { main: voiceURI } choisie dans les Réglages
 let queueId = 0;
 
-const FEMALE = ['Audrey', 'Aurélie', 'Amélie', 'Marie', 'Virginie', 'Julie', 'Céline', 'Chantal', 'Google français'];
-const MALE = ['Thomas', 'Nicolas', 'Paul', 'Mathieu', 'Henri'];
 const NOVELTY = ['Grand', 'Eddy', 'Flo', 'Reed', 'Rocko', 'Sandy', 'Shelley', 'Jacques', 'Albert', 'Bad', 'Bells', 'Boing',
   'Bubbles', 'Cellos', 'Wobble', 'Good News', 'Jester', 'Organ', 'Superstar', 'Trinoids', 'Whisper', 'Zarvox'];
 
@@ -42,13 +40,10 @@ function chooseVoices() {
   if (!synth) return;
   const fr = frenchVoices();
   const byUri = (uri) => fr.find((v) => v.voiceURI === uri) || null;
-  const named = (names) => fr.filter((v) => names.some((n) => v.name.includes(n)));
   const english = synth.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith('en'));
-  const anyFr = best(fr, 'fr-FR');
   voices = {
-    female: byUri(preferences.female) || best(named(FEMALE), 'fr-FR') || anyFr,
-    male: byUri(preferences.male) || best(named(MALE), 'fr-FR') || anyFr,
-    any: anyFr,
+    // une seule voix pour toute l'app (l'ancien réglage « voix des filles » est repris)
+    main: byUri(preferences.main) || byUri(preferences.female) || best(fr, 'fr-FR'),
     en: best(english, 'en-GB'),
   };
 }
@@ -92,7 +87,7 @@ function sayOne(part, id) {
     const { text, rate = 0.95, pitch = 1, voice, lang = 'fr-FR' } = part;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
-    const chosen = lang.startsWith('en') ? voices.en : voices[voice] || voices.any;
+    const chosen = lang.startsWith('en') ? voices.en : voices.main;
     if (chosen) {
       utterance.voice = chosen;
       utterance.lang = chosen.lang;
@@ -107,6 +102,9 @@ function sayOne(part, id) {
     };
     utterance.onend = done;
     utterance.onerror = done;
+    // lecture en karaoké : on suit les mots lus (si le navigateur le permet)
+    if (part.onStart) utterance.onstart = () => part.onStart();
+    if (part.onWord) utterance.onboundary = (e) => { if (!e.name || e.name === 'word') part.onWord(e.charIndex); };
     synth.speak(utterance);
   });
 }

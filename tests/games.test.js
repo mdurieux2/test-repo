@@ -5,7 +5,10 @@ import { CALC_PALIERS, CALC_FORMATS, equationHolds } from '../app/js/games/maths
 import { areNeighbours, canMove } from '../app/js/games/labyrinthes.js';
 import { clockLabel, countSolutions, sudokuAllows } from '../app/js/games/maths-extra.js';
 import { TEXT_DATA } from '../app/js/games/textes.js';
-import { mirrorCell } from '../app/js/games/logique.js';
+import { mirrorCell, PIECES } from '../app/js/games/logique.js';
+import { makeChange } from '../app/js/games/mesures.js';
+import { STORY_DATA } from '../app/js/games/histoires.js';
+import { seasonOf } from '../app/js/themes.js';
 import { createRng } from '../app/js/random.js';
 import {
   FIRST_SOUNDS, PICTURES, READING_WORDS, SIGHT_WORDS, SYLLABLE_LEVELS,
@@ -80,10 +83,15 @@ function checkQuestion(q, ctx) {
     case 'symmetry': {
       const { cols, rows, axis, model, solution } = q.stage;
       assert.equal(model.length, solution.length, ctx);
-      assert.deepEqual([...model.map((c) => mirrorCell(c, cols, rows, axis))].sort((a, b) => a - b), solution, ctx);
+      const image = (c) => (q.stage.mode === 'copy' ? c + cols / 2 : mirrorCell(c, cols, rows, axis));
+      assert.deepEqual([...model.map(image)].sort((a, b) => a - b), solution, ctx);
       assert.equal(new Set([...model, ...solution]).size, model.length * 2, `modèle et reflet se chevauchent : ${ctx}`);
       break;
     }
+    case 'pay':
+      assert.ok(Number.isInteger(q.answer) && q.answer >= 1 && q.answer <= 50, ctx);
+      assert.ok(q.values.includes(1), `on doit pouvoir payer toute somme : ${ctx}`);
+      break;
     case 'sudoku': {
       const { size, puzzle, solution } = q.stage;
       assert.equal(puzzle.length, size * size, ctx);
@@ -114,7 +122,7 @@ test('les identifiants de jeux sont uniques et rangés par matière', () => {
   const ids = GAMES.map((g) => g.id);
   assert.equal(new Set(ids).size, ids.length);
   for (const d of DOMAINS) for (const g of d.games) assert.equal(g.domain, d.id, g.id);
-  assert.deepEqual(DOMAINS.map((d) => d.id), ['francais', 'maths', 'anglais', 'monde']);
+  assert.deepEqual(DOMAINS.map((d) => d.id), ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'anglais']);
   assert.equal(findGame('calcul').title, 'Calcul');
 });
 
@@ -244,6 +252,64 @@ test('le monde : réponses présentes, phrases sans faute de liaison', () => {
       assert.ok(!/de le |de les |à le /.test(`${q.text} ${q.success.speak}`), `${q.text} / ${q.success.speak}`);
     }
   }
+});
+
+test('monnaie : la somme montrée est la réponse, payer et rendre sont justes', () => {
+  assert.deepEqual(makeChange(18, [1, 2, 5, 10]), [10, 5, 2, 1]);
+  for (const { level, q } of questions(findGame('monnaie'))) {
+    if (level <= 2) assert.equal(q.stage.items.reduce((a, b) => a + b, 0), q.answer);
+    if (level === 4) assert.equal(q.stage.paid - q.stage.price, q.answer);
+  }
+});
+
+test('mesures et calendrier : réponses justes', () => {
+  for (const { level, q } of questions(findGame('mesures'))) {
+    if (level === 1) assert.equal(q.answer, Math.max(...q.choices.map((c) => c.value)));
+    if (level === 2 || level === 3) {
+      assert.equal(q.answer, q.stage.length);
+      assert.ok(q.stage.start + q.stage.length <= 10, 'le crayon dépasse la règle');
+    }
+    if (level === 4) assert.equal(q.stage.heavier === 'left' ? q.stage.left : q.stage.right, q.answer);
+  }
+  const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+  for (const { level, q } of questions(findGame('calendrier'))) {
+    if (level === 2) assert.equal(q.answer, days[(q.stage.firstWeekday + q.stage.mark - 1) % 7]);
+    if (level === 3) assert.ok(q.answer <= q.stage.days);
+  }
+});
+
+test('les pièces du carré : la bonne pièce a la forme du trou', () => {
+  for (const { q } of questions(findGame('tangram'))) {
+    assert.equal(q.answer, q.stage.missing.shape);
+    assert.ok(PIECES[q.answer]);
+    assert.ok(!q.stage.pieces.some((p) => p.cell === q.stage.missing.cell && p.shape === q.stage.missing.shape));
+  }
+});
+
+test('histoires : 3 niveaux, une bonne réponse parmi 3, histoires courtes', () => {
+  for (const level of [1, 2, 3]) assert.ok(STORY_DATA.filter((st) => st.level === level).length >= 4);
+  for (const story of STORY_DATA) {
+    assert.equal(new Set([story.answer, ...story.others]).size, 3, story.title);
+    assert.ok(story.sentences.length >= 3 && story.sentences.length <= 4, story.title);
+  }
+});
+
+test('anglais parlé : le prénom de l’enfant dans la conversation', () => {
+  const game = findGame('parle-anglais');
+  const rng = createRng(5);
+  for (let i = 0; i < 100; i++) {
+    const q = game.generate(2, rng, i, { name: 'Zoé' });
+    if (q.answer.startsWith('My name')) assert.equal(q.answer, 'My name is Zoé.');
+  }
+});
+
+test('décors de saison selon la date', () => {
+  assert.equal(seasonOf(new Date(2026, 11, 20)).id, 'noel');
+  assert.equal(seasonOf(new Date(2026, 9, 31)).id, 'halloween');
+  assert.equal(seasonOf(new Date(2026, 3, 10)).id, 'printemps');
+  assert.equal(seasonOf(new Date(2026, 6, 14)).id, 'ete');
+  assert.equal(seasonOf(new Date(2026, 9, 3)).id, 'automne');
+  assert.equal(seasonOf(new Date(2026, 0, 15)).id, 'hiver');
 });
 
 test('patates : paquets de 2, 5 ou 10, la réponse est le nombre d’objets', () => {

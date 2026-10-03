@@ -6,7 +6,7 @@
 import { chromium } from 'playwright';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { startServer } from './serve.mjs';
-import { GAMES, findGame } from '../app/js/games/index.js';
+import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
@@ -178,6 +178,11 @@ async function answer(page, q, wrongFirst) {
       for (let i = 0; i < q.pairs.length; i++) {
         await page.click(`[data-left="${i}"]`);
         await page.click(`[data-right="${q.pairs[i].right}"]:not([disabled])`);
+        if (q.pairs[i].swatch) {
+          // relier des couleurs : la paire prend la couleur reliée
+          const pair = await page.$eval(`[data-left="${i}"]`, (el) => el.style.getPropertyValue('--pair'));
+          if (pair !== q.pairs[i].swatch) fail(`relier les couleurs : ${pair} au lieu de ${q.pairs[i].swatch}`);
+        }
       }
       break;
     case 'fill':
@@ -251,6 +256,24 @@ async function answer(page, q, wrongFirst) {
         await page.waitForSelector('.try-again');
       }
       for (const item of sorted) await page.click(`.order-item[data-value="${item.value}"]:not([disabled])`);
+      break;
+    }
+    case 'pay': {
+      if (wrongFirst) {
+        await page.click('[data-pay="1"]');
+        if (q.answer === 1) await page.click('[data-pay="1"]');
+        await page.click('.pay .validate-btn');
+        await page.waitForSelector('.try-again');
+        while (await page.locator('.pay-coin').count()) await page.click('.pay-coin >> nth=0');
+      }
+      let rest = q.answer;
+      for (const v of [...q.values].sort((a, b) => b - a)) {
+        while (rest >= v) {
+          await page.click(`[data-pay="${v}"]`);
+          rest -= v;
+        }
+      }
+      await page.click('.pay .validate-btn');
       break;
     }
     case 'symmetry': {
@@ -345,7 +368,8 @@ const shotsWanted = {
   problemes: '24-probleme', heure: '25-heure', 'petits-textes': '26-texte', 'ou-est': '27-where', intrus: '28-intrus',
   ombres: '29-ombres', 'epelle-anglais': '30-epelle', relier: '31-relier', trous: '32-trous',
   sudoku: '33-sudoku', 'relie-calculs': '34-relie-calculs', symetrie: '36-symetrie', cubes: '37-cubes',
-  'animaux-monde': '38-animaux', saisons: '39-saisons', pays: '40-pays',
+  'animaux-monde': '38-animaux', saisons: '39-saisons', pays: '40-pays', histoires: '44-histoire', monnaie: '45-monnaie',
+  mesures: '46-mesures', calendrier: '47-calendrier', tangram: '48-tangram', reproduire: '49-reproduire', 'parle-anglais': '50-parle',
 };
 const bubbleText = (t) => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\u2011/g, '-').replace(/\s+/g, ' ').trim();
 for (const game of GAMES) {
@@ -434,6 +458,63 @@ await goProfile(page);
 if (!(await page.textContent('[data-defi] .pill')).includes('fait')) fail('défi du jour : non marqué comme fait');
 console.log(`✔ défi du jour (${fromGames.size} jeux différents, série de jours)`);
 
+// révisions : les jeux où l'enfant s'est trompé reviennent, puis s'espacent
+await goProfile(page);
+if (!(await page.locator('[data-revision]').count())) fail('révisions : bouton absent après des erreurs');
+await page.click('[data-revision]');
+const revised = new Set();
+for (let i = 0; i < 5; i++) {
+  const zone = await page.waitForSelector('.choices:not(.answered)');
+  const q = await page.evaluate(() => globalThis.__lc.question);
+  revised.add(q.from);
+  await answer(page, q, false);
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+}
+await page.waitForSelector('.results');
+const reviewSteps = await page.evaluate(([key, ids]) => {
+  const kid = JSON.parse(localStorage.getItem(key)).profiles['eva-rose'];
+  return ids.map((id) => kid.review[id]?.step ?? 'fini');
+}, [STORAGE_KEY, [...revised]]);
+if (reviewSteps.some((st) => st === 0)) fail(`révisions : pas espacées après une bonne réponse (${reviewSteps})`);
+console.log(`✔ révisions (${revised.size} jeux revus, prochaines dans 1 jour ou plus)`);
+
+// jeux bonus : après une partie à 2 étoiles ou plus
+await page.click('[data-bonus-open]');
+await page.click('[data-bonus="bulles"]');
+await page.waitForSelector('.pop-bubble');
+await page.click('.pop-bubble >> nth=0', { force: true });
+await page.waitForFunction(() => document.querySelector('.bubble-score')?.textContent !== '0');
+await shot('41-bulles');
+await goProfile(page);
+console.log('✔ jeu bonus : les bulles');
+
+// habiller son personnage
+await page.click('[data-dress]');
+await page.click('[data-shirt="vert"]');
+await page.click('[data-accessory="couronne"]');
+if (!(await page.locator('.dress-preview svg text').allTextContents()).includes('👑')) fail('personnage : la couronne n’apparaît pas');
+await shot('42-personnage');
+console.log('✔ personnage habillé (tee-shirt vert, couronne)');
+
+// objectif du jour et temps maximum (réglés par les parents)
+await setStore(page, "store.profiles['eva-rose'].goals = { parts: 2, limit: 1 };");
+await goProfile(page);
+if (!(await page.textContent('.goal-bar')).includes('atteint')) fail('objectif du jour : non atteint malgré les parties jouées');
+await page.click('[data-domain="maths"]');
+await page.click('[data-game="compter"]');
+await page.waitForSelector('.pause-card');
+await shot('43-pause');
+await setStore(page, "store.profiles['eva-rose'].goals = {};");
+console.log('✔ objectif du jour et pause quand le temps est écoulé');
+
+// lecture facilitée et décors de saison
+await setStore(page, "store.profiles['eva-rose'].easyRead = true;");
+await goProfile(page);
+if (!(await page.evaluate(() => document.body.classList.contains('easy-read')))) fail('lecture facilitée non appliquée');
+if (!(await page.evaluate(() => document.body.dataset.season))) fail('décor de saison absent');
+await setStore(page, "store.profiles['eva-rose'].easyRead = false;");
+console.log('✔ lecture facilitée et décor de saison');
+
 // profils séparés : Matteo n'a pas les étoiles d'Eva-Rose
 await goProfiles(page);
 const matteoStars = await page.textContent('[data-profile="matteo"] .profile-stars');
@@ -509,6 +590,7 @@ await page.waitForSelector('.settings');
 await shot('07-reglages');
 if ((await page.textContent('[data-version]')) !== pkg.version) fail('version affichée différente de package.json');
 if (!(await page.textContent('.credits')).includes('Michaël Durieux')) fail('crédits absents');
+if (!(await page.getAttribute('[data-contact]', 'href')).startsWith('mailto:')) fail('contact absent des crédits');
 if (!(await page.locator('.changelog-entry').count())) fail('journal des modifications absent');
 await page.click('[data-tab="enfants"]');
 await page.click('[data-edit="eva-rose"]');
@@ -629,7 +711,7 @@ async function checkDevice(device, repeat) {
     await setStore(page, `store.profiles['${id}'] = store.profiles['${id}'] || {}; store.profiles['${id}'].grade = '${grade}';`);
     await goProfile(page, id);
     await checkLayout(page, tag(`accueil ${id}`));
-    for (const domain of ['francais', 'maths', 'anglais', 'monde']) {
+    for (const domain of DOMAINS.map((d) => d.id)) {
       await page.click(`[data-domain="${domain}"]`);
       await checkLayout(page, tag(`liste ${domain} ${id}`), { reachable: false });
       await page.click('.top-bar .icon-btn');
@@ -640,7 +722,10 @@ async function checkDevice(device, repeat) {
   await page.click('[data-levels="calcul"], [data-levels="compter"]');
   await page.waitForSelector('.level-list');
   await checkLayout(page, tag('choix du niveau'), { reachable: false });
-  checked += 12;
+  await page.click('.top-bar .icon-btn');
+  await page.click('[data-dress]');
+  await checkLayout(page, tag('personnage'), { reachable: false });
+  checked += 16;
 
   // chaque niveau de chaque jeu
   for (const game of GAMES) {
