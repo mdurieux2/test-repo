@@ -1021,7 +1021,7 @@ async function checkOffline(context, page) {
 }
 
 if (!ONLY && PARTS.includes('scenario')) await scenario();
-else if (ONLY.includes('hors-ligne')) {
+else if (ONLY?.includes('hors-ligne')) {
   const context = await newContext({ width: 390, height: 844 });
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.push(`hors ligne : ${e.message}`));
