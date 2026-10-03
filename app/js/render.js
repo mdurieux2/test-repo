@@ -2,6 +2,7 @@
 
 import { ACCESSORIES, avatarSvg } from './characters.js';
 import { PIECES } from './games/logique.js';
+import { FLAGS, flagMarkup } from './games/drapeaux.js';
 
 /** h('div', {class: 'x', onclick}, enfant1, enfant2…) */
 export function h(tag, attrs = {}, ...children) {
@@ -233,6 +234,8 @@ export function renderStage(stage, actions) {
         stage.items.map((n) => h('span', { class: n === null ? 'seq-item gap' : 'seq-item' }, n === null ? '?' : n)));
     case 'frame':
       return frameStage(stage);
+    case 'flag':
+      return flagStage(stage);
     case 'equation':
       return h('div', { class: 'equation big' },
         stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
@@ -378,7 +381,26 @@ function shadowContent(emoji, label, transform) {
   return h('span', { class: 'shadow', role: 'img', 'aria-label': label || 'ombre', style: transform ? { transform } : undefined }, emoji);
 }
 
+/** Un drapeau ; `hole` efface une bande (niveau « Complète le drapeau »). */
+export function flagElement(code, hole = null, extraClass = '') {
+  const el = h('span', { class: `flag ${extraClass}`.trim(), role: 'img', 'aria-label': `Drapeau : ${FLAGS[code].label}` });
+  el.innerHTML = flagMarkup(code);
+  if (hole) {
+    const size = (hole.dir === 'v' ? 30 : 20) / hole.count;
+    const rect = hole.dir === 'v'
+      ? `<rect x="${hole.index * size}" y="0" width="${size}" height="20" class="flag-hole"/>`
+      : `<rect x="0" y="${hole.index * size}" width="30" height="${size}" class="flag-hole"/>`;
+    el.querySelector('svg').insertAdjacentHTML('beforeend', `${rect}<text x="${hole.dir === 'v' ? (hole.index + 0.5) * size : 15}" y="${hole.dir === 'v' ? 10 : (hole.index + 0.5) * size}" class="flag-q">?</text>`);
+  }
+  return el;
+}
+
+function flagStage({ code, hole, caption }) {
+  return h('div', { class: 'stage-flag' }, flagElement(code, hole), caption ? h('span', { class: 'flag-caption' }, caption) : null);
+}
+
 export function renderChoiceContent(choice) {
+  if (choice.flag) return flagElement(choice.flag, null, 'flag-choice');
   if (choice.scene) return sceneContent(choice.scene, choice.name);
   if (choice.shadow) return shadowContent(choice.shadow, choice.name, choice.transform);
   if (choice.piece) return pieceContent(choice.piece);

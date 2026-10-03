@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { APP, CHANGELOG } from '../app/js/config.js';
-import { voiceScore } from '../app/js/speech.js';
+import { offlineSafe, voiceScore } from '../app/js/speech.js';
 import { addChild, defaultStore, loadStore, resetChild, saveStore } from '../app/js/storage.js';
 import { avatarSvg, makeCharacter } from '../app/js/characters.js';
 
@@ -36,6 +36,15 @@ test('voix : Premium > améliorée > compacte, voix gadget écartées, accent de
   assert.ok(voiceScore(v('Audrey', 'fr-FR', 'com.apple.voice.premium.fr-FR.Audrey')) > compact);
   const edge = { ...v('Microsoft Denise Online (Natural) - French (France)'), localService: false };
   assert.ok(voiceScore(edge) > voiceScore(v('Microsoft Hortense - French (France)')));
+});
+
+test('voix : hors connexion, une voix en ligne est remplacée par une voix de l’appareil', () => {
+  const online = { name: 'Google français', lang: 'fr-FR', localService: false };
+  const local = { name: 'Thomas', lang: 'fr-FR', localService: true };
+  assert.equal(offlineSafe(online, [online, local], 'fr-FR', true), online);
+  assert.equal(offlineSafe(online, [online, local], 'fr-FR', false), local);
+  assert.equal(offlineSafe(local, [online, local], 'fr-FR', false), local);
+  assert.equal(offlineSafe(online, [online], 'fr-FR', false), online, 'faute de mieux, on garde la voix choisie');
 });
 
 function memoryStorage() {

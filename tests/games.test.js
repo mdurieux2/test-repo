@@ -109,6 +109,37 @@ function checkQuestion(q, ctx) {
       assert.equal(values.filter((v) => v === q.answer).length, 1, ctx);
       break;
     }
+    case 'swap': {
+      const { cols, rows, order } = q.stage;
+      assert.deepEqual([...order].sort((a, b) => a - b), Array.from({ length: cols * rows }, (_, i) => i), ctx);
+      assert.ok(order.some((v, i) => v !== i), `puzzle déjà fini : ${ctx}`);
+      break;
+    }
+    case 'memory': {
+      const counts = {};
+      for (const c of q.cards) counts[c.pair] = (counts[c.pair] || 0) + 1;
+      assert.ok(Object.values(counts).every((n) => n === 2), `chaque carte a exactement une paire : ${ctx}`);
+      assert.ok(q.cards.length >= 4 && q.cards.length <= 20, ctx);
+      break;
+    }
+    case 'colorby': {
+      const { zones, legend } = q.stage;
+      for (const z of zones) {
+        assert.ok(z.c >= 0 && z.c < legend.length, ctx);
+        // le calcul écrit dans la zone donne bien le nombre de sa couleur
+        const value = Function(`return ${z.label.replace('−', '-').replace('×', '*')}`)();
+        assert.equal(value, legend[z.c].n, `${z.label} ≠ ${legend[z.c].n} : ${ctx}`);
+      }
+      assert.ok(new Set(zones.map((z) => z.c)).size >= 2, ctx);
+      break;
+    }
+    case 'dots': {
+      const { points, labels } = q.stage;
+      assert.equal(points.length, labels.length, ctx);
+      assert.equal(new Set(labels).size, labels.length, ctx);
+      for (const [x, y] of points) assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100, ctx);
+      break;
+    }
     default: {
       const values = q.choices.map((c) => c.value);
       assert.ok(values.length >= 2, ctx);

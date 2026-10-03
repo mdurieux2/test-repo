@@ -599,7 +599,10 @@ function nextQuestion(session) {
 
   let stage = null;
   let zone;
-  const custom = { build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone }[q.interaction];
+  const custom = {
+    build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
+    swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone,
+  }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
   } else {
@@ -1273,6 +1276,342 @@ function symmetryZone(ctx) {
   const grid = h('div', { class: `sym-grid axis-${axis}`, style: { '--cols': cols, '--rows': rows } }, cells);
   const zone = h('div', { class: 'choices sym-zone' }, h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
   return { stage: h('div', { class: 'stage stage-sym' }, grid), zone };
+}
+
+// ---- Le puzzle : toucher deux pièces pour les échanger
+
+/** Un morceau de l'image : le même dessin, recadré sur la case (x, y). */
+function puzzlePiece({ cols, rows, picture, colors }, piece) {
+  const w = 100 / cols;
+  const hh = 100 / rows;
+  const x = (piece % cols) * w;
+  const y = Math.floor(piece / cols) * hh;
+  const el = h('span', { class: 'pz-piece', 'aria-hidden': 'true' });
+  el.innerHTML = `<svg viewBox="${x} ${y} ${w} ${hh}" preserveAspectRatio="none">
+    <defs><linearGradient id="pz${piece}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="100">
+      <stop offset="0" stop-color="${colors[0]}"/><stop offset="1" stop-color="${colors[1]}"/></linearGradient></defs>
+    <rect x="0" y="0" width="100" height="100" fill="url(#pz${piece})"/>
+    <circle cx="14" cy="14" r="7" fill="#fff" opacity="0.7"/><circle cx="86" cy="86" r="10" fill="#fff" opacity="0.35"/>
+    <text x="50" y="54" font-size="${Math.min(cols, rows) / Math.max(cols, rows) * 78}" text-anchor="middle" dominant-baseline="middle">${picture}</text>
+  </svg>`;
+  return el;
+}
+
+function swapZone(ctx) {
+  const { q } = ctx;
+  const { cols, rows } = q.stage;
+  const order = [...q.stage.order];
+  let selected = null;
+  const board = h('div', { class: 'pz-board', style: { '--cols': cols, '--rows': rows } });
+  const draw = () => {
+    board.replaceChildren(...order.map((piece, pos) => {
+      const tile = h('button', {
+        class: `pz-tile${selected === pos ? ' selected' : ''}${piece === pos ? ' placed' : ''}`,
+        'data-pos': pos,
+        'data-piece': piece,
+        'aria-label': `Pièce ${pos + 1}${piece === pos ? ', bien placée' : ''}`,
+      }, puzzlePiece(q.stage, piece));
+      tile.addEventListener('click', () => {
+        if (ctx.session.locked) return;
+        if (selected === null) selected = pos;
+        else if (selected === pos) selected = null;
+        else {
+          [order[selected], order[pos]] = [order[pos], order[selected]];
+          selected = null;
+          playSound('tap');
+        }
+        draw();
+        checkSolved();
+      });
+      return tile;
+    }));
+  };
+  const checkSolved = () => {
+    if (!order.every((v, i) => v === i)) return;
+    board.classList.add('solved');
+    zone.classList.add('answered');
+    markCorrect(ctx);
+  };
+  // l'aide place une pièce ; elle compte comme une aide (pas d'étoile du premier coup)
+  const help = () => {
+    if (ctx.session.locked) return;
+    const pos = order.findIndex((v, i) => v !== i);
+    const from = order.indexOf(pos);
+    [order[pos], order[from]] = [order[from], order[pos]];
+    ctx.session.attempts++;
+    selected = null;
+    playSound('tap');
+    draw();
+    checkSolved();
+  };
+  draw();
+  // le modèle, en petit, pour comparer
+  const model = h('div', { class: 'pz-model', style: { '--cols': cols, '--rows': rows } },
+    Array.from({ length: cols * rows }, (_, i) => puzzlePiece(q.stage, i)));
+  const zone = h('div', { class: 'choices pz-zone' },
+    h('span', { class: 'pz-model-label' }, 'Le modèle :'), model,
+    h('button', { class: 'pz-hint', onclick: help, 'aria-label': 'Aide : placer une pièce' }, '💡'));
+  return { stage: h('div', { class: 'stage stage-puzzle' }, board), zone };
+}
+
+// ---- Le memory : retourner deux cartes, retrouver les paires
+
+function memoryZone(ctx) {
+  const { q } = ctx;
+  const n = q.cards.length;
+  const cols = n <= 4 ? 2 : n <= 6 ? 3 : n <= 16 ? 4 : 5;
+  const rows = Math.ceil(n / cols);
+  const open = [];
+  const found = new Set();
+  let misses = 0;
+  let busy = false;
+  const count = h('span', { class: 'memory-count', 'aria-live': 'polite' }, `0 / ${n / 2}`);
+  const cards = q.cards.map((card, i) => {
+    const el = h('button', { class: 'memory-card', 'data-card': i, 'aria-label': 'Carte retournée' },
+      h('span', { class: `memory-face${card.small ? ' small' : ''}${card.word ? ' word' : ''}`, lang: card.lang }, card.label));
+    el.addEventListener('click', () => {
+      if (ctx.session.locked || busy || found.has(i) || open.includes(i)) return;
+      open.push(i);
+      el.classList.add('open');
+      el.setAttribute('aria-label', card.small ? `${card.pair} objets` : String(card.label));
+      playSound('tap');
+      if (open.length < 2) return;
+      const [a, b] = open;
+      if (q.cards[a].pair === q.cards[b].pair) {
+        found.add(a).add(b);
+        open.length = 0;
+        cards[a].classList.add('found');
+        cards[b].classList.add('found');
+        count.textContent = `${found.size / 2} / ${n / 2}`;
+        if (q.cards[a].say && found.size < n) say(ctx.session.guide, q.cards[a].say);
+        if (found.size === n) {
+          // beaucoup d'essais ratés : pas d'étoile du premier coup
+          if (misses > n) ctx.session.attempts = 1;
+          zone.classList.add('answered');
+          markCorrect(ctx);
+        }
+        return;
+      }
+      misses++;
+      busy = true;
+      setTimeout(() => {
+        for (const k of open) {
+          cards[k].classList.remove('open');
+          cards[k].setAttribute('aria-label', 'Carte retournée');
+        }
+        open.length = 0;
+        busy = false;
+      }, 900);
+    });
+    return el;
+  });
+  const grid = h('div', { class: 'memory-grid', style: { '--cols': cols, '--rows': rows } }, cards);
+  const zone = h('div', { class: 'choices memory-zone' }, h('span', {}, 'Paires trouvées : '), count);
+  return { stage: h('div', { class: 'stage stage-memory' }, grid), zone };
+}
+
+// ---- Le coloriage magique : la couleur de chaque zone dépend du nombre écrit dedans
+
+function colorbyZone(ctx) {
+  const { q } = ctx;
+  const { zones, legend } = q.stage;
+  let color = null;
+  const done = new Set();
+  const misses = zones.map(() => 0);
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 120 120');
+  svg.setAttribute('class', 'magic-drawing');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', 'Dessin à colorier');
+  const shapes = zones.map((z, i) => {
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', z.d);
+    path.setAttribute('fill', '#ffffff');
+    path.setAttribute('fill-rule', 'evenodd');
+    path.setAttribute('class', 'magic-zone');
+    path.dataset.zone = i;
+    path.addEventListener('click', () => paint(i));
+    svg.append(path);
+    return path;
+  });
+  // les nombres par-dessus (ils ne captent pas le doigt)
+  zones.forEach((z) => {
+    const t = document.createElementNS(ns, 'text');
+    t.setAttribute('x', z.at[0]);
+    t.setAttribute('y', z.at[1]);
+    t.setAttribute('class', `magic-label${z.label.length > 3 ? ' long' : ''}`);
+    t.textContent = z.label;
+    svg.append(t);
+  });
+  const paint = (i) => {
+    if (ctx.session.locked || done.has(i)) return;
+    if (color === null) {
+      buttons.forEach((b) => b.classList.add('hint'));
+      nudge(ctx, 'Choisis d’abord une couleur en bas !');
+      return;
+    }
+    if (zones[i].c === color) {
+      done.add(i);
+      shapes[i].setAttribute('fill', legend[color].hex);
+      shapes[i].classList.add('painted');
+      playSound('tap');
+      if (done.size === zones.length) {
+        zone.classList.add('answered');
+        markCorrect(ctx);
+      }
+      return;
+    }
+    misses[i]++;
+    shapes[i].classList.add('shake');
+    setTimeout(() => shapes[i].classList.remove('shake'), 400);
+    const right = legend[zones[i].c];
+    markWrong(ctx, {
+      message: misses[i] >= 2 ? `Ici, c’est ${right.n} : le ${right.name} !` : 'Regarde bien le nombre !',
+      given: `${legend[color].name} pour ${zones[i].label}`,
+    });
+    if (misses[i] >= 2) buttons[zones[i].c].classList.add('hint');
+  };
+  // en anglais : la légende dit « 1 red, 2 blue… » et les pots de peinture n'ont pas de nom
+  const words = legend.some((c) => c.word);
+  const buttons = legend.map((c, i) => {
+    const btn = h('button', {
+      class: 'magic-color', 'data-color': i, style: { '--paint': c.hex },
+      'aria-label': words ? c.name : `${c.n} : ${c.name}`, 'aria-pressed': 'false',
+    }, h('span', { class: 'magic-swatch', 'aria-hidden': 'true' }), words ? null : h('span', { class: 'magic-n' }, c.n));
+    btn.addEventListener('click', () => {
+      color = i;
+      buttons.forEach((b, k) => {
+        b.classList.toggle('on', k === i);
+        b.classList.remove('hint');
+        b.setAttribute('aria-pressed', String(k === i));
+      });
+      playSound('tap');
+    });
+    return btn;
+  });
+  const zone = h('div', { class: `choices magic-palette${words ? ' with-legend' : ''}` },
+    words ? h('div', { class: 'magic-legend' }, legend.map((c) => h('span', { class: 'magic-key' }, h('b', {}, c.n), ' ', h('span', { lang: 'en' }, c.word)))) : null,
+    h('div', { class: 'magic-buttons', style: { '--n': legend.length } }, words ? shuffle(rng, buttons) : buttons));
+  return { stage: h('div', { class: 'stage stage-magic' }, svg), zone };
+}
+
+/** Message court sous l'exercice, sans compter d'erreur. */
+function nudge(ctx, message) {
+  ctx.feedback.replaceChildren(h('p', { class: 'try-again' }, message));
+  say(ctx.session.guide, message);
+}
+
+// ---- Les points à relier : glisser le doigt d'un nombre au suivant ; un dessin apparaît
+
+function dotsZone(ctx) {
+  const { q } = ctx;
+  const { points, labels, close } = q.stage;
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs) => {
+    const node = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  };
+  const svg = el('svg', { viewBox: '-4 -4 108 108', class: 'dots-drawing', role: 'img', 'aria-label': 'Points à relier' });
+  const shape = el('polygon', { class: 'dots-shape', points: '' });
+  const line = el('polyline', { class: 'dots-line', points: '' });
+  const rubber = el('line', { class: 'dots-rubber', x1: 0, y1: 0, x2: 0, y2: 0, visibility: 'hidden' });
+  svg.append(shape, line, rubber);
+  // chaque nombre est écrit à l'extérieur du dessin, à côté de son point
+  const cx = points.reduce((s, p) => s + p[0], 0) / points.length;
+  const cy = points.reduce((s, p) => s + p[1], 0) / points.length;
+  const dots = points.map(([x, y], i) => {
+    const d = Math.hypot(x - cx, y - cy) || 1;
+    const lx = x + ((x - cx) / d) * 7;
+    const ly = y + ((y - cy) / d) * 7;
+    const g = el('g', { class: 'dot', 'data-dot': i });
+    g.append(el('circle', { cx: x, cy: y, r: 2.6, class: 'dot-point' }));
+    const t = el('text', { x: lx, y: ly, class: 'dot-label' });
+    t.textContent = labels[i];
+    g.append(t);
+    svg.append(g);
+    return g;
+  });
+  let next = 0;
+  let drawing = false;
+  const linked = [];
+  const refresh = () => {
+    line.setAttribute('points', linked.map((i) => points[i].join(',')).join(' '));
+    dots.forEach((g, i) => {
+      g.classList.toggle('next', i === next);
+      g.classList.toggle('done', linked.includes(i));
+    });
+  };
+  const toSvg = (e) => {
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  };
+  const near = (p, i) => Math.hypot(p.x - points[i][0], p.y - points[i][1]) < 8;
+  const link = (i) => {
+    linked.push(i);
+    next++;
+    playSound('tap');
+    if (next === points.length) {
+      if (close) linked.push(linked[0]);
+      refresh();
+      rubber.setAttribute('visibility', 'hidden');
+      drawing = false;
+      shape.setAttribute('points', points.map((p) => p.join(',')).join(' '));
+      svg.classList.add('finished');
+      zone.replaceChildren(h('span', { class: 'dots-name' }, `C’est ${q.stage.name} !`));
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    refresh();
+  };
+  const move = (p) => {
+    if (!drawing || !linked.length) return;
+    const last = points[linked.at(-1)];
+    rubber.setAttribute('x1', last[0]);
+    rubber.setAttribute('y1', last[1]);
+    rubber.setAttribute('x2', p.x);
+    rubber.setAttribute('y2', p.y);
+    rubber.setAttribute('visibility', 'visible');
+    if (near(p, next)) link(next);
+  };
+  svg.addEventListener('pointerdown', (e) => {
+    if (ctx.session.locked) return;
+    e.preventDefault();
+    const p = toSvg(e);
+    if (near(p, next)) {
+      drawing = true;
+      link(next);
+      return;
+    }
+    // le premier point s'il n'y en a pas encore, sinon on repart du dernier point relié
+    const start = linked.length ? linked.at(-1) : -1;
+    if (start >= 0 && near(p, start)) {
+      drawing = true;
+      return;
+    }
+    const wrong = points.findIndex((_, i) => !linked.includes(i) && near(p, i));
+    if (wrong >= 0) {
+      dots[wrong].classList.add('shake');
+      setTimeout(() => dots[wrong].classList.remove('shake'), 400);
+      markWrong(ctx, { message: `Cherche le ${labels[next]} !`, given: `${labels[wrong]} au lieu de ${labels[next]}` });
+    }
+  });
+  svg.addEventListener('pointermove', (e) => move(toSvg(e)));
+  const stop = () => {
+    drawing = false;
+    rubber.setAttribute('visibility', 'hidden');
+  };
+  svg.addEventListener('pointerup', stop);
+  svg.addEventListener('pointercancel', stop);
+  svg.addEventListener('pointerleave', stop);
+  refresh();
+  const zone = h('div', { class: 'choices dots-zone' },
+    h('span', { class: 'dots-help' }, `Commence au ${labels[0]}, puis glisse ton doigt jusqu’au ${labels[1]}…`));
+  return { stage: h('div', { class: 'stage stage-dots' }, svg), zone };
 }
 
 // ---- Payer le bon prix : toucher les pièces et les billets
