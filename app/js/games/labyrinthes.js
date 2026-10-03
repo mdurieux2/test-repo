@@ -105,6 +105,11 @@ export function randomPath(rng, cols, rows, length) {
 
 // ---------------------------------------------------------------- Le labyrinthe
 
+/** « jusqu’au fromage », « jusqu’à la fleur » (à + le = au). */
+export function untilGoal(what) {
+  return what.startsWith('le ') ? `jusqu’au ${what.slice(3)}` : `jusqu’à ${what}`;
+}
+
 const HEROES = [
   { hero: '🐭', goal: '🧀', who: 'la souris', what: 'le fromage' },
   { hero: '🐰', goal: '🥕', who: 'le lapin', what: 'la carotte' },
@@ -182,7 +187,7 @@ export const labyrinthe = {
       key: twist ? `labyrinthe:${twist}:${start}:${open.join('')}` : `labyrinthe:${cols}:${open.join('')}`,
       interaction: 'maze',
       text: `Aide ${pair.who} à trouver ${pair.what}.`,
-      instruction: `Glisse ton doigt, ou touche les cases, pour guider ${pair.who} jusqu'à ${pair.what}.${twist === 'boucles' ? ' Il y a plusieurs chemins !' : ''}`,
+      instruction: `Glisse ton doigt, ou touche les cases, pour guider ${pair.who} ${untilGoal(pair.what)}.${twist === 'boucles' ? ' Il y a plusieurs chemins !' : ''}`,
       short: { key: 'labyrinthe', text: `Aide ${pair.who} à trouver ${pair.what}.` },
       stage: { type: 'maze', cols, rows, open, start, goal, hero: pair.hero, goalEmoji: pair.goal, solution },
       choices: [],
