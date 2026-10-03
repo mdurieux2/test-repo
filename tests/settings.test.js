@@ -34,6 +34,8 @@ test('voix : Premium > améliorée > compacte, voix gadget écartées, accent de
   assert.ok(voiceScore(v('Rocko (français (France))')) < compact);
   assert.ok(voiceScore(v('Amélie', 'fr-CA')) < compact);
   assert.ok(voiceScore(v('Audrey', 'fr-FR', 'com.apple.voice.premium.fr-FR.Audrey')) > compact);
+  const edge = { ...v('Microsoft Denise Online (Natural) - French (France)'), localService: false };
+  assert.ok(voiceScore(edge) > voiceScore(v('Microsoft Hortense - French (France)')));
 });
 
 function memoryStorage() {

@@ -24,6 +24,7 @@ export function voiceScore(voice, wantedLang = 'fr-FR') {
   if (id.includes('premium')) score += 6;
   else if (id.includes('enhanced') || id.includes('amélior')) score += 4;
   if (id.includes('siri')) score += 5;
+  if (id.includes('natural') || id.includes('neural')) score += 5; // voix « Natural » de Microsoft (Edge, Windows)
   if (voice.lang === wantedLang) score += 2;
   if (voice.localService === false) score -= 1; // voix en ligne : indisponible hors connexion
   return score;

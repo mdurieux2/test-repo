@@ -132,7 +132,7 @@ input { -webkit-user-select: text; user-select: text; }
 .home-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 0 18px; }
 .home-title { margin: 6px 0 0; font-size: 2.1rem; }
 
-/* ---------- Eva-Rose et Matteo ---------- */
+/* ---------- personnages ---------- */
 .avatar { display: block; border-radius: 50%; overflow: hidden; flex: none; }
 .avatar svg { display: block; width: 100%; height: 100%; }
 .avatar-md { width: 96px; height: 96px; }
