@@ -271,9 +271,9 @@ async function checkLayout(page, label, { reachable = true } = {}) {
     for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card')) {
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
-    const zone = document.querySelector('.choices');
+    const zone = document.querySelector('.choices, .home-menu, .profile-list');
     if (mustReach && zone && zone.getBoundingClientRect().bottom > window.innerHeight + 1) {
-      return `réponses hors de l'écran (${Math.round(zone.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
+      return `boutons hors de l'écran (${Math.round(zone.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
     }
     return null;
   }, reachable);
@@ -298,7 +298,7 @@ async function checkDevice(device, repeat) {
     await checkLayout(page, tag(`accueil ${id}`));
     for (const domain of ['francais', 'maths', 'anglais']) {
       await page.click(`[data-domain="${domain}"]`);
-      await checkLayout(page, tag(`liste ${domain} ${id}`));
+      await checkLayout(page, tag(`liste ${domain} ${id}`), { reachable: false });
       await page.click('.top-bar .icon-btn');
     }
   }
