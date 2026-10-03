@@ -206,6 +206,10 @@ npm run test:e2e     # parcours complet + mise en page sur 14 iPhone (dont 3 en 
 npm run icons        # régénère les icônes
 ```
 
+Options du test de bout en bout : `ONLY=memory,points` (mise en page de quelques jeux),
+`ONLY=hors-ligne` (mode avion), `PLAY=memory,points` (une partie de quelques jeux),
+`PORT=8124` (plusieurs tests en même temps), `CHROMIUM_PATH=…` (un Chromium déjà installé).
+
 | Fichier | Rôle |
 |---|---|
 | `app/js/games/*.js` | Les jeux : chacun génère des questions décrites par des données |

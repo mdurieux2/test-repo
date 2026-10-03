@@ -6,6 +6,7 @@
 //         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
 //         PORT=8124 pour lancer plusieurs tests en même temps
+//         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
 
 import { chromium } from 'playwright';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -23,7 +24,8 @@ const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
-const browser = await chromium.launch();
+// CHROMIUM_PATH : utiliser un Chromium déjà installé (sinon celui téléchargé par Playwright)
+const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 const errors = [];
 
 function fail(message) {
