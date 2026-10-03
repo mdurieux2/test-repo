@@ -1,11 +1,13 @@
 // Petit serveur statique sans dépendance : `npm start` puis ouvrir l'adresse affichée.
 // Sur le même Wi-Fi, l'iPhone peut ouvrir http://<ip-de-l-ordinateur>:8080.
+// `npm run start:affiche` sert l'application d'affiches (dossier affiche/).
 
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 
-const ROOT = new URL('../app/', import.meta.url).pathname;
+const APP = process.argv[2] === 'affiche' ? 'affiche' : 'app';
+const ROOT = new URL(`../${APP}/`, import.meta.url).pathname;
 const PORT = Number(process.env.PORT) || 8080;
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -16,13 +18,15 @@ const TYPES = {
   '.svg': 'image/svg+xml',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
+  '.jpg': 'image/jpeg',
+  '.pdf': 'application/pdf',
 };
 
-export function startServer(port = PORT) {
+export function startServer(port = PORT, root = ROOT) {
   const server = createServer(async (req, res) => {
     const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-    const file = normalize(join(ROOT, path.endsWith('/') ? `${path}index.html` : path));
-    if (!file.startsWith(ROOT)) {
+    const file = normalize(join(root, path.endsWith('/') ? `${path}index.html` : path));
+    if (!file.startsWith(root)) {
       res.writeHead(403).end();
       return;
     }
@@ -39,5 +43,5 @@ export function startServer(port = PORT) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   await startServer();
-  console.log(`Lire & Compter : http://localhost:${PORT}`);
+  console.log(`${APP === 'affiche' ? 'Affiche foot' : 'Lire & Compter'} : http://localhost:${PORT}`);
 }
