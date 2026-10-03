@@ -1228,6 +1228,9 @@ input { -webkit-user-select: text; user-select: text; }
   /* ranger */
   .order { gap: 14px; width: 100%; }
   .order-item.order-picture { min-height: 92px; }
+  /* une phrase à remettre dans l'ordre : 5 mots tiennent dans la colonne de droite */
+  .order.words .order-items { gap: 6px; }
+  .order.words .order-item, .order.words .order-slot { font-size: 0.9rem; }
 
   /* accueil, profils, liste des jeux */
   .home-hero { margin: 0 0 10px; }
