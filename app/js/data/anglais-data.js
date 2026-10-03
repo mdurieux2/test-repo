@@ -95,3 +95,32 @@ export const ENGLISH_THEMES = [
     ],
   },
 ];
+
+// Des objets dont l'image existe en plusieurs couleurs : pour les petites phrases
+// « a green book », « a red apple » (il faut entendre ou lire les deux mots).
+const COLOUR_FR = {
+  red: 'rouge', orange: 'orange', yellow: 'jaune', green: 'vert', blue: 'bleu',
+  purple: 'violet', black: 'noir', white: 'blanc', brown: 'marron',
+};
+const FEMININE = { vert: 'verte', bleu: 'bleue' };
+const COLOURED_THINGS = [
+  { en: 'book', fr: 'le livre', pictures: { red: '📕', green: '📗', blue: '📘', orange: '📙' } },
+  {
+    en: 'heart', fr: 'le cœur',
+    pictures: { red: '❤️', orange: '🧡', yellow: '💛', green: '💚', blue: '💙', purple: '💜', black: '🖤', white: '🤍', brown: '🤎' },
+  },
+  { en: 'apple', fr: 'la pomme', feminine: true, pictures: { red: '🍎', green: '🍏' } },
+  { en: 'car', fr: 'la voiture', feminine: true, pictures: { red: '🚗', blue: '🚙' } },
+];
+
+/** « a green book » (le livre vert), « an orange heart » (le cœur orange)… */
+export const COLOUR_PHRASES = COLOURED_THINGS.flatMap((thing) => Object.entries(thing.pictures).map(([colour, emoji]) => {
+  const adjective = COLOUR_FR[colour];
+  return {
+    en: `${colour === 'orange' ? 'an' : 'a'} ${colour} ${thing.en}`,
+    fr: `${thing.fr} ${thing.feminine ? FEMININE[adjective] || adjective : adjective}`,
+    emoji,
+    thing: thing.en,
+    colour,
+  };
+}));

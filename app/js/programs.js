@@ -125,15 +125,15 @@ export const PROGRAMS = {
       ['puzzle', 3, 6], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
     ],
     temps: [
-      ['heure', 2, 7], ['calendrier', 2, 4], ['saisons', 2, 4], ['monnaie', 2, 4], ['mesures', 2, 5],
+      ['heure', 2, 7], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
     ],
     monde: [
-      ['animaux-monde', 2, 4], ['pays', 1, 3],
+      ['animaux-monde', 2, 7], ['pays', 1, 6],
       ['drapeaux', 1, 6],
     ],
     anglais: [
-      ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],
-      ['compte-anglais', 3, 4], ['ou-est', 2, 3], ['epelle-anglais', 1, 10], ['parle-anglais', 1, 3],
+      ['ecoute', 2, 13], ['lis-anglais', 1, 13], ['mot-anglais', 1, 13], ['relie-anglais', 1, 13],
+      ['compte-anglais', 3, 7], ['ou-est', 2, 6], ['epelle-anglais', 1, 13], ['parle-anglais', 1, 6],
       ['nombres-anglais', 1, 6], ['calcul-anglais', 1, 4], ['couleurs-anglais', 1, 3], ['colorie-anglais', 1, 3],
       ['memory-anglais', 1, 4], ['intrus-anglais', 1, 3], ['contraires-anglais', 1, 3], ['phrase-anglais', 1, 3],
     ],
