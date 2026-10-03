@@ -103,9 +103,9 @@ export const compter = {
     const tip = layout === 'scatter' ? ' Touche chaque objet pour le compter.' : '';
     return {
       key: `compter:${count}`,
-      text: `Combien y a-t-il de ${obj.many} ?`,
-      instruction: `Combien y a-t-il de ${obj.many} ?${tip}`,
-      short: { key: `compter:${layout}`, text: `Combien de ${obj.many} ?` },
+      text: `Combien y a-t-il ${deMany(obj)} ?`,
+      instruction: `Combien y a-t-il ${deMany(obj)} ?${tip}`,
+      short: { key: `compter:${layout}`, text: `Combien ${deMany(obj)} ?` },
       stage,
       choices: numberOptions(choicesWithTens(rng, count, choiceCount, 1, Math.max(max, 6))),
       choiceStyle: 'numbers',
