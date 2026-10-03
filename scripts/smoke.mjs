@@ -3,6 +3,7 @@
 // l'espace parents. Vérifie aussi la mise en page de chaque niveau sur un petit iPhone.
 // Usage : npm run test:e2e   (SCREENSHOTS=dossier pour enregistrer des captures)
 //         ONLY=memory,points npm run test:e2e   (seulement la mise en page de ces jeux, sur tous les appareils)
+//         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
 //         PORT=8124 pour lancer plusieurs tests en même temps
 
 import { chromium } from 'playwright';
@@ -615,18 +616,42 @@ await page.waitForSelector('.toast');
 if (await page.locator('[data-photo-row="eva-rose"] .avatar-photo').count()) fail('le dessin n’est pas revenu');
 console.log('✔ réglages (photo enregistrée automatiquement, version, journal, crédits)');
 
-// hors ligne : le service worker doit servir l'app sans réseau
-await page.goto(BASE);
-await page.evaluate(() => navigator.serviceWorker.ready);
-await page.reload();
-await context.setOffline(true);
-await page.reload();
-await page.waitForSelector('.profiles, .home');
-await context.setOffline(false);
+// hors ligne (mode avion) : le service worker doit servir l'app et tous les jeux sans réseau
+await checkOffline(context, page);
 await context.close();
-console.log('✔ fonctionne hors ligne');
 }
+
+/** Mode avion : après une première visite avec réseau, chaque jeu s'ouvre sans connexion. */
+async function checkOffline(context, page) {
+  await page.goto(BASE);
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload(); // la page est maintenant servie par le service worker
+  const failed = [];
+  const onFail = (request) => failed.push(request.url());
+  page.on('requestfailed', onFail);
+  await context.setOffline(true);
+  await page.reload();
+  await page.waitForSelector('.welcome, .profiles, .home');
+  for (const game of GAMES) {
+    await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor(game.id)}';`);
+    await openGame(page, game);
+    await page.waitForSelector('.choices');
+    if (await page.locator('.choices').count() !== 1) fail(`hors ligne : ${game.id} ne s'affiche pas`);
+  }
+  await context.setOffline(false);
+  page.off('requestfailed', onFail);
+  if (failed.length) fail(`hors ligne, fichiers introuvables : ${[...new Set(failed)].join(', ')}`);
+  console.log(`✔ mode avion : l'app et les ${GAMES.length} jeux s'ouvrent sans réseau`);
+}
+
 if (!ONLY) await scenario();
+else if (ONLY.includes('hors-ligne')) {
+  const context = await newContext({ width: 390, height: 844 });
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`hors ligne : ${e.message}`));
+  await checkOffline(context, page);
+  await context.close();
+}
 
 // ---------------------------------------------------------------- Mise en page : tous les iPhone
 
