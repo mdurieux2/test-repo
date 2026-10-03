@@ -172,7 +172,8 @@ for (const game of GAMES) {
 }
 
 test('premier-son : le mot commence par le son, jamais par un distracteur', () => {
-  for (const { q } of questions(findGame('premier-son'))) {
+  for (const { level, q } of questions(findGame('premier-son'))) {
+    if (level > 3) continue; // niveaux 4 à 6 : voir tests/nouveaux-niveaux.test.js
     const word = q.success.reveal;
     assert.ok(word.startsWith(q.answer), word);
     for (const c of q.choices) {
@@ -323,11 +324,15 @@ test('les pièces du carré : la bonne pièce a la forme du trou', () => {
   }
 });
 
-test('histoires : 3 niveaux, une bonne réponse parmi 3, histoires courtes', () => {
-  for (const level of [1, 2, 3]) assert.ok(STORY_DATA.filter((st) => st.level === level).length >= 4);
+test('histoires : 6 niveaux, une bonne réponse parmi 3, histoires courtes', () => {
+  for (const level of [1, 2, 3, 4, 5, 6]) assert.ok(STORY_DATA.filter((st) => st.level === level).length >= 4);
   for (const story of STORY_DATA) {
-    assert.equal(new Set([story.answer, ...story.others]).size, 3, story.title);
-    assert.ok(story.sentences.length >= 3 && story.sentences.length <= 4, story.title);
+    // niveau 6 : des images à remettre dans l'ordre au lieu d'une question
+    if (story.level === 6) assert.equal(new Set(story.steps.map(([emoji]) => emoji)).size, 3, story.title);
+    else assert.equal(new Set([story.answer, ...story.others]).size, 3, story.title);
+    // niveau 5 : 6 phrases (courtes : l'histoire doit tenir sur l'écran d'un petit téléphone)
+    const [min, max] = story.level === 5 ? [6, 6] : [3, 4];
+    assert.ok(story.sentences.length >= min && story.sentences.length <= max, story.title);
   }
 });
 
@@ -432,9 +437,9 @@ test('intrus et ombres : une seule bonne réponse, dans le bon sens', () => {
 });
 
 test('petits textes : questions variées, réponses distinctes, textes courts', () => {
-  for (const level of [1, 2, 3]) assert.ok(TEXT_DATA.filter((t) => t.level === level).length >= 5);
+  for (const level of [1, 2, 3, 4, 5, 6]) assert.ok(TEXT_DATA.filter((t) => t.level === level).length >= 5);
   for (const t of TEXT_DATA) {
-    assert.ok(t.text.length <= [0, 80, 140, 220][t.level], `${t.title} trop long (${t.text.length})`);
+    assert.ok(t.text.length <= [0, 80, 140, 220, 220, 220, 220][t.level], `${t.title} trop long (${t.text.length})`);
     for (const [question, ...answers] of t.questions) {
       assert.ok(question.endsWith('?') || question.endsWith('…'), question);
       assert.equal(new Set(answers).size, 3, question);

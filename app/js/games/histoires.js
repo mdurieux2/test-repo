@@ -1,5 +1,6 @@
 // Histoires lues à voix haute en karaoké : le mot lu s'allume. Puis une question.
-// Niveau 1 : écouter (réponses en images) ; niveaux 2 et 3 : lire en suivant.
+// Niveau 1 : écouter (réponses en images) ; niveaux 2 et 3 : lire en suivant ; niveau 4 :
+// deviner ce qui n'est pas dit ; niveau 5 : 6 phrases ; niveau 6 : remettre les images dans l'ordre.
 
 import { pick, shuffle } from '../random.js';
 
@@ -45,7 +46,70 @@ const STORIES = [
     question: 'Qui va chercher le cerf-volant ?', answer: 'un pompier', others: ['le père de Chloé', 'un oiseau'] },
   { level: 3, title: 'La boulangerie', emoji: '🥐', sentences: ['Tous les dimanches, Malo achète le pain.', 'Il demande une baguette et trois croissants.', 'La boulangère lui rend la monnaie en souriant.', 'Sur le chemin, Malo croque un petit bout de baguette !'],
     question: 'Combien de croissants Malo achète-t-il ?', answer: 'trois', others: ['deux', 'cinq'] },
+
+  // ---- Niveau 4 : pourquoi ? comment se sent-il ? (la réponse n'est pas écrite dans l'histoire)
+  { level: 4, title: 'Le parapluie oublié', emoji: '🌂', sentences: ['Ce matin, le ciel est tout gris.', 'Maman dit à Tom de prendre son parapluie, mais il l’oublie.', 'À midi, Tom rentre de l’école.', 'Il est trempé de la tête aux pieds !'],
+    question: 'Pourquoi Tom est-il trempé ?', answer: 'il a plu', others: ['il a nagé', 'il a couru'] },
+  { level: 4, title: 'Le paquet doré', emoji: '🎁', sentences: ['Lila emballe une boîte dans du papier doré.', 'Elle dessine des cœurs sur une carte.', 'Demain, c’est la fête des mères.', 'Vite, Lila cache la boîte sous son lit !'],
+    question: 'Pour qui est le cadeau ?', answer: 'pour maman', others: ['pour papa', 'pour Lila'] },
+  { level: 4, title: 'La glace à la fraise', emoji: '🍦', sentences: ['Il fait très chaud.', 'Hugo achète une glace à la fraise.', 'Il parle longtemps avec son copain.', 'Quand il veut la manger, sa main est toute collante !'],
+    question: 'Pourquoi la main d’Hugo colle-t-elle ?', answer: 'la glace a fondu', others: ['il a du miel', 'il a peint'] },
+  { level: 4, title: 'Pirate attend', emoji: '🐕', sentences: ['À quatre heures, Pirate s’assoit devant la porte.', 'Il remue la queue en regardant la rue.', 'Quand le bus jaune s’arrête, il aboie de joie.', 'Emma descend du bus et court le caresser.'],
+    question: 'Qui Pirate attend-il ?', answer: 'Emma', others: ['le facteur', 'le chat'] },
+  { level: 4, title: 'La tour de cubes', emoji: '🧱', sentences: ['Nina construit une très haute tour.', 'Son petit frère arrive en courant.', 'Boum ! La tour tombe par terre.', 'Nina croise les bras et fronce les sourcils.'],
+    question: 'Comment se sent Nina ?', answer: 'elle est fâchée', others: ['elle est contente', 'elle a faim'] },
+  { level: 4, title: 'Les traces', emoji: '🐾', sentences: ['Ce matin, il y a de la neige dans le jardin.', 'Léon voit de petites traces de pattes.', 'Elles vont jusqu’à la cabane du lapin.', 'La porte de la cabane est ouverte !'],
+    question: 'Qui a laissé les traces ?', answer: 'le lapin', others: ['un ours', 'le facteur'] },
+
+  // ---- Niveau 5 : histoires en 6 phrases (plus de détails à retenir, l'ordre des événements)
+  { level: 5, title: 'Le pique-nique', emoji: '🧺', sentences: ['Dimanche, la famille part pique-niquer.', 'Papa porte le grand panier.', 'Les enfants posent une nappe sur l’herbe.', 'Oh ! Une fourmi grimpe sur le sandwich de Léa.', 'Tout le monde rit.', 'Après le repas, ils jouent au ballon.'],
+    question: 'Que font-ils après le repas ?', answer: 'ils jouent au ballon', others: ['ils dorment', 'ils nagent'] },
+  { level: 5, title: 'Le spectacle', emoji: '🎭', sentences: ['Ce soir, Clara joue au spectacle.', 'Elle porte un costume de papillon.', 'Avant de monter sur scène, elle a peur.', 'Elle cherche ses parents dans la salle.', 'Quand elle les voit, elle se sent mieux.', 'À la fin, tout le monde applaudit.'],
+    question: 'Qu’est-ce qui rassure Clara ?', answer: 'voir ses parents', others: ['son costume', 'la musique'] },
+  { level: 5, title: 'Le petit bateau', emoji: '⛵', sentences: ['Malo et papi fabriquent un bateau en bois.', 'Ils peignent la voile en blanc.', 'Puis ils vont à la rivière.', 'Malo pose le bateau sur l’eau.', 'Oh non ! Le courant l’emporte.', 'Papi le rattrape juste avant le pont.'],
+    question: 'Qui rattrape le bateau ?', answer: 'papi', others: ['Malo', 'un pêcheur'] },
+  { level: 5, title: 'La dent qui bouge', emoji: '🦷', sentences: ['Une dent de Sofia bouge.', 'Au dîner, elle croque une pomme.', 'Crac ! La dent tombe dans l’assiette.', 'Sofia la range dans une petite boîte.', 'Le soir, elle la glisse sous l’oreiller.', 'Le matin, il y a une pièce à la place !'],
+    question: 'Quand la dent tombe-t-elle ?', answer: 'au dîner', others: ['le matin', 'à l’école'] },
+  { level: 5, title: 'Le hérisson', emoji: '🦔', sentences: ['Un soir, Jules entend du bruit dehors.', 'Il prend sa lampe et s’approche.', 'C’est un petit hérisson qui a faim !', 'Jules lui apporte un bol d’eau.', 'Le hérisson boit, puis il repart.', 'Depuis, Jules le guette chaque soir.'],
+    question: 'Que donne Jules au hérisson ?', answer: 'de l’eau', others: ['du lait', 'du pain'] },
+  { level: 5, title: 'Le marché', emoji: '🍅', sentences: ['Rose va au marché avec mamie.', 'Elles achètent des tomates et du fromage.', 'Le marchand donne une pomme à Rose.', 'Sur le chemin, il se met à pleuvoir.', 'Elles courent sous un grand arbre.', 'Rose croque sa pomme en attendant.'],
+    question: 'Que se passe-t-il sur le chemin ?', answer: 'il pleut', others: ['il neige', 'Rose tombe'] },
+
+  // ---- Niveau 6 : remettre les images dans l'ordre de l'histoire (début, milieu, fin)
+  { level: 6, title: 'La fleur de Zoé', emoji: '🌱', sentences: ['Zoé plante une graine.', 'Elle l’arrose tous les jours.', 'Une petite pousse sort de la terre.', 'Bientôt, une belle fleur s’ouvre !'],
+    steps: [['💧', 'Zoé arrose'], ['🌱', 'la pousse sort'], ['🌻', 'la fleur s’ouvre']] },
+  { level: 6, title: 'Le bonhomme', emoji: '⛄', sentences: ['Il neige toute la nuit.', 'Le matin, Max fait un bonhomme de neige.', 'Puis le soleil se met à briller.', 'Le bonhomme fond…'],
+    steps: [['🌨️', 'il neige'], ['⛄', 'le bonhomme de neige'], ['☀️', 'le soleil brille']] },
+  { level: 6, title: 'Le poussin', emoji: '🐣', sentences: ['La poule couve son œuf.', 'Crac ! La coquille se casse.', 'Un petit poussin sort.', 'Il suit sa maman partout.'],
+    steps: [['🥚', 'l’œuf'], ['🐣', 'le poussin sort'], ['🐔', 'avec sa maman']] },
+  { level: 6, title: 'La chenille', emoji: '🐛', sentences: ['Sur une feuille, il y a un petit œuf.', 'Une chenille en sort et mange.', 'Elle dort dans un cocon.', 'Un matin, un papillon s’envole !'],
+    steps: [['🥚', 'l’œuf'], ['🐛', 'la chenille'], ['🦋', 'le papillon']] },
+  { level: 6, title: 'Le gâteau d’Inès', emoji: '🎂', sentences: ['Papa et Inès cassent des œufs.', 'Ils mélangent tout dans un bol.', 'Le gâteau cuit dans le four.', 'Le soir, Inès souffle les bougies !'],
+    steps: [['🥚', 'les œufs'], ['🥣', 'on mélange'], ['🎂', 'les bougies']] },
+  { level: 6, title: 'La journée de Léo', emoji: '🕗', sentences: ['Léo prend son petit déjeuner.', 'Ensuite, il va à l’école à vélo.', 'Le soir, il prend son bain.', 'Puis il s’endort.'],
+    steps: [['🥣', 'le petit déjeuner'], ['🚲', 'à vélo'], ['🛁', 'le bain']] },
 ];
+
+/** Niveau 6 : après l'histoire, toucher les images dans l'ordre (jamais déjà rangées). */
+function orderStory(rng, story) {
+  let order = shuffle(rng, story.steps.map((_, i) => i));
+  if (order.every((v, i) => v === i)) order = [...order.slice(1), order[0]];
+  const text = 'Remets les images dans l’ordre de l’histoire.';
+  return {
+    key: `histoires:${story.title}`,
+    karaoke: true,
+    interaction: 'order',
+    text,
+    instruction: [text],
+    replay: [text],
+    stage: { type: 'karaoke', title: story.title, emoji: story.emoji, sentences: story.sentences },
+    items: order.map((i) => ({ value: i, emoji: story.steps[i][0], label: story.steps[i][1] })),
+    order: 'asc',
+    choices: [],
+    answer: story.steps.map(([, label]) => label).join(', '),
+    success: { speak: 'Bravo, tu as remis l’histoire dans l’ordre !' },
+  };
+}
 
 export const histoires = {
   id: 'histoires',
@@ -53,10 +117,11 @@ export const histoires = {
   section: 'Lire',
   title: 'Histoires lues',
   icon: '📖',
-  skill: 'Écouter et suivre une histoire lue (karaoké), la comprendre',
-  levels: ['Écoute une histoire', 'Lis en suivant', 'Histoires plus longues'],
+  skill: 'Écouter et suivre une histoire lue (karaoké), la comprendre et la raconter dans l’ordre',
+  levels: ['Écoute une histoire', 'Lis en suivant', 'Histoires plus longues', 'Pourquoi ? (inférence)', 'Histoires en 6 phrases', 'Remets dans l’ordre'],
   generate(level, rng) {
     const story = pick(rng, STORIES.filter((s) => s.level === level));
+    if (level === 6) return orderStory(rng, story);
     const pictures = level === 1;
     const options = shuffle(rng, [story.answer, ...story.others]);
     return {

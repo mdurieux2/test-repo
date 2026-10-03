@@ -31,6 +31,9 @@ export const PICTURES = {
   neige: '❄️', nez: '👃', dauphin: '🐬', dinosaure: '🦕', carotte: '🥕',
   cactus: '🌵', gorille: '🦍', guitare: '🎸', jus: '🧃', journal: '📰',
   champignon: '🍄',
+  // « Le premier son » : groupes de consonnes (tr, cr, fl…) et son de la fin
+  trompette: '🎺', crabe: '🦀', fromage: '🧀', drapeau: '🚩', plage: '🏖️', pluie: '🌧️',
+  bras: '💪', blé: '🌾', clown: '🤡', prince: '🤴', kangourou: '🦘',
 };
 
 /** Mots à lire (jeu « Le bon mot »), par niveau. */
@@ -73,6 +76,35 @@ export const FIRST_SOUNDS = [
   { grapheme: 'g', level: 3, words: ['gâteau', 'glace', 'gorille', 'grenouille', 'guitare'] },
   { grapheme: 'j', level: 3, words: ['judo', 'jus', 'journal'] },
   { grapheme: 'z', level: 3, words: ['zèbre'] },
+];
+
+/**
+ * « Le premier son », niveau 5 : le son entendu à la fin du mot, écrit tel quel
+ * à la fin du mot (pas de lettre muette : « loup » ou « éléphant » sont exclus).
+ */
+export const FINAL_SOUNDS = [
+  { grapheme: 'o', words: ['moto', 'vélo', 'piano', 'judo', 'radio'] },
+  { grapheme: 'a', words: ['lama', 'panda', 'koala'] },
+  { grapheme: 'é', words: ['café', 'bébé', 'dé'] },
+  { grapheme: 'ou', words: ['hibou', 'kangourou'] },
+  { grapheme: 'on', words: ['ballon', 'melon', 'mouton', 'cochon', 'dragon', 'citron', 'crayon', 'poisson', 'avion'] },
+  { grapheme: 'in', words: ['lapin', 'sapin', 'raisin', 'requin', 'dauphin', 'train', 'main'] },
+];
+
+/** « Le premier son », niveau 6 : les deux premiers sons, une consonne suivie de r ou de l. */
+export const CLUSTER_SOUNDS = [
+  { grapheme: 'tr', words: ['train', 'tracteur', 'trompette'] },
+  { grapheme: 'cr', words: ['crayon', 'crocodile', 'crabe'] },
+  { grapheme: 'gr', words: ['grenouille'] },
+  { grapheme: 'fr', words: ['fraise', 'fromage'] },
+  { grapheme: 'br', words: ['bras'] },
+  { grapheme: 'dr', words: ['dragon', 'drapeau'] },
+  { grapheme: 'pl', words: ['plage', 'pluie'] },
+  { grapheme: 'fl', words: ['fleur'] },
+  { grapheme: 'gl', words: ['glace'] },
+  { grapheme: 'bl', words: ['blé'] },
+  { grapheme: 'cl', words: ['clown'] },
+  { grapheme: 'pr', words: ['prince'] },
 ];
 
 /** Jeu « Les syllabes » : consonnes et voyelles combinées à chaque niveau. */

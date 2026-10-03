@@ -45,7 +45,7 @@ export const PROGRAMS = {
   },
   GS: {
     francais: [
-      ['syllabes-rythme', 1, 3], ['rimes', 1, 2], ['lettres', 2, 4], ['premier-son', 1, 2],
+      ['syllabes-rythme', 1, 6], ['rimes', 1, 5], ['lettres', 2, 7], ['premier-son', 1, 2],
       ['syllabes', 1, 1],
     ],
     histoires: [
@@ -76,7 +76,7 @@ export const PROGRAMS = {
   },
   CP: {
     francais: [
-      ['premier-son', 1, 3], ['syllabes', 1, 3], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
+      ['premier-son', 1, 6], ['syllabes', 1, 6], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
     ],
     histoires: [
       ['histoires', 1, 2], ['petits-textes', 1, 2],
@@ -108,10 +108,10 @@ export const PROGRAMS = {
   },
   CE1: {
     francais: [
-      ['bon-mot', 2, 3], ['petits-mots', 2, 3], ['phrase', 1, 2], ['homophones', 1, 2], ['genre', 1, 3],
+      ['bon-mot', 2, 6], ['petits-mots', 2, 6], ['phrase', 1, 5], ['homophones', 1, 5], ['genre', 1, 6],
     ],
     histoires: [
-      ['histoires', 2, 3], ['petits-textes', 2, 3],
+      ['histoires', 2, 6], ['petits-textes', 2, 6],
     ],
     maths: [
       ['patates', 4, 8], ['dizaines', 2, 8], ['comparer', 2, 7], ['suite', 3, 8], ['calcul', 4, 36],
