@@ -4,13 +4,24 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.6.0',
+  version: '1.7.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.7.0',
+    date: '2026-10-03',
+    changes: [
+      'Nouveaux jeux : « Écris au doigt » (traits, chiffres, capitales, lettres attachées, puis son prénom), « La dictée de mots », « Règle l’horloge » et « Défi chrono des tables ».',
+      'Jouer à deux : deux enfants jouent chacun leur tour sur le même appareil, chacun à son niveau.',
+      'Espace parents : choisir les jeux de chaque enfant (masquer une rubrique ou un jeu, en conseiller jusqu’à 3 en haut de son accueil).',
+      '« Qui joue ? » explique comment ajouter l’icône sur l’écran d’accueil.',
+      'Les prénoms peuvent faire jusqu’à 30 caractères.',
+    ],
+  },
   {
     version: '1.6.0',
     date: '2026-10-03',
