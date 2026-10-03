@@ -1343,6 +1343,17 @@ input { -webkit-user-select: text; user-select: text; }
 .pay-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .pay-add { border-radius: 14px; padding: 4px; }
 .pay-add:active { transform: translateY(3px); }
+/* téléphone en paysage : la caisse, les pièces et le bouton tiennent à côté du dessin */
+@media (orientation: landscape) and (max-height: 520px) {
+  .pay { gap: 6px; }
+  .pay-tray { min-height: 48px; padding: 4px; }
+  .pay-buttons { gap: 6px; }
+  .pay-add { padding: 2px; }
+  .pay-add .coin { width: 44px; height: 44px; }
+  .pay-add .coin b { font-size: 1.1rem; }
+  .pay-add .note { width: 70px; height: 38px; }
+  .pay .validate-btn { min-height: 48px; padding-top: 6px; padding-bottom: 6px; }
+}
 
 /* mesures : règle, crayons, balance */
 .stage-ruler svg { display: block; width: min(100%, 420px); height: auto; }
@@ -1551,14 +1562,19 @@ body[data-season="ete"] { background: #fffbea; }
   .home-title { font-size: 1.7rem; }
   .season-decor { font-size: 1.1rem; }
 }
+/* écran en paysage (tablette, ordinateur) : les rubriques sur 4 colonnes, tout tient sans défiler */
+@media (orientation: landscape) and (min-aspect-ratio: 5/4) {
+  .home-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .home-grid .domain-tile:last-child:nth-child(odd) { grid-column: auto; }
+}
 @media (orientation: landscape) and (max-height: 520px) {
   .home-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .home-grid .domain-tile:last-child:nth-child(odd) { grid-column: auto; }
-  .domain-tile { min-height: 66px; flex-direction: row; gap: 8px; font-size: 1rem; }
+  .domain-tile { min-height: 60px; flex-direction: row; gap: 8px; font-size: 1rem; }
   .domain-tile .domain-icon { font-size: 1.5rem; }
   .season-decor { display: none; }
   .home-title { font-size: 1.5rem; }
-  .home-top .domain-btn, .home-bottom .domain-btn { min-height: 52px; }
+  .home-top .domain-btn, .home-bottom .domain-btn { min-height: 48px; }
 }
 
 /* relier des couleurs : la paire prend la couleur reliée, texte foncé sur les couleurs claires */
