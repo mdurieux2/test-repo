@@ -6,7 +6,8 @@ on:
   pull_request:
 
 jobs:
-  test:
+  # tests unitaires : quelques secondes
+  unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -16,5 +17,31 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+
+  # test de bout en bout découpé en 5 morceaux qui tournent en même temps :
+  # le parcours complet (tous les jeux joués, mode avion), puis la mise en page de chaque
+  # niveau de chaque jeu sur les 33 appareils, répartie en 4 quarts
+  e2e:
+    name: e2e (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: parcours complet, parts: scenario, shard: '' }
+          - { name: mise en page 1/4, parts: layout, shard: 1/4 }
+          - { name: mise en page 2/4, parts: layout, shard: 2/4 }
+          - { name: mise en page 3/4, parts: layout, shard: 3/4 }
+          - { name: mise en page 4/4, parts: layout, shard: 4/4 }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+        env:
+          PARTS: ${{ matrix.parts }}
+          SHARD: ${{ matrix.shard }}

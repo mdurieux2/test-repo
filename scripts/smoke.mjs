@@ -5,6 +5,7 @@
 //         ONLY=memory,points npm run test:e2e   (seulement la mise en page de ces jeux, sur tous les appareils)
 //         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
+//         PARTS=scenario | PARTS=layout SHARD=1/4   (une partie du test, comme dans la CI)
 //         PORT=8124 pour lancer plusieurs tests en même temps
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
 
@@ -21,6 +22,10 @@ const BASE = `http://localhost:${PORT}/`;
 const SHOTS = process.env.SCREENSHOTS;
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
+// En CI, le test est découpé : PARTS=scenario (le parcours complet), ou PARTS=layout avec SHARD=2/4
+// (la mise en page sur un quart des appareils). Sans rien, tout est fait.
+const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : ['scenario', 'layout'];
+const SHARD = process.env.SHARD ? process.env.SHARD.split('/').map(Number) : null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
@@ -718,7 +723,7 @@ async function checkOffline(context, page) {
   console.log(`✔ mode avion : l'app et les ${GAMES.length} jeux s'ouvrent sans réseau`);
 }
 
-if (!ONLY) await scenario();
+if (!ONLY && PARTS.includes('scenario')) await scenario();
 else if (ONLY.includes('hors-ligne')) {
   const context = await newContext({ width: 390, height: 844 });
   const page = await context.newPage();
@@ -799,7 +804,10 @@ async function checkLayout(page, label, { reachable = true } = {}) {
 }
 const layoutProblems = [];
 
-async function checkDevice(device, repeat) {
+async function checkDevice(device, repeat, deviceIndex) {
+  // découpage en morceaux (SHARD=k/n) : chaque morceau vérifie tous les appareils, mais un jeu sur n
+  // (décalé selon l'appareil), et les écrans fixes d'un appareil sur n
+  const mine = (key) => !SHARD || key % SHARD[1] === SHARD[0] - 1;
   const ctx = await newContext({ width: device.width, height: device.height });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(`${device.name} : ${e.message}`));
@@ -811,7 +819,7 @@ async function checkDevice(device, repeat) {
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
 
   // écrans fixes
-  if (!ONLY) {
+  if (!ONLY && mine(deviceIndex)) {
   await goProfiles(page);
   await checkLayout(page, tag('Qui joue ?'));
   for (const [id, grade] of [['matteo', 'MS'], ['eva-rose', 'CP']]) {
@@ -836,8 +844,8 @@ async function checkDevice(device, repeat) {
   }
 
   // chaque niveau de chaque jeu
-  for (const game of GAMES) {
-    if (game.paliers || ONLY && !ONLY.includes(game.id)) continue;
+  for (const [gameIndex, game] of GAMES.entries()) {
+    if (game.paliers || ONLY && !ONLY.includes(game.id) || !mine(gameIndex + deviceIndex)) continue;
     for (let level = 1; level <= game.levels.length; level++) {
       const grade = gradeFor(game.id, level);
       await setStore(page, `store.profiles['eva-rose'].grade = '${grade}'; store.profiles['eva-rose'].games['${game.id}'] = { level: ${level} };`);
@@ -849,7 +857,7 @@ async function checkDevice(device, repeat) {
       }
     }
   }
-  if (ONLY) {
+  if (ONLY || !mine(deviceIndex)) {
     await ctx.close();
     return checked;
   }
@@ -891,12 +899,14 @@ async function checkDevice(device, repeat) {
 
 if (SHOTS) mkdirSync(`${SHOTS}/devices`, { recursive: true });
 // 6 appareils à la fois, pour ne pas saturer la machine de test
+const devices = PLAY || !PARTS.includes('layout') ? [] : DEVICES;
+// plus de tirages sur les deux écrans les plus petits (iPhone SE, Android 360 points)
+const smallest = (d) => (d.width === 375 && d.height === 667) || (d.width === 360 && d.height === 740);
 const counts = [];
-for (let i = 0; i < (PLAY ? 0 : DEVICES.length); i += 6) {
-  // plus de tirages sur les deux écrans les plus petits (iPhone SE, Android 360 points)
-  counts.push(...await Promise.all(DEVICES.slice(i, i + 6).map((d, k) => checkDevice(d, i + k === 0 || d.width === 360 && d.height === 740 ? 3 : 1))));
+for (let i = 0; i < devices.length; i += 6) {
+  counts.push(...await Promise.all(devices.slice(i, i + 6).map((d, k) => checkDevice(d, smallest(d) ? 3 : 1, i + k))));
 }
-counts.forEach((n, i) => console.log(`✔ ${DEVICES[i].name} (${DEVICES[i].width}×${DEVICES[i].height}) : ${n} écrans vérifiés`));
+counts.forEach((n, i) => console.log(`✔ ${devices[i].name} (${devices[i].width}×${devices[i].height}) : ${n} écrans vérifiés`));
 if (layoutProblems.length) fail(`mise en page :\n${layoutProblems.join('\n')}`);
 
 await browser.close();
