@@ -22,12 +22,15 @@ Interface et commentaires en français.
 ## Affiche foot (dossier `affiche/`)
 
 Deuxième application, indépendante : affiche de foot parent(s) et enfant(s) vus de dos, prénoms et numéros
-paramétrables, export JPG/PDF A4 ou A3 à 300 dpi. Publiée dans `/affiche/` du même site (voir `pages.yml`).
+paramétrables, export JPG/PDF de l'A4 au 40 × 60 cm, de 150 à 600 dpi. Publiée dans `/affiche/` du même site
+(voir `pages.yml`).
 
-- Pas de build ni de dépendance à l'exécution (le PDF est écrit à la main dans `pdf.js`).
-- Dessin sur canvas dans un repère de 1000 × 1414 unités (`poster.js`, `figures.js`) : le même code sert à
-  l'aperçu et aux fichiers haute résolution (le PDF est dessiné par bandes, limite des canvas sur iPhone).
+- Pas de build ni de dépendance à l'exécution (JPEG écrit par `jpeg.js`, PDF par `pdf.js`).
+- Dessin sur canvas dans un repère de 1000 unités de large (1414 de haut en A4/A3 ; la hauteur suit le format)
+  dans `poster.js` et `figures.js` : le même code sert à l'aperçu et aux fichiers. Les fichiers sont dessinés
+  et compressés par bandes de 4 millions de pixels (limite des canvas sur iPhone : 16,7 millions).
+- Logos : seulement l'image importée par l'utilisateur (gardée sur l'appareil), jamais de logo de club intégré.
 - Tout nouveau fichier dans `affiche/` doit être ajouté à `PRECACHE` dans `affiche/sw.js` (un test le vérifie)
   et `VERSION` doit être incrémentée à chaque mise en production.
-- Aucun logo ni nom de club : seulement des couleurs et un titre libre.
+- Aucun nom de club en dur : seulement des couleurs et un titre libre.
 - Vérifier avant de pousser : `npm test` puis `npm run test:e2e:affiche`.

@@ -32,6 +32,8 @@ export const DEFAULTS = {
   custom: { ...CUSTOM_DEFAULT },
   border: true,
   format: 'a4',
+  quality: 'hd',
+  logo: { place: 'haut-gauche', size: 'moyen' },
 };
 
 /** Charge les polices avant de dessiner (sinon le canvas utilise une police de secours). */
@@ -68,6 +70,7 @@ export function withDefaults(settings = {}) {
     children: list('children'),
     adults: list('adults'),
     custom: { ...DEFAULTS.custom, ...settings.custom },
+    logo: { ...DEFAULTS.logo, ...settings.logo },
   };
 }
 
@@ -173,10 +176,14 @@ function titleLines(ctx, title) {
 /** Zone du titre, en haut de l'affiche. */
 const TITLE_BOX = { x: 70, y: 62, w: 860, h: 168 };
 
-function drawTitle(ctx, theme, rawTitle, scale) {
+/**
+ * Titre « usé ». `pxPerUnit` : pixels par unité ; `visible` : lignes de l'affiche
+ * présentes dans le canvas (rendu par bandes : seule la partie visible est dessinée,
+ * ce qui garde de petits canvas même en 40 × 60 cm Ultra HD).
+ */
+function drawTitle(ctx, theme, rawTitle, pxPerUnit, [visTop, visBottom], box = TITLE_BOX) {
   const title = jerseyName(rawTitle);
   if (!title) return;
-  const box = TITLE_BOX;
   ctx.font = `100px ${FONT_TITLE}`;
   let lines = [title];
   let fit = fitFont(ctx, FONT_TITLE, title, 138, box.w);
@@ -197,27 +204,70 @@ function drawTitle(ctx, theme, rawTitle, scale) {
 
   // le titre est dessiné à part, puis « usé » (éraflures), puis posé sur l'affiche
   const pad = 12;
+  const [y0, y1] = [Math.max(box.y - pad, visTop), Math.min(box.y + box.h + pad, visBottom)];
+  if (y1 <= y0) return;
   const off = document.createElement('canvas');
-  off.width = Math.ceil((box.w + pad * 2) * scale);
-  off.height = Math.ceil((box.h + pad * 2) * scale);
+  off.width = Math.ceil((box.w + pad * 2) * pxPerUnit);
+  off.height = Math.ceil((y1 - y0) * pxPerUnit);
   const o = off.getContext('2d');
-  o.scale(scale, scale);
-  o.translate(pad - box.x, pad - box.y);
+  o.scale(pxPerUnit, pxPerUnit);
+  o.translate(pad - box.x, -y0);
   o.font = `${fit.size}px ${FONT_TITLE}`;
   o.textAlign = 'center';
   o.lineJoin = 'round';
+  const cx = box.x + box.w / 2;
   lines.forEach((line, i) => {
     const baseline = top + fit.cap * (i + 1) + gap * i;
     if (theme.titleOutline) {
       o.strokeStyle = theme.titleOutline;
       o.lineWidth = fit.size * 0.08;
-      o.strokeText(line, 500, baseline);
+      o.strokeText(line, cx, baseline);
     }
     o.fillStyle = theme.titleColor;
-    o.fillText(line, 500, baseline);
+    o.fillText(line, cx, baseline);
   });
-  distress(o, box, random(7));
-  ctx.drawImage(off, box.x - pad, box.y - pad, box.w + pad * 2, box.h + pad * 2);
+  distress(o, TITLE_BOX, random(7));
+  ctx.drawImage(off, box.x - pad, y0, off.width / pxPerUnit, off.height / pxPerUnit);
+  off.width = 0;
+  off.height = 0;
+}
+
+// ---------------------------------------------------------------- logo importé
+
+/** Places possibles du logo et tailles (plus grand côté, en unités de l'affiche). */
+export const LOGO_PLACES = [
+  { id: 'haut-gauche', name: 'En haut à gauche' },
+  { id: 'haut-droite', name: 'En haut à droite' },
+  { id: 'bas-gauche', name: 'En bas à gauche' },
+  { id: 'bas-droite', name: 'En bas à droite' },
+];
+export const LOGO_SIZES = [
+  { id: 'petit', name: 'Petit', size: 120 },
+  { id: 'moyen', name: 'Moyen', size: 160 },
+  { id: 'grand', name: 'Grand', size: 210 },
+];
+
+/** Rectangle du logo (unités), en gardant ses proportions. */
+function logoRect(image, logo, H, top) {
+  const iw = image.naturalWidth || image.width;
+  const ih = image.naturalHeight || image.height;
+  if (!iw || !ih) return null;
+  let side = (LOGO_SIZES.find((z) => z.id === logo.size) || LOGO_SIZES[1]).size;
+  if (top) side = Math.min(side, TITLE_BOX.h);
+  const [w, h] = iw >= ih ? [side, (side * ih) / iw] : [(side * iw) / ih, side];
+  const left = logo.place.endsWith('gauche');
+  const inset = 64;
+  const x = left ? inset : POSTER_W - inset - w;
+  const y = top ? TITLE_BOX.y + (TITLE_BOX.h - h) / 2 : H - inset - h;
+  return { x, y, w, h, left };
+}
+
+function drawLogo(ctx, image, rect) {
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
+  ctx.restore();
 }
 
 /** Éraflures et petits manques dans les lettres, façon impression usée. */
@@ -287,14 +337,19 @@ function drawJersey(ctx, theme, kind, person, { shift = 0 } = {}) {
 
 /**
  * Dessine l'affiche. `scale` : pixels par unité (largeur en pixels / 1000).
+ * La hauteur dépend du format (1414 en A4/A3, 1500 en 40 × 60, 1250 en 40 × 50…) :
+ * l'illustration est réduite si l'affiche est moins haute, et descend un peu si elle l'est plus.
  * Pour un rendu par bandes : `height` = hauteur totale de l'affiche en pixels,
  * `offsetY` = haut de la bande en pixels (le canvas ne contient que la bande).
+ * `logo` : image importée par l'utilisateur (facultative).
  */
-export function drawPoster(ctx, settings, scale, { height = ctx.canvas.height, offsetY = 0 } = {}) {
+export function drawPoster(ctx, settings, scale, { height = ctx.canvas.height, offsetY = 0, logo = null } = {}) {
   const s = withDefaults(settings);
   const scene = resolveScene(s);
   const { theme } = scene.colors;
   const H = height / scale;
+  const k = Math.min(1, H / POSTER_H);
+  const dy = H > POSTER_H ? (H - POSTER_H) * 0.4 : 0;
 
   ctx.save();
   ctx.setTransform(scale, 0, 0, scale, 0, -offsetY);
@@ -304,12 +359,31 @@ export function drawPoster(ctx, settings, scale, { height = ctx.canvas.height, o
   ctx.beginPath();
   ctx.rect(m, m, POSTER_W - 2 * m, H - 2 * m);
   ctx.clip();
-
   drawBackground(ctx, theme, H);
-  // rendu par bandes : le titre n'est dessiné que dans les bandes qui le contiennent
-  const [bandTop, bandBottom] = [offsetY / scale, (offsetY + ctx.canvas.height) / scale];
-  if (s.showTitle && bandTop < TITLE_BOX.y + TITLE_BOX.h + 20 && bandBottom > TITLE_BOX.y - 20) drawTitle(ctx, theme, s.title, scale);
+
+  const place = logo && s.logo?.place;
+  const top = Boolean(place?.startsWith('haut'));
+  const rect = place ? logoRect(logo, s.logo, H, top) : null;
+
+  // titre et personnages : repère de 1000 × 1414, centré dans l'affiche
+  ctx.save();
+  ctx.translate(500 * (1 - k), dy);
+  ctx.scale(k, k);
+  const visible = [(offsetY / scale - dy) / k, ((offsetY + ctx.canvas.height) / scale - dy) / k];
+  if (s.showTitle) {
+    // un logo en haut laisse de la place : le titre se décale de l'autre côté
+    let box = TITLE_BOX;
+    if (rect && top) {
+      const [from, to] = rect.left ? [rect.x + rect.w + 20, TITLE_BOX.x + TITLE_BOX.w] : [TITLE_BOX.x, rect.x - 20];
+      box = { ...TITLE_BOX, x: from, w: to - from };
+    }
+    drawTitle(ctx, theme, s.title, scale * k, visible, box);
+  }
+  if (rect && top) drawLogo(ctx, logo, rect);
   drawScene(ctx, scene.colors, scene.layout.id, scene.adults, scene.children,
     (kind, person, options) => drawJersey(ctx, theme, kind, person, options));
+  ctx.restore();
+
+  if (rect && !top) drawLogo(ctx, logo, rect);
   ctx.restore();
 }

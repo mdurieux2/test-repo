@@ -78,11 +78,12 @@ body {
   line-height: 0;
 }
 
+/* --ratio : hauteur / largeur du format choisi (1,4142 en A4 et A3, 1,5 en 40 × 60…) */
 #poster {
   display: block;
-  width: min(calc(100vw - 48px), calc(62vh / 1.4142));
-  width: min(calc(100vw - 48px), calc(62svh / 1.4142));
-  aspect-ratio: 1000 / 1414;
+  width: min(calc(100vw - 48px), calc(62vh / var(--ratio, 1.4142)));
+  width: min(calc(100vw - 48px), calc(62svh / var(--ratio, 1.4142)));
+  aspect-ratio: 1 / var(--ratio, 1.4142);
   background: #fff;
 }
 
@@ -209,9 +210,11 @@ input[type='text']:focus { outline: 3px solid color-mix(in srgb, var(--focus) 35
 
 .swatches .choice span { padding: 6px 12px 6px 8px; }
 
-.layouts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.layouts, .formats, .qualities { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-.layouts .choice span { flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; height: 100%; }
+.qualities { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+.layouts .choice span, .formats .choice span, .qualities .choice span { flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; height: 100%; }
 
 .choice small { display: block; font-size: 12.5px; font-weight: 400; color: var(--muted); }
 
@@ -251,6 +254,27 @@ input[type='text']:focus { outline: 3px solid color-mix(in srgb, var(--focus) 35
 }
 
 .hint { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+
+.hint.first { margin-top: 0; }
+
+/* logo importé */
+.logo-row { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+
+.file-btn { position: relative; overflow: hidden; flex: 1; }
+
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.file-btn:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.logo-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: repeating-conic-gradient(#e9ebf2 0 25%, #fff 0 50%) 0 0 / 16px 16px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  flex: none;
+}
 
 .actions { display: grid; gap: 10px; margin-top: 14px; }
 
@@ -305,7 +329,7 @@ input[type='text']:focus { outline: 3px solid color-mix(in srgb, var(--focus) 35
   cursor: pointer;
 }
 
-.mini canvas { width: 84px; aspect-ratio: 1000 / 1414; display: block; background: #fff; }
+.mini canvas { width: 84px; aspect-ratio: 1 / var(--ratio, 1.4142); display: block; background: #fff; }
 
 /* ---------- fenêtre « fichier prêt » ---------- */
 
@@ -351,7 +375,7 @@ input[type='text']:focus { outline: 3px solid color-mix(in srgb, var(--focus) 35
 @media (min-width: 860px) {
   .layout { grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); align-items: start; gap: 24px; }
   .preview { position: sticky; top: 16px; }
-  #poster { width: min(calc(min(100vw, 1180px) - 540px), calc((100vh - 130px) / 1.4142)); }
+  #poster { width: min(calc(min(100vw, 1180px) - 540px), calc((100vh - 130px) / var(--ratio, 1.4142))); }
   .mini { display: none; }
 }
 
@@ -360,7 +384,7 @@ input[type='text']:focus { outline: 3px solid color-mix(in srgb, var(--focus) 35
   .top { display: none; }
   .layout { grid-template-columns: auto minmax(0, 1fr); align-items: start; padding-top: max(8px, env(safe-area-inset-top)); }
   .preview { position: sticky; top: 8px; }
-  #poster { width: calc((100vh - 36px) / 1.4142); width: calc((100svh - 36px) / 1.4142); }
+  #poster { width: calc((100vh - 36px) / var(--ratio, 1.4142)); width: calc((100svh - 36px) / var(--ratio, 1.4142)); }
   .preview-note { display: none; }
   .mini { display: none; }
 }

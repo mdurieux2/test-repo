@@ -1,21 +1,30 @@
 // Écran de personnalisation : réglages, aperçu en direct, export JPG / PDF et impression.
 
 import {
-  POSTER_H, POSTER_W, drawPoster, jerseyName, jerseyNumber, loadFonts, withDefaults,
+  LOGO_PLACES, LOGO_SIZES, POSTER_W, drawPoster, jerseyName, jerseyNumber, loadFonts, withDefaults,
 } from './poster.js';
 import {
   ADULTS, CUSTOM_DEFAULT, GENDERS, HAIR_COLORS, LAYOUTS, SKINS, THEMES, adultHairsFor, findLayout, findTheme, hairsFor,
 } from './themes.js';
 import { HAIRS_BELOW } from './figures.js';
-import { FORMATS, IOS_MAX_PIXELS, bands, exportSize, pageSizePt } from './formats.js';
-import { imagesToPdf, setJpegDpi } from './pdf.js';
+import {
+  FORMATS, IOS_MAX_PIXELS, QUALITIES, TARGET_DPI, bands, exportSize, findFormat, findQuality, megapixels, pageSizePt,
+  posterHeight,
+} from './formats.js';
+import { jpegToPdf } from './pdf.js';
+import { createJpegEncoder } from './jpeg.js';
+import {
+  imageFromBlob, loadLogoBlob, prepareLogo, release as releaseImage, removeLogoBlob, saveLogoBlob,
+} from './logo.js';
 
 const STORAGE_KEY = 'affiche-foot';
-const JPEG_QUALITY = 0.92;
+const JPEG_QUALITY = 92;
 const $ = (selector) => document.querySelector(selector);
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 let settings = load();
+/** Logo importé (image décodée), ou null. */
+let logoImage = null;
 
 // ---------------------------------------------------------------- réglages enregistrés
 
@@ -62,7 +71,10 @@ function groupOptions(group) {
     case 'showTitle':
     case 'border': return YES_NO;
     case 'theme': return [...THEMES, { id: 'perso', name: 'Personnalisé', perso: true }];
-    case 'format': return Object.values(FORMATS).map((f) => ({ id: f.id, name: `${f.name} · ${f.hint}` }));
+    case 'format': return Object.values(FORMATS).map((f) => ({ id: f.id, name: f.name, hint: f.hint }));
+    case 'quality': return Object.values(QUALITIES).map((q) => ({ id: q.id, name: `${q.name} · ${q.dpi} dpi`, hint: q.hint }));
+    case 'logo.place': return LOGO_PLACES;
+    case 'logo.size': return LOGO_SIZES;
     default: return [];
   }
 }
@@ -146,6 +158,7 @@ function onChoice(group, value) {
   }
   if (group === 'layout') buildPeople();
   syncForm();
+  save();
   schedule();
 }
 
@@ -243,9 +256,13 @@ function syncForm() {
   $('#title-field').hidden = !settings.showTitle;
   $('#custom-colors').classList.toggle('on', settings.theme === 'perso');
 
-  const f = FORMATS[settings.format] || FORMATS.a4;
-  const size = exportSize(f.id);
-  $('#format-hint').textContent = `${f.name} (${f.hint}) en haute résolution : ${size.width} × ${size.height} pixels, ${size.dpi} dpi.`;
+  const f = findFormat(settings.format);
+  const q = findQuality(settings.quality);
+  const size = exportSize(f.id, { dpi: q.dpi });
+  $('#format-hint').textContent = `${f.name}${f.hint ? ` (${f.hint})` : ''} en ${q.name} : ${size.width} × ${size.height} pixels `
+    + `(${megapixels(size)}), ${size.dpi} dpi.${size.width * size.height > 40e6 ? ' La création peut prendre une minute sur téléphone.' : ''}`;
+  $('#logo-options').hidden = !logoImage;
+  $('#logo-remove').hidden = !logoImage;
 }
 
 function onInput(event) {
@@ -263,6 +280,7 @@ function onInput(event) {
   set(input.name, value);
   if (input.type === 'color') buildGroup($('[data-group="theme"]'));
   syncForm();
+  save();
   schedule();
 }
 
@@ -281,20 +299,23 @@ function schedule() {
 
 function renderPreview() {
   const canvas = $('#poster');
+  const ratio = posterHeight(settings.format) / POSTER_W;
+  document.documentElement.style.setProperty('--ratio', ratio.toFixed(4));
   const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
   const width = Math.max(200, Math.round(canvas.clientWidth * dpr));
-  if (canvas.width !== width) {
+  const height = Math.round(width * ratio);
+  if (canvas.width !== width || canvas.height !== height) {
     canvas.width = width;
-    canvas.height = Math.round((width * POSTER_H) / POSTER_W);
+    canvas.height = height;
   }
-  drawPoster(canvas.getContext('2d'), settings, width / POSTER_W);
+  drawPoster(canvas.getContext('2d'), settings, width / POSTER_W, { logo: logoImage });
   canvas.setAttribute('aria-label', describe());
 
   const mini = $('#mini-canvas');
   const miniWidth = Math.round(84 * dpr);
-  if (mini.width !== miniWidth) {
+  if (mini.width !== miniWidth || mini.height !== Math.round(miniWidth * ratio)) {
     mini.width = miniWidth;
-    mini.height = Math.round((miniWidth * POSTER_H) / POSTER_W);
+    mini.height = Math.round(miniWidth * ratio);
   }
   mini.getContext('2d').drawImage(canvas, 0, 0, mini.width, mini.height);
   save();
@@ -321,7 +342,7 @@ function makeCanvas(width, height) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   try {
     if (!ctx) throw new Error('canvas');
     ctx.fillStyle = '#123456';
@@ -339,47 +360,27 @@ function release(canvas) {
   canvas.height = 0;
 }
 
-function toBlob(canvas) {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('jpeg'))), 'image/jpeg', JPEG_QUALITY);
-  });
-}
-
-const bytesOf = async (blob) => new Uint8Array(await blob.arrayBuffer());
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
 
-/** JPG pleine page : 300 dpi, ou un peu moins si l'appareil ne peut pas (A3 sur iPhone). */
-async function renderJpeg(s) {
-  const tries = [exportSize(s.format), exportSize(s.format, { maxPixels: IOS_MAX_PIXELS }), exportSize(s.format, { maxPixels: 8_000_000 })];
-  for (const size of tries) {
-    const canvas = makeCanvas(size.width, size.height);
-    if (!canvas) continue;
-    drawPoster(canvas.getContext('2d'), s, size.width / POSTER_W);
-    const blob = await toBlob(canvas);
-    release(canvas);
-    const jpeg = setJpegDpi(await bytesOf(blob), size.dpi);
-    return { blob: new Blob([jpeg], { type: 'image/jpeg' }), size };
-  }
-  throw new Error('memoire');
-}
-
-/** PDF au format exact de la page, à 300 dpi : dessiné par bandes pour tenir sur téléphone. */
-async function renderPdf(s) {
-  const size = exportSize(s.format);
-  const page = pageSizePt(s.format);
-  const parts = [];
-  for (const band of bands(size.width, size.height)) {
+/**
+ * Image JPEG de l'affiche, dessinée et compressée bande par bande : aucune limite de taille
+ * (40 × 60 cm à 600 dpi = 134 millions de pixels, même sur iPhone).
+ */
+async function renderJpeg(s, { dpi, maxPixels = Infinity, onProgress = () => {} }) {
+  const size = exportSize(s.format, { dpi, maxPixels });
+  const encoder = createJpegEncoder(size.width, size.height, { quality: JPEG_QUALITY, dpi: size.dpi });
+  const list = bands(size.width, size.height);
+  for (const [i, band] of list.entries()) {
     const canvas = makeCanvas(size.width, band.height);
     if (!canvas) throw new Error('memoire');
-    drawPoster(canvas.getContext('2d'), s, size.width / POSTER_W, { height: size.height, offsetY: band.top });
-    const blob = await toBlob(canvas);
+    const ctx = canvas.getContext('2d');
+    drawPoster(ctx, s, size.width / POSTER_W, { height: size.height, offsetY: band.top, logo: logoImage });
+    encoder.addRows(ctx.getImageData(0, 0, size.width, band.height).data, band.height);
     release(canvas);
-    const ratio = page.height / size.height;
-    parts.push({ jpeg: await bytesOf(blob), x: 0, y: band.top * ratio, width: page.width, height: band.height * ratio });
+    onProgress((i + 1) / list.length);
     await nextFrame();
   }
-  const pdf = imagesToPdf(parts, { ...page, title: fileTitle(s) });
-  return { blob: new Blob([pdf], { type: 'application/pdf' }), size };
+  return { bytes: encoder.finish(), size };
 }
 
 const slug = (text) => jerseyName(text).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -387,7 +388,8 @@ const slug = (text) => jerseyName(text).normalize('NFD').replace(/[̀-ͯ]/g, '')
 
 function fileName(s, ext) {
   const { children, adults } = people(s);
-  const parts = ['affiche', ...[...children, ...adults].map((p) => slug(p.name)), s.format].filter(Boolean);
+  const quality = s.quality === 'hd' ? '' : s.quality;
+  const parts = ['affiche', ...[...children, ...adults].map((p) => slug(p.name)), s.format, quality].filter(Boolean);
   return `${parts.join('-')}.${ext}`;
 }
 
@@ -435,17 +437,22 @@ async function exportFile(kind) {
   if (busy) return;
   busy = true;
   const s = clone(settings);
-  const f = FORMATS[s.format] || FORMATS.a4;
+  const f = findFormat(s.format);
+  const q = findQuality(s.quality);
   const label = kind === 'pdf' ? 'PDF' : 'JPG';
-  dialog({
-    title: kind === 'print' ? 'Préparation de l’impression' : `Création du ${label}`,
-    text: `Affiche ${f.name} en haute résolution… quelques secondes.`,
-    busy: true,
-  });
+  const title = kind === 'print' ? 'Préparation de l’impression' : `Création du ${label}`;
+  const what = `Affiche ${f.name}${kind === 'print' ? '' : ` en ${q.name}`}`;
+  dialog({ title, text: `${what}…`, busy: true });
   await nextFrame();
   try {
     await loadFonts();
-    const { blob, size } = kind === 'pdf' ? await renderPdf(s) : await renderJpeg(s);
+    const onProgress = (done) => { $('#dialog-text').textContent = `${what}… ${Math.round(done * 100)} %`; };
+    // impression depuis le téléphone : 300 dpi, sans dépasser ce qu'un iPhone sait afficher
+    const options = kind === 'print' ? { dpi: TARGET_DPI, maxPixels: IOS_MAX_PIXELS } : { dpi: q.dpi };
+    const { bytes, size } = await renderJpeg(s, { ...options, onProgress });
+    const blob = kind === 'pdf'
+      ? new Blob([jpegToPdf(bytes, { ...pageSizePt(s.format), title: fileTitle(s) })], { type: 'application/pdf' })
+      : new Blob([bytes], { type: 'image/jpeg' });
     if (objectUrl) URL.revokeObjectURL(objectUrl);
     objectUrl = URL.createObjectURL(blob);
 
@@ -453,11 +460,11 @@ async function exportFile(kind) {
       const img = $('#print-image');
       img.src = objectUrl;
       await img.decode().catch(() => {});
-      $('#page-size').textContent = `@page { size: ${f.name} portrait; margin: 0; }`;
+      $('#page-size').textContent = `@page { size: ${f.widthMm}mm ${f.heightMm}mm; margin: 0; }`;
       dialog({
         title: 'Prêt à imprimer',
-        text: `Choisissez le papier ${f.name} (${f.hint}) et l’échelle 100 % ou « Ajuster ». `
-          + 'Si l’imprimante ne gère pas le A3, téléchargez le PDF pour un imprimeur.',
+        text: `Choisissez le papier ${f.name}${f.hint ? ` (${f.hint})` : ''} et l’échelle 100 % ou « Ajuster ». `
+          + 'Pour un grand format, téléchargez plutôt le PDF et confiez-le à un imprimeur.',
         actions: [button('Imprimer', () => window.print(), 'btn primary')],
       });
       return;
@@ -478,7 +485,8 @@ async function exportFile(kind) {
     }
     dialog({
       title: 'Votre affiche est prête',
-      text: `${label} ${f.name} (${f.hint}) · ${size.width} × ${size.height} pixels · ${size.dpi} dpi · ${megabytes(blob.size)}`,
+      text: `${label} ${f.name}${f.hint ? ` (${f.hint})` : ''} · ${q.name} · ${size.width} × ${size.height} pixels · `
+        + `${size.dpi} dpi · ${megabytes(blob.size)}`,
       actions,
     });
   } catch (error) {
@@ -486,10 +494,37 @@ async function exportFile(kind) {
     dialog({
       title: 'Oups',
       text: 'Impossible de créer le fichier sur cet appareil (mémoire insuffisante). '
-        + 'Fermez quelques onglets et réessayez, ou choisissez le format A4.',
+        + 'Fermez quelques onglets et réessayez, ou choisissez une qualité plus légère.',
     });
   } finally {
     busy = false;
+  }
+}
+
+// ---------------------------------------------------------------- logo
+
+async function useLogo(blob) {
+  releaseImage(logoImage);
+  logoImage = blob ? await imageFromBlob(blob).catch(() => null) : null;
+  const thumb = $('#logo-thumb');
+  thumb.hidden = !logoImage;
+  if (logoImage) thumb.src = logoImage.src;
+  else thumb.removeAttribute('src');
+  syncForm();
+  schedule();
+}
+
+async function onLogoFile(event) {
+  const file = event.target.files?.[0];
+  event.target.value = '';
+  if (!file) return;
+  try {
+    const blob = await prepareLogo(file);
+    await saveLogoBlob(blob);
+    await useLogo(blob);
+  } catch (error) {
+    console.error(error);
+    dialog({ title: 'Image illisible', text: 'Cette image ne peut pas être ouverte. Essayez une image PNG ou JPG.' });
   }
 }
 
@@ -503,6 +538,11 @@ function start() {
   form.addEventListener('input', onInput);
   form.addEventListener('change', onInput);
   form.addEventListener('submit', (e) => e.preventDefault());
+  $('#logo-file').addEventListener('change', onLogoFile);
+  $('#logo-remove').addEventListener('click', async () => {
+    await removeLogoBlob();
+    await useLogo(null);
+  });
   for (const b of document.querySelectorAll('[data-export]')) b.addEventListener('click', () => exportFile(b.dataset.export));
   $('#dialog-close').addEventListener('click', closeDialog);
   $('#dialog').addEventListener('click', (e) => { if (e.target === e.currentTarget && !busy) closeDialog(); });
@@ -521,7 +561,14 @@ function start() {
   const mini = $('#mini');
   mini.addEventListener('click', () => $('.preview').scrollIntoView({ behavior: 'smooth', block: 'start' }));
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => { mini.hidden = entry.isIntersecting; }, { threshold: 0.15 }).observe($('#poster'));
+    // caché quand l'aperçu est visible, et quand les boutons de téléchargement le sont (il les couvrirait)
+    const seen = new Map();
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) seen.set(entry.target, entry.isIntersecting);
+      mini.hidden = [...seen.values()].some(Boolean);
+    }, { threshold: 0.15 });
+    observer.observe($('#poster'));
+    observer.observe($('.print-card .actions'));
   }
   if ('ResizeObserver' in window) new ResizeObserver(schedule).observe($('#poster'));
   window.addEventListener('resize', schedule);
@@ -529,6 +576,7 @@ function start() {
   renderPreview();
   // les polices arrivent : on redessine avec les bonnes lettres
   loadFonts().then(schedule);
+  loadLogoBlob().then((blob) => blob && useLogo(blob));
 }
 
 start();

@@ -250,39 +250,50 @@ mise en page.
 
 Une deuxième application, indépendante de Lire & Compter : une **affiche de foot** où l'on voit
 de dos un parent qui porte son enfant sur les épaules, avec **les prénoms et les numéros sur les
-maillots**, à imprimer en **A4 ou A3**.
+maillots**, à imprimer en **A4, A3 ou grand format jusqu'à 40 × 60 cm**.
 
 👉 Adresse : celle de l'application suivie de `affiche/`
 (<https://mdurieux2.github.io/lire-compter-samuser/affiche/>). Elle s'installe sur l'écran
 d'accueil comme Lire & Compter et fonctionne ensuite sans Internet.
 
-- **Composition** : 1 parent et 1 enfant ; 1 parent et 2 enfants (un sur chaque épaule) ;
-  2 parents et 2 enfants (un chacun) ; 2 parents et 4 enfants (un sur chaque épaule).
+- **Composition** :
+  - 1 parent et 1 enfant : le parent lui tient les mains, bras levés ;
+  - 1 parent et 2 enfants : un sur chaque épaule, tenus par le côté ; ils se donnent la main
+    au-dessus de la tête du parent ;
+  - 2 parents et 2 enfants : les parents sont collés, chacun tient son enfant d'une main et
+    passe l'autre bras autour de la taille de l'autre ;
+  - 2 parents et 4 enfants : un sur chaque épaule de chaque parent.
 - **Pour chaque personne** : prénom, numéro (2 chiffres), papa ou maman / garçon ou fille,
   coiffure (courts, longs et lisses, queue de cheval, couettes, chignon, carré, bouclés, rasés),
   couleur des cheveux (6) et de peau (5).
-- **Titre** libre (« PARIS », « ALLEZ LES BLEUS »…) ou pas de titre ; 9 jeux de couleurs ou des
-  couleurs personnalisées ; marge blanche ou affiche pleine page.
-- **Fichiers haute résolution** : JPG ou PDF à **300 dpi** — A4 : 2480 × 3508 pixels,
-  A3 : 3508 × 4961 pixels. Le PDF a le format exact de la page (pour un imprimeur ou un
-  copy-shop). Sur iPhone et iPad, le JPG A3 passe à 287 dpi (limite des navigateurs) ; le PDF,
-  dessiné par bandes, reste à 300 dpi. Bouton **Imprimer** pour une imprimante A4 ou A3.
-- Aucun logo ni nom de club : seulement des couleurs et le titre choisi.
+- **Titre** libre (« PARIS SAINT-GERMAIN », « ALLEZ LES BLEUS »…) ou pas de titre ; 9 jeux de
+  couleurs ou des couleurs personnalisées ; marge blanche ou affiche pleine page.
+- **Logo** : chacun importe l'image de son choix depuis son téléphone (en haut ou en bas, à
+  gauche ou à droite, 3 tailles). Elle reste sur l'appareil. L'application ne contient aucun
+  logo ni nom de club (ce sont des marques déposées).
+- **Formats** : A4, A3, 30 × 40, 40 × 50 et 40 × 60 cm ; l'illustration s'adapte à la proportion.
+- **Fichiers** JPG ou PDF en **Standard (150 dpi)**, **HD (300 dpi)** ou **Ultra HD (600 dpi)** :
+  A4 en HD = 2480 × 3508 pixels ; 40 × 60 cm en Ultra HD = 9449 × 14173 pixels (134 millions).
+  L'image est dessinée et compressée **par bandes** (encodeur JPEG de l'application) : aucune
+  limite de taille, même sur iPhone. Le PDF a le format exact de la page (pour un imprimeur).
+  Bouton **Imprimer** pour une imprimante A4 ou A3.
 - Tout se passe sur l'appareil : rien n'est envoyé ailleurs.
 
 ```bash
 npm run start:affiche      # http://localhost:8080
-npm run test:e2e:affiche   # mise en page (iPhone, iPad, Android, ordinateur), JPG/PDF A4 et A3, hors ligne
+npm run test:e2e:affiche   # mise en page (iPhone, iPad, Android, ordinateur), JPG/PDF jusqu'en 40 × 60 Ultra HD, logo, hors ligne
 npm run icons:affiche      # régénère les icônes de l'affiche
 ```
 
 | Fichier | Rôle |
 |---|---|
-| `affiche/js/figures.js` | Les personnages vus de dos et les compositions (1 ou 2 parents, 1 ou 2 enfants chacun) |
-| `affiche/js/poster.js` | Fond, bande, titre usé, prénoms et numéros ; même dessin pour l'aperçu et les fichiers |
+| `affiche/js/figures.js` | Les personnages vus de dos et les compositions (bras levés, tenus par le côté, par la taille) |
+| `affiche/js/poster.js` | Fond, bande, titre usé, prénoms et numéros, logo ; même dessin pour l'aperçu et les fichiers |
 | `affiche/js/themes.js` | Couleurs, peaux, cheveux, coiffures, compositions |
-| `affiche/js/formats.js` | A4 / A3, pixels à 300 dpi, découpage en bandes |
-| `affiche/js/pdf.js` | PDF sans bibliothèque (images JPEG en pleine page) |
+| `affiche/js/formats.js` | Formats (A4 à 40 × 60 cm), qualités (dpi), découpage en bandes |
+| `affiche/js/jpeg.js` | Encodeur JPEG sans bibliothèque, qui reçoit l'image bande par bande |
+| `affiche/js/pdf.js` | PDF sans bibliothèque (image JPEG en pleine page) |
+| `affiche/js/logo.js` | Logo importé : préparé et gardé sur l'appareil (IndexedDB) |
 | `affiche/js/main.js` | Écran de réglages, aperçu, export et impression |
 | `affiche/sw.js` | Hors ligne : tout nouveau fichier doit être ajouté à `PRECACHE` |
 
