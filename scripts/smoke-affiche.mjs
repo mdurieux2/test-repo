@@ -155,6 +155,12 @@ async function journey() {
   // thème : le titre suit
   await page.click('[data-group="theme"] input[value="ciel-blanc"]');
   check(await page.inputValue('#title') === 'MARSEILLE', 'le titre suit le thème');
+  // titre long : rien n'est coupé à la saisie
+  await page.fill('#title', 'Paris Saint-Germain');
+  check(await page.inputValue('#title') === 'Paris Saint-Germain', 'titre long coupé à la saisie');
+  await page.fill('#children-0-name', 'Marie-Antoinette');
+  check(await page.inputValue('#children-0-name') === 'Marie-Antoinette', 'prénom long coupé à la saisie');
+  await page.fill('#children-0-name', 'Léa');
   await page.fill('#title', 'Allez Léa');
   await page.click('[data-group="theme"] input[value="vert"]');
   check(await page.inputValue('#title') === 'Allez Léa', 'un titre personnalisé est gardé');

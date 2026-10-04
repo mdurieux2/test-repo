@@ -143,14 +143,27 @@ function spacedText(ctx, text, cx, baseline, spacing, paint) {
   }
 }
 
+/**
+ * Façons de couper un titre en deux lignes : aux espaces (« PARIS » / « SAINT-GERMAIN »),
+ * sinon après un trait d'union (« SAINT- » / « ÉTIENNE »).
+ */
+export function titleSplits(title) {
+  const words = title.split(' ');
+  if (words.length > 1) {
+    return words.slice(1).map((_, i) => [words.slice(0, i + 1).join(' '), words.slice(i + 1).join(' ')]);
+  }
+  const parts = title.split('-');
+  return parts.slice(1).map((_, i) => [`${parts.slice(0, i + 1).join('-')}-`, parts.slice(i + 1).join('-')])
+    .filter(([, b]) => b);
+}
+
 /** Coupe un titre trop long en deux lignes équilibrées. */
 function titleLines(ctx, title) {
-  const words = title.split(' ');
-  if (words.length < 2) return [title];
+  const splits = titleSplits(title);
+  if (!splits.length) return [title];
   ctx.font = `100px ${FONT_TITLE}`;
   let best = null;
-  for (let i = 1; i < words.length; i += 1) {
-    const lines = [words.slice(0, i).join(' '), words.slice(i).join(' ')];
+  for (const lines of splits) {
     const widest = Math.max(...lines.map((l) => ctx.measureText(l).width));
     if (!best || widest < best.widest) best = { lines, widest };
   }

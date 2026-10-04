@@ -166,7 +166,7 @@ function choiceField(id, label, group, swatches = false) {
 function nameFields(id, path, label) {
   return '<div class="row">'
     + `<div class="field grow"><label class="label" for="${id}-name" data-label="name">${label}</label>`
-    + `<input id="${id}-name" name="${path}.name" type="text" maxlength="12" autocapitalize="characters" spellcheck="false"></div>`
+    + `<input id="${id}-name" name="${path}.name" type="text" maxlength="16" autocapitalize="characters" spellcheck="false"></div>`
     + `<div class="field number"><label class="label" for="${id}-number">Numéro <span class="count" data-count="${path}.number"></span></label>`
     + `<input id="${id}-number" name="${path}.number" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"></div>`
     + '</div>';
