@@ -16,6 +16,19 @@ export function pickForLevel(rng, items, level, levelOf = (item) => item.level) 
 }
 
 /**
+ * Tire un élément en tenant compte de la saison (`season` : identifiant de themes.js).
+ * Pendant leur saison, les éléments de saison sortent une fois sur deux ; hors saison, ou
+ * sans saison (tests), jamais. Les autres éléments sont tirés exactement comme sans saison
+ * (même suite de hasard), et le tirage reste déterministe pour un rng et une saison donnés.
+ */
+export function pickSeasonal(rng, items, season) {
+  const common = items.filter((item) => !item.season);
+  const seasonal = season ? items.filter((item) => item.season === season) : [];
+  if (seasonal.length && (!common.length || rng() < 0.5)) return pick(rng, seasonal);
+  return pick(rng, common);
+}
+
+/**
  * `count` nombres distincts dont `answer`, choisis près de la bonne réponse
  * (les distracteurs les plus proches sont les plus instructifs), dans [min, max].
  */

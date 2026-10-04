@@ -104,6 +104,9 @@ test('données : aucun profil au premier lancement, chaque famille crée les sie
   for (let i = 0; i < 10; i++) addChild(store, { name: `Enfant ${i}` });
   assert.equal(store.order.length, MAX_CHILDREN);
   assert.equal(cleanName('x'.repeat(50)).length, NAME_MAX);
+  // les prénoms longs ou les surnoms restent entiers
+  assert.equal(cleanName('Paris Saint-Germain'), 'Paris Saint-Germain');
+  assert.equal(cleanName(' Paris  Saint-Germain Féminines '), 'Paris Saint-Germain Féminines');
   store.active = 'eva-rose';
   removeChild(store, 'eva-rose');
   assert.equal(store.active, null);

@@ -4,7 +4,9 @@
 // Usage : npm run test:e2e   (SCREENSHOTS=dossier pour enregistrer des captures)
 //         ONLY=memory,points npm run test:e2e   (seulement la mise en page de ces jeux, sur tous les appareils)
 //         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
+//         ONLY=ecrans npm run test:e2e          (seulement la mise en page des écrans fixes : accueil, listes, duo, parents)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
+//         PARTS=scenario | PARTS=layout SHARD=1/4   (une partie du test, comme dans la CI)
 //         PORT=8124 pour lancer plusieurs tests en même temps
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
 
@@ -13,32 +15,49 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { startServer } from './serve.mjs';
 import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
+import { formatChrono } from '../app/js/games/chrono.js';
+import { STORY_DATA } from '../app/js/games/histoires.js';
 import { PROGRAMS } from '../app/js/programs.js';
+import { starsFor } from '../app/js/progress.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
+import { seasonOf } from '../app/js/themes.js';
 
 const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
 const SHOTS = process.env.SCREENSHOTS;
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
+// En CI, le test est découpé : PARTS=scenario (le parcours complet), ou PARTS=layout avec SHARD=2/4
+// (la mise en page sur un quart des appareils). Sans rien, tout est fait.
+const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : ['scenario', 'layout'];
+const SHARD = process.env.SHARD ? process.env.SHARD.split('/').map(Number) : null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
 // CHROMIUM_PATH : utiliser un Chromium déjà installé (sinon celui téléchargé par Playwright)
-const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
+// Micro factice (un bip), autorisé sans question : pour enregistrer les voix des parents.
+const browser = await chromium.launch({
+  args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'],
+  ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
+});
 const errors = [];
 
 function fail(message) {
   throw new Error(message);
 }
 
-/** Voix factice : la vraie synthèse vocale n'existe pas dans Chromium sans tête. */
+/** Voix factice : la vraie synthèse vocale n'existe pas dans Chromium sans tête (ce qui est dit va dans __spoken). */
 async function newContext(viewport) {
-  const context = await browser.newContext({ viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'fr-FR' });
+  const context = await browser.newContext({
+    viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'fr-FR', permissions: ['microphone'],
+  });
   await context.addInitScript(() => {
     const fake = {
       speaking: false, pending: false,
-      speak(u) { setTimeout(() => u.onend && u.onend(), 5); },
+      speak(u) {
+        (window.__spoken = window.__spoken || []).push(u.text);
+        setTimeout(() => u.onend && u.onend(), 5);
+      },
       cancel() {}, getVoices: () => [], addEventListener() {},
     };
     Object.defineProperty(window, 'speechSynthesis', { value: fake });
@@ -88,12 +107,49 @@ async function goProfile(page, id = 'eva-rose', url = BASE) {
   await page.waitForSelector('.home');
 }
 
+/** Ouvre l'espace parents (en calculant la multiplication si la barrière est là). */
+async function openParents(page) {
+  await goProfiles(page);
+  await page.click('.parent-btn');
+  await page.waitForSelector('.parents, .gate');
+  if (await page.locator('.gate').count()) {
+    const [a, b] = (await page.textContent('.gate-question')).match(/\d+/g).map(Number);
+    await page.fill('.gate-input', String(a * b));
+    await page.click('.gate-form button');
+    await page.waitForSelector('.parents');
+  }
+}
+
+/** Écran « Vos voix » : Espace parents → Réglages → Vos voix pour les histoires. */
+async function openVoices(page) {
+  await openParents(page);
+  await page.click('[data-tab="reglages"]');
+  await page.click('[data-voices]');
+  await page.waitForSelector('.voices');
+}
+
 async function openGame(page, game, { palier, format = 0 } = {}) {
   await goProfile(page, 'eva-rose', format ? `${BASE}?format=${format}` : BASE);
   await page.click(`[data-domain="${game.domain}"]`);
   await page.click(`[data-game="${game.id}"]`);
   // la tuile conseillée est animée en continu : clic forcé
   if (game.paliers) await page.click(palier ? `[data-palier="${palier}"]` : '.palier-tile.recommended', { force: true });
+}
+
+/** L'enfant actif et les étoiles de chacun, tels qu'enregistrés sur l'appareil. */
+async function savedState(page) {
+  return page.evaluate((key) => {
+    const store = JSON.parse(localStorage.getItem(key));
+    return { active: store.active, stars: Object.fromEntries(Object.entries(store.profiles).map(([id, kid]) => [id, kid.stars])) };
+  }, STORAGE_KEY);
+}
+
+/** Ouvre « Jouer à deux » depuis « Qui joue ? » et choisit les deux joueurs (le premier commence). */
+async function pickDuo(page, players) {
+  await goProfiles(page);
+  await page.click('[data-duo]');
+  await page.waitForSelector('.duo-pick');
+  for (const id of players) await page.click(`[data-pick="${id}"]`);
 }
 
 /** Aucun « null », « undefined » ou « NaN » ne doit apparaître à l'écran. */
@@ -151,6 +207,83 @@ async function testLasso(page, q) {
   await page.waitForFunction(() => document.querySelectorAll('.lasso-object.grouped').length === 2, null, { timeout: 3000 })
     .catch(() => fail('patates : la boucle autour de deux objets n’a pas fait de paquet'));
   console.log('  ✔ patates : boucle dessinée au doigt (refusée autour d’un objet, acceptée autour de deux)');
+}
+
+/** Positions à l'écran des points d'un trait (carré 0–100 du dessin, avec sa marge de 8). */
+async function tracePoints(page, points) {
+  return page.$eval('.trace-drawing', (svg, pts) => {
+    const r = svg.getBoundingClientRect();
+    const scale = Math.min(r.width, r.height) / 116;
+    const left = r.left + (r.width - 116 * scale) / 2;
+    const top = r.top + (r.height - 116 * scale) / 2;
+    return pts.map(([x, y]) => [left + (x + 8) * scale, top + (y + 8) * scale]);
+  }, points);
+}
+
+/** Glisse le doigt (souris) par ces positions de la page. */
+async function drag(page, points, steps = 2) {
+  await page.mouse.move(...points[0]);
+  await page.mouse.down();
+  for (const p of points.slice(1)) await page.mouse.move(...p, { steps });
+  await page.mouse.up();
+}
+
+// Écris au doigt : tracer à l'envers ne compte pas, s'éloigner du chemin donne un petit mot.
+let traceTested = false;
+async function testTrace(page, q) {
+  traceTested = true;
+  const first = q.stage.strokes[0];
+  await drag(page, await tracePoints(page, [...first].reverse()));
+  const state = await page.evaluate(() => ({
+    finished: document.querySelector('.trace-drawing.finished') !== null,
+    number: document.querySelector('.trace-start-num').textContent,
+  }));
+  if (state.finished || state.number !== '1') fail('écris au doigt : un trait tracé à l’envers a été accepté');
+  const far = await tracePoints(page, [[-6, 106], [-4, 104], [-6, 102], [-3, 105]]);
+  await page.mouse.move(...far[0]);
+  await page.mouse.down();
+  for (const p of far.slice(1)) {
+    await page.waitForTimeout(150);
+    await page.mouse.move(...p);
+  }
+  await page.mouse.up();
+  await page.waitForSelector('.try-again');
+  if (!(await page.textContent('.try-again')).includes('chemin gris')) fail('écris au doigt : pas de message hors du chemin');
+  console.log('  ✔ écris au doigt : trait à l’envers refusé, « Reste sur le chemin gris ! » hors du chemin');
+}
+
+// Règle l'horloge : l'heure montrée par le cadran (attributs data-h et data-m du cadran).
+let clockDragTested = false;
+const clockMinutes = ({ h, m }) => (h % 12) * 60 + m;
+async function clockTime(page) {
+  return page.$eval('.setclock-dial', (el) => ({ h: Number(el.dataset.h), m: Number(el.dataset.m) }));
+}
+
+/** Règle l'horloge avec les boutons « +1 h », « −5 min »… (par le chemin le plus court). */
+async function setClockWithButtons(page, target) {
+  let diff = (((clockMinutes(target) - clockMinutes(await clockTime(page))) % 720) + 720) % 720;
+  if (diff > 360) diff -= 720;
+  const sign = diff < 0 ? -1 : 1;
+  for (let k = 0; k < Math.floor(Math.abs(diff) / 60); k++) await page.click(`[data-shift="${sign * 60}"]`);
+  for (let k = 0; k < (Math.abs(diff) % 60) / 5; k++) await page.click(`[data-shift="${sign * 5}"]`);
+  const now = await clockTime(page);
+  if (clockMinutes(now) !== clockMinutes(target)) fail(`régler l’horloge : ${now.h} h ${now.m} au lieu de ${target.h} h ${target.m}`);
+}
+
+/** Glisser la grande aiguille à la souris de 2 h 50 jusqu'à 3 h 10 : elle passe le 12 et l'heure avance. */
+async function testClockDrag(page) {
+  clockDragTested = true;
+  await setClockWithButtons(page, { h: 2, m: 50 });
+  const box = await page.locator('.setclock-dial svg').boundingBox();
+  const [cx, cy, r] = [box.x + box.width / 2, box.y + box.height / 2, box.width * 0.3];
+  const at = (deg) => [cx + r * Math.sin((deg * Math.PI) / 180), cy - r * Math.cos((deg * Math.PI) / 180)];
+  await page.mouse.move(...at(300));
+  await page.mouse.down();
+  for (const deg of [315, 330, 345, 360, 15, 30, 45, 60]) await page.mouse.move(...at(deg), { steps: 3 });
+  await page.mouse.up();
+  const now = await clockTime(page);
+  if (now.h !== 3 || now.m !== 10) fail(`régler l’horloge : après le glisser de la grande aiguille, ${now.h} h ${now.m} au lieu de 3 h 10`);
+  console.log('  ✔ règle l’horloge : grande aiguille glissée à la souris (elle passe le 12, l’heure avance)');
 }
 
 async function answer(page, q, wrongFirst) {
@@ -261,9 +394,13 @@ async function answer(page, q, wrongFirst) {
       break;
     }
     case 'order': {
-      const sorted = [...q.items].sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
+      const sorted = q.items.filter((it) => it.value !== null)
+        .sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
       if (wrongFirst) {
-        await page.click(`.order-item[data-value="${sorted[1].value}"]`);
+        // une lettre piège s'il y en a, sinon un élément différent du premier attendu
+        const wrong = q.items.find((it) => it.value === null)
+          || sorted.find((it) => (q.byLabel ? it.label !== sorted[0].label : it !== sorted[0]));
+        await page.click(wrong.value === null ? `.order-item[data-value="null"][data-label="${wrong.label}"]` : `.order-item[data-value="${wrong.value}"]`);
         await page.waitForSelector('.try-again');
       }
       for (const item of sorted) await page.click(`.order-item[data-value="${item.value}"]:not([disabled])`);
@@ -387,6 +524,31 @@ async function answer(page, q, wrongFirst) {
       await page.mouse.up();
       break;
     }
+    case 'trace': {
+      // l'aide (💡) compte comme une aide : la question n'est plus « du premier coup »
+      if (wrongFirst) await page.click('.trace-hint');
+      else if (!traceTested) await testTrace(page, q);
+      // chaque trait, en passant par ses points, dans l'ordre et dans le bon sens
+      for (const st of q.stage.strokes) await drag(page, await tracePoints(page, st));
+      break;
+    }
+    case 'setclock': {
+      if (wrongFirst) {
+        // une mauvaise heure : un conseil ; une deuxième : l'heure attendue est montrée
+        if (clockMinutes(await clockTime(page)) === clockMinutes(q.target)) await page.click('[data-shift="5"]');
+        await page.click('.setclock-zone .validate-btn');
+        await page.waitForSelector('.try-again');
+        if (!(await page.textContent('.try-again')).includes('aiguille')) fail('régler l’horloge : pas de conseil après une erreur');
+        await page.click('.setclock-zone .validate-btn');
+        await page.waitForSelector('.setclock-dial.show-hint');
+        if (!(await page.textContent('.try-again')).includes(q.answer)) fail(`régler l’horloge : l’heure attendue (${q.answer}) n’est pas montrée`);
+      } else if (!clockDragTested) {
+        await testClockDrag(page);
+      }
+      await setClockWithButtons(page, q.target);
+      await page.click('.setclock-zone .validate-btn');
+      break;
+    }
     default:
       if (wrongFirst) {
         const wrong = q.choices.find((c) => c.value !== q.answer);
@@ -395,6 +557,147 @@ async function answer(page, q, wrongFirst) {
       }
       await page.click(`.choice[data-value="${q.answer}"]`);
   }
+}
+
+// ---------------------------------------------------------------- Défi chrono
+
+/** Le record enregistré sur le profil pour ce jeu : { niveau: secondes }. */
+async function savedRecords(page, gameId) {
+  return page.evaluate(([key, id]) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'].records?.[id] || {}, [STORAGE_KEY, gameId]);
+}
+
+/** Pendant la partie : 10 points de progression, le chronomètre (mm:ss) dans le badge en haut à droite. */
+async function checkChronoBadge(page, game, i) {
+  const steps = await page.locator('.progress .step').count();
+  if (steps !== game.questions) fail(`${game.id} : ${steps} questions au lieu de ${game.questions}`);
+  const shown = (await page.textContent('.level-badge .chrono-clock')).trim();
+  if (!/^⏱ \d{2}:\d{2}$/.test(shown)) fail(`${game.id} : chronomètre « ${shown} »`);
+  if (i > 0 && shown === '⏱ 00:00') fail(`${game.id} : le chronomètre ne tourne pas`);
+}
+
+/** À la fin : le temps (mm:ss), le record du niveau (battu ou non), et ce qui est enregistré. */
+async function checkChronoResults(page, game, { level = null, record = null } = {}) {
+  const time = (await page.textContent('.chrono-time b')).trim();
+  if (!/^\d{2}:\d{2}$/.test(time)) fail(`${game.id} : temps affiché « ${time} »`);
+  const line = (await page.textContent('.chrono-record')).replace(/\s+/g, ' ');
+  const saved = await savedRecords(page, game.id);
+  if (record === null) {
+    // premier défi : c'est un record, enregistré en secondes pour le niveau joué
+    if (!line.includes('Nouveau record')) fail(`${game.id} : « Nouveau record » absent (${line})`);
+    const levels = Object.keys(saved);
+    if (levels.length !== 1 || formatChrono(saved[levels[0]]) !== time) fail(`${game.id} : record enregistré ${JSON.stringify(saved)} pour un temps de ${time}`);
+    return Number(levels[0]);
+  }
+  // record imbattable : il est affiché et conservé
+  if (line.includes('Nouveau') || !line.includes(`Ton record : ${formatChrono(record)}`)) fail(`${game.id} : record non conservé (${line})`);
+  if (saved[level] !== record) fail(`${game.id} : record ${saved[level]} au lieu de ${record}`);
+  return level;
+}
+
+/**
+ * L'histoire à enregistrer pour le test : celle que le jeu tire le plus souvent aujourd'hui
+ * (une histoire de la saison, seule de sa saison à son niveau, sort une fois sur deux).
+ */
+function storyToRecord() {
+  const season = seasonOf(new Date()).id;
+  const odds = (story) => {
+    if (story.season && story.season !== season) return 0;
+    const same = STORY_DATA.filter((s) => s.level === story.level);
+    const seasonal = same.filter((s) => s.season === season);
+    const common = same.filter((s) => !s.season);
+    if (story.season) return (common.length ? 0.5 : 1) / seasonal.length;
+    return (seasonal.length ? 0.5 : 1) / common.length;
+  };
+  return [...STORY_DATA].sort((a, b) => odds(b) - odds(a))[0];
+}
+
+/**
+ * Histoires lues par un parent : Espace parents → Réglages → Vos voix → enregistrer une histoire
+ * au micro (factice) → la garder ; puis, dans le jeu « Histoires », c'est l'enregistrement qui est
+ * joué (élément audio, source blob:), les phrases s'allument, et la question est posée ensuite.
+ */
+async function checkRecordings(page) {
+  const story = storyToRecord();
+  await openVoices(page);
+  if ((await page.locator('.voice-story').count()) !== STORY_DATA.length) fail('voix : toutes les histoires ne sont pas listées');
+  if (!(await page.textContent('.voices-intro')).includes('restent sur cet appareil')) fail('voix : il manque le rappel « restent sur cet appareil »');
+  await page.click(`[data-record="${story.id}"]`);
+  await page.waitForSelector('[data-rec-start]');
+  if (!(await page.textContent('.record-text')).replace(/\s+/g, ' ').includes(story.sentences[0].split(' ')[0])) fail('voix : le texte de l’histoire n’est pas affiché');
+  // micro refusé une fois : un message clair, rien ne casse, et on peut réessayer
+  await page.evaluate(() => {
+    const devices = navigator.mediaDevices;
+    const real = devices.getUserMedia.bind(devices);
+    devices.getUserMedia = () => {
+      devices.getUserMedia = real;
+      return Promise.reject(new DOMException('Permission refusée', 'NotAllowedError'));
+    };
+  });
+  await page.click('[data-rec-start]');
+  await page.waitForSelector('.record-status.problem');
+  if (!(await page.textContent('.record-status')).includes('micro est refusé')) fail('voix : pas de message clair quand le micro est refusé');
+  await page.click('[data-rec-start]'); // « Réessayer »
+  await page.waitForSelector('[data-rec-stop]');
+  await page.waitForTimeout(1500);
+  await page.click('[data-rec-stop]');
+  await page.waitForSelector('[data-rec-keep]', { timeout: 5000 });
+  if (!(await page.locator('[data-rec-listen]').count()) || !(await page.locator('[data-rec-redo]').count())) fail('voix : Écouter et Recommencer absents');
+  await page.click('[data-rec-listen]');
+  await page.waitForFunction(() => document.querySelector('.record-screen audio.story-audio')?.getAttribute('src')?.startsWith('blob:'), null, { timeout: 5000 });
+  await page.click('[data-rec-keep]');
+  await page.waitForSelector(`[data-story="${story.id}"][data-recorded]`);
+  if (!(await page.textContent(`[data-story="${story.id}"]`)).includes('Enregistrée')) fail('voix : l’histoire n’apparaît pas comme enregistrée');
+  if (!(await page.locator(`[data-listen="${story.id}"]`).count()) || !(await page.locator(`[data-delete="${story.id}"]`).count())) fail('voix : Écouter et Supprimer absents');
+  const saved = await page.evaluate(async (id) => {
+    const record = await (await import('./js/recordings.js')).get(id);
+    return record && { duration: record.duration, size: record.size, mime: record.mime };
+  }, story.id);
+  if (!saved || !(saved.duration >= 1 && saved.duration <= 3) || !saved.size) fail(`voix : enregistrement inattendu ${JSON.stringify(saved)}`);
+  console.log(`✔ voix des parents : « ${story.title} » enregistrée au micro (${saved.duration.toFixed(1)} s, ${saved.mime}), gardée sur l’appareil`);
+
+  // dans le jeu : la voix enregistrée remplace la voix de synthèse pour l'histoire
+  // (les phrases allumées sont relevées dès le chargement : une phrase courte ne reste allumée qu'un instant)
+  await page.addInitScript(() => {
+    window.__lit = [];
+    new MutationObserver((records) => {
+      for (const { target } of records) {
+        if (target.classList?.contains('k-sentence') && target.classList.contains('on')) window.__lit.push(Number(target.dataset.s));
+      }
+    }).observe(document, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  });
+  await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor('histoires', story.level)}'; store.profiles['eva-rose'].games.histoires = { level: ${story.level} };`);
+  let q = null;
+  for (let tries = 0; tries < 40 && q?.stage.storyId !== story.id; tries++) {
+    await openGame(page, findGame('histoires'));
+    await page.waitForSelector('.choices');
+    q = await page.evaluate(() => globalThis.__lc.question);
+  }
+  if (q.stage.storyId !== story.id) fail(`voix : l’histoire « ${story.title} » n’a pas été tirée en 40 essais`);
+  await page.waitForSelector('.stage-karaoke audio.story-audio[src^="blob:"]', { state: 'attached', timeout: 5000 })
+    .catch(() => fail('voix : l’enregistrement n’est pas joué dans le jeu'));
+  await page.waitForFunction((text) => (globalThis.__spoken || []).includes(text), q.instruction[0], { timeout: 15000 })
+    .catch(() => fail('voix : la question n’est pas posée après l’enregistrement'));
+  const spoken = await page.evaluate(() => globalThis.__spoken);
+  if (spoken.some((text) => story.sentences.includes(text))) fail('voix : l’histoire a aussi été lue par la voix de synthèse');
+  // les phrases se sont allumées une à une, dans l'ordre, pendant la lecture ; plus rien ensuite
+  const order = await page.evaluate(() => globalThis.__lit.filter((s, i, all) => s !== all[i - 1]));
+  if (order.join() !== story.sentences.map((_, i) => i).join()) fail(`voix : phrases allumées ${order.join(', ') || 'jamais'} au lieu d’une à une`);
+  if (await page.locator('.k-sentence.on').count()) fail('voix : une phrase reste allumée après la lecture');
+  // 🔊 Relire l'histoire : l'enregistrement est rejoué
+  await page.click('.karaoke-replay');
+  await page.waitForFunction(() => {
+    const audio = document.querySelector('.stage-karaoke audio.story-audio');
+    return audio && !audio.paused && audio.getAttribute('src').startsWith('blob:');
+  }, null, { timeout: 5000 }).catch(() => fail('voix : « Relire l’histoire » ne rejoue pas l’enregistrement'));
+  console.log('✔ voix des parents : dans « Histoires », l’enregistrement est joué, les phrases s’allument, puis la question est posée');
+
+  // 🗑 Supprimer : l'histoire revient à la voix de synthèse
+  if (!page.listenerCount('dialog')) page.once('dialog', (dialog) => dialog.accept());
+  await openVoices(page);
+  await page.click(`[data-delete="${story.id}"]`);
+  await page.waitForSelector(`[data-story="${story.id}"]:not([data-recorded])`);
+  if (await page.locator('.voice-story[data-recorded]').count()) fail('voix : l’enregistrement supprimé est toujours là');
+  console.log('✔ voix des parents : enregistrement supprimé');
 }
 
 // ---------------------------------------------------------------- Parcours complet (iPhone 13)
@@ -432,6 +735,14 @@ console.log('✔ premier lancement : profils créés (prénom, dessin, classe)')
 await setStore(page, 'store.settings = { sessionLength: 5 };');
 await page.reload();
 await shot('01-qui-joue');
+// inviter à installer l'icône : visible dans le navigateur, « Plus tard » le cache (et c'est retenu)
+if (!(await page.locator('[data-install-hint]').count())) fail('installer l’icône : l’invitation est absente');
+if (!(await page.textContent('[data-install-hint]')).includes('7 jours') && (await page.evaluate(() => /iPhone|iPad/.test(navigator.userAgent)))) fail('installer l’icône : explication des 7 jours absente');
+await page.click('[data-install-later]');
+await page.reload();
+await page.waitForSelector('.profiles');
+if (await page.locator('[data-install-hint]').count()) fail('installer l’icône : « Plus tard » n’est pas retenu');
+console.log('✔ invitation à installer l’icône (masquée avec « Plus tard »)');
 await page.click('[data-profile="eva-rose"]');
 await page.waitForSelector('.home');
 if (!(await page.textContent('.home-title')).replace('\u2011', '-').includes('Eva-Rose')) fail('prénom absent de l’accueil');
@@ -447,6 +758,7 @@ const shotsWanted = {
   mesures: '46-mesures', calendrier: '47-calendrier', tangram: '48-tangram', reproduire: '49-reproduire', 'parle-anglais': '50-parle',
 };
 const bubbleText = (t) => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\u2011/g, '-').replace(/\s+/g, ' ').trim();
+let extraStars = 0; // étoiles gagnées en plus des 2 étoiles par jeu (deuxième défi chrono)
 for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
   const grade = gradeFor(game.id);
   await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`);
@@ -463,7 +775,11 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
     await openGame(page, game);
   }
   const briefed = new Set();
-  for (let i = 0; i < 5; i++) {
+  // une partie de 5 questions (réglage) avec une erreur : 2 étoiles ; le défi chrono a toujours
+  // 10 questions : deux erreurs pour garder 2 étoiles (8 sur 10)
+  const count = game.questions || 5;
+  const wrongAt = game.questions ? [1, 6] : [1];
+  for (let i = 0; i < count; i++) {
     const zone = await page.waitForSelector('.choices:not(.answered)');
     const q = await page.evaluate(() => globalThis.__lc.question);
     // consigne complète la première fois, puis la consigne courte
@@ -477,14 +793,32 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
     if (game.id === 'calcul' && i === 1) await shot('15-relie');
     if (game.id === 'calcul' && i === 3) await shot('16-complete');
     if (!(await page.locator('.guide-btn .avatar-eva-rose').count())) fail(`${game.id} : la question n’est pas posée par Eva-Rose`);
-    await answer(page, q, i === 1);
+    if (game.timed && (i === 0 || i === count - 1)) await checkChronoBadge(page, game, i);
+    await answer(page, q, wrongAt.includes(i));
     await assertNoJunk(page, `${game.id} question ${i + 1}`);
     await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
   }
   await page.waitForSelector('.results');
   await assertNoJunk(page, `${game.id} résultats`);
   const stars = await page.locator('.big-star.on').count();
-  if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (4 bonnes sur 5)`);
+  if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (${count - wrongAt.length} bonnes sur ${count})`);
+  if (game.timed) {
+    const level = await checkChronoResults(page, game);
+    await shot('51-chrono');
+    // deuxième défi avec un record imbattable (1 seconde) : il n'est pas battu, il est conservé
+    await setStore(page, `const kid = store.profiles['eva-rose']; kid.records = { '${game.id}': { ${level}: 1 } };
+      kid.games['${game.id}'] = { ...kid.games['${game.id}'], level: ${level} };`);
+    await openGame(page, game);
+    for (let i = 0; i < count; i++) {
+      const zone = await page.waitForSelector('.choices:not(.answered)');
+      await answer(page, await page.evaluate(() => globalThis.__lc.question), wrongAt.includes(i));
+      await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+    }
+    await page.waitForSelector('.results');
+    await checkChronoResults(page, game, { level, record: 1 });
+    extraStars += await page.locator('.big-star.on').count();
+    console.log(`  ✔ ${game.id} : 10 questions, chronomètre, temps et record (battu, puis conservé)`);
+  }
   if (game.id === 'calcul') {
     await page.waitForTimeout(2500);
     await shot('17-resultats');
@@ -492,7 +826,10 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
   console.log(`✔ ${game.id} (${grade}) : partie complète, ${stars} étoiles`);
 }
 
-if (PLAY) return;
+if (PLAY) {
+  if (PLAY.includes('histoires')) await checkRecordings(page);
+  return;
+}
 
 // choisir directement son niveau
 await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
@@ -512,7 +849,7 @@ console.log('✔ choix direct du niveau');
 // album : 2 étoiles par partie, un autocollant toutes les 5 étoiles
 await goProfile(page);
 await page.click('.domain-album');
-const expected = Math.floor((GAMES.length * 2) / 5);
+const expected = Math.floor((GAMES.length * 2 + extraStars) / 5);
 const unlocked = await page.locator('.sticker:not(.locked)').count();
 if (unlocked !== expected) fail(`${unlocked} autocollants au lieu de ${expected}`);
 console.log(`✔ album : ${unlocked} autocollants`);
@@ -604,6 +941,70 @@ await page.waitForSelector('.home');
 await shot('05-accueil-matteo');
 console.log('✔ profils séparés');
 
+// jouer à deux : Eva-Rose et Matteo, chacun son tour, 10 questions
+const beforeDuo = await savedState(page);
+await pickDuo(page, []);
+if (!(await page.locator('.duo-go').isDisabled())) fail('duo : « C’est parti ! » possible sans avoir choisi deux enfants');
+await page.click('[data-pick="eva-rose"]');
+await page.click('[data-pick="matteo"]');
+if (await page.locator('.duo-go').isDisabled()) fail('duo : « C’est parti ! » impossible avec deux enfants choisis');
+await shot('51-duo-choix');
+await page.click('.duo-go');
+const programOf = (grade) => new Set(Object.values(PROGRAMS[grade]).flat().map(([id]) => id));
+const duoPrograms = { 'eva-rose': programOf('CP'), matteo: programOf('MS') };
+for (let i = 0; i < 10; i++) {
+  const zone = await page.waitForSelector('.choices:not(.answered)');
+  const q = await page.evaluate(() => globalThis.__lc.question);
+  const turn = i % 2 === 0 ? 'eva-rose' : 'matteo';
+  if (!(await page.locator(`.guide-btn .avatar-${turn}`).count())) fail(`duo question ${i + 1} : la question n’est pas posée par ${turn}`);
+  if ((await page.locator('.duo-player').count()) !== 2) fail(`duo question ${i + 1} : les deux portraits ne sont pas en haut`);
+  if (!(await page.locator(`.duo-player.turn[data-duo-player="${turn}"]`).count())) fail(`duo question ${i + 1} : le tour de ${turn} n’est pas mis en avant`);
+  if (!duoPrograms[turn].has(q.from)) fail(`duo question ${i + 1} : ${q.from} n’est pas au programme de ${turn}`);
+  if (i === 0) await shot('52-duo');
+  await answer(page, q, false);
+  await assertNoJunk(page, `duo question ${i + 1}`);
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+}
+await page.waitForSelector('.duo-end');
+await assertNoJunk(page, 'duo résultats');
+await shot('53-duo-resultats');
+if (!(await page.textContent('.duo-team')).includes('équipe')) fail('duo : pas de message pour l’équipe');
+const afterDuo = await savedState(page);
+const duoLines = [];
+for (const id of ['eva-rose', 'matteo']) {
+  const card = page.locator(`[data-duo-result="${id}"]`);
+  const text = (await card.textContent()).replace(/\u2011/g, '-');
+  const good = Number(text.match(/(\d+) bonnes? réponses?/)?.[1]);
+  if (!text.includes(id === 'matteo' ? 'Matteo' : 'Eva-Rose') || Number.isNaN(good)) fail(`duo : résultats de ${id} absents`);
+  const won = afterDuo.stars[id] - beforeDuo.stars[id];
+  if (won < 1 || won !== starsFor(good, 5) || (await card.locator('.big-star.on').count()) !== won) {
+    fail(`duo : ${id} gagne ${won} étoile(s) pour ${good} bonnes réponses sur 5`);
+  }
+  duoLines.push(`${id} ${good}/5, +${won} ⭐`);
+}
+if (afterDuo.active !== beforeDuo.active) fail(`duo : enfant actif « ${afterDuo.active} » au lieu de « ${beforeDuo.active} » après la partie`);
+// rechargement au milieu d'une partie, puis abandon : « Qui joue ? » et l'enfant actif d'avant
+await page.click('[data-duo-again]');
+await page.waitForSelector('.duo-play');
+await page.reload();
+await page.waitForSelector('.profiles');
+if ((await savedState(page)).active !== beforeDuo.active) fail('duo : enfant actif non restauré après un rechargement');
+await pickDuo(page, ['matteo', 'eva-rose']);
+await page.click('.duo-go');
+await page.waitForSelector('.duo-play');
+if (!(await page.locator('.guide-btn .avatar-matteo').count())) fail('duo : le premier enfant choisi ne commence pas');
+await page.click('.top-bar .icon-btn');
+await page.waitForSelector('.profiles');
+if ((await savedState(page)).active !== beforeDuo.active) fail('duo : enfant actif non restauré après un abandon');
+// temps du jour écoulé pour l'un des deux : on le dit, et la partie ne commence pas
+await setStore(page, "store.profiles.matteo.goals = { limit: 10 }; store.profiles.matteo.history.push({ at: new Date().toISOString(), game: 'saisons', level: 1, correct: 5, total: 5, stars: 3, seconds: 900 });");
+await pickDuo(page, ['eva-rose', 'matteo']);
+await page.click('.duo-go');
+await page.waitForSelector('.duo-hint.warning');
+if (!(await page.textContent('.duo-hint')).includes('Matteo') || await page.locator('.duo-play').count()) fail('duo : lancé alors que Matteo a fini son temps du jour');
+await setStore(page, 'store.profiles.matteo.goals = {}; store.profiles.matteo.history.pop();');
+console.log(`✔ jouer à deux (10 questions en alternance, ${duoLines.join(', ')} ; enfant actif rendu ; temps du jour respecté)`);
+
 // espace parents : barrière, tableau de bord, changement de classe
 await goProfiles(page);
 await page.click('.parent-btn');
@@ -642,25 +1043,67 @@ if ((await page.textContent('[data-profile="eva-rose"] svg text')) !== 'Lou') fa
 await page.click('[data-profile="eva-rose"]');
 await page.waitForSelector('.home');
 if (!(await page.textContent('.home-title')).includes('Lou')) fail('nouveau prénom absent de l’accueil');
-// ajouter puis supprimer un enfant
+// ajouter puis supprimer un enfant, avec un prénom long tapé au clavier (gardé en entier)
+const LONG_NAME = 'Paris Saint-Germain Féminines';
 page.on('dialog', (dialog) => dialog.accept());
 await goProfiles(page);
 await page.click('.parent-btn');
 await page.click('[data-tab="enfants"]');
 await page.click('.add-child');
-await page.fill('[data-field="name"]', 'Zoé');
+await page.locator('[data-field="name"]').pressSequentially(LONG_NAME);
 await page.click('.child-submit');
-await page.waitForSelector('[data-child-card="zoe"]');
-await page.click('[data-edit="zoe"]');
+const longId = 'paris-saint-germain-feminines';
+await page.waitForSelector(`[data-child-card="${longId}"]`);
+const longName = await page.evaluate(([key, id]) => JSON.parse(localStorage.getItem(key)).profiles[id]?.name, [STORAGE_KEY, longId]);
+if (longName !== LONG_NAME) fail(`prénom long coupé : « ${longName} » au lieu de « ${LONG_NAME} »`);
+await page.click('[data-edit="' + longId + '"]');
 await page.click('.delete-child');
 await page.waitForSelector('[data-child-card="matteo"]');
-if (await page.locator('[data-child-card="zoe"]').count()) fail('le profil supprimé est toujours là');
+if (await page.locator(`[data-child-card="${longId}"]`).count()) fail('le profil supprimé est toujours là');
 // remettre le prénom d'origine
 await page.click('[data-edit="eva-rose"]');
 await page.fill('[data-field="name"]', 'Eva-Rose');
 await page.click('.child-submit');
 await page.waitForSelector('.toast');
 console.log('✔ espace parents (barrière, suivi, classe et prénom modifiés, enfant ajouté puis supprimé)');
+
+// ses jeux : masquer un jeu et en conseiller un autre pour Eva-Rose (CE1), masquer une rubrique
+await page.click('[data-domain-games="maths"] summary');
+await page.click('[data-show-game="tables"]');
+await page.waitForSelector('[data-show-game="tables"][aria-pressed="false"]');
+if (!(await page.locator('[data-feature-game="tables"]').isDisabled())) fail('ses jeux : un jeu masqué peut être conseillé');
+await page.click('[data-feature-game="problemes"]');
+await page.waitForSelector('[data-feature-game="problemes"][aria-pressed="true"]');
+await page.click('[data-domain-switch="monde"]');
+await page.waitForSelector('[data-kid-domain="monde"].off');
+await shot('54-ses-jeux');
+const kidSettings = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'], STORAGE_KEY);
+if (!kidSettings.hiddenGames.includes('tables') || !kidSettings.featured.includes('problemes') || !kidSettings.hiddenDomains.includes('monde')) {
+  fail(`ses jeux : réglages non enregistrés (${JSON.stringify([kidSettings.hiddenGames, kidSettings.featured, kidSettings.hiddenDomains])})`);
+}
+await goProfile(page, 'eva-rose');
+if (!(await page.textContent('.home-featured')).includes('Conseillé pour toi')) fail('accueil : bloc « Conseillé pour toi » absent');
+if (!(await page.locator('.home-featured [data-featured="problemes"]').count())) fail('accueil : le jeu conseillé est absent');
+if (await page.locator('[data-domain="monde"]').count()) fail('accueil : la rubrique masquée est affichée');
+await shot('55-accueil-conseille');
+await page.click('[data-domain="maths"]');
+if (await page.locator('[data-game="tables"]').count()) fail('rubrique : le jeu masqué est affiché');
+if (!(await page.locator('.game-card.featured [data-game="problemes"] .featured-badge').count())) fail('rubrique : pas de badge ⭐ sur le jeu conseillé');
+await goProfile(page, 'eva-rose');
+await page.click('[data-featured="problemes"]');
+await page.waitForSelector('.choices');
+if (!(await page.evaluate(() => globalThis.__lc.question.key))) fail('accueil : le jeu conseillé ne s’ouvre pas');
+// on remet le jeu et la rubrique (le jeu conseillé reste) pour la suite du parcours
+await goProfiles(page);
+await page.click('.parent-btn');
+await page.click('[data-tab="enfants"]');
+await page.click('[data-edit="eva-rose"]');
+await page.click('[data-domain-games="maths"] summary');
+await page.click('[data-show-game="tables"]');
+await page.click('[data-domain-switch="monde"]');
+await page.waitForSelector('[data-show-game="tables"][aria-pressed="true"]');
+await page.waitForSelector('[data-kid-domain="monde"]:not(.off)');
+console.log('✔ ses jeux (jeu masqué, jeu conseillé en haut de l’accueil et avec un badge, rubrique masquée)');
 
 // réglages : photo depuis l'iPhone (enregistrée automatiquement), version, journal, crédits
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -690,6 +1133,9 @@ await page.waitForSelector('.toast');
 if (await page.locator('[data-photo-row="eva-rose"] .avatar-photo').count()) fail('le dessin n’est pas revenu');
 console.log('✔ réglages (photo enregistrée automatiquement, version, journal, crédits)');
 
+// vos voix pour les histoires : enregistrer une histoire, puis l'entendre dans le jeu
+await checkRecordings(page);
+
 // hors ligne (mode avion) : le service worker doit servir l'app et tous les jeux sans réseau
 await checkOffline(context, page);
 await context.close();
@@ -718,8 +1164,8 @@ async function checkOffline(context, page) {
   console.log(`✔ mode avion : l'app et les ${GAMES.length} jeux s'ouvrent sans réseau`);
 }
 
-if (!ONLY) await scenario();
-else if (ONLY.includes('hors-ligne')) {
+if (!ONLY && PARTS.includes('scenario')) await scenario();
+else if (ONLY?.includes('hors-ligne')) {
   const context = await newContext({ width: 390, height: 844 });
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.push(`hors ligne : ${e.message}`));
@@ -780,12 +1226,17 @@ const STRESS = {
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
-    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell')) {
+    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game')) {
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
     const zone = document.querySelector('.choices, .home-menu, .profile-list');
     if (mustReach && zone && zone.getBoundingClientRect().bottom > window.innerHeight + 1) {
       return `boutons hors de l'écran (${Math.round(zone.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
+    }
+    // « Jouer à deux » : le bouton « C'est parti ! » sous les portraits doit aussi être visible
+    const go = document.querySelector('.duo-go');
+    if (mustReach && go && go.getBoundingClientRect().bottom > window.innerHeight + 1) {
+      return `« C’est parti ! » hors de l'écran (${Math.round(go.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
     }
     // en paysage, le dessin est à côté des réponses : il doit aussi tenir dans l'écran
     const stage = document.querySelector('.stage');
@@ -799,7 +1250,38 @@ async function checkLayout(page, label, { reachable = true } = {}) {
 }
 const layoutProblems = [];
 
-async function checkDevice(device, repeat) {
+/** Les boutons de l'écran d'enregistrement restent visibles sans faire défiler. */
+async function checkRecordButtons(page, label) {
+  const problem = await page.evaluate(() => {
+    const r = document.querySelector('.record-buttons').getBoundingClientRect();
+    return r.top < 0 || r.bottom > window.innerHeight + 1 ? `boutons d’enregistrement hors de l’écran (${Math.round(r.top)}–${Math.round(r.bottom)})` : null;
+  });
+  if (problem) layoutProblems.push(`${label} : ${problem}`);
+}
+
+/** Vos voix : la liste des histoires, puis l'enregistrement de la plus longue (avant et après). */
+async function checkVoicesLayout(page, tag) {
+  await openVoices(page);
+  await checkLayout(page, tag('vos voix'), { reachable: false });
+  const longest = STORY_DATA.reduce((a, b) => (b.sentences.join(' ').length > a.sentences.join(' ').length ? b : a));
+  await page.click(`[data-record="${longest.id}"]`);
+  await page.waitForSelector('[data-rec-start]');
+  await checkLayout(page, tag('enregistrer une histoire'), { reachable: false });
+  await checkRecordButtons(page, tag('enregistrer une histoire'));
+  await page.click('[data-rec-start]');
+  await page.waitForSelector('[data-rec-stop]');
+  await page.waitForTimeout(400);
+  await page.click('[data-rec-stop]');
+  await page.waitForSelector('[data-rec-keep]', { timeout: 5000 });
+  await checkLayout(page, tag('enregistrement à garder'), { reachable: false });
+  await checkRecordButtons(page, tag('enregistrement à garder'));
+  return 3;
+}
+
+async function checkDevice(device, repeat, deviceIndex) {
+  // découpage en morceaux (SHARD=k/n) : chaque morceau vérifie tous les appareils, mais un jeu sur n
+  // (décalé selon l'appareil), et les écrans fixes d'un appareil sur n
+  const mine = (key) => !SHARD || key % SHARD[1] === SHARD[0] - 1;
   const ctx = await newContext({ width: device.width, height: device.height });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(`${device.name} : ${e.message}`));
@@ -811,7 +1293,8 @@ async function checkDevice(device, repeat) {
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
 
   // écrans fixes
-  if (!ONLY) {
+  const screens = !ONLY || ONLY.includes('ecrans');
+  if (screens && mine(deviceIndex)) {
   await goProfiles(page);
   await checkLayout(page, tag('Qui joue ?'));
   for (const [id, grade] of [['matteo', 'MS'], ['eva-rose', 'CP']]) {
@@ -824,6 +1307,19 @@ async function checkDevice(device, repeat) {
       await page.click('.top-bar .icon-btn');
     }
   }
+  // accueil avec des jeux conseillés : un seul (Matteo), puis trois aux titres longs (Eva-Rose)
+  await setStore(page, "store.profiles.matteo.featured = ['coloriage-magique'];");
+  await goProfile(page, 'matteo');
+  await checkLayout(page, tag('accueil conseillé matteo'));
+  await setStore(page, "store.profiles['eva-rose'].featured = ['relie-calculs', 'petits-textes', 'chemin-nombres'];");
+  await goProfile(page, 'eva-rose');
+  await checkLayout(page, tag('accueil conseillé eva-rose'));
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-accueil-conseille.png` });
+  await setStore(page, "store.profiles.matteo.featured = []; store.profiles['eva-rose'].featured = [];");
+  // jouer à deux : le choix des deux joueurs
+  await pickDuo(page, ['eva-rose', 'matteo']);
+  await checkLayout(page, tag('choix du duo'));
+  await goProfile(page);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-accueil.png` });
   await page.click('[data-domain="maths"]');
   await page.click('[data-levels="calcul"], [data-levels="compter"]');
@@ -832,12 +1328,12 @@ async function checkDevice(device, repeat) {
   await goProfile(page);
   await page.click('[data-dress]');
   await checkLayout(page, tag('personnage'), { reachable: false });
-  checked += 16;
+  checked += 22;
   }
 
   // chaque niveau de chaque jeu
-  for (const game of GAMES) {
-    if (game.paliers || ONLY && !ONLY.includes(game.id)) continue;
+  for (const [gameIndex, game] of GAMES.entries()) {
+    if (game.paliers || ONLY && !ONLY.includes(game.id) || !mine(gameIndex + deviceIndex)) continue;
     for (let level = 1; level <= game.levels.length; level++) {
       const grade = gradeFor(game.id, level);
       await setStore(page, `store.profiles['eva-rose'].grade = '${grade}'; store.profiles['eva-rose'].games['${game.id}'] = { level: ${level} };`);
@@ -849,13 +1345,14 @@ async function checkDevice(device, repeat) {
       }
     }
   }
-  if (ONLY) {
+  if ((ONLY && !screens) || !mine(deviceIndex)) {
+    if (ONLY?.includes('histoires')) checked += await checkVoicesLayout(page, tag);
     await ctx.close();
     return checked;
   }
-  // calcul : un palier sur trois, les 4 formes d'exercice
+  // calcul : un palier sur trois, les 4 formes d'exercice (pas avec ONLY=ecrans)
   await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
-  for (const palier of CALC_PALIERS.filter((_, i) => i % 3 === 2)) {
+  for (const palier of ONLY ? [] : CALC_PALIERS.filter((_, i) => i % 3 === 2)) {
     for (let format = 0; format < 4; format++) {
       await openGame(page, findGame('calcul'), { palier: palier.id, format });
       await page.waitForSelector('.choices');
@@ -879,24 +1376,28 @@ async function checkDevice(device, repeat) {
   await page.click('[data-tab="enfants"]');
   await checkLayout(page, tag('enfants'), { reachable: false });
   await page.click('[data-edit="eva-rose"]');
+  await page.click('[data-domain-games="maths"] summary'); // « Ses jeux » : une rubrique dépliée
   await checkLayout(page, tag('modifier un enfant'), { reachable: false });
   await page.click('.top-bar .icon-btn');
   await page.click('[data-tab="reglages"]');
   await page.waitForSelector('.settings');
   await checkLayout(page, tag('réglages'), { reachable: false });
   checked += 6;
+  checked += await checkVoicesLayout(page, tag);
   await ctx.close();
   return checked;
 }
 
 if (SHOTS) mkdirSync(`${SHOTS}/devices`, { recursive: true });
 // 6 appareils à la fois, pour ne pas saturer la machine de test
+const devices = PLAY || !PARTS.includes('layout') ? [] : DEVICES;
+// plus de tirages sur les deux écrans les plus petits (iPhone SE, Android 360 points)
+const smallest = (d) => (d.width === 375 && d.height === 667) || (d.width === 360 && d.height === 740);
 const counts = [];
-for (let i = 0; i < (PLAY ? 0 : DEVICES.length); i += 6) {
-  // plus de tirages sur les deux écrans les plus petits (iPhone SE, Android 360 points)
-  counts.push(...await Promise.all(DEVICES.slice(i, i + 6).map((d, k) => checkDevice(d, i + k === 0 || d.width === 360 && d.height === 740 ? 3 : 1))));
+for (let i = 0; i < devices.length; i += 6) {
+  counts.push(...await Promise.all(devices.slice(i, i + 6).map((d, k) => checkDevice(d, smallest(d) ? 3 : 1, i + k))));
 }
-counts.forEach((n, i) => console.log(`✔ ${DEVICES[i].name} (${DEVICES[i].width}×${DEVICES[i].height}) : ${n} écrans vérifiés`));
+counts.forEach((n, i) => console.log(`✔ ${devices[i].name} (${devices[i].width}×${devices[i].height}) : ${n} écrans vérifiés`));
 if (layoutProblems.length) fail(`mise en page :\n${layoutProblems.join('\n')}`);
 
 await browser.close();

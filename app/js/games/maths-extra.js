@@ -817,7 +817,7 @@ export function clockLabel(h, m) {
   return m === 0 ? `${h} h` : `${h} h ${String(m).padStart(2, '0')}`;
 }
 
-function clockSpeech(h, m) {
+export function clockSpeech(h, m) {
   const hours = `${h === 1 ? 'une' : h} heure${h > 1 ? 's' : ''}`;
   if (m === 0) return hours;
   if (m === 30) return `${hours} et demie`;

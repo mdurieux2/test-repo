@@ -3,26 +3,40 @@
 import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
 import { canMove, solveMaze } from './games/labyrinthes.js';
-import { levelRange, programFor } from './programs.js';
+import { clockLabel } from './games/maths-extra.js';
+import {
+  clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
+} from './games/horloge.js';
+import {
+  chronoLevelAfter, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono,
+} from './games/chrono.js';
+import { featuredGames, levelRange, MAX_FEATURED, programFor, programForChild } from './programs.js';
+import { dailyPicks, dueReviews as reviewsDue, duoPlan, drawPool } from './picks.js';
 import { createRng, pick, randInt, sample, shuffle } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import {
-  addChild, cleanName, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild, resetChild, saveStore,
+  addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
+  resetChild, saveStore,
 } from './storage.js';
 import { listFrenchVoices, setSpeechEnabled, setVoicePreferences, speak, stopSpeaking } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
-import { avatar, h, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
+import { avatar, clockSvg, h, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
 import { APP, CHANGELOG } from './config.js';
-import { seasonOf } from './themes.js';
+import { SEASON_LABELS, seasonOf } from './themes.js';
+import { STORY_DATA } from './games/histoires.js';
+import * as recordings from './recordings.js';
+import { formatDuration, MAX_SECONDS, pickMime, sentenceAt, sentenceTimeline } from './recordings.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
 const store = loadStore();
 applySettings();
+
+let leaveScreen = null; // ce qu'il faut arrêter en quittant l'écran affiché (le micro…)
 
 const PRAISES = ['Bravo !', 'Super !', 'Génial !', 'Très bien !', 'Excellent !', 'Bien joué !', 'Parfait !'];
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -51,6 +65,12 @@ function save() {
 
 function show(...children) {
   stopSpeaking();
+  stopStoryAudio();
+  if (leaveScreen) {
+    const leave = leaveScreen;
+    leaveScreen = null;
+    leave();
+  }
   document.body.classList.toggle('easy-read', Boolean(child()?.easyRead));
   document.body.dataset.season = store.settings.seasonal === false ? '' : currentSeason().id;
   app.replaceChildren(...children.filter(Boolean));
@@ -73,14 +93,16 @@ function seasonDecor() {
 
 /**
  * Typographie française : espace insécable avant ? ! : ; et trait d'union insécable
- * (« Eva-Rose » ne se coupe jamais en fin de ligne).
+ * (« Eva-Rose » ne se coupe jamais en fin de ligne, « sera-t-il » non plus : la lettre qui
+ * suit le trait d'union n'est pas consommée, pour traiter aussi le trait d'union suivant).
  */
 function frenchSpacing(text) {
-  return text.replace(/ ([?!:;])/g, '\u00a0$1').replace(/(\p{L})-(\p{L})/gu, '$1\u2011$2');
+  return text.replace(/ ([?!:;])/g, '\u00a0$1').replace(/(\p{L})-(?=\p{L})/gu, '$1\u2011');
 }
 
 /** Fait parler le personnage de l'enfant, avec sa voix (fille ou garçon). */
 function say(who, parts) {
+  stopStoryAudio(); // comme la voix de synthèse, une voix enregistrée s'arrête quand on parle
   return speak(parts, who?.voice);
 }
 
@@ -112,8 +134,17 @@ function sessionFlag(key, set = false) {
   }
 }
 
+function clearSessionFlag(key) {
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    // navigation privée
+  }
+}
+
+/** Une rubrique de l'enfant qui joue (absente si les parents l'ont masquée). */
 function domainById(id) {
-  return programFor(child().grade).find((d) => d.id === id);
+  return programForChild(child()).find((d) => d.id === id);
 }
 
 // ---------------------------------------------------------------- Qui joue ?
@@ -143,7 +174,7 @@ function parentButton() {
 function profileScreen() {
   if (!store.order.length) return welcomeScreen();
   show(h('main', { class: 'screen profiles' },
-    h('header', { class: 'top-bar' }, h('span'), h('span'), parentButton()),
+    h('header', { class: 'top-bar' }, duoButton(), h('span'), parentButton()),
     h('h1', { class: 'profiles-title' }, 'Qui joue ?'),
     h('div', { class: `profile-list n${store.order.length}` },
       store.order.map((id) => {
@@ -153,7 +184,81 @@ function profileScreen() {
           h('span', { class: 'profile-name' }, frenchSpacing(kid.name)),
           h('span', { class: 'profile-grade' }, GRADES[kid.grade]),
           h('span', { class: 'profile-stars' }, '⭐ ', kid.stars));
-      }))));
+      })),
+    installHint()));
+}
+
+// ---------------------------------------------------------------- Installer l'icône
+
+// Android et ordinateur (Chrome, Edge) : le navigateur propose lui-même l'installation.
+let installPrompt = null;
+addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPrompt = e;
+});
+
+function platform() {
+  const ua = navigator.userAgent;
+  // l'iPad se présente comme un Mac, mais il a un écran tactile
+  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/Android/.test(ua)) return 'android';
+  return 'desktop';
+}
+
+/** Les étapes pour mettre l'icône sur l'écran d'accueil, selon l'appareil. */
+function installSteps() {
+  const steps = {
+    ios: [
+      'Touchez Partager (le carré avec une flèche vers le haut).',
+      'Faites défiler, puis touchez « Sur l’écran d’accueil ».',
+      'Touchez « Ajouter » : l’icône apparaît, l’app marche sans Internet.',
+    ],
+    android: [
+      'Touchez le menu ⋮ du navigateur, en haut à droite.',
+      'Touchez « Installer l’application » ou « Ajouter à l’écran d’accueil ».',
+      'Confirmez : l’icône apparaît, l’app marche sans Internet.',
+    ],
+    desktop: [
+      'Cliquez sur l’icône d’installation dans la barre d’adresse, ou ouvrez le menu du navigateur.',
+      'Choisissez « Installer Lire & Compter ».',
+      'L’app s’ouvre alors dans sa propre fenêtre, même sans Internet.',
+    ],
+  };
+  return h('ol', { class: 'plain-list install-steps' }, steps[platform()].map((step) => h('li', {}, step)));
+}
+
+/**
+ * Sous « Qui joue ? » : inviter à installer l'icône. Sur iPhone et iPad, le navigateur peut effacer
+ * les données d'un site qu'on n'a pas ouvert depuis 7 jours ; l'app installée est protégée.
+ */
+function installHint() {
+  const settings = store.settings;
+  if (isStandalone() || settings.installHintDone || Date.now() < (settings.installHintUntil || 0)) return null;
+  const hide = (patch) => {
+    Object.assign(store.settings, patch);
+    save();
+    profileScreen();
+  };
+  const install = installPrompt
+    ? h('button', {
+      class: 'big-btn primary', 'data-install': '',
+      onclick: async () => {
+        installPrompt.prompt();
+        const { outcome } = await installPrompt.userChoice.catch(() => ({}));
+        installPrompt = null;
+        if (outcome === 'accepted') hide({ installHintDone: true });
+      },
+    }, '📲 Installer l’app')
+    : null;
+  return h('section', { class: 'card install-hint', 'data-install-hint': '' },
+    h('h2', {}, '📲 Mettez l’icône sur l’écran d’accueil'),
+    h('p', {}, platform() === 'ios'
+      ? 'Sur iPhone et iPad, le navigateur peut effacer les prénoms et les progrès d’un site qu’on n’ouvre pas pendant 7 jours. Avec l’icône, tout est protégé, et l’app s’ouvre en plein écran, même sans Internet.'
+      : 'Avec l’icône, l’app s’ouvre en plein écran, même sans Internet, et les prénoms et les progrès sont mieux protégés.'),
+    install || h('details', { class: 'install-how' }, h('summary', {}, 'Comment faire ?'), installSteps()),
+    h('div', { class: 'install-actions' },
+      h('button', { class: 'link-action', 'data-install-later': '', onclick: () => hide({ installHintUntil: Date.now() + 14 * 24 * 3600 * 1000 }) }, 'Plus tard'),
+      h('button', { class: 'link-action', 'data-install-done': '', onclick: () => hide({ installHintDone: true }) }, 'J’ai déjà l’icône')));
 }
 
 function chooseProfile(id) {
@@ -161,6 +266,170 @@ function chooseProfile(id) {
   save();
   homeScreen();
   say(me(), `Bonjour ${me().spoken} !`);
+}
+
+// ---------------------------------------------------------------- Jouer à deux
+
+/** Sur « Qui joue ? », dès qu'il y a deux enfants : une partie de 10 questions chacun son tour. */
+function duoButton() {
+  if (store.order.length < 2) return h('span');
+  return h('button', { class: 'duo-btn', 'data-duo': '', onclick: () => duoPickScreen() },
+    h('span', { class: 'duo-btn-icon', 'aria-hidden': 'true' }, '👫'), h('span', {}, 'Jouer à deux'));
+}
+
+/** On touche deux portraits (le premier commence), puis « C'est parti ! ». */
+function duoPickScreen({ picked = [], message = '', speech = message } = {}) {
+  if (store.order.length < 2) return profileScreen();
+  let chosen = picked.filter((id) => store.profiles[id]).slice(0, 2);
+  const hint = h('p', { class: 'duo-hint', 'aria-live': 'polite' });
+  const go = h('button', { class: 'big-btn primary duo-go', onclick: () => tryDuo(chosen) }, 'C’est parti !');
+  const cards = store.order.map((id) => {
+    const kid = store.profiles[id];
+    return h('button', { class: `profile-card duo-card look-${kid.look}`, 'data-pick': id, onclick: () => choose(id) },
+      h('span', { class: 'duo-order', 'aria-hidden': 'true' }),
+      avatar(id, 'avatar-xl'),
+      h('span', { class: 'profile-name' }, frenchSpacing(kid.name)),
+      h('span', { class: 'profile-grade' }, GRADES[kid.grade]));
+  });
+  const draw = (text = '') => {
+    for (const card of cards) {
+      const n = chosen.indexOf(card.dataset.pick);
+      card.classList.toggle('picked', n >= 0);
+      card.setAttribute('aria-pressed', String(n >= 0));
+      card.querySelector('.duo-order').textContent = n >= 0 ? `✓ ${n + 1}` : '';
+    }
+    go.disabled = chosen.length < 2;
+    hint.classList.toggle('warning', Boolean(text));
+    hint.textContent = frenchSpacing(text || ['Touchez deux portraits', 'Et le deuxième joueur ?', 'Prêts ? Touchez « C’est parti ! »'][chosen.length]);
+  };
+  // toucher un portrait le choisit (ou le retire) ; un troisième remplace le deuxième
+  const choose = (id) => {
+    if (chosen.includes(id)) chosen = chosen.filter((x) => x !== id);
+    else chosen = chosen.length < 2 ? [...chosen, id] : [chosen[0], id];
+    draw();
+  };
+  show(h('main', { class: 'screen profiles duo-pick' },
+    topBar({ onBack: profileScreen, title: '👫 Jouer à deux' }),
+    hint,
+    h('div', { class: `profile-list n${store.order.length}` }, cards),
+    go));
+  draw(message);
+  speak(speech || 'Qui joue ensemble ? Touchez deux portraits.');
+}
+
+/** Avant de commencer : si l'un des deux a fini son temps du jour, on le dit simplement. */
+function tryDuo(players) {
+  const tired = players.filter((id) => timeIsUp(store.profiles[id]));
+  if (tired.length) {
+    const verb = tired.length > 1 ? 'ont' : 'a';
+    const names = (key) => tired.map((id) => me(id)[key]).join(' et ');
+    return duoPickScreen({
+      picked: players,
+      message: `${names('name')} ${verb} assez joué aujourd’hui : c’est l’heure de la pause !`,
+      speech: `${names('spoken')} ${verb} assez joué aujourd’hui. C’est l’heure de la pause !`,
+    });
+  }
+  const plan = duoPlan(store.profiles, players, rng);
+  if (!plan) return duoPickScreen({ picked: players, message: 'Chacun doit avoir au moins un jeu affiché (Espace parents).' });
+  beginDuo(store, players);
+  sessionFlag('duo', true);
+  store.active = players[0];
+  startSession(duoGame(plan), {
+    total: plan.length,
+    back: quitDuo,
+    duo: { players, plan, scores: Object.fromEntries(players.map((id) => [id, 0])) },
+  });
+}
+
+/** Abandon (ou fin) : l'enfant actif redevient celui d'avant, retour à « Qui joue ? ». */
+function quitDuo() {
+  endDuo(store);
+  clearSessionFlag('duo');
+  save();
+  profileScreen();
+}
+
+/**
+ * La partie à deux, sur le modèle du défi du jour : chaque question vient d'un jeu de l'enfant dont
+ * c'est le tour, à son niveau (q.from), et les niveaux de ses jeux ne changent pas (fixedLevel).
+ */
+function duoGame(plan) {
+  return {
+    id: 'duo',
+    domain: 'duo',
+    title: 'Jouer à deux',
+    icon: '👫',
+    levels: ['Jouer à deux'],
+    range: { min: 1, max: 1 },
+    fixedLevel: true,
+    generate(_level, rng, index, context) {
+      const { game, level } = plan[index % plan.length];
+      const q = game.generate(level, rng, index, context);
+      return { ...q, key: `duo:${q.key}`, from: game.id, fromLevel: level };
+    },
+  };
+}
+
+/** En haut de l'écran : les deux portraits et leurs bonnes réponses ; celui dont c'est le tour est mis en avant. */
+function duoScoreboard(session, progress) {
+  const { players, scores } = session.duo;
+  const label = players.map((id) => `${store.profiles[id].name} : ${scores[id]}`).join(', ');
+  return h('div', { class: 'duo-score', 'aria-label': `${label}. À ${me().name} de jouer.` },
+    h('div', { class: 'duo-players' }, players.map((id) => {
+      const turn = id === store.active;
+      return h('span', { class: turn ? 'duo-player turn' : 'duo-player', 'data-duo-player': id, 'aria-current': turn ? 'true' : undefined },
+        avatar(id, 'avatar-xs'),
+        h('span', { class: 'duo-name' }, store.profiles[id].name),
+        h('b', { class: 'duo-points', 'aria-label': `${scores[id]} bonnes réponses` }, `✓ ${scores[id]}`));
+    })),
+    progress);
+}
+
+/** Fin de la partie à deux : les résultats des deux, des étoiles pour chacun selon ses réponses. */
+function finishDuo(session) {
+  const { players, plan, scores } = session.duo;
+  const seconds = Math.round((Date.now() - session.startedAt) / 1000);
+  const results = players.map((id) => {
+    const kid = store.profiles[id];
+    const total = plan.filter((turn) => turn.player === id).length;
+    const correct = scores[id];
+    const stars = starsFor(correct, total);
+    const before = kid.stars;
+    kid.stars += stars;
+    const stats = gameStats(kid, 'duo', 1);
+    kid.games.duo = { ...stats, sessions: stats.sessions + 1, bestStars: Math.max(stats.bestStars, stars) };
+    // une partie pour chacun (objectif du jour) ; le temps compte pour les deux
+    logSession(kid, { at: new Date().toISOString(), game: 'duo', level: 1, correct, total, stars, seconds });
+    return { id, correct, stars, unlocked: newStickers(before, kid.stars) };
+  });
+  endDuo(store);
+  clearSessionFlag('duo');
+  save();
+
+  const team = results.reduce((sum, r) => sum + r.correct, 0) / session.total;
+  const title = team >= 0.9 ? 'Bravo l’équipe !' : team >= 0.6 ? 'Très bien l’équipe !' : 'Bien joué l’équipe !';
+  const answers = (n) => `${n} bonne${n > 1 ? 's' : ''} réponse${n > 1 ? 's' : ''}`;
+  show(h('main', { class: 'screen results duo-end domain-theme-duo' },
+    confetti(Math.max(...results.map((r) => r.stars))),
+    topBar({ onBack: profileScreen, backLabel: 'Qui joue ?', title: '👫 Jouer à deux' }),
+    h('h2', { class: 'duo-team' }, frenchSpacing(title)),
+    h('div', { class: 'duo-final' }, results.map(({ id, correct, stars, unlocked }) => h('section', { class: 'duo-final-card', 'data-duo-result': id },
+      avatar(id, 'avatar-md cheer'),
+      h('h3', { class: 'duo-final-name' }, frenchSpacing(store.profiles[id].name)),
+      h('p', { class: 'duo-final-detail' }, answers(correct)),
+      h('div', { class: 'result-stars', 'aria-label': `${stars} étoile${stars > 1 ? 's' : ''} sur 3` },
+        [1, 2, 3].map((i) => h('span', { class: i <= stars ? 'big-star on' : 'big-star', style: { animationDelay: `${i * 0.25}s` } }, '⭐'))),
+      h('p', { class: 'duo-final-gain' }, `+${stars} ⭐`),
+      unlocked.length ? h('p', { class: 'duo-final-sticker' }, unlocked.at(-1).emoji, frenchSpacing(' Nouvel autocollant !')) : null))),
+    h('div', { class: 'result-actions duo-actions' },
+      h('button', { class: 'big-btn primary', 'data-duo-again': '', onclick: () => tryDuo(players) }, '🔁 Rejouer à deux'),
+      h('button', { class: 'big-btn', 'data-duo-home': '', onclick: profileScreen }, '👫 Qui joue ?'))));
+  playSound('fanfare');
+  speak([
+    title,
+    results.map(({ id, correct }, i) => `${me(id).spoken} : ${i ? correct : answers(correct)}`).join(', ') + '.',
+    ...results.filter((r) => r.unlocked.length).map((r) => `Nouvel autocollant pour ${me(r.id).spoken} !`),
+  ]);
 }
 
 // ---------------------------------------------------------------- Premier lancement
@@ -250,18 +519,22 @@ function profileChip() {
 
 function homeScreen() {
   const c = me();
-  const domains = programFor(child().grade);
-  show(h('main', { class: 'screen home' },
+  const domains = programForChild(child());
+  const featured = featuredBlock();
+  show(h('main', { class: `screen home${featured ? ' has-featured' : ''}` },
     h('header', { class: 'top-bar' }, profileChip(), h('span'), starCounter()),
     h('div', { class: 'home-hero' },
       seasonDecor(),
       h('h1', { class: 'home-title' }, frenchSpacing(`Bonjour ${c.name} !`)),
       goalBar()),
     h('nav', { class: 'home-menu' },
+      featured,
       h('div', { class: 'home-top' }, dailyButton(), reviewButton()),
-      h('div', { class: `home-grid n${domains.length}` },
-        domains.map((d) => h('button', { class: `domain-tile domain-${d.id}`, 'data-domain': d.id, onclick: () => domainScreen(d.id) },
-          h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, d.icon), h('span', { class: 'domain-name' }, d.title)))),
+      domains.length
+        ? h('div', { class: `home-grid n${domains.length}` },
+          domains.map((d) => h('button', { class: `domain-tile domain-${d.id}`, 'data-domain': d.id, onclick: () => domainScreen(d.id) },
+            h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, d.icon), h('span', { class: 'domain-name' }, d.title))))
+        : h('p', { class: 'muted home-empty' }, 'Pas de jeux pour le moment : demande à un parent.'),
       h('div', { class: 'home-bottom' },
         h('button', { class: 'domain-btn domain-album', onclick: albumScreen },
           h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🏆'),
@@ -270,6 +543,22 @@ function homeScreen() {
         h('button', { class: 'domain-btn domain-dress', 'data-dress': '', onclick: () => characterScreen() },
           h('span', { class: 'domain-icon', 'aria-hidden': 'true' }, '🎨'),
           h('span', {}, 'Mon personnage'))))));
+}
+
+/** « ⭐ Conseillé pour toi » : les jeux choisis par les parents, en haut de l'accueil. */
+function featuredBlock() {
+  const list = featuredGames(child()).slice(0, MAX_FEATURED);
+  if (!list.length) return null;
+  return h('section', { class: 'home-featured', 'aria-labelledby': 'featured-label' },
+    h('h2', { class: 'featured-label', id: 'featured-label' }, '⭐ Conseillé pour toi'),
+    h('div', { class: `featured-list n${list.length}` },
+      list.map(({ game, min, max }) => h('button', {
+        class: `featured-game domain-theme-${game.domain}`,
+        'data-featured': game.id,
+        onclick: () => (game.paliers ? palierMap(min, max) : startSession(game, { back: homeScreen })),
+      },
+      h('span', { class: 'featured-icon', 'aria-hidden': 'true' }, game.icon),
+      h('span', { class: 'featured-title' }, game.title)))));
 }
 
 // ---------------------------------------------------------------- Défi du jour
@@ -281,19 +570,13 @@ function dayKey(offset = 0, from = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function hashText(text) {
-  let hash = 2166136261;
-  for (const ch of text) hash = Math.imul(hash ^ ch.codePointAt(0), 16777619);
-  return hash >>> 0;
-}
-
 /**
- * Le défi du jour : 5 questions tirées des jeux de la classe, au niveau de l'enfant.
- * Les mêmes jeux toute la journée ; une étoile bonus et un jour de plus dans la série.
+ * Le défi du jour : 5 questions tirées des jeux de la classe, au niveau de l'enfant (jamais un
+ * jeu masqué par les parents, ni un défi chrono, qui a son propre format). Les mêmes jeux toute
+ * la journée ; une étoile bonus et un jour de plus dans la série.
  */
 function dailyGame() {
-  const pool = programFor(child().grade).flatMap((d) => d.games).filter(({ game }) => !game.paliers);
-  const picks = sample(createRng(hashText(`${dayKey()}:${store.active}`)), pool, 5);
+  const picks = dailyPicks(child(), `${dayKey()}:${store.active}`);
   return {
     id: 'defi',
     domain: 'defi',
@@ -316,10 +599,10 @@ function dailyGame() {
 
 const REVIEW_STEPS = [1, 3, 7]; // jours avant la révision suivante
 
-/** Une erreur dans un jeu : on le révisera dès aujourd'hui, au niveau où l'erreur a eu lieu. */
+/** Une erreur dans un jeu : on le révisera dès aujourd'hui, au niveau où l'erreur a eu lieu (sauf calcul et défis chrono). */
 function scheduleReview(gameId, level) {
   const kid = child();
-  if (!kid || !findGame(gameId) || findGame(gameId).paliers) return;
+  if (!kid || !findGame(gameId) || findGame(gameId).paliers || findGame(gameId).timed) return;
   kid.review = { ...(kid.review || {}), [gameId]: { level, due: dayKey(), step: 0 } };
 }
 
@@ -332,8 +615,9 @@ function advanceReview(gameId) {
   else kid.review[gameId] = { ...item, step: item.step + 1, due: dayKey(REVIEW_STEPS[item.step + 1]) };
 }
 
+/** Les révisions du jour (sans les jeux masqués par les parents). */
 function dueReviews() {
-  return Object.entries(child().review || {}).filter(([id, r]) => findGame(id) && r.due <= dayKey());
+  return reviewsDue(child(), dayKey());
 }
 
 function reviewGame() {
@@ -384,10 +668,10 @@ function goalBar() {
 }
 
 /** Temps maximum atteint ? (réglé par les parents, avec du temps en plus possible) */
-function timeIsUp() {
-  const limit = child().goals?.limit || 0;
+function timeIsUp(kid = child()) {
+  const limit = kid.goals?.limit || 0;
   if (!limit) return false;
-  const { minutes, extra } = todayStats();
+  const { minutes, extra } = todayStats(kid);
   return minutes >= limit + extra;
 }
 
@@ -415,6 +699,7 @@ function pauseScreen() {
 }
 
 function dailyButton() {
+  if (!drawPool(child()).length) return null; // tous les jeux sont masqués
   const daily = child().daily;
   const done = daily?.last === dayKey();
   const streak = daily && (done || daily.last === dayKey(-1)) ? daily.streak : 0;
@@ -446,6 +731,7 @@ function domainScreen(domainId) {
   const domain = domainById(domainId);
   if (!domain) return homeScreen();
   const guide = me();
+  const featured = new Set(featuredGames(child()).map(({ game }) => game.id));
   const blocks = [];
   let section = null;
   for (const { game, min, max } of domain.games) {
@@ -457,12 +743,13 @@ function domainScreen(domainId) {
     const level = Math.min(max, Math.max(min, stats.level));
     // La carte lance le jeu ; le bas de la carte (les points de niveau) permet de choisir le niveau.
     const pickable = !game.paliers && max > min;
-    blocks.push(h('div', { class: 'game-card' },
+    blocks.push(h('div', { class: featured.has(game.id) ? 'game-card featured' : 'game-card' },
       h('button', {
         class: 'game-play',
         'data-game': game.id,
         onclick: () => (game.paliers ? palierMap(min, max) : startSession(game)),
       },
+      featured.has(game.id) ? h('span', { class: 'featured-badge' }, '⭐ Conseillé') : null,
       h('span', { class: 'game-icon', 'aria-hidden': 'true' }, game.icon),
       h('span', { class: 'game-title' }, game.title),
       game.paliers ? palierSummary(min, max) : null,
@@ -541,8 +828,8 @@ function palierMap(min = 1, max = CALC_PALIERS.length) {
 
 // ---------------------------------------------------------------- Partie
 
-function startSession(game, { level, back, total } = {}) {
-  if (timeIsUp()) return pauseScreen();
+function startSession(game, { level, back, total, duo } = {}) {
+  if (!duo && timeIsUp()) return pauseScreen(); // à deux, le temps de chacun est vérifié avant (tryDuo)
   const { min, max } = game.range || levelRange(child().grade, game.id);
   const stats = gameStats(child(), game.id, min);
   const startLevel = level || Math.min(max, Math.max(min, stats.level));
@@ -552,7 +839,7 @@ function startSession(game, { level, back, total } = {}) {
     max,
     back: back || (() => domainScreen(game.domain)),
     index: 0,
-    total: total || store.settings.sessionLength,
+    total: questionsPerSession(game, total, store.settings.sessionLength), // défi chrono : toujours 10
     correct: 0,
     recentKeys: [],
     briefed: new Set(), // consignes déjà dites en entier pendant cette partie
@@ -560,6 +847,7 @@ function startSession(game, { level, back, total } = {}) {
     // un niveau choisi à la main repart d'une série vierge
     levelState: { level: startLevel, streak: game.paliers || level ? 0 : stats.streak, recent: game.paliers || level ? [] : stats.recent },
     formatOffset: Number(new URLSearchParams(location.search).get('format') || 0),
+    duo, // partie à deux : { players, plan, scores }
   };
   nextQuestion(session);
 }
@@ -567,7 +855,8 @@ function startSession(game, { level, back, total } = {}) {
 function newQuestion(session) {
   let q;
   for (let i = 0; i < 10; i++) {
-    q = session.game.generate(session.levelState.level, rng, session.index + session.formatOffset, { name: me().name });
+    // contexte : le prénom de l'enfant et la saison (histoires et textes de saison)
+    q = session.game.generate(session.levelState.level, rng, session.index + session.formatOffset, { name: me().name, season: currentSeason().id });
     if (!session.recentKeys.includes(q.key)) break;
   }
   session.recentKeys = [...session.recentKeys, q.key].slice(-4);
@@ -576,6 +865,8 @@ function newQuestion(session) {
 
 function nextQuestion(session) {
   if (session.index >= session.total) return finishSession(session);
+  // à deux : la question est celle de l'enfant dont c'est le tour (son prénom, son personnage, sa voix)
+  if (session.duo) store.active = session.duo.plan[session.index].player;
   const q = newQuestion(session);
   session.question = q;
   session.attempts = 0;
@@ -586,8 +877,9 @@ function nextQuestion(session) {
   const guide = me(); // seul l'enfant qui joue apparaît, avec sa photo ou son dessin et sa voix
   session.guide = guide;
   // La consigne complète est dite la première fois ; ensuite, une version courte
-  // (q.short) évite de répéter la même phrase à chaque question.
-  const briefKey = q.short && (q.short.key ?? q.short.text);
+  // (q.short) évite de répéter la même phrase à chaque question (à deux : pour chaque enfant).
+  const shortKey = q.short && (q.short.key ?? q.short.text);
+  const briefKey = session.duo && q.short ? `${store.active}:${shortKey}` : shortKey;
   const brief = Boolean(q.short) && session.briefed.has(briefKey);
   if (q.short) session.briefed.add(briefKey);
   const replay = () => say(guide, q.replay || q.instruction);
@@ -601,7 +893,7 @@ function nextQuestion(session) {
   let zone;
   const custom = {
     build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
-    swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone,
+    swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -616,9 +908,16 @@ function nextQuestion(session) {
   }
   if (stage) enableCounting(stage, guide);
 
-  const badge = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
-  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}` },
-    topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: h('span', { class: 'level-badge' }, badge) }),
+  const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
+  // défi chrono : le chronomètre (mm:ss) s'affiche sous le niveau, en haut à droite
+  const clock = game.timed ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
+  const badge = clock
+    ? h('span', { class: 'level-badge chrono-badge' }, h('span', { class: 'chrono-level' }, levelText), clock)
+    : h('span', { class: 'level-badge' }, levelText);
+  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}` },
+    session.duo
+      ? topBar({ onBack: session.back, backLabel: 'Quitter', title: duoScoreboard(session, progress) })
+      : topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
     h('div', { class: 'instruction' },
       h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
         avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')),
@@ -626,14 +925,40 @@ function nextQuestion(session) {
     stage,
     zone,
     feedback));
-  // histoire en karaoké : la voix lit l'histoire (chaque mot s'allume), puis pose la question
-  const readAlong = () => (q.karaoke ? karaoke(stage, guide, q.stage.sentences, q.instruction) : null);
-  if (q.karaoke) readAlong();
-  else say(guide, brief ? (q.short.speak ?? q.short.text) : q.instruction);
+  if (clock) runChrono(session, clock);
+  // histoire en karaoké : la voix d'un parent (si l'histoire est enregistrée) ou la voix de
+  // synthèse lit l'histoire pendant que le texte s'allume, puis la question est posée
+  const readAlong = (before = []) => (q.karaoke ? readStory(stage, guide, q, before) : null);
+  const turn = session.duo ? [`À toi, ${guide.spoken} !`] : []; // à deux : « À toi, Matteo ! »
+  if (q.karaoke) readAlong(turn);
+  else say(guide, [...turn, ...[brief ? (q.short.speak ?? q.short.text) : q.instruction].flat()]);
+}
+
+// ---- Défi chrono : le temps court de l'affichage de la 1re question à la dernière bonne réponse
+
+let chronoTimer = null;
+
+function chronoNow(session) {
+  return elapsedSeconds(session.chronoStart, session.chronoEnd || Date.now());
+}
+
+/** Démarre le chrono à la 1re question, puis met à jour l'affichage (il s'arrête seul quand l'écran change). */
+function runChrono(session, el) {
+  if (!session.chronoStart) session.chronoStart = Date.now();
+  clearInterval(chronoTimer);
+  const tick = () => {
+    if (!el.isConnected) {
+      clearInterval(chronoTimer); // partie finie ou quittée
+      return;
+    }
+    el.textContent = `⏱ ${formatChrono(chronoNow(session))}`;
+  };
+  tick();
+  chronoTimer = setInterval(tick, 250);
 }
 
 /** Lit des phrases en allumant chaque mot ; repli au rythme moyen si le navigateur ne suit pas les mots. */
-function karaoke(stageEl, guide, sentences, after = []) {
+function karaoke(stageEl, guide, sentences, after = [], before = []) {
   const sentenceEls = [...stageEl.querySelectorAll('.k-sentence')];
   const clear = () => stageEl.querySelectorAll('.w.on').forEach((w) => w.classList.remove('on'));
   let timer = null;
@@ -660,10 +985,124 @@ function karaoke(stageEl, guide, sentences, after = []) {
       },
     };
   });
-  return say(guide, [...parts, ...(Array.isArray(after) ? after : [after])]).then(() => {
+  return say(guide, [...before, ...parts, ...(Array.isArray(after) ? after : [after])]).then(() => {
     clearInterval(timer);
     clear();
   });
+}
+
+// ---- Histoires lues par papa ou maman (enregistrées sur l'appareil, voir recordings.js)
+
+let recordedIds = null; // identifiants des histoires enregistrées (null : pas encore lus)
+let storyAudioEl = null;
+let storyRun = 0; // chaque lecture a son numéro : une nouvelle lecture ou une parole annule la précédente
+let stopCurrentAudio = null;
+let audioUnlocked = false;
+
+function refreshRecorded() {
+  return recordings.list().then((ids) => {
+    recordedIds = new Set(ids);
+    return recordedIds;
+  });
+}
+
+/** Un seul élément <audio> pour toute l'app (caché, sans commandes), placé là où il joue. */
+function storyAudio() {
+  if (!storyAudioEl) storyAudioEl = h('audio', { class: 'story-audio', preload: 'auto' });
+  return storyAudioEl;
+}
+
+/**
+ * Sur iPhone et iPad, un élément audio ne peut jouer après une attente (lecture de la base)
+ * que s'il a déjà été lancé pendant un toucher : on le « débloque » au premier toucher.
+ */
+function unlockStoryAudio() {
+  if (audioUnlocked || stopCurrentAudio || !recordedIds?.size) return;
+  audioUnlocked = true;
+  const audio = storyAudio();
+  audio.load();
+  audio.play()?.catch(() => {});
+  audio.pause();
+}
+
+/** Arrête la voix enregistrée en cours (nouvel écran, nouvelle parole, réécoute…). */
+function stopStoryAudio() {
+  storyRun++;
+  stopCurrentAudio?.();
+}
+
+/**
+ * Joue un son enregistré avec l'élément audio de l'app, placé (caché) dans `into`.
+ * `onTime(t, durée)` suit la lecture. Se termine par 'ended', 'stopped' ou 'failed'.
+ */
+function playAudio(blob, { into = null, duration = 0, onTime = null } = {}) {
+  stopStoryAudio();
+  const audio = storyAudio();
+  if (into && audio.parentNode !== into) into.append(audio);
+  const url = URL.createObjectURL(blob);
+  return new Promise((resolve) => {
+    let ticker = null;
+    let safety = null;
+    // un son WebM enregistré par Chrome n'annonce pas sa durée : on prend celle mesurée
+    const length = () => (Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : duration);
+    const finish = (outcome) => {
+      if (stopCurrentAudio !== stop) return;
+      stopCurrentAudio = null;
+      clearInterval(ticker);
+      clearTimeout(safety);
+      audio.onended = null;
+      audio.onerror = null;
+      audio.pause();
+      URL.revokeObjectURL(url);
+      resolve(outcome);
+    };
+    const stop = () => finish('stopped');
+    stopCurrentAudio = stop;
+    audio.onended = () => finish('ended');
+    audio.onerror = () => finish('failed');
+    audio.src = url;
+    if (onTime) ticker = setInterval(() => onTime(audio.currentTime, length()), 100);
+    // filet de sécurité : certains navigateurs n'émettent jamais « ended »
+    if (duration > 0) safety = setTimeout(() => finish('ended'), (duration + 4) * 1000);
+    audio.play()?.catch(() => finish('failed'));
+  });
+}
+
+/**
+ * Lit l'histoire puis pose la question. Si un parent a enregistré l'histoire sur cet appareil,
+ * c'est sa voix qu'on entend, et les phrases s'allument une à une au prorata de leur longueur ;
+ * la question reste posée par la voix de synthèse. Sinon, karaoké avec la voix de synthèse.
+ */
+async function readStory(stageEl, guide, q, before = []) {
+  const id = q.stage.storyId;
+  // histoire non enregistrée : la voix de synthèse tout de suite
+  if (!id || (recordedIds && !recordedIds.has(id))) return karaoke(stageEl, guide, q.stage.sentences, q.instruction, before);
+  stopSpeaking();
+  stopStoryAudio();
+  const run = storyRun;
+  const saved = await recordings.get(id);
+  if (run !== storyRun || !stageEl.isConnected) return undefined; // une autre lecture a commencé, ou l'écran a changé
+  let intro = before;
+  if (saved) {
+    // à deux : « À toi, Matteo ! » avant l'histoire enregistrée (speak et non say, qui arrêterait cette lecture)
+    if (intro.length) {
+      await speak(intro, guide?.voice);
+      intro = [];
+      if (run !== storyRun || !stageEl.isConnected) return undefined;
+    }
+    const sentenceEls = [...stageEl.querySelectorAll('.k-sentence')];
+    const light = (index) => sentenceEls.forEach((el, i) => el.classList.toggle('on', i === index));
+    const outcome = await playAudio(saved.blob, {
+      into: stageEl.querySelector('.stage-karaoke') || stageEl,
+      duration: saved.duration,
+      onTime: (t, length) => light(sentenceAt(sentenceTimeline(q.stage.sentences, length), t)),
+    });
+    light(-1);
+    if (outcome === 'stopped' || !stageEl.isConnected) return undefined;
+    if (outcome === 'ended') return say(guide, q.instruction);
+    // son illisible sur cet appareil : la voix de synthèse prend le relais
+  }
+  return karaoke(stageEl, guide, q.stage.sentences, q.instruction, intro);
 }
 
 /** Toucher les objets pour les compter un par un : la voix dit « un, deux, trois… ». */
@@ -712,10 +1151,12 @@ async function markCorrect(ctx) {
   playSound('success');
   app.querySelector('.guide-btn .avatar')?.classList.add('cheer');
   if (firstTry) session.correct++;
+  if (firstTry && session.duo) session.duo.scores[store.active]++;
   if (firstTry && game.id === 'revision') advanceReview(q.from);
 
   let change = null;
-  if (!game.fixedLevel) {
+  // défi chrono : le niveau ne change pas pendant la partie (le record est celui du niveau joué)
+  if (!game.fixedLevel && !game.timed) {
     const result = recordAnswer(session.levelState, firstTry, session.max, session.min);
     session.levelState = result.state;
     change = result.change;
@@ -730,6 +1171,7 @@ async function markCorrect(ctx) {
   };
   save();
   session.index++;
+  if (game.timed && session.index >= session.total) session.chronoEnd = Date.now(); // dernière bonne réponse : le chrono s'arrête
 
   const name = me().name;
   const praise = firstTry ? (rng() < 0.3 ? `Bravo ${name} !` : pick(rng, PRAISES)) : 'Oui, c’est ça !';
@@ -745,7 +1187,13 @@ async function markCorrect(ctx) {
     toSay.push('Tu passes au niveau suivant !');
     setTimeout(() => playSound('levelUp'), 300);
   }
-  await Promise.all([sleep(1300), Promise.race([say(session.guide, toSay), sleep(4500)])]);
+  if (game.timed) {
+    // défi chrono : on enchaîne vite, le temps tourne
+    say(session.guide, praise);
+    await sleep(800);
+  } else {
+    await Promise.all([sleep(1300), Promise.race([say(session.guide, toSay), sleep(4500)])]);
+  }
   if (app.contains(feedback)) nextQuestion(session);
 }
 
@@ -1614,6 +2062,426 @@ function dotsZone(ctx) {
   return { stage: h('div', { class: 'stage stage-dots' }, svg), zone };
 }
 
+// ---- Écris au doigt : suivre le chemin gris, trait après trait, en partant du point vert
+
+const TRACE_REACH = 10; // distance (unités du dessin) à laquelle un point de contrôle est atteint
+const TRACE_LOST = 25; // au-delà, le doigt n'est plus sur le chemin
+const TRACE_VIEW = { x: -8, size: 116 }; // le carré 0–100 avec une marge pour l'épaisseur du trait
+
+const tracePoint = (p) => `${p[0]} ${p[1]}`;
+
+/** Chemin SVG lisse qui suit les points (courbes passant par le milieu de chaque segment). */
+function traceCurve(points) {
+  if (points.length < 3) return `M${points.map(tracePoint).join(' L')}`;
+  let d = `M${tracePoint(points[0])}`;
+  for (let i = 1; i < points.length - 1; i++) {
+    const [x, y] = points[i];
+    const [nx, ny] = points[i + 1];
+    d += ` Q${x} ${y} ${(x + nx) / 2} ${(y + ny) / 2}`;
+  }
+  return `${d} L${tracePoint(points.at(-1))}`;
+}
+
+/** Points de contrôle d'un trait (indices) : environ tous les 8 unités, le premier et le dernier compris. */
+function traceCheckpoints(points) {
+  const out = [0];
+  let run = 0;
+  for (let i = 1; i < points.length; i++) {
+    run += Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]);
+    if (run >= 8 || i === points.length - 1) {
+      out.push(i);
+      run = 0;
+    }
+  }
+  return out;
+}
+
+/** Distance d'un point à une ligne brisée. */
+function distanceToLine([px, py], points) {
+  let best = Infinity;
+  for (let i = 0; i < points.length; i++) {
+    const [ax, ay] = points[i];
+    const [bx, by] = points[Math.min(i + 1, points.length - 1)];
+    const len = (bx - ax) ** 2 + (by - ay) ** 2;
+    const t = len ? Math.max(0, Math.min(1, ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / len)) : 0;
+    best = Math.min(best, Math.hypot(px - (ax + t * (bx - ax)), py - (ay + t * (by - ay))));
+  }
+  return best;
+}
+
+function traceZone(ctx) {
+  const { q, session } = ctx;
+  const { strokes, lines, set, glyph, word, position } = q.stage;
+  const el = (tag, attrs = {}) => {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  };
+  const what = { graphisme: 'Chemin', chiffres: `Chiffre ${glyph}`, capitales: `Lettre ${glyph}`, cursive: `Lettre ${glyph} attachée` }[set];
+  const svg = el('svg', {
+    viewBox: `${TRACE_VIEW.x} ${TRACE_VIEW.x} ${TRACE_VIEW.size} ${TRACE_VIEW.size}`,
+    class: `trace-drawing trace-${set}`, role: 'img', 'aria-label': `${what} à tracer`,
+  });
+  // lignes d'écriture de la cursive : ligne de base (pleine) et hauteur des minuscules (pointillés)
+  if (lines) {
+    svg.append(
+      el('line', { class: 'trace-line trace-line-x', x1: -8, x2: 108, y1: lines.x, y2: lines.x }),
+      el('line', { class: 'trace-line trace-line-base', x1: -8, x2: 108, y1: lines.base, y2: lines.base }));
+  }
+  const guides = strokes.map((st) => el('path', { class: 'trace-guide', d: traceCurve(st) }));
+  const done = strokes.map(() => el('path', { class: 'trace-done', d: '' }));
+  const inkLayer = el('g', { class: 'trace-inks' });
+  // départ du trait en cours : rond vert numéroté et petite flèche dans le sens du geste
+  const start = el('g', { class: 'trace-start' });
+  const startNumber = el('text', { class: 'trace-start-num' });
+  start.append(el('circle', { class: 'trace-start-dot', r: 5.4 }), startNumber);
+  const arrow = el('path', { class: 'trace-arrow', d: 'M-2.6 -3.4 L3.6 0 L-2.6 3.4 Z' });
+  const here = el('circle', { class: 'trace-here', r: 3.4, visibility: 'hidden' });
+  const hintDot = el('circle', { class: 'trace-hint-dot', r: 4.4, visibility: 'hidden' });
+  svg.append(...guides, ...done, inkLayer, arrow, start, here, hintDot);
+
+  const checkpoints = strokes.map(traceCheckpoints);
+  let current = 0; // trait en cours
+  let reached = 0; // points de contrôle déjà atteints sur ce trait
+  let finished = false;
+  let drawing = false;
+  let waitLift = false; // trait fini : on lève le doigt avant le suivant
+  let ink = null;
+  let inkPoints = [];
+  let last = null;
+  let lostSince = 0;
+  let lostAt = 0;
+  let lostMessage = null;
+
+  const steps = word
+    ? null
+    : strokes.map((_, i) => h('span', { class: 'trace-step', 'aria-hidden': 'true' }, String(i + 1)));
+  const stepsLabel = h('span', { class: 'visually-hidden', 'aria-live': 'polite' });
+  const refresh = () => {
+    done.forEach((path, i) => {
+      if (i < current) path.setAttribute('d', traceCurve(strokes[i]));
+      else if (i === current && reached > 1) path.setAttribute('d', traceCurve(strokes[i].slice(0, checkpoints[i][reached - 1] + 1)));
+      else path.setAttribute('d', '');
+    });
+    const show = !finished && current < strokes.length;
+    start.setAttribute('visibility', show ? 'visible' : 'hidden');
+    arrow.setAttribute('visibility', 'hidden');
+    here.setAttribute('visibility', 'hidden');
+    if (show) {
+      const st = strokes[current];
+      start.setAttribute('transform', `translate(${tracePoint(st[0])})`);
+      start.classList.toggle('started', reached > 0);
+      startNumber.textContent = String(current + 1);
+      // la flèche, un peu après le départ, dans la direction du trait
+      let k = 1;
+      for (let run = 0; k < st.length - 1 && run < 12; k++) run += Math.hypot(st[k][0] - st[k - 1][0], st[k][1] - st[k - 1][1]);
+      const [a, b] = [st[k - 1], st[k]];
+      if (reached === 0 && st.length > 3) {
+        const angle = (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
+        arrow.setAttribute('transform', `translate(${tracePoint(a)}) rotate(${angle.toFixed(1)})`);
+        arrow.setAttribute('visibility', 'visible');
+      }
+      // doigt levé au milieu d'un trait : on montre où reprendre
+      if (reached > 0 && !drawing) {
+        const p = st[checkpoints[current][reached - 1]];
+        here.setAttribute('cx', p[0]);
+        here.setAttribute('cy', p[1]);
+        here.setAttribute('visibility', 'visible');
+      }
+    }
+    steps?.forEach((s, i) => {
+      s.classList.toggle('done', i < current);
+      s.classList.toggle('current', i === current && !finished);
+      s.textContent = i < current ? '✓' : String(i + 1);
+    });
+    stepsLabel.textContent = finished ? 'Terminé' : `Trait ${current + 1} sur ${strokes.length}`;
+  };
+
+  const finish = () => {
+    finished = true;
+    drawing = false;
+    stopHint();
+    svg.classList.add('finished'); // le glyphe se remplit de couleur
+    refresh();
+    zone.classList.add('answered');
+    setTimeout(() => { if (svg.isConnected) markCorrect(ctx); }, 600);
+  };
+  const strokeDone = () => {
+    playSound('tap');
+    current++;
+    reached = 0;
+    waitLift = true;
+    stopHint();
+    if (lostMessage?.isConnected) ctx.feedback.replaceChildren();
+    if (current === strokes.length) finish();
+    else refresh();
+  };
+  /** Le doigt passe en p : on avance tant que le point de contrôle suivant est assez près. */
+  const reach = (p) => {
+    if (finished || waitLift) return;
+    const st = strokes[current];
+    const cps = checkpoints[current];
+    let moved = false;
+    while (reached < cps.length && Math.hypot(p[0] - st[cps[reached]][0], p[1] - st[cps[reached]][1]) <= TRACE_REACH) {
+      reached++;
+      moved = true;
+    }
+    if (!moved) return;
+    if (reached === cps.length) strokeDone();
+    else refresh();
+  };
+  /** Suit le doigt de last à p par petits pas (un doigt rapide ne saute aucun point de contrôle). */
+  const follow = (p) => {
+    const from = last || p;
+    const n = Math.max(1, Math.ceil(Math.hypot(p[0] - from[0], p[1] - from[1]) / 2));
+    for (let i = 1; i <= n && !finished && !waitLift; i++) reach([from[0] + ((p[0] - from[0]) * i) / n, from[1] + ((p[1] - from[1]) * i) / n]);
+    last = p;
+    // loin du chemin un moment : un petit mot, sans compter d'erreur
+    if (finished || waitLift) return;
+    const now = Date.now();
+    if (distanceToLine(p, strokes[current]) > TRACE_LOST) {
+      if (!lostSince) lostSince = now;
+      else if (now - lostSince > 300 && now - lostAt > 3000) {
+        lostAt = now;
+        nudge(ctx, 'Reste sur le chemin gris !');
+        lostMessage = ctx.feedback.firstChild;
+      }
+    } else {
+      lostSince = 0;
+      if (lostMessage?.isConnected) ctx.feedback.replaceChildren();
+    }
+  };
+  const toSvg = (e) => {
+    const r = svg.getBoundingClientRect();
+    const scale = Math.min(r.width, r.height) / TRACE_VIEW.size || 1;
+    const left = r.left + (r.width - TRACE_VIEW.size * scale) / 2;
+    const top = r.top + (r.height - TRACE_VIEW.size * scale) / 2;
+    return [TRACE_VIEW.x + (e.clientX - left) / scale, TRACE_VIEW.x + (e.clientY - top) / scale];
+  };
+  const drawInk = (p) => {
+    const prev = inkPoints.at(-1);
+    if (prev && Math.hypot(p[0] - prev[0], p[1] - prev[1]) < 0.8) return;
+    inkPoints.push(p);
+    ink.setAttribute('points', inkPoints.map((pt) => `${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' '));
+  };
+  svg.addEventListener('pointerdown', (e) => {
+    if (session.locked || finished) return;
+    e.preventDefault();
+    try { svg.setPointerCapture(e.pointerId); } catch { /* pointeur déjà relâché */ }
+    drawing = true;
+    waitLift = false;
+    lostSince = 0;
+    const p = toSvg(e);
+    ink = el('polyline', { class: 'trace-ink', points: '' });
+    inkLayer.append(ink);
+    inkPoints = [];
+    drawInk(p);
+    last = null;
+    follow(p);
+    refresh();
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (!drawing || finished) return;
+    const p = toSvg(e);
+    drawInk(p);
+    follow(p);
+  });
+  const lift = () => {
+    if (!drawing) return;
+    drawing = false;
+    lostSince = 0;
+    refresh();
+  };
+  svg.addEventListener('pointerup', lift);
+  svg.addEventListener('pointercancel', lift);
+
+  // 💡 : un point parcourt le trait en cours (une aide : pas d'étoile du premier coup)
+  let hintFrame = 0;
+  let hintRun = 0;
+  function stopHint() {
+    hintRun++;
+    cancelAnimationFrame(hintFrame);
+    hintDot.setAttribute('visibility', 'hidden');
+  }
+  const hint = () => {
+    if (session.locked || finished) return;
+    session.attempts++;
+    stopHint();
+    const st = strokes[current].slice(reached ? checkpoints[current][reached - 1] : 0);
+    const lengths = [0];
+    for (let i = 1; i < st.length; i++) lengths.push(lengths[i - 1] + Math.hypot(st[i][0] - st[i - 1][0], st[i][1] - st[i - 1][1]));
+    const total = lengths.at(-1);
+    const duration = Math.min(2600, Math.max(900, total * 22));
+    const begin = performance.now();
+    const run = hintRun;
+    const step = (now) => {
+      if (run !== hintRun) return;
+      const target = Math.min(1, (now - begin) / duration) * total;
+      let i = 1;
+      while (i < st.length - 1 && lengths[i] < target) i++;
+      const span = lengths[i] - lengths[i - 1] || 1;
+      const t = Math.max(0, Math.min(1, (target - lengths[i - 1]) / span));
+      const [a, b] = [st[i - 1], st[Math.min(i, st.length - 1)]];
+      hintDot.setAttribute('cx', a[0] + (b[0] - a[0]) * t);
+      hintDot.setAttribute('cy', a[1] + (b[1] - a[1]) * t);
+      hintDot.setAttribute('visibility', 'visible');
+      if (target < total) hintFrame = requestAnimationFrame(step);
+      else setTimeout(() => { if (run === hintRun) hintDot.setAttribute('visibility', 'hidden'); }, 500);
+    };
+    hintFrame = requestAnimationFrame(step);
+    say(session.guide, 'Regarde le point jaune, puis fais pareil avec ton doigt !');
+  };
+  // ↺ : on efface et on recommence le glyphe
+  const restart = () => {
+    if (session.locked || finished) return;
+    current = 0;
+    reached = 0;
+    drawing = false;
+    waitLift = false;
+    inkLayer.replaceChildren();
+    stopHint();
+    if (lostMessage?.isConnected) ctx.feedback.replaceChildren();
+    refresh();
+  };
+
+  // « Ton prénom » : le prénom par morceaux (il passe à la ligne après un espace ou un tiret),
+  // la lettre à écrire encadrée et soulignée
+  const parts = [{ letters: [], spaced: false }];
+  [...(word || '')].forEach((ch, i) => {
+    if (ch === ' ') parts.push({ letters: [], spaced: true });
+    else {
+      parts.at(-1).letters.push(h('span', { class: i === position ? 'on' : '' }, ch));
+      if (ch === '-') parts.push({ letters: [], spaced: false });
+    }
+  });
+  const middle = word
+    ? h('span', { class: `trace-word${word.length > 10 ? ' long' : ''}`, role: 'img', 'aria-label': word },
+      parts.filter((p) => p.letters.length)
+        .map((p) => h('span', { class: `trace-word-part${p.spaced ? ' spaced' : ''}`, 'aria-hidden': 'true' }, p.letters)))
+    : h('span', { class: 'trace-steps' }, steps);
+  const zone = h('div', { class: 'choices trace-zone' },
+    h('button', { class: 'trace-btn trace-hint', onclick: hint, 'aria-label': 'Aide : montre-moi le chemin' }, '💡'),
+    middle,
+    stepsLabel,
+    h('button', { class: 'trace-btn trace-reset', onclick: restart, 'aria-label': 'Effacer et recommencer' }, '↺'));
+  refresh();
+  return { stage: h('div', { class: 'stage stage-trace' }, svg), zone };
+}
+
+// ---- Règle l'horloge : déplacer les aiguilles au doigt (ou avec les boutons), puis valider
+
+function setClockZone(ctx) {
+  const { q } = ctx;
+  const target = toClockMinutes(q.target);
+  let time = toClockMinutes(q.stage.start);
+  const dial = h('div', { class: 'setclock-dial', role: 'img' });
+  dial.innerHTML = clockSvg(q.stage.start.h, q.stage.start.m);
+  const svg = dial.querySelector('svg');
+  const svgEl = (tag, attrs) => {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  };
+  // l'heure attendue en pointillés, montrée en indice après deux erreurs (sous les vraies aiguilles)
+  const goal = handAngles(target);
+  const hourHand = svg.querySelector('.hand-hour');
+  const minuteHand = svg.querySelector('.hand-minute');
+  hourHand.before(
+    svgEl('line', { class: 'ghost-hand ghost-hour', x1: 50, y1: 50, x2: 50, y2: 29, transform: `rotate(${goal.hour} 50 50)` }),
+    svgEl('line', { class: 'ghost-hand ghost-minute', x1: 50, y1: 50, x2: 50, y2: 13, transform: `rotate(${goal.minute} 50 50)` }));
+  // une poignée au bout de chaque aiguille : on voit qu'on peut les attraper
+  const hourKnob = svgEl('circle', { class: 'hand-knob knob-hour', cx: 50, cy: 29, r: 4 });
+  const minuteKnob = svgEl('circle', { class: 'hand-knob knob-minute', cx: 50, cy: 13, r: 3.4 });
+  hourHand.after(hourKnob);
+  minuteHand.after(minuteKnob);
+
+  const render = () => {
+    const { hour, minute } = handAngles(time);
+    for (const el of [hourHand, hourKnob]) el.setAttribute('transform', `rotate(${hour} 50 50)`);
+    for (const el of [minuteHand, minuteKnob]) el.setAttribute('transform', `rotate(${minute} 50 50)`);
+    const shown = fromClockMinutes(time);
+    dial.dataset.h = shown.h;
+    dial.dataset.m = shown.m;
+    dial.setAttribute('aria-label', `Horloge à régler : elle montre ${clockLabel(shown.h, shown.m)}`);
+  };
+  const setTime = (next) => {
+    if (ctx.session.locked || next === time) return;
+    time = next;
+    playSound('tap');
+    render();
+  };
+
+  // au doigt (ou à la souris) : on attrape l'aiguille la plus proche et on la fait tourner
+  let grabbed = null;
+  const pointer = (e) => {
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return { angle: pointerAngle(p.x - 50, p.y - 50), radius: Math.hypot(p.x - 50, p.y - 50) };
+  };
+  const follow = (p) => setTime(grabbed === 'minute' ? dragMinuteHand(time, p.angle) : dragHourHand(time, p.angle));
+  svg.addEventListener('pointerdown', (e) => {
+    if (ctx.session.locked) return;
+    const p = pointer(e);
+    if (p.radius > 50 || p.radius < 4) return; // hors du cadran, ou au centre (pas de direction)
+    e.preventDefault();
+    grabbed = pickHand(time, p.angle, p.radius);
+    dial.classList.add(`grab-${grabbed}`);
+    try {
+      svg.setPointerCapture(e.pointerId);
+    } catch {
+      // sans capture, le glisser marche tant que le doigt reste sur le cadran
+    }
+    follow(p);
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (grabbed) follow(pointer(e));
+  });
+  const release = () => {
+    grabbed = null;
+    dial.classList.remove('grab-minute', 'grab-hour');
+  };
+  svg.addEventListener('pointerup', release);
+  svg.addEventListener('pointercancel', release);
+
+  const validate = () => {
+    if (ctx.session.locked) return;
+    if (time === target) {
+      dial.classList.add('right');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    dial.classList.add('shake');
+    setTimeout(() => dial.classList.remove('shake'), 400);
+    // après deux erreurs, l'heure attendue est montrée (aiguilles en pointillés et texte)
+    const hint = ctx.session.attempts >= 1;
+    if (hint) dial.classList.add('show-hint');
+    const advice = clockAdvice(time, target);
+    const shown = fromClockMinutes(time);
+    markWrong(ctx, {
+      message: hint ? `Il faut ${q.answer} : suis les pointillés !` : advice,
+      speech: hint ? `Il faut ${q.answerSpeech}. Mets les aiguilles sur les pointillés.` : advice,
+      given: clockLabel(shown.h, shown.m),
+    });
+  };
+  // les boutons, pour les petits doigts (et l'accessibilité) : l'heure et les minutes séparément
+  const shiftButton = (minutes, label, aria) => h('button', {
+    class: `clock-btn ${Math.abs(minutes) === 60 ? 'clock-btn-hour' : 'clock-btn-minute'}`,
+    'data-shift': minutes,
+    'aria-label': aria,
+    onclick: () => setTime(shiftClock(time, minutes)),
+  }, label);
+  const zone = h('div', { class: 'choices setclock-zone' },
+    h('div', { class: 'clock-btns' },
+      shiftButton(-60, '−1 h', 'Reculer d’une heure'), shiftButton(60, '+1 h', 'Avancer d’une heure'),
+      shiftButton(-5, '−5 min', 'Reculer de 5 minutes'), shiftButton(5, '+5 min', 'Avancer de 5 minutes')),
+    h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ C’est l’heure'));
+  render();
+  return { stage: h('div', { class: 'stage stage-setclock' }, dial), zone };
+}
+
 // ---- Payer le bon prix : toucher les pièces et les billets
 
 function payZone(ctx) {
@@ -1661,7 +2529,11 @@ function payZone(ctx) {
 
 function orderZone(ctx) {
   const { q } = ctx;
-  const sorted = [...q.items].sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
+  // les éléments à placer ; ceux qui valent null sont des pièges (lettres en trop dans la dictée)
+  const sorted = q.items.filter((it) => it.value !== null)
+    .sort((a, b) => (q.order === 'desc' ? b.value - a.value : a.value - b.value));
+  // dictée : deux lettres identiques sont interchangeables (on compare ce qui est écrit)
+  const same = (a, b) => (q.byLabel ? a.label === b.label : a.value === b.value);
   let next = 0;
   const content = (item) => (item.emoji
     ? h('span', { class: 'order-emoji', style: { '--scale': item.scale } }, item.emoji)
@@ -1670,10 +2542,13 @@ function orderZone(ctx) {
   const sign = q.sign ?? (q.items[0].emoji ? '→' : q.order === 'desc' ? '>' : '<');
   const lang = q.lang ? { lang: q.lang } : {};
   const buttons = q.items.map((item) => {
-    const btn = h('button', { class: `order-item${item.emoji ? ' order-picture' : ''}`, 'data-value': String(item.value), 'aria-label': item.label || `Taille ${item.value + 1}`, ...lang }, content(item));
+    const btn = h('button', {
+      class: `order-item${item.emoji ? ' order-picture' : ''}`, 'data-value': String(item.value), 'data-label': item.label,
+      'aria-label': item.label || `Taille ${item.value + 1}`, ...lang,
+    }, content(item));
     btn.addEventListener('click', () => {
       if (ctx.session.locked || btn.disabled) return;
-      if (item.value === sorted[next].value) {
+      if (item.value !== null && same(item, sorted[next])) {
         btn.disabled = true;
         btn.classList.add('placed');
         slots[next].replaceChildren(content(item));
@@ -1690,7 +2565,7 @@ function orderZone(ctx) {
       btn.classList.add('shake');
       setTimeout(() => btn.classList.remove('shake'), 400);
       const hint = ctx.session.attempts >= 1;
-      if (hint) buttons[q.items.indexOf(sorted[next])].classList.add('hint');
+      if (hint) buttons.find((b, i) => !b.disabled && q.items[i].value !== null && same(q.items[i], sorted[next]))?.classList.add('hint');
       markWrong(ctx, { message: hint ? 'Touche celui qui brille !' : 'Essaie encore !', given: item.label || `taille ${item.value + 1}` });
     });
     return btn;
@@ -2065,6 +2940,7 @@ function buildZone(ctx) {
 // ---- Fin de partie
 
 function finishSession(session) {
+  if (session.duo) return finishDuo(session);
   const { game } = session;
   const kid = child();
   const stars = starsFor(session.correct, session.total);
@@ -2094,6 +2970,27 @@ function finishSession(session) {
       h('span', { class: 'palier-stars' }, Array.from({ length: PALIER_MAX_STARS }, (_, i) => h('span', { class: i < now ? 'pstar on' : 'pstar' }, '★'))),
       now > previous ? h('b', {}, ' +1 !') : null);
   }
+  // défi chrono : le temps, le record du niveau (battu ou non) et le niveau du prochain défi
+  let chronoLine = null;
+  let chronoSpeech = [];
+  let newRecord = false;
+  if (game.timed && session.chronoStart) {
+    const level = session.levelState.level;
+    const seconds = Math.max(1, chronoNow(session));
+    const record = recordAfter(kid.records, game.id, level, seconds);
+    kid.records = record.records;
+    newRecord = record.isNew;
+    const next = chronoLevelAfter(level, session.correct, session.total, session.min, session.max);
+    kid.games[game.id] = { ...kid.games[game.id], level: next, streak: 0, recent: [] };
+    chronoLine = h('div', { class: 'chrono-result' },
+      h('p', { class: 'chrono-time' }, frenchSpacing('⏱ Ton temps : '), h('b', {}, formatChrono(seconds))),
+      record.isNew
+        ? h('p', { class: 'chrono-record new' }, frenchSpacing('🏆 Nouveau record !'))
+        : h('p', { class: 'chrono-record' }, frenchSpacing('🏅 Ton record : '), h('b', {}, formatChrono(record.best))),
+      record.isNew && record.previous ? h('p', { class: 'chrono-before' }, frenchSpacing(`Ancien record : ${formatChrono(record.previous)}`)) : null,
+      next > level ? h('p', { class: 'chrono-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')) : null);
+    chronoSpeech = [`Ton temps : ${spokenChrono(seconds)}.`, record.isNew ? 'Nouveau record !' : `Ton record : ${spokenChrono(record.best)}.`];
+  }
   logSession(kid, {
     at: new Date().toISOString(),
     game: game.id,
@@ -2108,24 +3005,27 @@ function finishSession(session) {
   const title = stars === 3 ? `Bravo ${me().name} !` : stars === 2 ? `Très bien ${me().name} !` : `Bien joué ${me().name} !`;
 
   show(h('main', { class: `screen results domain-theme-${game.domain}` },
-    confetti(stars),
+    confetti(newRecord ? 3 : stars),
     h('div', { class: 'duo duo-results' }, avatar(me().id, 'avatar-md cheer')),
     h('div', { class: 'result-stars', 'aria-label': `${stars} étoiles sur 3` },
       [1, 2, 3].map((i) => h('span', { class: i <= stars ? 'big-star on' : 'big-star', style: { animationDelay: `${i * 0.25}s` } }, '⭐'))),
     h('h1', {}, frenchSpacing(title)),
     h('p', { class: 'result-detail' }, `${session.correct} sur ${session.total} du premier coup`),
+    chronoLine,
     palierLine,
     dailyLine,
     unlocked.length
       ? h('div', { class: 'new-sticker' }, h('span', { class: 'sticker-big' }, unlocked.at(-1).emoji), h('p', {}, 'Nouvel autocollant !'))
       : null,
     h('div', { class: 'result-actions' },
-      h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers ? session.levelState.level : undefined, back: session.back, total: game.id === 'defi' ? session.total : undefined }) }, '🔁 Rejouer'),
+      // Rejouer : le même palier, ou le même niveau du défi chrono (pour battre son record)
+      h('button', { class: 'big-btn primary', onclick: () => startSession(game, { level: game.paliers || game.timed ? session.levelState.level : undefined, back: session.back, total: game.id === 'defi' ? session.total : undefined }) }, '🔁 Rejouer'),
       stars >= 2 ? h('button', { class: 'big-btn bonus-btn', 'data-bonus-open': '', onclick: () => bonusMenu(session.back) }, '🎁 Jeu bonus') : null,
       h('button', { class: 'big-btn', onclick: session.back }, game.paliers ? '🗺️ Les paliers' : '🎲 Autres jeux'))));
-  playSound('fanfare');
+  playSound(newRecord ? 'record' : 'fanfare'); // une fanfare plus longue pour un record battu
   say(me(), [
     `${title} ${stars} étoile${stars > 1 ? 's' : ''} !`,
+    ...chronoSpeech,
     ...(unlocked.length ? [`Nouvel autocollant : ${unlocked.at(-1).name} !`] : []),
   ]);
 }
@@ -2546,6 +3446,7 @@ function childEditScreen(id, message = '') {
       choiceSetting('Temps maximum par jour', 'limit', [[0, 'Sans'], [10, '10 min'], [15, '15'], [20, '20'], [30, '30']], kid.goals?.limit || 0,
         (v) => { kid.goals = { ...(kid.goals || {}), limit: v }; save(); }),
       h('p', { class: 'muted small' }, 'Quand le temps est écoulé, la partie en cours se termine, puis une pause est proposée. Vous pouvez accorder 10 minutes de plus.')),
+    kidGamesCard(id),
     h('section', { class: 'card danger-zone' },
       h('h2', {}, 'Données'),
       h('button', {
@@ -2572,6 +3473,86 @@ function childEditScreen(id, message = '') {
       }, 'Supprimer ce profil'))));
 }
 
+/**
+ * « Ses jeux » : les parents masquent une rubrique entière ou un jeu, et conseillent jusqu'à
+ * MAX_FEATURED jeux (bloc « ⭐ Conseillé pour toi » en haut de l'accueil, badge dans la rubrique).
+ * Enregistré sur le profil : child.hiddenDomains, child.hiddenGames, child.featured.
+ */
+function kidGamesCard(id) {
+  const kid = store.profiles[id];
+  const open = new Set(); // rubriques dépliées (gardées ouvertes quand la carte se redessine)
+  const card = h('section', { class: 'card kid-games', 'data-kid-games': id });
+  const setIn = (key, value, on) => {
+    const list = new Set(kid[key] || []);
+    if (on) list.add(value);
+    else list.delete(value);
+    kid[key] = [...list];
+  };
+  const change = (fn) => () => {
+    // le bouton touché est redessiné : on lui rend le focus (clavier, VoiceOver)
+    const focused = ['data-domain-switch', 'data-show-game', 'data-feature-game']
+      .map((attr) => document.activeElement?.hasAttribute?.(attr) && `[${attr}="${document.activeElement.getAttribute(attr)}"]`).find(Boolean);
+    fn();
+    save();
+    draw();
+    if (focused) card.querySelector(focused)?.focus();
+  };
+  const draw = () => {
+    const hiddenDomains = new Set(kid.hiddenDomains || []);
+    const hiddenGames = new Set(kid.hiddenGames || []);
+    const featured = new Set(featuredGames(kid).map(({ game }) => game.id));
+    const full = featured.size >= MAX_FEATURED;
+    // replaceChildren(null) afficherait « null » : on ne passe que de vrais éléments
+    card.replaceChildren(...[
+      h('h2', {}, 'Ses jeux'),
+      h('p', { class: 'muted small' }, `Masquez une rubrique ou un jeu. Conseillez jusqu’à ${MAX_FEATURED} jeux ⭐ : ils apparaissent en haut de son accueil.`),
+      ...programFor(kid.grade).map((domain) => {
+        const domainHidden = hiddenDomains.has(domain.id);
+        const nHidden = domain.games.filter(({ game }) => hiddenGames.has(game.id)).length;
+        const nFeatured = domain.games.filter(({ game }) => featured.has(game.id)).length;
+        const allHidden = nHidden === domain.games.length;
+        const toggleBox = h('input', {
+          type: 'checkbox', role: 'switch', checked: !domainHidden, 'data-domain-switch': domain.id, 'aria-label': `Afficher la rubrique ${domain.title}`,
+        });
+        toggleBox.addEventListener('change', change(() => setIn('hiddenDomains', domain.id, !toggleBox.checked)));
+        const summary = domainHidden ? 'Rubrique masquée'
+          : [`${domain.games.length} jeu${domain.games.length > 1 ? 'x' : ''}`, nHidden ? `${nHidden} masqué${nHidden > 1 ? 's' : ''}` : '',
+            nFeatured ? `${nFeatured} ⭐` : ''].filter(Boolean).join(' · ');
+        const details = h('details', { class: 'kid-domain-games', 'data-domain-games': domain.id, open: open.has(domain.id) },
+          h('summary', {}, summary),
+          domain.games.map(({ game }) => {
+            const hidden = hiddenGames.has(game.id);
+            const star = featured.has(game.id);
+            return h('div', { class: hidden ? 'kid-game off' : 'kid-game', 'data-kid-game': game.id },
+              h('span', { class: 'kid-game-title' }, h('span', { 'aria-hidden': 'true' }, game.icon), ' ', game.title),
+              h('span', { class: 'kid-game-ctrls' },
+                h('button', {
+                  class: hidden ? 'kid-toggle' : 'kid-toggle on', 'data-show-game': game.id, 'aria-pressed': String(!hidden),
+                  'aria-label': `Afficher ${game.title}`, disabled: domainHidden,
+                  // un jeu masqué n'est plus conseillé
+                  onclick: change(() => { setIn('hiddenGames', game.id, !hidden); if (!hidden) setIn('featured', game.id, false); }),
+                }, hidden ? '🚫 Masqué' : '👁 Affiché'),
+                h('button', {
+                  class: star ? 'kid-toggle star on' : 'kid-toggle star', 'data-feature-game': game.id, 'aria-pressed': String(star),
+                  'aria-label': `Conseiller ${game.title}`, disabled: domainHidden || hidden || (!star && full),
+                  onclick: change(() => setIn('featured', game.id, !star)),
+                }, star ? '⭐ Conseillé' : '☆ Conseiller')));
+          }));
+        details.addEventListener('toggle', () => (details.open ? open.add(domain.id) : open.delete(domain.id)));
+        return h('div', { class: domainHidden || allHidden ? 'kid-domain off' : 'kid-domain', 'data-kid-domain': domain.id },
+          h('label', { class: 'setting kid-domain-head' },
+            h('span', { class: 'kid-domain-title' }, h('span', { 'aria-hidden': 'true' }, domain.icon), ' ', domain.title),
+            h('span', { class: 'kid-domain-state', 'aria-hidden': 'true' }, domainHidden ? 'Masquée' : allHidden ? 'Aucun jeu' : 'Affichée'),
+            toggleBox),
+          details);
+      }),
+      full ? h('p', { class: 'muted small kid-games-full' }, `${MAX_FEATURED} jeux conseillés : retirez-en un pour en choisir un autre.`) : null,
+    ].filter(Boolean));
+  };
+  draw();
+  return card;
+}
+
 function voiceRow(voiceList) {
   const sample = makeCharacter('voix', { name: 'Léa' });
   const select = h('select', { class: 'select', 'aria-label': 'Voix de l’application' },
@@ -2588,6 +3569,323 @@ function voiceRow(voiceList) {
     h('span', {}, 'Voix'),
     h('div', { class: 'voice-ctrl' }, select,
       h('button', { class: 'mini-btn', 'aria-label': 'Écouter la voix', onclick: test }, '▶')));
+}
+
+// ---- Vos voix pour les histoires : les parents enregistrent les histoires (micro de l'appareil)
+
+const plural = (n, word) => `${n} ${word}${n > 1 ? 's' : ''}`;
+
+/** « 3 histoires enregistrées sur 49. » */
+function recordedSummary(ids) {
+  const n = STORY_DATA.filter((s) => ids.has(s.id)).length;
+  return `${plural(n, 'histoire')} ${n > 1 ? 'enregistrées' : 'enregistrée'} sur ${STORY_DATA.length}.`;
+}
+
+/** Réglages : la section qui ouvre l'écran des voix. */
+function voicesCard() {
+  const count = h('p', { class: 'muted small voices-count', 'aria-live': 'polite', hidden: true });
+  refreshRecorded().then((ids) => {
+    if (!ids.size) return;
+    count.textContent = recordedSummary(ids);
+    count.hidden = false;
+  });
+  return h('section', { class: 'card voices-card' },
+    h('h2', {}, 'Vos voix pour les histoires'),
+    h('p', { class: 'muted small' }, 'Lisez les histoires à voix haute : votre enfant les entendra avec votre voix au lieu de la voix de synthèse. Les enregistrements restent sur cet appareil.'),
+    h('button', { class: 'big-btn primary voices-open', 'data-voices': '', onclick: () => voicesScreen() }, '🎙 Enregistrer les histoires'),
+    count);
+}
+
+/** Les classes qui entendent les histoires de ce niveau (« MS, GS, CP »). */
+function gradesForStoryLevel(level) {
+  return Object.keys(GRADES).filter((grade) => {
+    const { min, max } = levelRange(grade, 'histoires');
+    return level >= min && level <= max;
+  }).join(', ');
+}
+
+/** Toutes les histoires, par niveau, chacune avec 🎙 Enregistrer, et ▶ Écouter, 🗑 Supprimer si elle est enregistrée. */
+async function voicesScreen(message = '') {
+  const saved = await refreshRecorded();
+  const { levels } = findGame('histoires');
+  show(h('main', { class: 'screen parents voices' },
+    topBar({ onBack: () => parentsScreen({ tab: 'reglages' }), title: 'Vos voix' }),
+    message ? h('p', { class: 'toast', role: 'status' }, message) : null,
+    h('section', { class: 'card voices-intro' },
+      h('p', {}, 'Choisissez une histoire et lisez-la à voix haute. Dans « Histoires lues », votre enfant l’entendra avec votre voix et les phrases s’allumeront au fil de la lecture ; la question est ensuite posée par la voix de l’application.'),
+      h('p', { class: 'voices-private' }, '🔒 Les enregistrements restent sur cet appareil : ils ne sont envoyés nulle part.'),
+      h('p', { class: 'muted small', 'data-recorded-count': '' }, recordedSummary(saved))),
+    levels.map((label, i) => {
+      const stories = STORY_DATA.filter((s) => s.level === i + 1);
+      const grades = gradesForStoryLevel(i + 1);
+      return h('section', { class: 'card voices-level' },
+        h('h2', {}, `Niveau ${i + 1} · ${label}`),
+        grades ? h('p', { class: 'muted small voices-grades' }, grades) : null,
+        stories.map((story) => storyVoiceRow(story, saved.has(story.id))));
+    })));
+}
+
+function storyVoiceRow(story, recorded) {
+  const season = SEASON_LABELS[story.season];
+  const listen = h('button', { class: 'pill-btn quiet', 'data-listen': story.id }, '▶ Écouter');
+  listen.addEventListener('click', () => listenRecording(story, listen));
+  return h('div', { class: recorded ? 'voice-story recorded' : 'voice-story', 'data-story': story.id, 'data-recorded': recorded },
+    h('span', { class: 'voice-story-emoji', 'aria-hidden': 'true' }, story.emoji),
+    h('div', { class: 'voice-story-text' },
+      h('b', {}, story.title),
+      h('span', { class: 'small voice-state' }, recorded ? '✔ Enregistrée' : 'À enregistrer',
+        season ? h('span', { class: 'muted' }, ` · ${season}`) : null)),
+    h('div', { class: 'voice-story-actions' },
+      h('button', { class: 'pill-btn', 'data-record': story.id, onclick: () => recordScreen(story) }, '🎙 Enregistrer'),
+      recorded ? listen : null,
+      recorded ? h('button', { class: 'pill-btn warn', 'data-delete': story.id, onclick: () => deleteRecording(story) }, '🗑 Supprimer') : null));
+}
+
+/** ▶ Écouter un enregistrement (le bouton devient ⏹ Arrêter pendant la lecture). */
+async function listenRecording(story, button) {
+  if (button.classList.contains('playing')) {
+    stopStoryAudio();
+    return;
+  }
+  unlockStoryAudio(); // pendant le toucher : l'élément audio pourra jouer après la lecture de la base
+  stopSpeaking();
+  const saved = await recordings.get(story.id);
+  if (!button.isConnected) return;
+  if (!saved) {
+    voicesScreen('Cet enregistrement est introuvable.');
+    return;
+  }
+  button.classList.add('playing');
+  button.textContent = '⏹ Arrêter';
+  await playAudio(saved.blob, { into: button.closest('.voice-story'), duration: saved.duration });
+  button.classList.remove('playing');
+  button.textContent = '▶ Écouter';
+}
+
+async function deleteRecording(story) {
+  if (!confirm(`Supprimer l’enregistrement de « ${story.title} » ? L’histoire sera de nouveau lue par la voix de l’application.`)) return;
+  stopStoryAudio();
+  const done = await recordings.remove(story.id);
+  voicesScreen(done ? `Enregistrement de « ${story.title} » supprimé.` : 'L’enregistrement n’a pas pu être supprimé.');
+}
+
+/** Pourquoi le micro ne peut pas servir, en clair. */
+function micProblem(error) {
+  const name = error?.name || '';
+  if (name === 'NotAllowedError' || name === 'SecurityError' || name === 'PermissionDeniedError') {
+    return 'L’accès au micro est refusé. Autorisez le micro pour cette app (sur iPhone : touchez « aA » dans la barre d’adresse → Réglages du site web → Micro, ou Réglages → Safari → Micro), puis réessayez.';
+  }
+  if (name === 'NotFoundError' || name === 'DevicesNotFoundError' || name === 'OverconstrainedError') {
+    return 'Aucun micro n’a été trouvé sur cet appareil.';
+  }
+  if (name === 'NotReadableError' || name === 'TrackStartError' || name === 'AbortError') {
+    return 'Le micro est occupé (un appel ou une autre app ?). Fermez-la, puis réessayez.';
+  }
+  return 'Le micro n’a pas pu démarrer. Réessayez.';
+}
+
+/**
+ * Enregistrer une histoire : le texte en gros pour le lire, ⏺ Commencer puis ⏹ Terminer
+ * (3 minutes au plus), puis ▶ Écouter, ✔ Garder ou ↺ Recommencer.
+ */
+function recordScreen(story) {
+  const levelLabel = findGame('histoires').levels[story.level - 1];
+  const timer = h('p', { class: 'record-timer', hidden: true });
+  const status = h('p', { class: 'record-status', 'aria-live': 'polite' });
+  const buttons = h('div', { class: 'record-buttons' });
+  let take = null; // la lecture enregistrée : { blob, mime, duration }
+  let capture = null; // l'enregistrement en cours : { recorder, stream, startedAt, … }
+
+  const button = (label, className, data, onclick) => h('button', { class: `big-btn ${className}`, [`data-${data}`]: '', onclick }, label);
+
+  // chaque étape : le message, puis les boutons
+  const steps = {
+    ready: () => ['Touchez « Commencer », puis lisez l’histoire à voix haute, lentement et avec le ton. 3 minutes au plus.',
+      [button('⏺ Commencer', 'primary', 'rec-start', start)]],
+    asking: () => ['Autorisez le micro si l’appareil le demande…', []],
+    recording: () => ['Lisez l’histoire, puis touchez « Terminer ».', [button('⏹ Terminer', 'danger', 'rec-stop', stop)]],
+    stopping: () => ['Un instant…', []],
+    recorded: () => [take.duration >= MAX_SECONDS - 1
+      ? 'L’enregistrement s’est arrêté à 3 minutes. Écoutez-le, puis gardez-le ou recommencez.'
+      : `Votre lecture dure ${formatDuration(take.duration)}. Écoutez-la, puis gardez-la ou recommencez.`,
+    [listenButton(), button('✔ Garder', 'primary', 'rec-keep', keep), button('↺ Recommencer', '', 'rec-redo', redo)]],
+    saving: () => ['Enregistrement sur l’appareil…', []],
+    error: (retry) => ['', retry ? [button('↺ Réessayer', '', 'rec-start', start)] : []],
+  };
+
+  function setState(state, message = '', retry = true) {
+    timer.hidden = state !== 'recording';
+    const [text, actions] = steps[state](retry);
+    status.textContent = message || text;
+    status.classList.toggle('problem', state === 'error');
+    buttons.replaceChildren(...actions);
+  }
+
+  function listenButton() {
+    const listen = button('▶ Écouter', '', 'rec-listen', async () => {
+      if (listen.classList.contains('playing')) {
+        stopStoryAudio();
+        return;
+      }
+      listen.classList.add('playing');
+      listen.textContent = '⏹ Arrêter';
+      await playAudio(take.blob, { into: screen, duration: take.duration });
+      listen.classList.remove('playing');
+      listen.textContent = '▶ Écouter';
+    });
+    return listen;
+  }
+
+  function showTime() {
+    if (!capture) return;
+    timer.replaceChildren(h('span', { class: 'rec-dot', 'aria-hidden': 'true' }),
+      `Enregistrement en cours · ${formatDuration((Date.now() - capture.startedAt) / 1000)} / ${formatDuration(MAX_SECONDS)}`);
+  }
+
+  async function start() {
+    stopStoryAudio();
+    stopSpeaking();
+    take = null;
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setState('error', 'Cet appareil ou ce navigateur ne permet pas d’enregistrer le son. Sur iPhone et iPad, mettez Safari à jour.', false);
+      return;
+    }
+    setState('asking');
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (error) {
+      if (screen.isConnected) setState('error', micProblem(error));
+      return;
+    }
+    const release = () => stream.getTracks().forEach((track) => track.stop());
+    if (!screen.isConnected) {
+      release();
+      return;
+    }
+    const mime = pickMime((type) => MediaRecorder.isTypeSupported?.(type));
+    let recorder;
+    try {
+      recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    } catch {
+      release();
+      setState('error', 'L’enregistrement n’a pas pu démarrer sur cet appareil.', false);
+      return;
+    }
+    const chunks = [];
+    const current = { recorder, release, startedAt: Date.now(), stoppedAt: 0, cancelled: false, ticker: null, limit: null };
+    const end = () => {
+      clearInterval(current.ticker);
+      clearTimeout(current.limit);
+      release();
+      if (capture === current) capture = null;
+    };
+    recorder.ondataavailable = (e) => {
+      if (e.data?.size) chunks.push(e.data);
+    };
+    recorder.onerror = () => {
+      current.cancelled = true;
+      end();
+      if (screen.isConnected) setState('error', 'L’enregistrement s’est interrompu. Réessayez.');
+    };
+    recorder.onstop = () => {
+      end();
+      if (current.cancelled || !screen.isConnected) return;
+      const type = recorder.mimeType || mime || chunks[0]?.type || '';
+      const blob = new Blob(chunks, type ? { type } : {});
+      if (!blob.size) {
+        setState('error', 'Aucun son n’a été enregistré. Vérifiez le micro, puis réessayez.');
+        return;
+      }
+      take = { blob, mime: type, duration: Math.min(MAX_SECONDS, ((current.stoppedAt || Date.now()) - current.startedAt) / 1000) };
+      setState('recorded');
+    };
+    try {
+      recorder.start();
+    } catch {
+      end();
+      setState('error', 'L’enregistrement n’a pas pu démarrer. Réessayez.');
+      return;
+    }
+    capture = current;
+    current.ticker = setInterval(showTime, 250);
+    current.limit = setTimeout(stop, MAX_SECONDS * 1000);
+    showTime();
+    setState('recording');
+  }
+
+  function stop() {
+    if (!capture) return;
+    capture.stoppedAt = Date.now();
+    clearInterval(capture.ticker);
+    clearTimeout(capture.limit);
+    setState('stopping');
+    try {
+      capture.recorder.stop(); // la suite dans onstop
+    } catch {
+      capture.cancelled = true;
+      capture.release();
+      capture = null;
+      setState('error', 'L’enregistrement s’est interrompu. Réessayez.');
+    }
+  }
+
+  /** En quittant l'écran : on arrête tout et on libère le micro (rien n'est gardé). */
+  function cancel() {
+    stopStoryAudio();
+    if (!capture) return;
+    const current = capture;
+    capture = null;
+    current.cancelled = true;
+    clearInterval(current.ticker);
+    clearTimeout(current.limit);
+    try {
+      if (current.recorder.state !== 'inactive') current.recorder.stop();
+    } catch {
+      // déjà arrêté
+    }
+    current.release();
+  }
+
+  async function keep() {
+    stopStoryAudio();
+    setState('saving');
+    const ok = await recordings.save(story.id, take.blob, { mime: take.mime, duration: take.duration });
+    if (!ok) {
+      if (screen.isConnected) setState('recorded', 'L’enregistrement n’a pas pu être gardé (espace plein ou navigation privée ?). Réessayez.');
+      return;
+    }
+    recordedIds = new Set([...(recordedIds || []), story.id]);
+    // demande à l'appareil de ne pas effacer ces données quand l'espace manque
+    navigator.storage?.persist?.().catch(() => {});
+    if (screen.isConnected) voicesScreen(`« ${story.title} » est enregistrée avec votre voix ✓`);
+  }
+
+  function redo() {
+    stopStoryAudio();
+    take = null;
+    setState('ready');
+  }
+
+  const screen = h('main', { class: 'screen parents record-screen', 'data-recording': story.id },
+    topBar({ onBack: () => { cancel(); voicesScreen(); }, title: 'Enregistrer' }),
+    h('div', { class: 'record-layout' },
+      h('section', { class: 'card record-story' },
+        h('div', { class: 'record-head' },
+          h('span', { class: 'record-emoji', 'aria-hidden': 'true' }, story.emoji),
+          h('div', {},
+            h('h2', {}, story.title),
+            h('p', { class: 'muted small' }, `Niveau ${story.level} · ${levelLabel}`))),
+        h('p', { class: 'record-text' }, frenchSpacing(story.sentences.join(' '))),
+        h('p', { class: 'muted small' }, story.question
+          ? `Ensuite, l’application pose la question : « ${frenchSpacing(story.question)} »`
+          : 'Ensuite, l’enfant remet les images dans l’ordre de l’histoire.')),
+      h('section', { class: 'card record-controls' },
+        timer, status, buttons,
+        h('p', { class: 'muted small' }, '🔒 L’enregistrement reste sur cet appareil.'))));
+  show(screen);
+  leaveScreen = cancel;
+  setState('ready');
 }
 
 function settingsTab() {
@@ -2611,12 +3909,11 @@ function settingsTab() {
       toggle('Décors de saison (Noël, Halloween…)', store.settings.seasonal !== false, (v) => { store.settings.seasonal = v; save(); }),
       h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
       h('p', { class: 'muted small' }, 'Voix plus naturelles : Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
+    voicesCard(),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
-      h('ol', { class: 'plain-list' },
-        h('li', {}, 'Touchez Partager (le carré avec une flèche).'),
-        h('li', {}, 'Faites défiler, puis touchez « Sur l’écran d’accueil ».'),
-        h('li', {}, 'Touchez « Ajouter » : l’icône apparaît, l’app marche sans Internet.'))),
+      installSteps(),
+      h('p', { class: 'muted small' }, 'Sur iPhone et iPad, l’app installée est protégée : le navigateur ne peut pas effacer ses données.')),
     h('section', { class: 'card about' },
       h('h2', {}, 'À propos'),
       h('div', { class: 'setting' }, h('span', {}, 'Version'), h('b', { 'data-version': APP.version }, APP.version)),
@@ -2635,6 +3932,8 @@ function settingsTab() {
 // ---------------------------------------------------------------- Démarrage
 
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
+document.addEventListener('pointerdown', unlockStoryAudio, { capture: true });
+refreshRecorded(); // les histoires enregistrées par les parents sur cet appareil
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopMusic(); });
 document.addEventListener('pointerdown', (e) => {
   if (e.target.closest('button')) playSound('tap');
@@ -2643,8 +3942,13 @@ document.addEventListener('pointerdown', (e) => {
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
+// demander au navigateur de ne pas effacer les données de l'app (profils, progrès) quand il manque de place
+if (store.order.length) navigator.storage?.persist?.().catch(() => {});
 
-// Au lancement : « Qui joue ? » (sauf si l'app est rouverte pendant la même séance).
-if (store.active && sessionFlag('playing')) homeScreen();
+// Au lancement : « Qui joue ? » (sauf si l'app est rouverte pendant la même séance). Une partie à
+// deux interrompue (rechargement) ramène aussi à « Qui joue ? », avec l'enfant actif d'avant la partie.
+const duoInterrupted = sessionFlag('duo');
+clearSessionFlag('duo');
+if (store.active && sessionFlag('playing') && !duoInterrupted) homeScreen();
 else profileScreen();
 sessionFlag('playing', true);

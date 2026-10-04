@@ -15,12 +15,16 @@ import { MONDE_GAMES } from './monde.js';
 import { MESURES_GAMES } from './mesures.js';
 import { JEUX_GAMES } from './jeux.js';
 import { drapeaux } from './drapeaux.js';
+import { dictee } from './dictee.js';
 import { ANGLAIS_PLUS_GAMES } from './anglais-plus.js';
+import { ecrire } from './ecriture.js';
+import { regleHorloge } from './horloge.js';
+import { tablesChrono } from './chrono.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
-  ...LOGIQUE_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, ...ANGLAIS_GAMES,
-  ...ANGLAIS_PLUS_GAMES,
+  ...LOGIQUE_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, ...ANGLAIS_GAMES,
+  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono,
 ];
 
 const RUBRIQUES = [
@@ -28,7 +32,7 @@ const RUBRIQUES = [
     id: 'francais',
     title: 'Lire et écrire',
     icon: '📚',
-    games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'homophones', 'genre'],
+    games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'homophones', 'genre', 'ecrire', 'dictee'],
   },
   { id: 'histoires', title: 'Histoires', icon: '📖', games: ['histoires', 'petits-textes'] },
   {
@@ -37,7 +41,8 @@ const RUBRIQUES = [
     icon: '🔢',
     games: [
       'compter', 'vite-vu', 'panier', 'patates', 'dizaines', 'relier',
-      'comparer', 'suite', 'calcul', 'trous', 'relie-calculs', 'faire-dix', 'tables', 'ranger', 'problemes', 'doubles',
+      'comparer', 'suite', 'calcul', 'trous', 'relie-calculs', 'faire-dix', 'tables', 'tables-chrono',
+      'ranger', 'problemes', 'doubles',
     ],
   },
   {
@@ -50,7 +55,7 @@ const RUBRIQUES = [
       'labyrinthe', 'chemin-nombres', 'chemin-lettres',
     ],
   },
-  { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
+  { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
   { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux'] },
   {
     id: 'anglais',
@@ -66,7 +71,8 @@ const RUBRIQUES = [
 
 // Sections affichées dans la liste des jeux de certaines rubriques.
 const SECTION_GAMES = {
-  'L’heure et le calendrier': ['heure', 'calendrier', 'saisons'],
+  'Écrire': ['ecrire'],
+  'L’heure et le calendrier': ['heure', 'regle-horloge', 'calendrier', 'saisons'],
   'Monnaie et mesures': ['monnaie', 'mesures'],
   'Puzzles, memory et coloriages': ['puzzle', 'memory', 'coloriage-magique', 'points'],
   'Logique': ['formes', 'algorithmes', 'intrus', 'ombres', 'sudoku'],

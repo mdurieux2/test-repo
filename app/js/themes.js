@@ -11,3 +11,8 @@ export function seasonOf(date) {
   if (m === 9 || m === 10 || m === 11) return { id: 'automne', deco: ['🍂', '🍁', '🍄', '🌰'] };
   return { id: 'hiver', deco: ['❄️', '⛄', '🧣', '🌨️'] };
 }
+
+/** Le nom de chaque saison (histoires et textes de saison, écran des voix des parents). */
+export const SEASON_LABELS = {
+  noel: '🎄 Noël', halloween: '🎃 Halloween', hiver: '❄️ Hiver', printemps: '🌸 Printemps', ete: '☀️ Été', automne: '🍂 Automne',
+};

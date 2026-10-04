@@ -36,4 +36,7 @@ test('sécurité : la page n’autorise que les fichiers de l’app (CSP)', () =
   assert.match(csp, /default-src 'self'/);
   assert.match(csp, /object-src 'none'/);
   assert.doesNotMatch(csp, /script-src[^;]*unsafe/, 'aucun script en ligne ni eval');
+  // voix des parents : les enregistrements (blob:) se jouent, rien d'autre ne vient d'ailleurs
+  const media = csp.match(/media-src ([^;]+)/)?.[1].trim().split(/\s+/);
+  assert.deepEqual(media, ["'self'", 'blob:']);
 });

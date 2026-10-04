@@ -19,6 +19,7 @@ export const PROGRAMS = {
   MS: {
     francais: [
       ['syllabes-rythme', 1, 2], ['rimes', 1, 1], ['lettres', 1, 2],
+      ['ecrire', 1, 3],
     ],
     histoires: [
       ['histoires', 1, 1],
@@ -46,7 +47,8 @@ export const PROGRAMS = {
   GS: {
     francais: [
       ['syllabes-rythme', 1, 6], ['rimes', 1, 5], ['lettres', 2, 7], ['premier-son', 1, 2],
-      ['syllabes', 1, 1],
+      ['syllabes', 1, 1], ['ecrire', 1, 5],
+      ['dictee', 1, 1],
     ],
     histoires: [
       ['histoires', 1, 1],
@@ -77,6 +79,8 @@ export const PROGRAMS = {
   CP: {
     francais: [
       ['premier-son', 1, 6], ['syllabes', 1, 6], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
+      ['ecrire', 2, 5],
+      ['dictee', 1, 5],
     ],
     histoires: [
       ['histoires', 1, 2], ['petits-textes', 1, 2],
@@ -93,7 +97,7 @@ export const PROGRAMS = {
       ['puzzle', 2, 5], ['memory', 3, 6], ['coloriage-magique', 2, 5], ['points', 2, 5],
     ],
     temps: [
-      ['heure', 1, 2], ['calendrier', 1, 2], ['saisons', 1, 3], ['monnaie', 1, 3], ['mesures', 1, 4],
+      ['heure', 1, 2], ['regle-horloge', 1, 4], ['calendrier', 1, 2], ['saisons', 1, 3], ['monnaie', 1, 3], ['mesures', 1, 4],
     ],
     monde: [
       ['animaux-monde', 1, 3], ['pays', 1, 2],
@@ -109,14 +113,16 @@ export const PROGRAMS = {
   CE1: {
     francais: [
       ['bon-mot', 2, 6], ['petits-mots', 2, 6], ['phrase', 1, 5], ['homophones', 1, 5], ['genre', 1, 6],
+      ['ecrire', 4, 5],
+      ['dictee', 2, 6],
     ],
     histoires: [
       ['histoires', 2, 6], ['petits-textes', 2, 6],
     ],
     maths: [
       ['patates', 4, 8], ['dizaines', 2, 8], ['comparer', 2, 7], ['suite', 3, 8], ['calcul', 4, 36],
-      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 6], ['tables', 1, 9], ['ranger', 5, 10],
-      ['problemes', 4, 10], ['doubles', 2, 7],
+      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 6], ['tables', 1, 9], ['tables-chrono', 1, 6],
+      ['ranger', 5, 10], ['problemes', 4, 10], ['doubles', 2, 7],
     ],
     jeux: [
       ['intrus', 2, 6], ['ombres', 3, 6], ['sudoku', 3, 9], ['symetrie', 2, 7], ['reproduire', 2, 6],
@@ -125,7 +131,7 @@ export const PROGRAMS = {
       ['puzzle', 3, 6], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
     ],
     temps: [
-      ['heure', 2, 7], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
+      ['heure', 2, 7], ['regle-horloge', 1, 6], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
     ],
     monde: [
       ['animaux-monde', 2, 7], ['pays', 1, 6],
@@ -156,4 +162,35 @@ export function levelRange(grade, gameId) {
     if (entry) return { min: entry[1], max: entry[2] };
   }
   return { min: 1, max: findGame(gameId).levels.length };
+}
+
+// ---------------------------------------------------------------- Jeux choisis par les parents
+
+/** Nombre maximum de jeux conseillés (ils tiennent en haut de l'accueil, sans faire défiler). */
+export const MAX_FEATURED = 3;
+
+/**
+ * Le programme d'un enfant : celui de sa classe, sans les rubriques ni les jeux masqués par les
+ * parents (child.hiddenDomains, child.hiddenGames). Une rubrique dont tous les jeux sont masqués
+ * disparaît aussi. Sans réglage, c'est exactement le programme de la classe.
+ */
+export function programForChild(child) {
+  const hiddenDomains = new Set(child?.hiddenDomains || []);
+  const hiddenGames = new Set(child?.hiddenGames || []);
+  return programFor(child?.grade)
+    .filter((domain) => !hiddenDomains.has(domain.id))
+    .map((domain) => ({ ...domain, games: domain.games.filter(({ game }) => !hiddenGames.has(game.id)) }))
+    .filter((domain) => domain.games.length);
+}
+
+/** Jeu masqué pour cet enfant (lui-même ou toute sa rubrique), ou jeu inconnu. */
+export function isGameHidden(child, gameId) {
+  const game = findGame(gameId);
+  return !game || (child?.hiddenGames || []).includes(gameId) || (child?.hiddenDomains || []).includes(game.domain);
+}
+
+/** Les jeux conseillés par les parents (child.featured), dans l'ordre du programme, sauf s'ils sont masqués. */
+export function featuredGames(child) {
+  const featured = new Set(child?.featured || []);
+  return programForChild(child).flatMap((domain) => domain.games).filter(({ game }) => featured.has(game.id));
 }
