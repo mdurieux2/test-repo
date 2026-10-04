@@ -2116,3 +2116,7 @@ body[data-season="ete"] { background: #fffbea; }
   .record-buttons { gap: 8px; }
   .record-buttons .big-btn { flex: 1 1 auto; min-height: 46px; font-size: 1.05rem; }
 }
+
+/* voix naturelle (Réglages) : l'état du téléchargement sous l'interrupteur */
+.natural-voice-state { margin: -2px 0 6px; line-height: 1.4; }
+.natural-voice .setting:first-of-type { border-top: 1px solid var(--line); }

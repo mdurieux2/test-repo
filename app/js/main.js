@@ -19,7 +19,10 @@ import {
   addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
   resetChild, saveStore,
 } from './storage.js';
-import { listFrenchVoices, setSpeechEnabled, setVoicePreferences, speak, stopSpeaking } from './speech.js';
+import {
+  isNaturalVoiceOn, listFrenchVoices, loadNaturalVoice, naturalVoiceFiles, setNaturalVoice, setSpeechEnabled, setSpeechNames,
+  setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
+} from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
 import { avatar, clockSvg, h, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
@@ -56,6 +59,9 @@ function applySettings() {
   setSpeechEnabled(store.settings.voice);
   setSoundsEnabled(store.settings.sounds);
   setVoicePreferences(store.settings.voices);
+  setNaturalVoice(store.settings.naturalVoice !== false);
+  // les prénoms des enfants sont dits avec leur propre son (s'ils sont dans la liste des prénoms enregistrés)
+  setSpeechNames(Object.values(store.profiles).flatMap((p) => [p.name, p.spoken]));
   setProfiles(store.profiles);
 }
 
@@ -3553,6 +3559,75 @@ function kidGamesCard(id) {
   return card;
 }
 
+// ---- Voix naturelle : les sons sont téléchargés peu à peu, pour être joués hors connexion
+
+const VOICE_CACHE = 'lire-et-compter-voix'; // le même que dans sw.js
+const voiceDownload = { total: 0, done: 0, running: false, listeners: new Set() };
+
+function voiceDownloadChanged() {
+  voiceDownload.listeners.forEach((fn) => fn());
+}
+
+/** Télécharge les sons qui manquent (3 à la fois) ; le service worker les garde pour le mode avion. */
+async function prefetchVoices() {
+  const files = naturalVoiceFiles();
+  if (voiceDownload.running || !files.length || !isNaturalVoiceOn() || !('caches' in window)) return;
+  if (!navigator.serviceWorker?.controller || navigator.onLine === false) return;
+  voiceDownload.running = true;
+  try {
+    const cache = await caches.open(VOICE_CACHE);
+    const have = new Set((await cache.keys()).map((r) => new URL(r.url).pathname.split('/voix/')[1]));
+    const missing = files.filter((f) => !have.has(f));
+    Object.assign(voiceDownload, { total: files.length, done: files.length - missing.length });
+    voiceDownloadChanged();
+    let next = 0;
+    const worker = async () => {
+      while (next < missing.length && isNaturalVoiceOn() && navigator.onLine !== false) {
+        const file = missing[next++];
+        const response = await fetch(`voix/${file}`).catch(() => null);
+        if (response?.ok) voiceDownload.done++;
+        if (voiceDownload.done % 50 === 0 || voiceDownload.done === voiceDownload.total) voiceDownloadChanged();
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+  } finally {
+    voiceDownload.running = false;
+    voiceDownloadChanged();
+  }
+}
+
+/** Réglages : « Voix naturelle » et l'état du téléchargement des sons. */
+function naturalVoiceRow() {
+  const state = h('p', { class: 'muted small natural-voice-state', 'aria-live': 'polite' });
+  const draw = () => {
+    // l'écran des réglages a été quitté : on ne suit plus le téléchargement
+    if (state.isConnected) state.dataset.seen = '1';
+    else if (state.dataset.seen) {
+      voiceDownload.listeners.delete(draw);
+      return;
+    }
+    const total = naturalVoiceFiles().length;
+    if (!total) state.textContent = 'Les sons de la voix naturelle ne sont pas encore disponibles : la voix de l’appareil est utilisée.';
+    else if (store.settings.naturalVoice === false) state.textContent = 'Coupée : la voix de l’appareil est utilisée.';
+    else if (voiceDownload.total && voiceDownload.done < voiceDownload.total) {
+      state.textContent = `Téléchargement pour jouer sans Internet : ${voiceDownload.done.toLocaleString('fr-FR')} sons sur ${voiceDownload.total.toLocaleString('fr-FR')}.`;
+    } else if (voiceDownload.total) state.textContent = `Les ${total.toLocaleString('fr-FR')} sons sont sur l’appareil : la voix marche aussi sans Internet.`;
+    else state.textContent = `${total.toLocaleString('fr-FR')} phrases enregistrées ; les autres sont dites par la voix de l’appareil.`;
+  };
+  voiceDownload.listeners.add(draw);
+  draw();
+  return h('div', { class: 'natural-voice' },
+    toggle('Voix naturelle (Estelle)', store.settings.naturalVoice !== false, (v) => {
+      store.settings.naturalVoice = v;
+      applySettings();
+      save();
+      draw();
+      if (v) prefetchVoices();
+      say(makeCharacter('voix', { name: 'Léa' }), 'Bravo ! Tu as trouvé la bonne réponse.');
+    }),
+    state);
+}
+
 function voiceRow(voiceList) {
   const sample = makeCharacter('voix', { name: 'Léa' });
   const select = h('select', { class: 'select', 'aria-label': 'Voix de l’application' },
@@ -3903,12 +3978,13 @@ function settingsTab() {
     h('section', { class: 'card' },
       h('h2', {}, 'Voix et sons'),
       toggle('Consignes lues à voix haute', store.settings.voice, (v) => { store.settings.voice = v; applySettings(); save(); }),
+      naturalVoiceRow(),
       voiceList.length ? voiceRow(voiceList) : null,
       toggle('Petits sons', store.settings.sounds, (v) => { store.settings.sounds = v; applySettings(); save(); }),
       toggle('Musique douce (accueil et menus)', Boolean(store.settings.music), (v) => { store.settings.music = v; save(); if (!v) stopMusic(); }),
       toggle('Décors de saison (Noël, Halloween…)', store.settings.seasonal !== false, (v) => { store.settings.seasonal = v; save(); }),
       h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
-      h('p', { class: 'muted small' }, 'Voix plus naturelles : Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
+      h('p', { class: 'muted small' }, 'Voix de l’appareil (phrases rares, ou voix naturelle coupée) : pour qu’elle soit plus naturelle, Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
     voicesCard(),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
@@ -3926,12 +4002,21 @@ function settingsTab() {
         h('p', {}, h('b', {}, APP.name), ' · conçue par ', h('b', {}, APP.author)),
         h('p', { class: 'contact' }, 'Une remarque, un bug, une idée ? Écrivez à ',
           h('a', { class: 'link-action', href: `mailto:${APP.contact}?subject=${encodeURIComponent(APP.name)}`, 'data-contact': '' }, APP.contact), '.'),
-        h('p', { class: 'muted small' }, 'Police Andika © SIL International (licence OFL).'))));
+        h('p', { class: 'muted small' }, 'Police Andika © SIL International (licence OFL).'),
+        h('p', { class: 'muted small' }, 'Voix naturelle : Pocket TTS © Kyutai, voix « Estelle » (corpus CML-TTS) et « Alba » (licence CC-BY 4.0).'))));
 }
 
 // ---------------------------------------------------------------- Démarrage
 
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
+document.addEventListener('pointerdown', unlockNaturalVoice, { capture: true });
+// voix naturelle : la liste des sons, puis leur téléchargement en arrière-plan (pour le mode avion)
+loadNaturalVoice().then((ok) => {
+  if (!ok) return;
+  voiceDownloadChanged();
+  setTimeout(prefetchVoices, 4000);
+});
+window.addEventListener('online', () => prefetchVoices());
 document.addEventListener('pointerdown', unlockStoryAudio, { capture: true });
 refreshRecorded(); // les histoires enregistrées par les parents sur cet appareil
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopMusic(); });

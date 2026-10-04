@@ -1,9 +1,13 @@
-// Voix (synthèse vocale du système : sur iPhone et iPad, les voix françaises d'Apple).
-// Indispensable au CP : l'enfant entend chaque consigne sans avoir à la lire.
+// Voix. Indispensable au CP : l'enfant entend chaque consigne sans avoir à la lire.
 //
-// Pour une voix plus naturelle, on choisit automatiquement la meilleure voix installée :
-// « Premium », puis « améliorée », puis la voix compacte. Les voix gadget (Grand-mère,
-// Rocko…) sont écartées. Une seule voix pour toute l'app ; le parent peut la choisir dans les Réglages.
+// 1. Voix naturelle : les phrases sont enregistrées à l'avance (Pocket TTS de Kyutai, voix
+//    « Estelle » ; voir scripts/voix/) et jouées depuis app/voix/. Une phrase absente est jouée
+//    en morceaux (texte, nombres, prénoms : voix-cles.js) si tous les morceaux existent.
+// 2. Sinon, synthèse vocale du système (sur iPhone et iPad, les voix françaises d'Apple) : on
+//    choisit automatiquement la meilleure voix installée (« Premium », puis « améliorée », puis la
+//    voix compacte). Les voix gadget (Grand-mère, Rocko…) sont écartées. Le parent peut la choisir.
+
+import { cle, langue, morceaux } from './voix-cles.js';
 
 const synth = globalThis.speechSynthesis;
 let enabled = true;
@@ -80,7 +84,152 @@ export function setVoicePreferences(prefs = {}) {
 }
 
 export function isSpeechSupported() {
-  return Boolean(synth);
+  return Boolean(synth) || Boolean(natural.clips);
+}
+
+// ---- Voix naturelle : sons enregistrés à l'avance
+
+const VOICE_BASE = 'voix/';
+const natural = { wanted: true, clips: null, files: [], names: [], unlocked: false, silence: null };
+let player = null;
+let cancelClip = null;
+
+function audioPlayer() {
+  if (!player) {
+    player = new Audio();
+    player.preload = 'auto';
+    player.dataset.voix = 'naturelle'; // repéré par le test de bout en bout
+  }
+  return player;
+}
+
+/** Lit la liste des sons (voix/manifest.json). Sans elle, la synthèse du système est utilisée. */
+export async function loadNaturalVoice(url = `${VOICE_BASE}manifest.json`) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return false;
+    const data = await response.json();
+    natural.clips = data.clips || null;
+    natural.files = [...new Set(Object.values(data.clips || {}))];
+    // un court silence, prêt à jouer au premier toucher (voir unlockNaturalVoice)
+    fetch(`${VOICE_BASE}silence.mp3`).then((r) => (r.ok ? r.blob() : null)).then((blob) => {
+      if (blob) natural.silence = URL.createObjectURL(blob);
+    }).catch(() => {});
+    return Boolean(natural.clips);
+  } catch {
+    return false;
+  }
+}
+
+/** Fichiers des sons (pour les télécharger tous à l'avance, et jouer hors connexion). */
+export function naturalVoiceFiles() {
+  return natural.files;
+}
+
+export function setNaturalVoice(on) {
+  natural.wanted = on !== false;
+  if (!natural.wanted) stopClip();
+}
+
+export function isNaturalVoiceOn() {
+  return Boolean(natural.wanted && natural.clips);
+}
+
+/** Prénoms des enfants : découpés dans les phrases pour être dits avec leur propre son. */
+export function setSpeechNames(names) {
+  natural.names = [...new Set(names.filter(Boolean))];
+}
+
+/** Sur iPhone et iPad, l'élément audio ne joue seul qu'après avoir joué une fois pendant un toucher. */
+export function unlockNaturalVoice() {
+  if (natural.unlocked || !isNaturalVoiceOn() || !natural.silence) return;
+  natural.unlocked = true;
+  const audio = audioPlayer();
+  audio.src = natural.silence;
+  audio.play()?.catch(() => { natural.unlocked = false; });
+}
+
+/** Les sons d'une phrase : la phrase entière, ou tous ses morceaux ; null s'il en manque un. */
+export function clipsFor(part, clips = natural.clips, names = natural.names) {
+  if (!clips || !part?.text) return null;
+  const options = { lang: part.lang, rate: part.rate };
+  const whole = clips[cle(part.text, options)];
+  if (whole) return [{ file: whole, weight: 1 }];
+  const pieces = morceaux(part.text, names, langue(part.lang));
+  if (!pieces.length) return null;
+  const files = [];
+  for (const piece of pieces) {
+    // nombres et prénoms : à la vitesse demandée s'il existe, sinon à la vitesse normale
+    const file = clips[cle(piece.text, options)] || (piece.type !== 'texte' ? clips[cle(piece.text, { lang: part.lang })] : null);
+    if (!file) return null;
+    files.push({ file, weight: piece.text.length });
+  }
+  return files;
+}
+
+function stopClip() {
+  cancelClip?.();
+  cancelClip = null;
+}
+
+/** Début de chaque mot, pour suivre la lecture en karaoké (comme les « boundary » de la synthèse). */
+function wordStarts(text) {
+  return [...text.matchAll(/\S+/g)].map((m) => m.index);
+}
+
+async function playClips(list, part, id) {
+  // tous les sons sont chargés avant de commencer : pas de trou, et pas de mélange de voix
+  const blobs = await Promise.all(list.map(async ({ file }) => {
+    const response = await fetch(VOICE_BASE + file);
+    if (!response.ok) throw new Error(`son absent : ${file}`);
+    return response.blob();
+  }));
+  if (id !== queueId) return;
+  const total = list.reduce((sum, c) => sum + c.weight, 0);
+  const starts = wordStarts(part.text);
+  let before = 0;
+  let lastWord = -1;
+  part.onStart?.();
+  for (let i = 0; i < list.length; i++) {
+    if (id !== queueId) return;
+    const url = URL.createObjectURL(blobs[i]);
+    const weight = list[i].weight;
+    try {
+      await new Promise((resolve, reject) => {
+        const audio = audioPlayer();
+        let finished = false;
+        const finish = (error) => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(timer);
+          audio.onended = audio.onerror = audio.ontimeupdate = null;
+          if (error) reject(error);
+          else resolve();
+        };
+        const timer = setTimeout(() => finish(), 20000); // filet de sécurité
+        cancelClip = () => {
+          audio.pause();
+          finish();
+        };
+        audio.onended = () => finish();
+        audio.onerror = () => finish(new Error('son illisible'));
+        audio.ontimeupdate = () => {
+          if (!part.onWord || !audio.duration) return;
+          const at = ((before + (audio.currentTime / audio.duration) * weight) / total) * part.text.length;
+          const word = starts.filter((s) => s <= at).length - 1;
+          if (word >= 0 && word !== lastWord) {
+            lastWord = word;
+            part.onWord(starts[word]);
+          }
+        };
+        audio.src = url;
+        audio.play()?.catch((error) => finish(error));
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+    before += weight;
+  }
 }
 
 export function setSpeechEnabled(value) {
@@ -90,13 +239,22 @@ export function setSpeechEnabled(value) {
 
 export function stopSpeaking() {
   queueId++;
+  stopClip();
   // Safari ignore parfois la phrase suivante si l'on annule une file déjà vide.
   if (synth && (synth.speaking || synth.pending)) synth.cancel();
 }
 
 function sayOne(part, id) {
+  if (id !== queueId) return Promise.resolve();
+  const clips = natural.wanted ? clipsFor(part) : null;
+  // son introuvable ou illisible (hors connexion, pas encore téléchargé…) : la synthèse prend le relais
+  if (clips) return playClips(clips, part, id).catch(() => (id === queueId ? saySynth(part, id) : undefined));
+  return saySynth(part, id);
+}
+
+function saySynth(part, id) {
   return new Promise((resolve) => {
-    if (id !== queueId) return resolve();
+    if (id !== queueId || !synth) return resolve();
     const { text, rate = 0.95, pitch = 1, voice, lang = 'fr-FR' } = part;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
@@ -130,7 +288,7 @@ function sayOne(part, id) {
  * Interrompt ce qui était en cours. Ne bloque jamais l'interface.
  */
 export async function speak(parts, style = {}) {
-  if (!synth || !enabled || !parts) return;
+  if (!enabled || !parts || (!synth && !natural.clips)) return;
   stopSpeaking();
   const id = queueId;
   const list = Array.isArray(parts) ? parts : [parts];

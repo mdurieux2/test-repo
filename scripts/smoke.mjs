@@ -11,7 +11,7 @@
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
 
 import { chromium } from 'playwright';
-import { mkdirSync, readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { startServer } from './serve.mjs';
 import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
@@ -21,6 +21,7 @@ import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 import { seasonOf } from '../app/js/themes.js';
+import { cle } from '../app/js/voix-cles.js';
 
 const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
@@ -31,6 +32,10 @@ const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
 // (la mise en page sur un quart des appareils). Sans rien, tout est fait.
 const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : ['scenario', 'layout'];
 const SHARD = process.env.SHARD ? process.env.SHARD.split('/').map(Number) : null;
+// SPEECH_LOG=fichier.json : tout ce que l'application dit est noté (avec le nombre de fois),
+// pour choisir les phrases de la voix naturelle (scripts/voix/phrases.mjs)
+const SPEECH_LOG = process.env.SPEECH_LOG;
+const spokenLog = new Map();
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
@@ -51,16 +56,33 @@ async function newContext(viewport) {
   const context = await browser.newContext({
     viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'fr-FR', permissions: ['microphone'],
   });
+  if (SPEECH_LOG) {
+    await context.exposeBinding('__parole', (_source, text, lang, rate) => {
+      const key = JSON.stringify([text, lang, rate]);
+      spokenLog.set(key, (spokenLog.get(key) || 0) + 1);
+    });
+  }
   await context.addInitScript(() => {
     const fake = {
       speaking: false, pending: false,
       speak(u) {
         (window.__spoken = window.__spoken || []).push(u.text);
+        window.__parole?.(u.text, u.lang, u.rate);
         setTimeout(() => u.onend && u.onend(), 5);
       },
       cancel() {}, getVoices: () => [], addEventListener() {},
     };
     Object.defineProperty(window, 'speechSynthesis', { value: fake });
+    // Voix naturelle : ses sons ne sont pas joués (la voix factice prend le relais et note ce qui est dit),
+    // sauf quand window.__voixNaturelle est vrai : le son est alors noté dans __clips et se termine aussitôt.
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function playForTests() {
+      if (this.dataset?.voix !== 'naturelle') return play.call(this);
+      if (!window.__voixNaturelle) return Promise.reject(new DOMException('test', 'NotAllowedError'));
+      (window.__clips = window.__clips || []).push(this.src);
+      setTimeout(() => this.dispatchEvent(new Event('ended')), 5);
+      return Promise.resolve();
+    };
     // tout ce que la règle de sécurité (CSP) bloque est une erreur
     document.addEventListener('securitypolicyviolation', (e) => console.error(`CSP ${e.violatedDirective} ${e.blockedURI}`));
   });
@@ -1115,6 +1137,26 @@ if ((await page.textContent('[data-version]')) !== pkg.version) fail('version af
 if (!(await page.textContent('.credits')).includes('Michaël Durieux')) fail('crédits absents');
 if (!(await page.getAttribute('[data-contact]', 'href')).startsWith('mailto:')) fail('contact absent des crédits');
 if (!(await page.locator('.changelog-entry').count())) fail('journal des modifications absent');
+// voix naturelle (Estelle) : allumée par défaut ; la phrase d'essai vient de ses sons (sinon, voix de l'appareil)
+const VOICE_TEST = 'Bravo ! Tu as trouvé la bonne réponse.';
+const voiceManifest = JSON.parse(readFileSync(new URL('../app/voix/manifest.json', import.meta.url), 'utf8'));
+if (!(await page.locator('.natural-voice input[type=checkbox]').isChecked())) fail('voix naturelle coupée par défaut');
+if (!(await page.textContent('.natural-voice-state')).trim()) fail('état de la voix naturelle absent');
+if (!(await page.textContent('.credits')).includes('Pocket TTS')) fail('crédits de la voix naturelle absents');
+await page.evaluate(() => { window.__spoken = []; window.__clips = []; window.__voixNaturelle = true; });
+await page.click('.natural-voice input'); // coupée : la voix de l'appareil dit la phrase d'essai
+await page.waitForFunction((text) => window.__spoken.includes(text), VOICE_TEST);
+await page.click('.natural-voice input'); // rallumée
+if (voiceManifest.clips[cle(VOICE_TEST)]) {
+  await page.waitForFunction(() => (window.__clips || []).some((src) => src.startsWith('blob:')));
+  await page.waitForTimeout(300);
+  if ((await page.evaluate(() => window.__spoken)).filter((t) => t === VOICE_TEST).length !== 1) fail('voix naturelle : la phrase a aussi été dite par la voix de l’appareil');
+  console.log(`✔ voix naturelle : réglage, phrase jouée depuis ses sons (${voiceManifest.sons} sons)`);
+} else {
+  await page.waitForFunction((text) => window.__spoken.filter((t) => t === text).length === 2, VOICE_TEST);
+  console.log('✔ voix naturelle : réglage ; sons pas encore générés, la voix de l’appareil prend le relais');
+}
+await page.evaluate(() => { window.__voixNaturelle = false; });
 await page.click('[data-tab="enfants"]');
 await page.click('[data-edit="eva-rose"]');
 await page.setInputFiles('[data-photo-input="eva-rose"]', 'app/icons/icon-512.png');
@@ -1402,5 +1444,10 @@ if (layoutProblems.length) fail(`mise en page :\n${layoutProblems.join('\n')}`);
 
 await browser.close();
 server.close();
+if (SPEECH_LOG) {
+  const entries = [...spokenLog].map(([key, count]) => { const [text, lang, rate] = JSON.parse(key); return { text, lang, rate, count }; });
+  writeFileSync(SPEECH_LOG, `${JSON.stringify(entries.sort((a, b) => b.count - a.count), null, 1)}\n`);
+  console.log(`✔ paroles notées : ${entries.length} phrases différentes → ${SPEECH_LOG}`);
+}
 if (errors.length) fail(`erreurs JavaScript :\n${errors.join('\n')}`);
 console.log('Tous les scénarios sont passés.');

@@ -147,8 +147,8 @@ bonus et un jour de plus dans la série 🔥.
 
 ## Pédagogie
 
-- **Tout est lu à voix haute** (voix française, et voix anglaise pour l'anglais). On réécoute
-  en touchant le personnage ou la bulle.
+- **Tout est lu à voix haute**, par une **voix naturelle** enregistrée à l'avance (Estelle, et Alba
+  pour l'anglais), qui marche aussi sans Internet. On réécoute en touchant le personnage ou la bulle.
 - **Consigne complète** à la première question, puis une **consigne courte** pour ne pas lasser.
 - **Niveau adaptatif** pour viser environ 80 % de réussite : 5 bonnes réponses d'affilée font
   monter d'un niveau, 3 erreurs sur 5 font redescendre, dans la fourchette de la classe.
@@ -170,7 +170,8 @@ Il ouvre trois onglets :
   sa classe ou sa photo (photothèque ou appareil photo, enregistrée automatiquement), effacer sa
   progression ou supprimer son profil. **Ses jeux** : masquer une rubrique ou un jeu, et
   conseiller jusqu'à 3 jeux (en haut de son accueil). On y trouve aussi **Partager le lien**.
-- **Réglages** : consignes lues ou non, choix de la voix avec un bouton d'essai, petits sons,
+- **Réglages** : consignes lues ou non, voix naturelle (et état du téléchargement des sons), choix
+  de la voix de l'appareil avec un bouton d'essai, petits sons,
   musique douce, décors de saison, nombre de questions par partie, installation, version,
   journal des modifications, et le contact pour vos remarques.
 - **Vos voix pour les histoires** (dans Réglages) : enregistrez-vous en lisant une histoire
@@ -178,9 +179,16 @@ Il ouvre trois onglets :
   voix pendant que les phrases s'allument, puis la question est posée. On peut réécouter,
   recommencer ou supprimer. Les enregistrements restent sur l'appareil (jamais envoyés).
 
-### Des voix plus naturelles
+### La voix naturelle
 
-L'application choisit toujours la voix la plus naturelle de l'appareil. Pour l'améliorer :
+Les consignes, les histoires, les nombres, les félicitations et environ 300 prénoms courants sont
+dits par une **voix enregistrée à l'avance** avec Pocket TTS (Kyutai), bien plus naturelle que les
+voix de synthèse. Les sons (environ 7 400) se téléchargent en arrière-plan après la première
+ouverture ; *Réglages* montre où en est le téléchargement. Ensuite, la voix marche aussi en mode avion.
+Les phrases rares et les prénoms peu courants sont dits par la voix de l'appareil, comme quand on
+coupe *Réglages → Voix naturelle*.
+
+Pour que la voix de l'appareil soit, elle aussi, plus naturelle :
 
 - **iPhone, iPad, Mac** : *Réglages → Accessibilité → Contenu énoncé → Voix → Français*, puis
   télécharger une voix « Premium » ou « améliorée » (et une voix anglaise pour l'anglais).
@@ -200,8 +208,10 @@ famille crée ses propres profils sur son appareil : rien n'est partagé entre l
 Après une première ouverture avec Internet, **tout fonctionne sans réseau** : les jeux, les
 images, les sons et les progrès sont sur l'appareil (le test automatique ouvre chaque jeu en
 mode avion). Ouvrez l'application une fois connecté après une mise à jour pour la recevoir.
-La voix aussi marche hors connexion sur iPhone, iPad et Android (si la voix française est
-téléchargée) ; sur ordinateur, l'app choisit alors une voix installée.
+La voix naturelle marche hors connexion une fois ses sons téléchargés (automatiquement, après la
+première ouverture). La voix de l'appareil, pour les phrases rares, marche aussi hors connexion sur
+iPhone, iPad et Android (si la voix française est téléchargée) ; sur ordinateur, l'app choisit alors
+une voix installée.
 
 ## Confidentialité et sécurité
 
@@ -245,6 +255,16 @@ mise en page.
 | `app/js/storage.js` | Profils et progression, enregistrés sur l'appareil |
 | `app/js/config.js` | Version, journal des modifications, crédits |
 | `app/sw.js` | Mode hors ligne : tout nouveau fichier doit être ajouté à `PRECACHE` |
+| `app/js/speech.js`, `app/js/voix-cles.js` | Voix naturelle (sons de `app/voix/`), sinon voix de l'appareil |
+| `scripts/voix/` | Fabrication des sons de la voix naturelle (voir ci-dessous) |
+
+**Voix naturelle.** `node scripts/voix/phrases.mjs` choisit les phrases à enregistrer : ce que
+disent les jeux à tous les niveaux et ce que dit l'app pendant le parcours complet
+(`scripts/voix/parole-e2e.json`, mis à jour avec `SPEECH_LOG=scripts/voix/parole-e2e.json PARTS=scenario npm run test:e2e`),
+les plus entendues d'abord, plus les nombres de 0 à 1000 et les prénoms de `scripts/voix/prenoms.txt`.
+En poussant la liste (`scripts/voix/a-generer.json`), le workflow GitHub « Voix naturelle » fabrique
+les sons manquants avec Pocket TTS (gratuit, sur 8 machines en même temps) ; `bash scripts/voix/recuperer.sh`
+les ajoute à `app/voix/` avec le manifeste.
 
 ## Affiche foot personnalisée (dossier `affiche/`)
 
@@ -289,6 +309,8 @@ npm run icons:affiche      # régénère les icônes de l'affiche
 ## Crédits
 
 Conçue par **Michaël Durieux**. Police : [Andika](https://software.sil.org/andika/)
-(SIL Open Font License), conçue pour l'apprentissage de la lecture. Affiche foot : polices
+(SIL Open Font License), conçue pour l'apprentissage de la lecture. Voix naturelle :
+[Pocket TTS](https://github.com/kyutai-labs/pocket-tts) © Kyutai, voix « Estelle » (corpus CML-TTS)
+et « Alba », licence CC-BY 4.0. Affiche foot : polices
 [Anton](https://fonts.google.com/specimen/Anton) et [Archivo Black](https://fonts.google.com/specimen/Archivo+Black)
 (SIL Open Font License).

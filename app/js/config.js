@@ -4,13 +4,21 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.7.0',
+  version: '1.8.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.8.0',
+    date: '2026-10-04',
+    changes: [
+      'Voix naturelle : les consignes, les histoires et les félicitations sont dites par une voix enregistrée bien plus naturelle (Estelle, et Alba pour l’anglais). Elle marche aussi sans Internet, une fois les sons téléchargés (automatiquement, en arrière-plan).',
+      'Les phrases rares et les prénoms peu courants restent dits par la voix de l’appareil. Réglages → « Voix naturelle » pour revenir à la voix de l’appareil.',
+    ],
+  },
   {
     version: '1.7.0',
     date: '2026-10-03',
