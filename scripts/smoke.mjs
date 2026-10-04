@@ -36,6 +36,14 @@ const SHARD = process.env.SHARD ? process.env.SHARD.split('/').map(Number) : nul
 // pour choisir les phrases de la voix naturelle (scripts/voix/phrases.mjs)
 const SPEECH_LOG = process.env.SPEECH_LOG;
 const spokenLog = new Map();
+if (SPEECH_LOG) {
+  // écrit à la fin, même si un test échoue : rien de ce qui a été noté n'est perdu
+  process.on('exit', () => {
+    const entries = [...spokenLog].map(([key, count]) => { const [text, lang, rate] = JSON.parse(key); return { text, lang, rate, count }; });
+    writeFileSync(SPEECH_LOG, `${JSON.stringify(entries.sort((a, b) => b.count - a.count), null, 1)}\n`);
+    console.log(`✔ paroles notées : ${entries.length} phrases différentes → ${SPEECH_LOG}`);
+  });
+}
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
 const server = await startServer(PORT);
@@ -1189,21 +1197,31 @@ async function checkOffline(context, page) {
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload(); // la page est maintenant servie par le service worker
   const failed = [];
-  const onFail = (request) => failed.push(request.url());
+  let clipsMissing = 0;
+  // un son de la voix naturelle pas encore téléchargé : la voix de l'appareil le remplace (vérifié plus bas)
+  const onFail = (request) => {
+    if (/\/voix\/(fr|en)\/[0-9a-f]+\.mp3$/.test(request.url())) clipsMissing++;
+    else failed.push(request.url());
+  };
   page.on('requestfailed', onFail);
   await context.setOffline(true);
   await page.reload();
   await page.waitForSelector('.welcome, .profiles, .home');
   for (const game of GAMES) {
     await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor(game.id)}';`);
+    await page.evaluate(() => { window.__spoken = []; });
     await openGame(page, game);
     await page.waitForSelector('.choices');
     if (await page.locator('.choices').count() !== 1) fail(`hors ligne : ${game.id} ne s'affiche pas`);
+    // la consigne est dite : par la voix naturelle si ses sons sont là, sinon par la voix de l'appareil
+    await page.waitForFunction(() => (window.__spoken || []).length > 0 || (window.__clips || []).length > 0, null, { timeout: 15000 })
+      .catch(() => fail(`hors ligne : ${game.id}, la consigne n'est pas dite`));
   }
   await context.setOffline(false);
   page.off('requestfailed', onFail);
   if (failed.length) fail(`hors ligne, fichiers introuvables : ${[...new Set(failed)].join(', ')}`);
-  console.log(`✔ mode avion : l'app et les ${GAMES.length} jeux s'ouvrent sans réseau`);
+  console.log(`✔ mode avion : l'app et les ${GAMES.length} jeux s'ouvrent sans réseau, consignes dites`
+    + (clipsMissing ? ` (${clipsMissing} sons pas encore téléchargés : voix de l'appareil)` : ''));
 }
 
 if (!ONLY && PARTS.includes('scenario')) await scenario();
@@ -1444,10 +1462,5 @@ if (layoutProblems.length) fail(`mise en page :\n${layoutProblems.join('\n')}`);
 
 await browser.close();
 server.close();
-if (SPEECH_LOG) {
-  const entries = [...spokenLog].map(([key, count]) => { const [text, lang, rate] = JSON.parse(key); return { text, lang, rate, count }; });
-  writeFileSync(SPEECH_LOG, `${JSON.stringify(entries.sort((a, b) => b.count - a.count), null, 1)}\n`);
-  console.log(`✔ paroles notées : ${entries.length} phrases différentes → ${SPEECH_LOG}`);
-}
 if (errors.length) fail(`erreurs JavaScript :\n${errors.join('\n')}`);
 console.log('Tous les scénarios sont passés.');
