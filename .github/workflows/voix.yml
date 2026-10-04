@@ -1,0 +1,54 @@
+name: Voix naturelle
+
+# Fabrique les sons de la voix naturelle (Pocket TTS de Kyutai, voix « Estelle » en français et
+# « Alba » en anglais) listés dans scripts/voix/a-generer.json, en 8 morceaux qui tournent en même
+# temps. Seuls les sons absents de app/voix/ sont fabriqués. Les MP3 et la liste des échecs sont
+# déposés sous l'étiquette git « voix-generees » (aucune branche n'est modifiée) ; on les ajoute
+# ensuite à app/voix/ avec scripts/voix/recuperer.sh.
+on:
+  push:
+    branches: ['claude/**']
+    paths: ['scripts/voix/a-generer.json', 'scripts/voix/generer.py', '.github/workflows/voix.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generer:
+    name: sons ${{ matrix.morceau }}/8
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        morceau: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: pip install pocket-tts --extra-index-url https://download.pytorch.org/whl/cpu
+      - run: python scripts/voix/generer.py --shard ${{ matrix.morceau }}/8 --sortie voix-sortie
+      - uses: actions/upload-artifact@v4
+        with:
+          name: voix-${{ matrix.morceau }}
+          path: voix-sortie
+
+  publier:
+    needs: generer
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # pour l'étiquette voix-generees
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: voix-*
+          merge-multiple: true
+          path: voix-sortie
+      - run: bash scripts/voix/publier.sh voix-generees voix-sortie
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

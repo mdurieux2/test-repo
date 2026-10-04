@@ -18,6 +18,13 @@ Interface et commentaires en français.
   portrait et paysage).
 - Couleurs : texte blanc seulement sur des fonds à contraste ≥ 3:1 (gros textes) ; jamais d'information
   portée par la couleur seule.
+- Voix naturelle : les phrases dites par l'app sont enregistrées à l'avance (Pocket TTS de Kyutai, voix
+  « Estelle ») dans `app/voix/` (`manifest.json`, `fr/*.mp3`, `en/*.mp3`) et jouées par `speech.js` ; une phrase
+  absente est jouée en morceaux (texte, nombres, prénoms : `voix-cles.js`), sinon par la voix de l'appareil.
+  Les sons ne sont pas dans `PRECACHE` (cache des voix séparé, téléchargé en arrière-plan).
+  Après avoir ajouté ou changé des phrases : `node scripts/voix/phrases.mjs`, pousser (le workflow « Voix
+  naturelle » fabrique les sons sur GitHub), puis `bash scripts/voix/recuperer.sh` et committer `app/voix/`.
+  Pour mettre à jour ce que dit l'app hors des jeux : `SPEECH_LOG=scripts/voix/parole-e2e.json PARTS=scenario npm run test:e2e`.
 
 ## Affiche foot (dossier `affiche/`)
 
