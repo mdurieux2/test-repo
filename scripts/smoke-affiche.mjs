@@ -2,7 +2,9 @@
 // - mise en page sur iPhone, iPad, Android et ordinateur (portrait et paysage) : rien ne déborde,
 //   l'aperçu est dessiné, aucune erreur ni violation de la règle de sécurité (CSP) ;
 // - parcours complet sur iPhone : prénoms, numéros, genre, cheveux, couleurs, puis JPG et PDF
-//   en A4 et en A3 (taille en pixels, résolution, format de page du PDF), impression ;
+//   en A4, A3 et 40 × 60 cm, en HD et Ultra HD (taille en pixels, résolution, format de
+//   page du PDF), logo importé, impression ;
+// - encodeur JPEG : l'image relue par le navigateur est identique au dessin ;
 // - fonctionnement sans Internet (service worker).
 // Usage : npm run test:e2e:affiche   (SCREENSHOTS=dossier pour enregistrer des captures)
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé ; PORT=8125
@@ -200,12 +202,52 @@ async function journey() {
     console.log(`✓ PDF ${format.toUpperCase()} (${(pdf.length / 1e6).toFixed(1)} Mo) : ${pdf.info}`);
   }
 
-  // impression
+  // impression (format A3 : page de 297 × 420 mm)
   await page.click('[data-export="print"]');
   await page.waitForSelector('#dialog-actions .btn', { timeout: 60000 });
   check((await page.textContent('#dialog-title')) === 'Prêt à imprimer', 'impression prête');
-  check((await page.textContent('#page-size')).includes('A3'), 'format de page à l’impression');
+  check((await page.textContent('#page-size')).includes('297mm 420mm'), 'format de page à l’impression');
   await page.click('#dialog-close');
+
+  // logo importé : image du téléphone, gardée après rechargement
+  const png = await page.evaluate(() => {
+    const c = document.createElement('canvas');
+    c.width = 300; c.height = 360;
+    const g = c.getContext('2d');
+    g.fillStyle = '#0d1b4f'; g.fillRect(0, 0, 300, 360);
+    g.fillStyle = '#e1322b'; g.fillRect(110, 0, 80, 360);
+    return c.toDataURL('image/png').split(',')[1];
+  });
+  await page.setInputFiles('#logo-file', { name: 'logo.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+  await page.waitForSelector('#logo-thumb:not([hidden])');
+  check(await page.isVisible('#logo-options'), 'réglages du logo');
+  await page.click('[data-group="logo.place"] input[value="bas-droite"]');
+  await page.reload();
+  await page.waitForSelector('#logo-thumb:not([hidden])');
+  check(await page.isChecked('[data-group="logo.place"] input[value="bas-droite"]'), 'place du logo gardée');
+
+  // grand format 40 × 60 cm, avec le logo
+  await page.click('[data-group="format"] input[value="40x60"]');
+  check((await page.textContent('#format-hint')).includes('4724 × 7087'), 'taille annoncée en 40 × 60');
+  const big = await exportFile(page, 'jpg');
+  const bigFacts = jpegFacts(big.head);
+  check(bigFacts.width === 4724 && bigFacts.height === 7087 && bigFacts.dpi === 300, `JPG 40x60 : ${bigFacts.width}×${bigFacts.height}`);
+  const bigPdf = new TextDecoder('latin1').decode((await exportFile(page, 'pdf')).head);
+  check(bigPdf.includes('/MediaBox [0 0 1133.86 1700.79]'), 'PDF 40 × 60 cm : format de page');
+  console.log(`✓ 40 × 60 cm : JPG ${bigFacts.width}×${bigFacts.height} (${(big.length / 1e6).toFixed(1)} Mo), PDF au format exact, logo`);
+
+  // Ultra HD (600 dpi)
+  await page.click('[data-group="format"] input[value="a4"]');
+  await page.click('[data-group="quality"] input[value="uhd"]');
+  const uhd = await exportFile(page, 'jpg');
+  const uhdFacts = jpegFacts(uhd.head);
+  check(uhdFacts.width === 4961 && uhdFacts.height === 7016 && uhdFacts.dpi === 600, `JPG Ultra HD : ${uhdFacts.width}×${uhdFacts.height} à ${uhdFacts.dpi} dpi`);
+  check(uhd.name === 'affiche-lea-jean-pierre-a4-uhd.jpg', `nom du fichier Ultra HD : ${uhd.name}`);
+  console.log(`✓ Ultra HD A4 : ${uhdFacts.width}×${uhdFacts.height} à 600 dpi (${(uhd.length / 1e6).toFixed(1)} Mo)`);
+  await page.click('[data-group="quality"] input[value="hd"]');
+  await page.click('#logo-remove');
+  await page.waitForSelector('#logo-thumb', { state: 'hidden' });
+  check(!(await page.isVisible('#logo-options')), 'logo retiré');
 
   // grande famille en A4
   await page.click('[data-group="format"] input[value="a4"]');
@@ -216,6 +258,38 @@ async function journey() {
   check(family.name === 'affiche-lea-leo-jade-tom-jean-pierre-claire-a4.jpg', `nom du fichier famille : ${family.name}`);
   console.log('✓ parcours complet sur iPhone (prénoms, cheveux, compositions, couleurs, JPG, PDF, impression)');
   await context.close();
+}
+
+/** L'encodeur JPEG de l'app produit une image que le navigateur relit fidèlement. */
+async function encoderAccuracy() {
+  const { context, page } = await newPage(DEVICES[11]);
+  await page.goto(BASE);
+  await page.waitForFunction(() => document.fonts.status === 'loaded');
+  const diff = await page.evaluate(async () => {
+    const { drawPoster } = await import('./js/poster.js');
+    const { createJpegEncoder } = await import('./js/jpeg.js');
+    const [w, h] = [400, 566];
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    drawPoster(c.getContext('2d'), { layout: 'deux-parents' }, w / 1000);
+    const src = c.getContext('2d').getImageData(0, 0, w, h).data;
+    const encoder = createJpegEncoder(w, h, { quality: 92 });
+    for (let top = 0; top < h; top += 64) {
+      const rows = Math.min(64, h - top);
+      encoder.addRows(src.subarray(top * w * 4, (top + rows) * w * 4), rows);
+    }
+    const bitmap = await createImageBitmap(new Blob([encoder.finish()], { type: 'image/jpeg' }));
+    const d = document.createElement('canvas');
+    d.width = w; d.height = h;
+    d.getContext('2d').drawImage(bitmap, 0, 0);
+    const out = d.getContext('2d').getImageData(0, 0, w, h).data;
+    let sum = 0;
+    for (let i = 0; i < src.length; i += 4) sum += Math.abs(src[i] - out[i]) + Math.abs(src[i + 1] - out[i + 1]) + Math.abs(src[i + 2] - out[i + 2]);
+    return sum / (w * h);
+  });
+  check(diff < 8, `JPEG trop différent du dessin (${diff.toFixed(2)})`);
+  await context.close();
+  console.log(`✓ encodeur JPEG : image relue par le navigateur identique au dessin (écart moyen ${diff.toFixed(2)} sur 765)`);
 }
 
 async function offline() {
@@ -234,6 +308,7 @@ async function offline() {
 
 try {
   for (const device of DEVICES) await layout(device);
+  await encoderAccuracy();
   await journey();
   await offline();
   check(errors.length === 0, `erreurs dans la page :\n${errors.join('\n')}`);

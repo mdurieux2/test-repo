@@ -25,27 +25,6 @@ export function jpegInfo(bytes) {
   throw new Error('JPEG illisible');
 }
 
-/**
- * Inscrit la résolution (dpi) dans l'en-tête JFIF du JPEG : les logiciels d'impression
- * connaissent alors sa taille réelle (21 × 29,7 cm…). Ajoute l'en-tête s'il manque.
- */
-export function setJpegDpi(bytes, dpi) {
-  const isJfif = bytes[2] === 0xff && bytes[3] === 0xe0 && String.fromCharCode(...bytes.slice(6, 11)) === 'JFIF\0';
-  if (isJfif) {
-    const out = bytes.slice();
-    out[13] = 1; // unités : points par pouce
-    out[14] = dpi >> 8; out[15] = dpi & 0xff;
-    out[16] = dpi >> 8; out[17] = dpi & 0xff;
-    return out;
-  }
-  const app0 = [0xff, 0xe0, 0, 16, 0x4a, 0x46, 0x49, 0x46, 0, 1, 1, 1, dpi >> 8, dpi & 0xff, dpi >> 8, dpi & 0xff, 0, 0];
-  const out = new Uint8Array(bytes.length + app0.length);
-  out.set(bytes.subarray(0, 2), 0);
-  out.set(app0, 2);
-  out.set(bytes.subarray(2), 2 + app0.length);
-  return out;
-}
-
 /** Chaîne de texte PDF (UTF-16 pour garder les accents des prénoms). */
 function pdfText(text) {
   let hex = 'FEFF';

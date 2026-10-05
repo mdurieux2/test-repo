@@ -149,7 +149,7 @@ function drawAdultArms(ctx, a) {
   });
 }
 
-function drawAdultBody(ctx, c, a, { headVisible }) {
+function drawAdultBody(ctx, c, a, { headVisible, raised }) {
   const body = ADULT[a.kind] || ADULT.papa;
   const s = c.shirt;
 
@@ -183,15 +183,17 @@ function drawAdultBody(ctx, c, a, { headVisible }) {
   });
   stroke(ctx, body.torso, s.deep, 2);
 
-  both(ctx, () => {
-    fill(ctx, ADULT_SLEEVE_SHADOW, a.skin.shade);
-    fill(ctx, ADULT_SLEEVE, g);
-    clipped(ctx, ADULT_SLEEVE, () => {
-      fill(ctx, ADULT_SLEEVE_FOLD, s.shade);
-      fill(ctx, ADULT_SLEEVE_HEM, s.shade);
+  if (raised) {
+    both(ctx, () => {
+      fill(ctx, ADULT_SLEEVE_SHADOW, a.skin.shade);
+      fill(ctx, ADULT_SLEEVE, g);
+      clipped(ctx, ADULT_SLEEVE, () => {
+        fill(ctx, ADULT_SLEEVE_FOLD, s.shade);
+        fill(ctx, ADULT_SLEEVE_HEM, s.shade);
+      });
+      stroke(ctx, ADULT_ARMHOLE, s.shade, 2.5);
     });
-    stroke(ctx, ADULT_ARMHOLE, s.shade, 2.5);
-  });
+  }
 
   if (!headVisible && HAIRS_BELOW.includes(a.hair)) {
     fill(ctx, HAIR_BELOW, a.hairColor.base);
@@ -220,6 +222,79 @@ function drawFists(ctx, a) {
     fill(ctx, THUMB, a.skin.base);
     stroke(ctx, THUMB, a.skin.shade, 2.5);
   });
+}
+
+// ---------------------------------------------------------------- bras de l'adulte (autres postures)
+
+const ARM_UPPER = 178;
+const ARM_FORE = 168;
+/** Épaules de l'adulte, quand ses bras ne sont pas levés. */
+const SHOULDERS = [[326, 794], [674, 794]];
+/** Main ouverte vue de dos, doigts vers le haut, poignet en (0, 0). */
+const HAND = 'M -17 4 C -20 -14 -21 -34 -17 -50 C -15 -60 -8 -64 -2 -62 C 4 -66 13 -62 16 -52 C 20 -36 20 -14 17 4 Z';
+const HAND_LINES = ['M -8 -28 L -9 -54', 'M 1 -30 L 1 -58', 'M 9 -28 L 10 -52'];
+
+const sub = (p, q) => [p[0] - q[0], p[1] - q[1]];
+const unit = ([x, y]) => {
+  const len = Math.hypot(x, y) || 1;
+  return [x / len, y / len];
+};
+const along = (p, v, d) => [p[0] + v[0] * d, p[1] + v[1] * d];
+
+/** Coude d'un bras qui va de l'épaule `S` à la main `H`, plié vers l'extérieur (`side` : -1 à gauche). */
+function solveElbow(S, H, side) {
+  const [dx, dy] = sub(H, S);
+  const d = Math.min(Math.hypot(dx, dy), ARM_UPPER + ARM_FORE - 1);
+  const base = Math.atan2(dy, dx);
+  const a = Math.acos(Math.min(1, (ARM_UPPER ** 2 + d * d - ARM_FORE ** 2) / (2 * ARM_UPPER * d)));
+  const [p, q] = [base + a, base - a].map((t) => [S[0] + Math.cos(t) * ARM_UPPER, S[1] + Math.sin(t) * ARM_UPPER]);
+  return p[0] * side > q[0] * side ? p : q;
+}
+
+/**
+ * Bras dont la main se pose sur `target` (centre de la main) : le poignet est placé pour que
+ * la main, dans le prolongement de l'avant-bras, couvre ce point.
+ */
+function reach(S, target, side) {
+  let wrist = [target[0] + side * 22, target[1] + 30];
+  let elbow = solveElbow(S, wrist, side);
+  for (let i = 0; i < 2; i += 1) {
+    wrist = along(target, unit(sub(target, elbow)), -30);
+    elbow = solveElbow(S, wrist, side);
+  }
+  return { S, E: elbow, W: wrist };
+}
+
+/** Peau du bras (dessinée avant le dos) : de l'épaule au poignet. */
+function drawArmSkin(ctx, a, { S, E, W }) {
+  const v = unit(sub(E, S));
+  const arm = limb([along(S, v, -16), E, W], [33, 27, 20]);
+  const n = [-v[1], v[0]];
+  const shade = limb([along(along(S, v, -16), n, 9), along(E, n, 9), along(W, n, 7)], [28, 22, 15]);
+  fill(ctx, arm, a.skin.base);
+  clipped(ctx, arm, () => fill(ctx, shade, a.skin.shade));
+  stroke(ctx, arm, a.skin.line, 2);
+}
+
+/** Manche courte sur le haut du bras (dessinée après le dos). */
+function drawSleeve(ctx, c, { S, E }) {
+  const v = unit(sub(E, S));
+  const end = along(S, v, 72);
+  const n = [-v[1] * 40, v[0] * 40];
+  fill(ctx, limb([along(S, v, -26), end], [44, 40]), c.shirt.base);
+  stroke(ctx, `M ${pt([end[0] + n[0], end[1] + n[1]])} L ${pt([end[0] - n[0], end[1] - n[1]])}`, c.shirt.shade, 9);
+}
+
+/** Main ouverte posée (sur le flanc d'un enfant, sur le dos de l'autre parent). */
+function drawHand(ctx, a, { E, W }) {
+  const [dx, dy] = unit(sub(W, E));
+  ctx.save();
+  ctx.translate(W[0], W[1]);
+  ctx.rotate(Math.atan2(dx, -dy));
+  fill(ctx, HAND, a.skin.base);
+  stroke(ctx, HAND, a.skin.line, 2);
+  for (const d of HAND_LINES) stroke(ctx, d, a.skin.shade, 2.5);
+  ctx.restore();
 }
 
 // ---------------------------------------------------------------- enfant (repère de l'enfant)
@@ -450,13 +525,16 @@ function drawChild(ctx, c, k, { hands, free = [false, false] }, jersey) {
 
 /**
  * Familles sur l'affiche : position (x, y) et taille (s) de chaque adulte dans le repère
- * de l'affiche, et nombre d'enfants qu'il porte.
+ * de l'affiche, nombre d'enfants qu'il porte et façon de les tenir :
+ * `mains` (bras levés, il tient les mains de l'enfant), `cotes` (une main sur le flanc
+ * de chaque enfant), `cote-taille` (une main sur le flanc de son enfant, l'autre bras
+ * autour de la taille de l'autre parent, collé à lui).
  */
 export const PLACEMENTS = {
-  solo: [{ x: 500, y: 0, s: 1, kids: 1 }],
-  'deux-enfants': [{ x: 500, y: -40, s: 1, kids: 2 }],
-  'deux-parents': [{ x: 270, y: 136, s: 0.62, kids: 1 }, { x: 730, y: 136, s: 0.62, kids: 1 }],
-  'deux-parents-quatre-enfants': [{ x: 270, y: 96, s: 0.62, kids: 2 }, { x: 730, y: 96, s: 0.62, kids: 2 }],
+  solo: [{ x: 500, y: 0, s: 1, kids: 1, hold: 'mains' }],
+  'deux-enfants': [{ x: 500, y: -40, s: 1, kids: 2, hold: 'cotes' }],
+  'deux-parents': [{ x: 380, y: 92, s: 0.7, kids: 1, hold: 'cote-taille' }, { x: 620, y: 92, s: 0.7, kids: 1, hold: 'cote-taille' }],
+  'deux-parents-quatre-enfants': [{ x: 270, y: 96, s: 0.62, kids: 2, hold: 'cotes' }, { x: 730, y: 96, s: 0.62, kids: 2, hold: 'cotes' }],
 };
 
 /** Places des enfants dans le repère de l'adulte : au centre, ou un sur chaque épaule. */
@@ -466,8 +544,13 @@ const SEATS = {
 };
 /** Les deux enfants se donnent la main au-dessus de la tête de l'adulte. */
 const JOINED_HANDS = [[494, 438], [506, 434]];
+/** Bras levés de joie (repère de l'enfant). */
+const CHEER = [[292, 300], [708, 300]];
+/** Flanc de l'enfant où l'adulte pose la main (repère de l'enfant). */
+const FLANK = [[384, 650], [616, 650]];
 
 const toSeat = (seat, [x, y]) => [(x - seat.x) / seat.s + 500, (y - seat.y) / seat.s];
+const fromSeat = (seat, [x, y]) => [seat.x + (x - 500) * seat.s, seat.y + y * seat.s];
 
 function inFrame(ctx, { x, y, s }, draw) {
   ctx.save();
@@ -478,6 +561,28 @@ function inFrame(ctx, { x, y, s }, draw) {
   ctx.restore();
 }
 
+/** Mains de chaque enfant (repère de l'adulte) et mains visibles. */
+function childHands(hold, count, i) {
+  const held = (k) => [ADULT_HANDS[k][0] + (k === 0 ? 26 : -26), ADULT_HANDS[k][1] - 2];
+  if (hold === 'mains') return { hands: [held(0), held(1)], free: [false, false] };
+  const seat = SEATS[count][i];
+  const cheer = CHEER.map((p) => fromSeat(seat, p));
+  if (count === 1) return { hands: cheer, free: [true, true] };
+  return i === 0
+    ? { hands: [cheer[0], JOINED_HANDS[0]], free: [true, true] }
+    : { hands: [JOINED_HANDS[1], cheer[1]], free: [true, true] };
+}
+
+/** Bras d'un parent autour de la taille de l'autre (repère de ce parent). */
+function waistArm(group, partner, side) {
+  const S = SHOULDERS[side < 0 ? 0 : 1];
+  const E = [S[0] + side * 30, S[1] + (side > 0 ? 300 : 330)];
+  // main posée au milieu du dos de l'autre parent
+  const target = [(partner.x + side * 20 - group.x) / group.s + 500, E[1] + 14];
+  const W = along(target, unit(sub(target, E)), -30);
+  return { S, E, W };
+}
+
 /**
  * Dessine les familles. `c` : couleurs communes (maillots, pantalon, liseré) ;
  * `adults`, `children` : personnes avec leurs couleurs (peau, cheveux) ;
@@ -486,27 +591,47 @@ function inFrame(ctx, { x, y, s }, draw) {
 export function drawScene(ctx, c, layout, adults, children, jersey) {
   const groups = PLACEMENTS[layout] || PLACEMENTS.solo;
   let next = 0;
+  const waist = [];
   groups.forEach((group, g) => {
     const adult = adults[g];
     const kids = children.slice(next, next + group.kids);
     next += group.kids;
     const seats = SEATS[group.kids];
     const headVisible = group.kids === 2;
+    const raised = group.hold === 'mains';
+    // bras qui tiennent un enfant par le côté : [bras, côté]
+    const sides = [];
+    if (group.hold === 'cotes') {
+      seats.forEach((seat, i) => sides.push([reach(SHOULDERS[i], fromSeat(seat, FLANK[i]), i === 0 ? -1 : 1), i]));
+    } else if (group.hold === 'cote-taille') {
+      const outer = g === 0 ? 0 : 1;
+      sides.push([reach(SHOULDERS[outer], fromSeat(seats[0], FLANK[outer]), outer === 0 ? -1 : 1), outer]);
+      const partner = groups[1 - g];
+      waist.push({ group, adult, arm: waistArm(group, partner, g === 0 ? 1 : -1) });
+    }
     inFrame(ctx, group, () => {
-      drawAdultArms(ctx, adult);
-      drawAdultBody(ctx, c, adult, { headVisible });
+      if (raised) drawAdultArms(ctx, adult);
+      for (const [arm] of sides) drawArmSkin(ctx, adult, arm);
+      drawAdultBody(ctx, c, adult, { headVisible, raised });
+      for (const [arm] of sides) drawSleeve(ctx, c, arm);
       const below = !headVisible && HAIRS_BELOW.includes(adult.hair);
       jersey('adult', adult, { shift: below ? 34 : 0 });
       if (headVisible) drawAdultHead(ctx, c, adult);
       kids.forEach((kid, i) => {
         const seat = seats[i];
-        const hands = group.kids === 1
-          ? ADULT_HANDS.map((h) => [h[0] + (h[0] < 500 ? 26 : -26), h[1] - 2])
-          : [i === 0 ? [ADULT_HANDS[0][0] + 26, ADULT_HANDS[0][1] - 2] : JOINED_HANDS[1], i === 0 ? JOINED_HANDS[0] : [ADULT_HANDS[1][0] - 26, ADULT_HANDS[1][1] - 2]];
-        const free = group.kids === 1 ? [false, false] : [i === 1, i === 0];
+        const { hands, free } = childHands(group.hold, group.kids, i);
         inFrame(ctx, seat, () => drawChild(ctx, c, kid, { hands: hands.map((h) => toSeat(seat, h)), free }, jersey));
       });
-      drawFists(ctx, adult);
+      if (raised) drawFists(ctx, adult);
+      for (const [arm] of sides) drawHand(ctx, adult, arm);
     });
   });
+  // les parents se tiennent par la taille : bras croisés dans le dos, main posée sur l'autre
+  for (const { group, adult, arm } of waist.reverse()) {
+    inFrame(ctx, group, () => {
+      drawArmSkin(ctx, adult, arm);
+      drawSleeve(ctx, c, arm);
+      drawHand(ctx, adult, arm);
+    });
+  }
 }
