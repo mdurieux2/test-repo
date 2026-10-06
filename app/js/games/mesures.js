@@ -488,14 +488,14 @@ export const calendrier = {
       const options = shuffle(rng, [answer, ...sample(rng, DAYS.filter((d) => d !== answer), 3)]);
       return {
         key: `calendrier:lire:${month}:${firstWeekday}:${date}`,
-        text: `Quel jour de la semaine est le ${date} ${MONTHS[month]} ?`,
-        instruction: `Regarde le calendrier. Quel jour de la semaine est le ${date} ${MONTHS[month]} ?`,
-        short: { key: 'calendrier:lire', text: `Le ${date} ${MONTHS[month]}, c’est quel jour ?` },
+        text: `Quel jour de la semaine est le ${dateLabel(date, month)} ?`,
+        instruction: `Regarde le calendrier. Quel jour de la semaine est le ${dateLabel(date, month)} ?`,
+        short: { key: 'calendrier:lire', text: `Le ${dateLabel(date, month)}, c’est quel jour ?` },
         stage: { type: 'calendar', month: MONTHS[month], days, firstWeekday, mark: date },
         choices: options.map((d) => ({ value: d, label: d })),
         choiceStyle: 'answers',
         answer,
-        success: { speak: `Le ${date} ${MONTHS[month]}, c’est un ${answer}.` },
+        success: { speak: `Le ${dateLabel(date, month)}, c’est un ${answer}.` },
       };
     }
     if (level === 3) {
@@ -504,14 +504,14 @@ export const calendrier = {
       const answer = date + shift;
       return {
         key: `calendrier:dans:${month}:${date}:${shift}`,
-        text: `Aujourd’hui, c’est le ${date} ${MONTHS[month]}. Dans ${shift} jours, on sera le…`,
-        instruction: `Aujourd’hui, c’est le ${date} ${MONTHS[month]}. Dans ${shift} jours, quelle sera la date ?`,
-        short: { key: 'calendrier:dans', text: `Le ${date}, dans ${shift} jours ?` },
+        text: `Aujourd’hui, c’est le ${dateLabel(date, month)}. Dans ${shift} jours, on sera le…`,
+        instruction: `Aujourd’hui, c’est le ${dateLabel(date, month)}. Dans ${shift} jours, quelle sera la date ?`,
+        short: { key: 'calendrier:dans', text: `Le ${date === 1 ? '1er' : date}, dans ${shift} jours ?` },
         stage: { type: 'calendar', month: MONTHS[month], days, firstWeekday, mark: date },
-        choices: numberChoices(rng, answer, 4, 1, days).map((v) => ({ value: v, label: `${v} ${MONTHS[month]}` })),
+        choices: numberChoices(rng, answer, 4, 1, days).map((v) => ({ value: v, label: dateLabel(v, month) })),
         choiceStyle: 'answers',
         answer,
-        success: { speak: `Dans ${shift} jours, on sera le ${answer} ${MONTHS[month]}.` },
+        success: { speak: `Dans ${shift} jours, on sera le ${dateLabel(answer, month)}.` },
       };
     }
     const fact = pick(rng, FACTS);

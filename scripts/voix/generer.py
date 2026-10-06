@@ -280,8 +280,12 @@ with tempfile.TemporaryDirectory() as tmp:
         else:
             write_wav(wav, best[1], rate)
             encode(wav, OUT / e['file'], e['rate'])
-            spoken += best[2]['duree']
-            report.append({'key': e['key'], 'note': round(best[0], 2), **best[2]})
+            if (OUT / e['file']).stat().st_size < 480:  # moins d'un dixième de seconde : tout a été retiré comme silence
+                (OUT / e['file']).unlink()
+                failures.append({'key': e['key'], 'text': text, 'erreur': 'son vide après retrait des silences'})
+            else:
+                spoken += best[2]['duree']
+                report.append({'key': e['key'], 'note': round(best[0], 2), **best[2]})
         if i % 200 == 0 or i == len(todo):
             spent = time.time() - start
             print(f'  {i}/{len(todo)} sons, {spoken:.0f} s de voix en {spent:.0f} s', flush=True)

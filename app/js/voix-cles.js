@@ -58,9 +58,12 @@ export function phrases(text) {
   return normaliser(text).split(/(?<=[.!?])\s+(?=\S)/u).map((s) => s.trim()).filter(dicible);
 }
 
-/** Propositions d'une phrase, coupées après « , », « ; », « : » et « … » (une pause naturelle). */
+/**
+ * Propositions d'une phrase, coupées après « , », « ; », « : » et « … » (une pause naturelle), et
+ * devant « ou » et « et » (« le poussin, le lionceau » + « ou le chaton ? »).
+ */
 export function propositions(sentence) {
-  return normaliser(sentence).split(/(?<=[,;:…])\s+(?=\S)/u).map((s) => s.trim()).filter(dicible);
+  return normaliser(sentence).split(/(?<=[,;:…])\s+(?=\S)|\s+(?=(?:ou|et|or|and)\s)/u).map((s) => s.trim()).filter(dicible);
 }
 
 /** Mots d'un morceau, sans la ponctuation autour, en minuscules (« L'arbre ! » → « l'arbre »). */

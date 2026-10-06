@@ -19,6 +19,7 @@ import { join } from 'node:path';
 const ROOT = new URL('../../', import.meta.url).pathname;
 const VOIX = join(ROOT, 'app/voix');
 const PACK_SIZE = 4_000_000;
+const MIN_SIZE = 480; // un son plus court (un dixième de seconde) est raté : il sera refait
 const list = JSON.parse(readFileSync(join(ROOT, 'scripts/voix/a-generer.json'), 'utf8'));
 
 // 1. les nouveaux sons (posés par recuperer.sh) ; un son refait remplace l'ancien
@@ -26,7 +27,10 @@ const wanted = new Map(list.map((e) => [e.file, e]));
 const loose = new Map();
 for (const lang of ['fr', 'en']) {
   if (!existsSync(join(VOIX, lang))) continue;
-  for (const name of readdirSync(join(VOIX, lang))) loose.set(`${lang}/${name}`, readFileSync(join(VOIX, lang, name)));
+  for (const name of readdirSync(join(VOIX, lang))) {
+    const bytes = readFileSync(join(VOIX, lang, name));
+    if (bytes.length >= MIN_SIZE) loose.set(`${lang}/${name}`, bytes);
+  }
 }
 
 // 2. les paquets actuels : gardés s'ils servent encore aux trois quarts et qu'aucun de leurs sons n'a été refait
@@ -38,13 +42,13 @@ for (const pack of old.paquets || []) {
   if (!existsSync(path)) continue;
   const bytes = readFileSync(path);
   const useful = pack.sons.filter(([file]) => wanted.has(file)).reduce((sum, [, size]) => sum + size, 0);
-  if (useful >= bytes.length * 0.75 && !pack.sons.some(([file]) => loose.has(file))) {
+  if (useful >= bytes.length * 0.75 && !pack.sons.some(([file, size]) => loose.has(file) || size < MIN_SIZE)) {
     kept.push({ nom: pack.nom, body: bytes, sons: pack.sons });
     continue;
   }
   let offset = 0;
   for (const [file, size] of pack.sons) {
-    if (wanted.has(file)) pool.set(file, bytes.subarray(offset, offset + size));
+    if (wanted.has(file) && size >= MIN_SIZE) pool.set(file, bytes.subarray(offset, offset + size));
     offset += size;
   }
 }
