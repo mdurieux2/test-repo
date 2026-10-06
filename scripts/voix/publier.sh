@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Dépose les MP3 (et les rapports JSON) d'un dossier sous une étiquette git (sans toucher aux branches) :
 # on les récupère ensuite avec « git fetch origin tag <étiquette> ».
-# Usage (dans GitHub Actions, avec GITHUB_TOKEN) : scripts/voix/publier.sh voix-generees voix-sortie
+# Usage (dans GitHub Actions, avec GITHUB_TOKEN) : scripts/voix/publier.sh voix-sons/<branche> voix-sortie
 set -euo pipefail
 tag=$1
 dir=$2

@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Récupère les sons fabriqués sur GitHub (workflow « Voix naturelle », étiquette voix-generees),
-# les ajoute à app/voix/ et met à jour app/voix/manifest.json.
-# Usage : bash scripts/voix/recuperer.sh
+# Récupère les sons fabriqués sur GitHub pour la branche courante (workflow « Voix naturelle »,
+# étiquette voix-sons/<branche>), les ajoute à app/voix/ et met à jour app/voix/manifest.json.
+# Usage : bash scripts/voix/recuperer.sh [branche]
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-git fetch -q -f origin refs/tags/voix-generees:refs/tags/voix-generees
+tag="voix-sons/${1:-$(git rev-parse --abbrev-ref HEAD)}"
+git fetch -q -f origin "refs/tags/$tag:refs/tags/$tag"
 tmp=$(mktemp -d)
-git archive voix-generees | tar -x -C "$tmp"
+git archive "$tag" | tar -x -C "$tmp"
 mkdir -p app/voix
 for lang in fr en; do
   if [ -d "$tmp/$lang" ]; then
