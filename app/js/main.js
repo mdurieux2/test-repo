@@ -3571,7 +3571,8 @@ function voiceDownloadChanged() {
 /** Télécharge les sons qui manquent (3 à la fois) ; le service worker les garde pour le mode avion. */
 async function prefetchVoices() {
   const files = naturalVoiceFiles();
-  if (voiceDownload.running || !files.length || !isNaturalVoiceOn() || !('caches' in window)) return;
+  // navigateur piloté par un test automatique : pas de téléchargement de 40 Mo en arrière-plan
+  if (voiceDownload.running || !files.length || !isNaturalVoiceOn() || !('caches' in window) || navigator.webdriver) return;
   if (!navigator.serviceWorker?.controller || navigator.onLine === false) return;
   voiceDownload.running = true;
   try {

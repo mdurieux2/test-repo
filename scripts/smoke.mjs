@@ -1201,7 +1201,8 @@ async function checkOffline(context, page) {
   // un son de la voix naturelle pas encore téléchargé : la voix de l'appareil le remplace (vérifié plus bas)
   const onFail = (request) => {
     if (/\/voix\/(fr|en)\/[0-9a-f]+\.mp3$/.test(request.url())) clipsMissing++;
-    else if (!request.url().startsWith('blob:')) failed.push(request.url()); // blob: : en mémoire, pas un fichier
+    // blob: : en mémoire, pas un fichier ; ERR_ABORTED : requête coupée par le changement de page
+    else if (!request.url().startsWith('blob:') && request.failure()?.errorText !== 'net::ERR_ABORTED') failed.push(request.url());
   };
   page.on('requestfailed', onFail);
   await context.setOffline(true);
