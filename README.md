@@ -308,6 +308,8 @@ npm run icons:affiche      # régénère les icônes de l'affiche
 | Fichier | Rôle |
 |---|---|
 | `affiche/js/figures.js` | Les personnages vus de dos et les compositions (bras levés, tenus par le côté, par la taille) |
+| `affiche/js/hair.js` | Les coiffures : aplats de 4 tons, mèches effilées, contours en pointes |
+| `affiche/js/draw.js` | Outils de dessin communs (tracés, mèches, membres) |
 | `affiche/js/poster.js` | Fond, bande, titre usé, prénoms et numéros, logo ; même dessin pour l'aperçu et les fichiers |
 | `affiche/js/themes.js` | Couleurs, peaux, cheveux, coiffures, compositions |
 | `affiche/js/formats.js` | Formats (A4 à 40 × 60 cm), qualités (dpi), découpage en bandes |

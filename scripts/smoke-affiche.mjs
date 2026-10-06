@@ -292,6 +292,34 @@ async function encoderAccuracy() {
   console.log(`✓ encodeur JPEG : image relue par le navigateur identique au dessin (écart moyen ${diff.toFixed(2)} sur 765)`);
 }
 
+/** Chaque coiffure (enfant et parent) se dessine, dans chaque couleur de cheveux. */
+async function everyHairstyle() {
+  const { context, page } = await newPage(DEVICES[11]);
+  await page.goto(BASE);
+  const drawn = await page.evaluate(async () => {
+    const { drawPoster } = await import('./js/poster.js');
+    const { ADULT_HAIRS, CHILD_HAIRS, HAIR_COLORS } = await import('./js/themes.js');
+    const c = document.createElement('canvas');
+    c.width = 300; c.height = 424;
+    let count = 0;
+    for (const color of HAIR_COLORS) {
+      for (const hair of CHILD_HAIRS) {
+        drawPoster(c.getContext('2d'), { children: [{ hair: hair.id, hairColor: color.id }] }, 0.3);
+        count += 1;
+      }
+      for (const hair of ADULT_HAIRS) {
+        drawPoster(c.getContext('2d'), { layout: 'deux-enfants', adults: [{ kind: 'maman', hair: hair.id, hairColor: color.id }] }, 0.3);
+        drawPoster(c.getContext('2d'), { adults: [{ kind: 'maman', hair: hair.id, hairColor: color.id }] }, 0.3);
+        count += 2;
+      }
+    }
+    return count;
+  });
+  check(drawn >= 100, `coiffures dessinées : ${drawn}`);
+  await context.close();
+  console.log(`✓ ${drawn} affiches : chaque coiffure dans chaque couleur, pour l’enfant et le parent`);
+}
+
 async function offline() {
   const { context, page } = await newPage(DEVICES[0]);
   await page.goto(BASE);
@@ -309,6 +337,7 @@ async function offline() {
 try {
   for (const device of DEVICES) await layout(device);
   await encoderAccuracy();
+  await everyHairstyle();
   await journey();
   await offline();
   check(errors.length === 0, `erreurs dans la page :\n${errors.join('\n')}`);
