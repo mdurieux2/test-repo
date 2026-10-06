@@ -203,8 +203,12 @@ async function playClips(list, part, id) {
           finished = true;
           clearTimeout(timer);
           audio.onended = audio.onerror = audio.ontimeupdate = null;
-          if (error) reject(error);
-          else resolve();
+          if (error) {
+            // le lecteur lâche ce son (il va être libéré) : il ne tentera pas de le recharger
+            audio.removeAttribute('src');
+            audio.load();
+            reject(error);
+          } else resolve();
         };
         const timer = setTimeout(() => finish(), 20000); // filet de sécurité
         cancelClip = () => {

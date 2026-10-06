@@ -737,7 +737,9 @@ async function scenario() {
 const context = await newContext({ width: 390, height: 844 });
 const page = await context.newPage();
 page.on('pageerror', (e) => errors.push(e.message));
-page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+// un son de la voix naturelle pas encore téléchargé (mode avion) : la voix de l'appareil prend le relais
+const voiceClip = (m) => /\/voix\/(fr|en)\/[0-9a-f]+\.mp3$/.test(m.location()?.url || '');
+page.on('console', (m) => m.type() === 'error' && !voiceClip(m) && errors.push(m.text()));
 const shot = async (name) => SHOTS && page.screenshot({ path: `${SHOTS}/${name}.png` });
 
 // premier lancement : la famille crée les profils (prénom, dessin, classe)
@@ -1201,7 +1203,8 @@ async function checkOffline(context, page) {
   // un son de la voix naturelle pas encore téléchargé : la voix de l'appareil le remplace (vérifié plus bas)
   const onFail = (request) => {
     if (/\/voix\/(fr|en)\/[0-9a-f]+\.mp3$/.test(request.url())) clipsMissing++;
-    else failed.push(request.url());
+    // blob: : en mémoire, pas un fichier ; ERR_ABORTED : requête coupée par le changement de page
+    else if (!request.url().startsWith('blob:') && request.failure()?.errorText !== 'net::ERR_ABORTED') failed.push(request.url());
   };
   page.on('requestfailed', onFail);
   await context.setOffline(true);

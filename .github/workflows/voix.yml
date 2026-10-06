@@ -3,8 +3,10 @@ name: Voix naturelle
 # Fabrique les sons de la voix naturelle (Pocket TTS de Kyutai, voix « Estelle » en français et
 # « Alba » en anglais) listés dans scripts/voix/a-generer.json, en 8 morceaux qui tournent en même
 # temps. Seuls les sons absents de app/voix/ sont fabriqués. Les MP3 et la liste des échecs sont
-# déposés sous l'étiquette git « voix-generees » (aucune branche n'est modifiée) ; on les ajoute
-# ensuite à app/voix/ avec scripts/voix/recuperer.sh.
+# déposés sous l'étiquette git « voix-sons/<branche> » (aucune branche n'est modifiée, et deux
+# branches ne s'écrasent pas) ; on les ajoute ensuite à app/voix/ avec scripts/voix/recuperer.sh.
+# Un envoi de plus de 300 fichiers ne déclenche pas les filtres de chemins : lancer alors le
+# workflow à la main (onglet Actions, ou API « workflow_dispatch » sur la branche).
 on:
   push:
     branches: ['claude/**']
@@ -41,7 +43,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     permissions:
-      contents: write # pour l'étiquette voix-generees
+      contents: write # pour l'étiquette voix-sons/<branche>
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
@@ -49,6 +51,6 @@ jobs:
           pattern: voix-*
           merge-multiple: true
           path: voix-sortie
-      - run: bash scripts/voix/publier.sh voix-generees voix-sortie
+      - run: bash scripts/voix/publier.sh "voix-sons/${{ github.ref_name }}" voix-sortie
         env:
           GITHUB_TOKEN: ${{ github.token }}
