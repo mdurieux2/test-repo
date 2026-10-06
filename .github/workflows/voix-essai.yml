@@ -1,0 +1,28 @@
+name: Voix naturelle (essai)
+
+# Essai temporaire : voix anglaise d'Estelle, variabilité, reconnaissance vocale.
+on:
+  push:
+    branches: ['claude/**']
+    paths: ['scripts/voix/essai.py', '.github/workflows/voix-essai.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write # pour l'étiquette voix-essai/<branche>
+
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: pip install pocket-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
+      - run: python scripts/voix/essai.py voix-essai
+      - if: always()
+        run: bash scripts/voix/publier.sh "voix-essai/${{ github.ref_name }}" voix-essai
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
