@@ -4,13 +4,21 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.8.0',
+  version: '1.8.1',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.8.1',
+    date: '2026-10-06',
+    changes: [
+      'La voix naturelle arrive vraiment : environ 7 400 sons enregistrés avec la voix d’Estelle (consignes, félicitations, histoires, nombres de 0 à 1000, prénoms courants). Ils se téléchargent en arrière-plan, puis marchent sans Internet.',
+      'Les pauses trop longues de la voix sont raccourcies.',
+    ],
+  },
   {
     version: '1.8.0',
     date: '2026-10-04',

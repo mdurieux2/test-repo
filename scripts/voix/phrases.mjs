@@ -87,7 +87,6 @@ if (existsSync(LOG)) {
 
 // phrases fixes toujours enregistrées (dont celle du bouton d'essai des Réglages, vérifiée par le test)
 const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !', 'Bravo !', 'Choisis un jeu !', 'Choisis ton niveau !'];
-for (const text of TOUJOURS) add(text, {}, 1000);
 
 // 3. sélection : les plus entendues d'abord
 const ranked = [...weights].filter(([, e]) => e.type === 'texte').sort((a, b) => b[1].poids - a[1].poids);
@@ -101,6 +100,8 @@ for (let n = 0; n <= 1000; n++) extra.push([cle(String(n)), { lang: 'fr', rate: 
 for (let n = 0; n <= 100; n++) extra.push([cle(String(n), { lang: 'en' }), { lang: 'en', rate: 1, text: String(n), type: 'nombre' }]);
 for (const [key, e] of weights) if (e.type === 'nombre' && !extra.some(([k]) => k === key)) extra.push([key, e]);
 for (const name of PRENOMS) extra.push([cle(name), { lang: 'fr', rate: 1, text: normaliser(name), type: 'prenom' }]);
+
+for (const text of TOUJOURS) extra.unshift([cle(text), { lang: 'fr', rate: 1, text: normaliser(text), type: 'texte' }]);
 
 const seen = new Set();
 const list = [];
