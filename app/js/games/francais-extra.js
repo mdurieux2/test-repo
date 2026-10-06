@@ -170,7 +170,7 @@ function oddRhyme(rng) {
     choices: options.map((w) => ({ value: w, label: pictureOf(w) })),
     choiceStyle: 'pictures',
     answer: odd,
-    success: { speak: `${odd} ne rime pas avec ${rhyming[0]}, ${rhyming[1]} et ${rhyming[2]} !` },
+    success: { speak: [`${odd} ne rime pas avec les autres !`, `${rhyming[0]}, ${rhyming[1]}, ${rhyming[2]} : ça rime !`] },
   };
 }
 

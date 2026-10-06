@@ -12,7 +12,7 @@ mkdir -p app/voix
 for lang in fr en; do
   if [ -d "$tmp/$lang" ]; then
     mkdir -p "app/voix/$lang"
-    cp -n "$tmp/$lang"/*.mp3 "app/voix/$lang/" 2>/dev/null || true
+    cp -f "$tmp/$lang"/*.mp3 "app/voix/$lang/" 2>/dev/null || true
   fi
 done
 node -e "

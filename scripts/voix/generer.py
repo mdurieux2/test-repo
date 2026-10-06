@@ -66,7 +66,9 @@ def tts_text(e):
 
 
 def existing_clip(e):
-    """Les octets du son déjà fabriqué (dans son paquet), ou None."""
+    """Les octets du son déjà fabriqué (posé dans app/voix/fr|en, sinon dans son paquet), ou None."""
+    if (EXISTING / e['file']).exists():
+        return (EXISTING / e['file']).read_bytes()
     if not manifest.exists():
         return None
     for pack in json.loads(manifest.read_text(encoding='utf-8')).get('paquets', []):
@@ -153,10 +155,48 @@ def plain(text, lang):
     """Texte comparable : minuscules, sans accents ni ponctuation, nombres en lettres."""
     symbols = {'+': 'plus', '=': 'égale' if lang == 'fr' else 'equals', '×': 'fois' if lang == 'fr' else 'times'}
     text = re.sub(r'[+=×]', lambda m: f' {symbols[m.group(0)]} ', text.lower())
+    if lang == 'fr':
+        # la reconnaissance vocale écrit les heures et les mesures en chiffres (« 10h15 », « 1 cm »)
+        text = re.sub(r'(\d+)\s*h(?![a-zé])\s*(\d*)', r' \1 heures \2 ', text)
+        text = re.sub(r'(\d+)\s*cm\b', r'\1 centimètres', text)
+        text = re.sub(r'\bet quart\b', 'quinze', re.sub(r'\bet demie?\b', 'trente', text))
     text = re.sub(r'\d+', lambda m: ' ' + say_number(m.group(0), lang) + ' ', text)
     text = unicodedata.normalize('NFD', text)
     text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
     return ' '.join(re.sub(r"[^a-z0-9']+", ' ', text.replace('-', ' ')).split())
+
+
+# noms des lettres épelées (francais-extra.js, LETTER_NAMES), écrits comme par plain()
+LETTERS = {'a': 'a', 'be': 'b', 'ce': 'c', 'de': 'd', 'e': 'e', 'effe': 'f', 'ge': 'g', 'ache': 'h', 'i': 'i', 'ji': 'j',
+           'ka': 'k', 'elle': 'l', 'emme': 'm', 'enne': 'n', 'o': 'o', 'pe': 'p', 'cu': 'q', 'erre': 'r', 'esse': 's',
+           'te': 't', 'u': 'u', 've': 'v', 'double ve': 'w', 'ixe': 'x', 'i grec': 'y', 'zede': 'z'}
+
+
+def spelled(words):
+    """Les lettres d'un texte épelé (« be a elle » → « bal »), ou None."""
+    out, i = [], 0
+    while i < len(words):
+        pair = ' '.join(words[i:i + 2])
+        if pair in LETTERS:
+            out.append(LETTERS[pair])
+            i += 2
+        elif words[i] in LETTERS:
+            out.append(LETTERS[words[i]])
+            i += 1
+        else:
+            return None
+    return ''.join(out)
+
+
+def similarity(text, said, lang):
+    """Ressemblance (de 0 à 1) entre le texte et ce que la reconnaissance vocale a entendu."""
+    expected, got = plain(text, lang), plain(said, lang)
+    letters = spelled(expected.split()) if lang == 'fr' else None
+    if letters and (',' in text or len(expected.split()) > len(letters)):
+        # un texte épelé (« vé, double vé, ixe ») est écrit en lettres : « V, W, X », « QRS »
+        got = spelled(got.split()) or ''.join(LETTERS.get(w, w) for w in got.split())
+        expected = letters
+    return difflib.SequenceMatcher(None, expected, got).ratio()
 
 
 asr = None
@@ -165,13 +205,51 @@ if args.whisper != 'aucun':
     asr = WhisperModel(args.whisper, device='cpu', compute_type='int8')
 
 
-def heard(path, lang):
-    """Ce que la reconnaissance vocale entend (le son est décodé par ffmpeg, en 16 kHz)."""
+def decode16(path):
+    """Le son en 16 kHz (décodé par ffmpeg), pour la reconnaissance vocale."""
     raw = subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', str(path), '-ac', '1', '-ar', '16000', '-f', 'f32le', '-'],
                          capture_output=True, check=True).stdout
-    segments, _ = asr.transcribe(np.frombuffer(raw, dtype=np.float32), language=lang, beam_size=1, vad_filter=False,
-                                 condition_on_previous_text=False)
+    return np.frombuffer(raw, dtype=np.float32)
+
+
+def transcribe(audio, lang):
+    segments, _ = asr.transcribe(audio, language=lang, beam_size=1, vad_filter=False, condition_on_previous_text=False)
     return ' '.join(s.text.strip() for s in segments)
+
+
+# Un mot seul est dit après une courte phrase : sans contexte, la reconnaissance vocale invente
+# souvent (« Merci. », « Sous-titrage… ») et jugeait mal des sons pourtant bons.
+CARRIER = {'fr': 'Voici le mot :', 'en': 'Here is the word:'}
+carriers = {}
+
+
+def heard(path, lang, before=None):
+    """Ce que la reconnaissance vocale entend ; avec `before`, la phrase d'appel est dite d'abord, puis retirée."""
+    if before is None:
+        return transcribe(decode16(path), lang)
+    said = plain(transcribe(np.concatenate([before, np.zeros(4800, dtype=np.float32), decode16(path)]), lang), lang).split()
+    head = plain(CARRIER[lang], lang).split()
+    if difflib.SequenceMatcher(None, ' '.join(said[:len(head)]), ' '.join(head)).ratio() >= 0.6:
+        said = said[len(head):]
+    return ' '.join(said)
+
+
+def carrier(lang, voice, model, state, rate, tmp):
+    """La phrase d'appel, en 16 kHz : le meilleur de quelques essais, vérifié par la reconnaissance vocale."""
+    if (lang, voice) not in carriers:
+        best = None
+        for _ in range(4):
+            path = Path(tmp) / 'appel.wav'
+            write_wav(path, level_up(model.generate_audio(state, CARRIER[lang]).numpy().reshape(-1), rate), rate)
+            audio = decode16(path)
+            score = similarity(CARRIER[lang], transcribe(audio, lang), lang)
+            if best is None or score > best[0]:
+                best = (score, audio)
+            if score >= 0.95:
+                break
+        print(f'phrase d\'appel ({lang}) : ressemblance {best[0]:.2f}', flush=True)
+        carriers[(lang, voice)] = best[1]
+    return carriers[(lang, voice)]
 
 
 def checked_by_asr(text):
@@ -223,6 +301,18 @@ with tempfile.TemporaryDirectory() as tmp:
             states[(lang, voice)] = models[lang].get_state_for_audio_prompt(voice)
         model, rate = models[lang], models[lang].sample_rate
         text = tts_text(e)
+        before = carrier(lang, voice, model, states[(lang, voice)], rate, tmp) if asr is not None and is_short(text) else None
+
+        def diction(path, measures):
+            """Pénalité de diction (0 si la reconnaissance vocale retrouve le texte), notée dans `measures`."""
+            said = heard(path, lang, before)
+            score = similarity(text, said, lang)
+            measures.update(entendu=said, ressemblance=round(score, 2))
+            penalty = max(0.0, 0.9 - score) * 10  # une diction douteuse compte plus qu'une voix un peu haute
+            # sur un mot seul, même avec la phrase d'appel, la reconnaissance vocale se trompe parfois :
+            # elle départage les essais, et n'exclut que ce qu'elle n'a presque pas reconnu
+            return min(penalty, 4.5) if before is not None else penalty
+
         best = None  # (note, audio, mesures) ; audio vaut None pour l'ancien son, gardé tel quel
         problems = []
         old = existing_clip(e) if e['key'] in redo else None
@@ -235,11 +325,7 @@ with tempfile.TemporaryDirectory() as tmp:
             note = (abs(np.log(f0 / PITCH.get(voice, f0))) if f0 else 0.0) / PITCH_TOLERANCE
             measures = {'hauteur': round(f0) if f0 else None, 'duree': round(len(raw) / rate, 2), 'essai': 'ancien son'}
             if checked_by_asr(text):
-                said = heard(trial, lang)
-                similarity = difflib.SequenceMatcher(None, plain(text, lang), plain(said, lang)).ratio()
-                measures.update(entendu=said, ressemblance=round(similarity, 2))
-                penalty = max(0.0, 0.9 - similarity) * 10
-                note += min(penalty, 3.0) if is_short(text) else penalty
+                note += diction(trial, measures)
             best = (note, None, measures)
         for attempt in ([] if best and best[0] <= 1 else attempts(text, args.essais)):
             audio = model.generate_audio(states[(lang, voice)], attempt).numpy().reshape(-1)
@@ -263,12 +349,7 @@ with tempfile.TemporaryDirectory() as tmp:
             if checked_by_asr(text):
                 write_wav(wav, audio, rate)
                 encode(wav, trial, 1)
-                said = heard(trial, lang)
-                similarity = difflib.SequenceMatcher(None, plain(text, lang), plain(said, lang)).ratio()
-                measures.update(entendu=said, ressemblance=round(similarity, 2))
-                penalty = max(0.0, 0.9 - similarity) * 10  # une diction douteuse compte plus qu'une voix un peu haute
-                # sur un ou deux mots, la reconnaissance vocale se trompe souvent : elle départage, sans exclure
-                note += min(penalty, 3.0) if is_short(text) else penalty
+                note += diction(trial, measures)
             if best is None or note < best[0]:
                 best = (note, audio, measures)
             if note <= 1:

@@ -186,6 +186,21 @@ function select(utterances) {
   for (let n = 0; n <= 1000; n++) addUnit(String(n), {}, 'nombre');
   for (let n = 0; n <= 100; n++) addUnit(String(n), { lang: 'en' }, 'nombre');
   for (const name of PRENOMS) addUnit(name, {}, 'prenom');
+  // e. ce qui serait encore dit mot à mot (« Regarde les grands lapins ! », « ou arbre ») est
+  // enregistré d'un tenant, proposition par proposition, les plus entendues d'abord
+  const available = (k) => units.has(k);
+  const repair = new Map();
+  for (const [key, w] of sentenceW) {
+    if (units.has(key)) continue;
+    const { text, opts, names } = info.get(key);
+    for (const p of propositions(text)) {
+      const k = cle(p, opts);
+      if (units.has(k) || has(names, p)) continue;
+      if (qualitePlan(planLecture(p, available, { ...opts, names })) !== 'mot') continue;
+      repair.set(k, { w: (repair.get(k)?.w || 0) + w, text: p, opts });
+    }
+  }
+  pick(repair, spent + BUDGET * 0.05, 'proposition');
   return { units, chosen, spent };
 }
 

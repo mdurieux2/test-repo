@@ -46035,6 +46035,15 @@
   "file": "fr/0023e348cc1492aa.mp3"
  },
  {
+  "key": "fr|1|rat ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "rat ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/c3a852d45aa256c2.mp3"
+ },
+ {
   "key": "fr|1|Quel est le double de 45 ?",
   "lang": "fr",
   "rate": 1,
@@ -47248,6 +47257,15 @@
   "text": "dragon ?",
   "voice": "estelle",
   "file": "fr/009e7765037d7164.mp3"
+ },
+ {
+  "key": "fr|1|cochon ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "cochon ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/3cfab799ef659f87.mp3"
  },
  {
   "key": "fr|1|renard et chat ?",
@@ -48724,6 +48742,15 @@
   "text": "9, 12, 15, 18, 21",
   "voice": "estelle",
   "file": "fr/db425284092364a5.mp3"
+ },
+ {
+  "key": "fr|1|train ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "train ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/56e89cdd08e53b60.mp3"
  },
  {
   "key": "fr|1|La moitié de 6 !",
@@ -51075,6 +51102,15 @@
   "file": "fr/f9ce552328fbb9f1.mp3"
  },
  {
+  "key": "fr|1|renard ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "renard ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/8287a5e451c6962d.mp3"
+ },
+ {
   "key": "fr|1|Le midi, le soir ou le matin ?",
   "lang": "fr",
   "rate": 1,
@@ -52281,6 +52317,24 @@
   "file": "fr/bc99f1eaa0ca68bb.mp3"
  },
  {
+  "key": "fr|1|main ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "main ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/ecd8cfe56b9a441f.mp3"
+ },
+ {
+  "key": "fr|1|loup, hibou, kangourou : ça rime !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "loup, hibou, kangourou : ça rime !",
+  "voice": "estelle",
+  "file": "fr/471c124281013bff.mp3"
+ },
+ {
   "key": "fr|1|5 kiwis",
   "lang": "fr",
   "rate": 1,
@@ -52378,6 +52432,15 @@
   "text": "seven minus one is six!",
   "voice": "estelle",
   "file": "en/daba6c692a9d7890.mp3"
+ },
+ {
+  "key": "fr|1|ordinateur, fleur, tracteur : ça rime !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "ordinateur, fleur, tracteur : ça rime !",
+  "voice": "estelle",
+  "file": "fr/6cebfd768855b205.mp3"
  },
  {
   "key": "fr|1|Une fraise de moins ?",
@@ -53703,6 +53766,15 @@
   "file": "fr/37d232640fb61433.mp3"
  },
  {
+  "key": "fr|1|poisson ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "poisson ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/bc6c660f23017a4e.mp3"
+ },
+ {
   "key": "fr|1|12 euros, tu donnes 20 euros : on te rend ?",
   "lang": "fr",
   "rate": 1,
@@ -54432,6 +54504,24 @@
   "file": "fr/054f5dbf4210851d.mp3"
  },
  {
+  "key": "fr|1|fleur, ordinateur, tracteur : ça rime !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "fleur, ordinateur, tracteur : ça rime !",
+  "voice": "estelle",
+  "file": "fr/600a459477ce34af.mp3"
+ },
+ {
+  "key": "fr|1|tracteur, ordinateur, fleur : ça rime !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "tracteur, ordinateur, fleur : ça rime !",
+  "voice": "estelle",
+  "file": "fr/f8ecf98e015f3425.mp3"
+ },
+ {
   "key": "fr|1|Quel est le double de 24 ?",
   "lang": "fr",
   "rate": 1,
@@ -55089,6 +55179,15 @@
   "file": "fr/973dff6321dc0aa7.mp3"
  },
  {
+  "key": "fr|1|avion ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "avion ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/23b0c94d55ac8e98.mp3"
+ },
+ {
   "key": "fr|1|L'horloge montre 9 heures et quart.",
   "lang": "fr",
   "rate": 1,
@@ -55474,6 +55573,15 @@
   "text": "L'écureuil a des poils : c'est un mammifère.",
   "voice": "estelle",
   "file": "fr/8eb7daf0ae522901.mp3"
+ },
+ {
+  "key": "fr|1|cadeau ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "cadeau ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/755feaaafa67b733.mp3"
  },
  {
   "key": "fr|0.9|té, u, vé, double vé",
@@ -56277,6 +56385,15 @@
   "file": "en/758ad74a78182746.mp3"
  },
  {
+  "key": "fr|1|dé ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "dé ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/4ff82aba6e620367.mp3"
+ },
+ {
   "key": "fr|1|Écris le a en lettres attachées.",
   "lang": "fr",
   "rate": 1,
@@ -56952,6 +57069,15 @@
   "file": "fr/301ab1ed47db35ac.mp3"
  },
  {
+  "key": "fr|1|lit ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "lit ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/45ba0b94152435b8.mp3"
+ },
+ {
   "key": "fr|1|lama, lapin : ça commence pareil !",
   "lang": "fr",
   "rate": 1,
@@ -56968,6 +57094,15 @@
   "text": "Oui, c'est le drapeau de le Mali !",
   "voice": "estelle",
   "file": "fr/24cf0bf9e6cd3b89.mp3"
+ },
+ {
+  "key": "fr|1|kangourou ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "kangourou ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/36d81c8c8efc5a32.mp3"
  },
  {
   "key": "fr|1|Il est 5 heures et quart.",
@@ -58149,6 +58284,15 @@
   "file": "fr/66a769df471ef03e.mp3"
  },
  {
+  "key": "fr|1|canard ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "canard ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/0e7a137943ce0b23.mp3"
+ },
+ {
   "key": "fr|0.9|pé, o, emme, emme, e",
   "lang": "fr",
   "rate": 0.9,
@@ -58561,6 +58705,15 @@
   "text": "Fais des patates : entoure des paquets de 2 coccinelles avec ton doigt.",
   "voice": "estelle",
   "file": "fr/851f0e3ff05debe9.mp3"
+ },
+ {
+  "key": "fr|1|dauphin ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "dauphin ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/cb4bf2f91d100e0c.mp3"
  },
  {
   "key": "fr|1|Sa copine en a 15.",
@@ -59346,6 +59499,24 @@
   "file": "fr/a406d5321486e799.mp3"
  },
  {
+  "key": "fr|1|fleur, tracteur, ordinateur : ça rime !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "fleur, tracteur, ordinateur : ça rime !",
+  "voice": "estelle",
+  "file": "fr/ea9c8b0bfb21b95b.mp3"
+ },
+ {
+  "key": "fr|1|ordinateur, tracteur, fleur : ça rime !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "ordinateur, tracteur, fleur : ça rime !",
+  "voice": "estelle",
+  "file": "fr/e5b01698d6fc2455.mp3"
+ },
+ {
   "key": "en|0.9|five plus one is six!",
   "lang": "en",
   "rate": 0.9,
@@ -60082,6 +60253,33 @@
   "text": "L'ours blanc vit sur la banquise.",
   "voice": "estelle",
   "file": "fr/299e8f7900514d02.mp3"
+ },
+ {
+  "key": "fr|1|chat ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "chat ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/f999e33412a2cb9c.mp3"
+ },
+ {
+  "key": "fr|1|kangourou, loup, hibou : ça rime !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "kangourou, loup, hibou : ça rime !",
+  "voice": "estelle",
+  "file": "fr/9c9132072d3d7fe2.mp3"
+ },
+ {
+  "key": "fr|1|hibou, loup, kangourou : ça rime !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "hibou, loup, kangourou : ça rime !",
+  "voice": "estelle",
+  "file": "fr/fd8a2ac968db092f.mp3"
  },
  {
   "key": "fr|1|Regarde les jolis chats !",
@@ -61081,6 +61279,24 @@
   "text": "Dans la savane, dans la forêt ou sur la banquise ?",
   "voice": "estelle",
   "file": "fr/af0a8ee74e383e2e.mp3"
+ },
+ {
+  "key": "fr|1|dragon ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "dragon ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/dca31f1fb35e6c15.mp3"
+ },
+ {
+  "key": "fr|1|souris ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "souris ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/a55930ce5d5d91cc.mp3"
  },
  {
   "key": "fr|0.9|esse, a, pé, i, enne",
@@ -62847,6 +63063,15 @@
   "file": "fr/f6d14bc85e603c5a.mp3"
  },
  {
+  "key": "fr|1|ordinateur ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "ordinateur ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/95d72779d2290560.mp3"
+ },
+ {
   "key": "fr|1|4 carottes",
   "lang": "fr",
   "rate": 1,
@@ -63061,6 +63286,15 @@
   "text": "Voici le drapeau de le Luxembourg, mais une bande est effacée.",
   "voice": "estelle",
   "file": "fr/e982b452c29e60a3.mp3"
+ },
+ {
+  "key": "fr|1|nez ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "nez ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/5250f47076e7ea30.mp3"
  },
  {
   "key": "fr|1|dans la forêt, dans la mer ou sur la banquise",
@@ -63648,6 +63882,24 @@
   "file": "fr/5a3db024dc7f69d1.mp3"
  },
  {
+  "key": "fr|1|café ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "café ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/943a102686cdb019.mp3"
+ },
+ {
+  "key": "fr|1|loup ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "loup ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/a5c6a3fa1ede47d6.mp3"
+ },
+ {
   "key": "fr|1|4 kiwis",
   "lang": "fr",
   "rate": 1,
@@ -64062,6 +64314,24 @@
   "file": "fr/210665327df3b09a.mp3"
  },
  {
+  "key": "fr|1|sapin ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "sapin ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/0c49bed3b6cfc0a1.mp3"
+ },
+ {
+  "key": "fr|1|hibou ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "hibou ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/3bed31ea09e068f0.mp3"
+ },
+ {
   "key": "fr|1|Écris le enne en lettres attachées.",
   "lang": "fr",
   "rate": 1,
@@ -64431,6 +64701,24 @@
   "file": "fr/f815d7bc115b0268.mp3"
  },
  {
+  "key": "fr|1|bateau ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "bateau ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/bf4a1b9385ddad12.mp3"
+ },
+ {
+  "key": "fr|1|oiseau ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "oiseau ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/5ba7733327745740.mp3"
+ },
+ {
   "key": "fr|1|5 poires",
   "lang": "fr",
   "rate": 1,
@@ -64753,6 +65041,15 @@
   "text": "2 mètres, 20 centimètres ou 2 centimètres",
   "voice": "estelle",
   "file": "fr/c5cb6f2449454627.mp3"
+ },
+ {
+  "key": "fr|1|chapeau ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "chapeau ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/34c82e54c30eb95e.mp3"
  },
  {
   "key": "fr|1|5 plus 4, égale 9",
@@ -65304,393 +65601,6 @@
   "file": "fr/c51ffa26500b7212.mp3"
  },
  {
-  "key": "fr|1|Quelle est la moitié de 62 ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Quelle est la moitié de 62 ?",
-  "voice": "estelle",
-  "file": "fr/82a7424c409ab877.mp3"
- },
- {
-  "key": "fr|1|Il est 4 heures moins le quart.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Il est 4 heures moins le quart.",
-  "voice": "estelle",
-  "file": "fr/fd70d3fd34f8201e.mp3"
- },
- {
-  "key": "fr|1|Dans 3 jours, ce sera lundi.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Dans 3 jours, ce sera lundi.",
-  "voice": "estelle",
-  "file": "fr/d6e32bd5affd8ca3.mp3"
- },
- {
-  "key": "fr|1|Après-demain, ce sera lundi.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Après-demain, ce sera lundi.",
-  "voice": "estelle",
-  "file": "fr/f4e93b8897c06f91.mp3"
- },
- {
-  "key": "fr|1|le midi, le matin ou la nuit",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "le midi, le matin ou la nuit",
-  "voice": "estelle",
-  "file": "fr/05912d871a75eeb2.mp3"
- },
- {
-  "key": "fr|1|Avant juin, c'est mai.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Avant juin, c'est mai.",
-  "voice": "estelle",
-  "file": "fr/79a77c5a2b516408.mp3"
- },
- {
-  "key": "fr|1|Il y a 29 euros.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Il y a 29 euros.",
-  "voice": "estelle",
-  "file": "fr/ebf109d5cc9eb227.mp3"
- },
- {
-  "key": "fr|1|Il y a 33 euros.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Il y a 33 euros.",
-  "voice": "estelle",
-  "file": "fr/2f2c93c9e4826475.mp3"
- },
- {
-  "key": "fr|1|Le jeu coûte 14 euros.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Le jeu coûte 14 euros.",
-  "voice": "estelle",
-  "file": "fr/5a639c919a31a749.mp3"
- },
- {
-  "key": "fr|1|Le jeu coûte 10 euros.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Le jeu coûte 10 euros.",
-  "voice": "estelle",
-  "file": "fr/8dcab97c8e203f35.mp3"
- },
- {
-  "key": "en|0.9|Five minus four?",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "Five minus four?",
-  "voice": "estelle",
-  "file": "en/ea02dd56ad11012d.mp3"
- },
- {
-  "key": "en|1|seven plus one equals eight.",
-  "lang": "en",
-  "rate": 1,
-  "type": "phrase",
-  "text": "seven plus one equals eight.",
-  "voice": "estelle",
-  "file": "en/b2a54f9ba6a7fb17.mp3"
- },
- {
-  "key": "en|0.9|Seven minus six?",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "Seven minus six?",
-  "voice": "estelle",
-  "file": "en/12e78d5b99a80ea3.mp3"
- },
- {
-  "key": "en|0.9|Eight minus two?",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "Eight minus two?",
-  "voice": "estelle",
-  "file": "en/50eed80d1dc3e386.mp3"
- },
- {
-  "key": "en|0.9|Ten minus seven?",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "Ten minus seven?",
-  "voice": "estelle",
-  "file": "en/7b860490ac31e9fb.mp3"
- },
- {
-  "key": "en|0.9|Nine minus five?",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "Nine minus five?",
-  "voice": "estelle",
-  "file": "en/1e6d68b2db19fecf.mp3"
- },
- {
-  "key": "fr|1|sapin, chapeau, ou rat",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "sapin, chapeau, ou rat",
-  "voice": "estelle",
-  "file": "fr/bc5f548675c174d9.mp3"
- },
- {
-  "key": "fr|1|glaçon, hérisson : ça finit pareil !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "glaçon, hérisson : ça finit pareil !",
-  "voice": "estelle",
-  "file": "fr/2faae4dcedc82512.mp3"
- },
- {
-  "key": "fr|1|crayon, loup, ou panda",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "crayon, loup, ou panda",
-  "voice": "estelle",
-  "file": "fr/499544fc68deb66c.mp3"
- },
- {
-  "key": "fr|1|tôt, tard : ce sont des contraires !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "tôt, tard : ce sont des contraires !",
-  "voice": "estelle",
-  "file": "fr/bcbf4d27a6f30004.mp3"
- },
- {
-  "key": "fr|1|toujours, jamais : ce sont des contraires !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "toujours, jamais : ce sont des contraires !",
-  "voice": "estelle",
-  "file": "fr/440720a205983091.mp3"
- },
- {
-  "key": "fr|1|1 ballon",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "1 ballon",
-  "voice": "estelle",
-  "file": "fr/97afc44796024e3c.mp3"
- },
- {
-  "key": "fr|1|6, et encore une : 7 !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "6, et encore une : 7 !",
-  "voice": "estelle",
-  "file": "fr/8b5def34446eed89.mp3"
- },
- {
-  "key": "fr|1|8, et encore une : 9 !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "8, et encore une : 9 !",
-  "voice": "estelle",
-  "file": "fr/254a6c3a31b5a350.mp3"
- },
- {
-  "key": "fr|1|Dans chaque boîte, il y a 2 crayons.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Dans chaque boîte, il y a 2 crayons.",
-  "voice": "estelle",
-  "file": "fr/d6bb50137432d712.mp3"
- },
- {
-  "key": "fr|1|Dans chaque boîte, il y a 5 crayons.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Dans chaque boîte, il y a 5 crayons.",
-  "voice": "estelle",
-  "file": "fr/fe1c2ed951082390.mp3"
- },
- {
-  "key": "fr|1|Déplace les aiguilles pour mettre l'horloge à 9 heures et quart.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Déplace les aiguilles pour mettre l'horloge à 9 heures et quart.",
-  "voice": "estelle",
-  "file": "fr/2da953bdbdebc76c.mp3"
- },
- {
-  "key": "fr|1|2 mètres, 20 centimètres ou 2 centimètres ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "2 mètres, 20 centimètres ou 2 centimètres ?",
-  "voice": "estelle",
-  "file": "fr/908d4ab43584bb68.mp3"
- },
- {
-  "key": "fr|1|C'est le drapeau de le Mali !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "C'est le drapeau de le Mali !",
-  "voice": "estelle",
-  "file": "fr/1780905b01a63c09.mp3"
- },
- {
-  "key": "fr|1|Oui, c'est le drapeau de la Suisse !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Oui, c'est le drapeau de la Suisse !",
-  "voice": "estelle",
-  "file": "fr/2f68d9e91e21099d.mp3"
- },
- {
-  "key": "fr|1|Voici le drapeau de le Japon.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Voici le drapeau de le Japon.",
-  "voice": "estelle",
-  "file": "fr/d0c56ce87413c47c.mp3"
- },
- {
-  "key": "fr|1|Voici le drapeau de l'Italie.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Voici le drapeau de l'Italie.",
-  "voice": "estelle",
-  "file": "fr/e315a231a96b85cb.mp3"
- },
- {
-  "key": "en|0.9|one plus six is seven!",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "one plus six is seven!",
-  "voice": "estelle",
-  "file": "en/dde1260dd44f3558.mp3"
- },
- {
-  "key": "en|0.9|two plus eight is ten!",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "two plus eight is ten!",
-  "voice": "estelle",
-  "file": "en/4e7fa057164b9ff8.mp3"
- },
- {
-  "key": "en|0.9|ten minus nine is one!",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "ten minus nine is one!",
-  "voice": "estelle",
-  "file": "en/395100a0c06b599e.mp3"
- },
- {
-  "key": "en|0.9|The cloud is not a part of the body.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "The cloud is not a part of the body.",
-  "voice": "estelle",
-  "file": "en/d9e3cb9126c4b14b.mp3"
- },
- {
-  "key": "en|0.9|The horse is not a part of the body.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "The horse is not a part of the body.",
-  "voice": "estelle",
-  "file": "en/6f8de01cb5ac6969.mp3"
- },
- {
-  "key": "en|0.9|The paint is not food.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "The paint is not food.",
-  "voice": "estelle",
-  "file": "en/c7250f5e47df0d9f.mp3"
- },
- {
-  "key": "en|0.9|The apple is not a part of the body.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "The apple is not a part of the body.",
-  "voice": "estelle",
-  "file": "en/94d3613ed78e9811.mp3"
- },
- {
-  "key": "en|0.9|The shoes is not a part of the body.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "The shoes is not a part of the body.",
-  "voice": "estelle",
-  "file": "en/fb10adcaa39ad539.mp3"
- },
- {
-  "key": "en|0.9|The bread is not a part of the body.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "The bread is not a part of the body.",
-  "voice": "estelle",
-  "file": "en/0e6fc219b110a0d0.mp3"
- },
- {
-  "key": "fr|1|Combien de fois 4 font 16 ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Combien de fois 4 font 16 ?",
-  "voice": "estelle",
-  "file": "fr/e2283edc59536175.mp3"
- },
- {
-  "key": "fr|1|4 moins 2, égale 2",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "4 moins 2, égale 2",
-  "voice": "estelle",
-  "file": "fr/f70abdd15b86513c.mp3"
- },
- {
   "key": "fr|1|À toi,",
   "lang": "fr",
   "rate": 1,
@@ -65709,22 +65619,13 @@
   "file": "fr/4bd71f2b2b6b4897.mp3"
  },
  {
-  "key": "fr|1|5.",
+  "key": "fr|1|ça rime !",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "5.",
+  "text": "ça rime !",
   "voice": "estelle",
-  "file": "fr/3c5f94239bbee0f6.mp3"
- },
- {
-  "key": "fr|1|lapin,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "lapin,",
-  "voice": "estelle",
-  "file": "fr/8c21db7907d3ec3a.mp3"
+  "file": "fr/141718411c8aaf9f.mp3"
  },
  {
   "key": "fr|1|café,",
@@ -65736,13 +65637,22 @@
   "file": "fr/83351e65b652b90a.mp3"
  },
  {
-  "key": "fr|1|hibou,",
+  "key": "fr|1|lapin,",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "hibou,",
+  "text": "lapin,",
   "voice": "estelle",
-  "file": "fr/779ab3107cd9f72f.mp3"
+  "file": "fr/8c21db7907d3ec3a.mp3"
+ },
+ {
+  "key": "fr|1|5.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "5.",
+  "voice": "estelle",
+  "file": "fr/3c5f94239bbee0f6.mp3"
  },
  {
   "key": "fr|1|dé,",
@@ -65754,6 +65664,15 @@
   "file": "fr/de0f667106d440ba.mp3"
  },
  {
+  "key": "fr|1|hibou,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "hibou,",
+  "voice": "estelle",
+  "file": "fr/779ab3107cd9f72f.mp3"
+ },
+ {
   "key": "fr|1|Aujourd'hui,",
   "lang": "fr",
   "rate": 1,
@@ -65763,13 +65682,13 @@
   "file": "fr/a642d96d0a22fabc.mp3"
  },
  {
-  "key": "fr|1|et 1 :",
+  "key": "fr|1|gâteau,",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "et 1 :",
+  "text": "gâteau,",
   "voice": "estelle",
-  "file": "fr/168b048e3e0431c6.mp3"
+  "file": "fr/c6f7f6aa7a26cc56.mp3"
  },
  {
   "key": "fr|1|fleur,",
@@ -65790,15 +65709,6 @@
   "file": "fr/0af65fcd0c5a38c6.mp3"
  },
  {
-  "key": "fr|1|gâteau,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "gâteau,",
-  "voice": "estelle",
-  "file": "fr/c6f7f6aa7a26cc56.mp3"
- },
- {
   "key": "fr|1|moto,",
   "lang": "fr",
   "rate": 1,
@@ -65806,6 +65716,15 @@
   "text": "moto,",
   "voice": "estelle",
   "file": "fr/b35dd419b026bf40.mp3"
+ },
+ {
+  "key": "fr|1|et 1 :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et 1 :",
+  "voice": "estelle",
+  "file": "fr/168b048e3e0431c6.mp3"
  },
  {
   "key": "fr|1|loup,",
@@ -65817,13 +65736,13 @@
   "file": "fr/3c479464bcb169d9.mp3"
  },
  {
-  "key": "fr|1|renard,",
+  "key": "fr|1|sapin,",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "renard,",
+  "text": "sapin,",
   "voice": "estelle",
-  "file": "fr/ad1d050f987e5413.mp3"
+  "file": "fr/8de6239fb7ff43c6.mp3"
  },
  {
   "key": "fr|1|bateau,",
@@ -65833,6 +65752,24 @@
   "text": "bateau,",
   "voice": "estelle",
   "file": "fr/db58ff0ba31ca61e.mp3"
+ },
+ {
+  "key": "fr|1|renard,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "renard,",
+  "voice": "estelle",
+  "file": "fr/ad1d050f987e5413.mp3"
+ },
+ {
+  "key": "fr|1|chapeau,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "chapeau,",
+  "voice": "estelle",
+  "file": "fr/9c97ef2ee423584d.mp3"
  },
  {
   "key": "fr|1|rat,",
@@ -65853,42 +65790,6 @@
   "file": "fr/fd2426de3e98ccb0.mp3"
  },
  {
-  "key": "fr|1|sapin,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "sapin,",
-  "voice": "estelle",
-  "file": "fr/8de6239fb7ff43c6.mp3"
- },
- {
-  "key": "fr|1|ça rime !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ça rime !",
-  "voice": "estelle",
-  "file": "fr/141718411c8aaf9f.mp3"
- },
- {
-  "key": "fr|1|chapeau,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "chapeau,",
-  "voice": "estelle",
-  "file": "fr/9c97ef2ee423584d.mp3"
- },
- {
-  "key": "fr|1|souris,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "souris,",
-  "voice": "estelle",
-  "file": "fr/7bc767097cdff3b0.mp3"
- },
- {
   "key": "fr|1|bébé,",
   "lang": "fr",
   "rate": 1,
@@ -65896,42 +65797,6 @@
   "text": "bébé,",
   "voice": "estelle",
   "file": "fr/b638bd97fec55c64.mp3"
- },
- {
-  "key": "fr|1|et 2 :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et 2 :",
-  "voice": "estelle",
-  "file": "fr/7a754a2cf33d1028.mp3"
- },
- {
-  "key": "fr|1|ordinateur,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ordinateur,",
-  "voice": "estelle",
-  "file": "fr/151b2c653d093e86.mp3"
- },
- {
-  "key": "fr|1|tracteur,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "tracteur,",
-  "voice": "estelle",
-  "file": "fr/801dfb8145ff0e86.mp3"
- },
- {
-  "key": "fr|1|cochon,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "cochon,",
-  "voice": "estelle",
-  "file": "fr/a0a8bce6c597aabd.mp3"
  },
  {
   "key": "fr|1|train,",
@@ -65943,22 +65808,22 @@
   "file": "fr/67869f042d51b0e3.mp3"
  },
  {
-  "key": "fr|1|lit,",
+  "key": "fr|1|cochon,",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "lit,",
+  "text": "cochon,",
   "voice": "estelle",
-  "file": "fr/3a0f724c0dd58e2e.mp3"
+  "file": "fr/a0a8bce6c597aabd.mp3"
  },
  {
-  "key": "fr|1|vélo,",
+  "key": "fr|1|souris,",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "vélo,",
+  "text": "souris,",
   "voice": "estelle",
-  "file": "fr/f69496a4bf8f3816.mp3"
+  "file": "fr/7bc767097cdff3b0.mp3"
  },
  {
   "key": "fr|1|nez,",
@@ -65970,6 +65835,51 @@
   "file": "fr/230e9f104016c245.mp3"
  },
  {
+  "key": "fr|1|tracteur,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "tracteur,",
+  "voice": "estelle",
+  "file": "fr/801dfb8145ff0e86.mp3"
+ },
+ {
+  "key": "fr|1|et 2 :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et 2 :",
+  "voice": "estelle",
+  "file": "fr/7a754a2cf33d1028.mp3"
+ },
+ {
+  "key": "fr|1|vélo,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "vélo,",
+  "voice": "estelle",
+  "file": "fr/f69496a4bf8f3816.mp3"
+ },
+ {
+  "key": "fr|1|ordinateur,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ordinateur,",
+  "voice": "estelle",
+  "file": "fr/151b2c653d093e86.mp3"
+ },
+ {
+  "key": "fr|1|lit,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "lit,",
+  "voice": "estelle",
+  "file": "fr/3a0f724c0dd58e2e.mp3"
+ },
+ {
   "key": "fr|1|cadeau,",
   "lang": "fr",
   "rate": 1,
@@ -65977,15 +65887,6 @@
   "text": "cadeau,",
   "voice": "estelle",
   "file": "fr/3b3ce53282a4cf8b.mp3"
- },
- {
-  "key": "fr|1|et quart.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et quart.",
-  "voice": "estelle",
-  "file": "fr/099d5c44b3fd430f.mp3"
  },
  {
   "key": "fr|1|crayon,",
@@ -65997,6 +65898,15 @@
   "file": "fr/5c0aafa9e0da9088.mp3"
  },
  {
+  "key": "fr|1|et quart.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et quart.",
+  "voice": "estelle",
+  "file": "fr/099d5c44b3fd430f.mp3"
+ },
+ {
   "key": "fr|1|poisson,",
   "lang": "fr",
   "rate": 1,
@@ -66004,15 +65914,6 @@
   "text": "poisson,",
   "voice": "estelle",
   "file": "fr/6fbb7be9171775b0.mp3"
- },
- {
-  "key": "fr|1|chat,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "chat,",
-  "voice": "estelle",
-  "file": "fr/602cff1e0a6c279d.mp3"
  },
  {
   "key": "fr|1|melon,",
@@ -66024,24 +65925,6 @@
   "file": "fr/97a16c9ddb5be048.mp3"
  },
  {
-  "key": "fr|1|raisin,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "raisin,",
-  "voice": "estelle",
-  "file": "fr/47bdbbd4f652edff.mp3"
- },
- {
-  "key": "fr|1|5 bonnes réponses,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "5 bonnes réponses,",
-  "voice": "estelle",
-  "file": "fr/47fcf1f11c045854.mp3"
- },
- {
   "key": "fr|1|fusée,",
   "lang": "fr",
   "rate": 1,
@@ -66051,13 +65934,31 @@
   "file": "fr/a3163ac9cb7d96de.mp3"
  },
  {
-  "key": "fr|1|c'est le…",
+  "key": "fr|1|raisin,",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "c'est le…",
+  "text": "raisin,",
   "voice": "estelle",
-  "file": "fr/4d757ca57fdfe310.mp3"
+  "file": "fr/47bdbbd4f652edff.mp3"
+ },
+ {
+  "key": "fr|1|chat,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "chat,",
+  "voice": "estelle",
+  "file": "fr/602cff1e0a6c279d.mp3"
+ },
+ {
+  "key": "fr|1|5 bonnes réponses,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "5 bonnes réponses,",
+  "voice": "estelle",
+  "file": "fr/47fcf1f11c045854.mp3"
  },
  {
   "key": "fr|1|kangourou,",
@@ -66087,13 +65988,13 @@
   "file": "fr/c5bf8b22378ce4ea.mp3"
  },
  {
-  "key": "fr|1|ou lapin",
+  "key": "fr|1|c'est le…",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "ou lapin",
+  "text": "c'est le…",
   "voice": "estelle",
-  "file": "fr/10971e56fcb4efad.mp3"
+  "file": "fr/4d757ca57fdfe310.mp3"
  },
  {
   "key": "fr|1|requin,",
@@ -66105,22 +66006,13 @@
   "file": "fr/78f832c5907bf267.mp3"
  },
  {
-  "key": "fr|1|C'est l'heure de la pause,",
+  "key": "fr|1|robot,",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "C'est l'heure de la pause,",
+  "text": "robot,",
   "voice": "estelle",
-  "file": "fr/104ff44a5418cdc0.mp3"
- },
- {
-  "key": "fr|1|et 3 :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et 3 :",
-  "voice": "estelle",
-  "file": "fr/09b07b2d5addb41b.mp3"
+  "file": "fr/28bd346e1bdbf873.mp3"
  },
  {
   "key": "fr|1|bonbon,",
@@ -66132,15 +66024,6 @@
   "file": "fr/52d2fce960f67f1b.mp3"
  },
  {
-  "key": "fr|1|robot,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "robot,",
-  "voice": "estelle",
-  "file": "fr/28bd346e1bdbf873.mp3"
- },
- {
   "key": "fr|1|mouton,",
   "lang": "fr",
   "rate": 1,
@@ -66150,22 +66033,31 @@
   "file": "fr/0c1af0d312cd0743.mp3"
  },
  {
-  "key": "fr|1|et demie.",
+  "key": "fr|1|ou lapin",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "et demie.",
+  "text": "ou lapin",
   "voice": "estelle",
-  "file": "fr/c4e2195792dae698.mp3"
+  "file": "fr/10971e56fcb4efad.mp3"
  },
  {
-  "key": "fr|1|dragon,",
+  "key": "fr|1|C'est l'heure de la pause,",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "dragon,",
+  "text": "C'est l'heure de la pause,",
   "voice": "estelle",
-  "file": "fr/4927aab0253c79c4.mp3"
+  "file": "fr/104ff44a5418cdc0.mp3"
+ },
+ {
+  "key": "fr|1|main,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "main,",
+  "voice": "estelle",
+  "file": "fr/8c0bb7e2678d51f3.mp3"
  },
  {
   "key": "fr|1|citron,",
@@ -66177,13 +66069,31 @@
   "file": "fr/256cfd965ae46863.mp3"
  },
  {
-  "key": "fr|1|main,",
+  "key": "fr|1|et 3 :",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "main,",
+  "text": "et 3 :",
   "voice": "estelle",
-  "file": "fr/8c0bb7e2678d51f3.mp3"
+  "file": "fr/09b07b2d5addb41b.mp3"
+ },
+ {
+  "key": "fr|1|dragon,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "dragon,",
+  "voice": "estelle",
+  "file": "fr/4927aab0253c79c4.mp3"
+ },
+ {
+  "key": "fr|1|et demie.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et demie.",
+  "voice": "estelle",
+  "file": "fr/c4e2195792dae698.mp3"
  },
  {
   "key": "fr|1|6,",
@@ -66211,6 +66121,24 @@
   "text": "My …",
   "voice": "estelle",
   "file": "en/fa944a2f8e4f8c97.mp3"
+ },
+ {
+  "key": "fr|1|oiseau,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "oiseau,",
+  "voice": "estelle",
+  "file": "fr/2ce04f82b88a6d7b.mp3"
+ },
+ {
+  "key": "fr|1|ou rat",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou rat",
+  "voice": "estelle",
+  "file": "fr/fa83f19786f7efa8.mp3"
  },
  {
   "key": "fr|1|ou canard",
@@ -66265,24 +66193,6 @@
   "text": "banane,",
   "voice": "estelle",
   "file": "fr/8e4346497a2b9d12.mp3"
- },
- {
-  "key": "fr|1|ou rat",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ou rat",
-  "voice": "estelle",
-  "file": "fr/fa83f19786f7efa8.mp3"
- },
- {
-  "key": "fr|1|oiseau,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "oiseau,",
-  "voice": "estelle",
-  "file": "fr/2ce04f82b88a6d7b.mp3"
  },
  {
   "key": "fr|1|5,",
@@ -66366,6 +66276,15 @@
   "file": "fr/b6a0feefb06fe521.mp3"
  },
  {
+  "key": "fr|1|8,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "8,",
+  "voice": "estelle",
+  "file": "fr/dc8788ac89869f6e.mp3"
+ },
+ {
   "key": "fr|1|un paquet de 10",
   "lang": "fr",
   "rate": 1,
@@ -66391,15 +66310,6 @@
   "text": "pantalon,",
   "voice": "estelle",
   "file": "fr/a3485adbe7c15d13.mp3"
- },
- {
-  "key": "fr|1|8,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "8,",
-  "voice": "estelle",
-  "file": "fr/dc8788ac89869f6e.mp3"
  },
  {
   "key": "fr|1|ou fleur",
@@ -66978,6 +66888,15 @@
   "file": "fr/8a88c1ddaee0334d.mp3"
  },
  {
+  "key": "fr|1|Dans 3 jours,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Dans 3 jours,",
+  "voice": "estelle",
+  "file": "fr/e992a0e13e78b49f.mp3"
+ },
+ {
   "key": "fr|1|Dans une heure,",
   "lang": "fr",
   "rate": 1,
@@ -67066,15 +66985,6 @@
   "text": "ou robot",
   "voice": "estelle",
   "file": "fr/f3da23ee76ae3d10.mp3"
- },
- {
-  "key": "fr|1|Dans 3 jours,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Dans 3 jours,",
-  "voice": "estelle",
-  "file": "fr/e992a0e13e78b49f.mp3"
  },
  {
   "key": "fr|1|étoile,",
@@ -67210,6 +67120,15 @@
   "text": "ou banane",
   "voice": "estelle",
   "file": "fr/111416e02784c1ff.mp3"
+ },
+ {
+  "key": "fr|1|ou panda",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou panda",
+  "voice": "estelle",
+  "file": "fr/bf05c5f287c0ee36.mp3"
  },
  {
   "key": "fr|1|dans 4 jours ?",
@@ -67365,15 +67284,6 @@
   "file": "fr/41fb2fcdbeac2f2e.mp3"
  },
  {
-  "key": "fr|1|ou panda",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ou panda",
-  "voice": "estelle",
-  "file": "fr/bf05c5f287c0ee36.mp3"
- },
- {
   "key": "fr|1|abeille,",
   "lang": "fr",
   "rate": 1,
@@ -67435,6 +67345,15 @@
   "text": "et 9 :",
   "voice": "estelle",
   "file": "fr/31b088016993eccc.mp3"
+ },
+ {
+  "key": "fr|1|glaçon,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "glaçon,",
+  "voice": "estelle",
+  "file": "fr/50adb76e321f7019.mp3"
  },
  {
   "key": "en|0.8|paint,",
@@ -67714,15 +67633,6 @@
   "text": "17,",
   "voice": "estelle",
   "file": "fr/093f1804c581a2b1.mp3"
- },
- {
-  "key": "fr|1|glaçon,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "glaçon,",
-  "voice": "estelle",
-  "file": "fr/50adb76e321f7019.mp3"
  },
  {
   "key": "fr|1|9 dizaines",
@@ -68301,6 +68211,15 @@
   "file": "fr/a488b3906d1d4cff.mp3"
  },
  {
+  "key": "fr|1|Oui,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Oui,",
+  "voice": "estelle",
+  "file": "fr/4df1988f8e0132b1.mp3"
+ },
+ {
   "key": "fr|1|80,",
   "lang": "fr",
   "rate": 1,
@@ -68760,6 +68679,15 @@
   "file": "fr/225643b1133b4fb4.mp3"
  },
  {
+  "key": "fr|1|ça finit pareil !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ça finit pareil !",
+  "voice": "estelle",
+  "file": "fr/d851c515d26a64f9.mp3"
+ },
+ {
   "key": "fr|1|et ordinateur ?",
   "lang": "fr",
   "rate": 1,
@@ -68848,6 +68776,15 @@
   "text": "52,",
   "voice": "estelle",
   "file": "fr/a7c2703c95c05607.mp3"
+ },
+ {
+  "key": "fr|1|bateau :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "bateau :",
+  "voice": "estelle",
+  "file": "fr/84bc9a3a5f5b8ba5.mp3"
  },
  {
   "key": "fr|1|neige,",
@@ -68983,15 +68920,6 @@
   "text": "26,",
   "voice": "estelle",
   "file": "fr/d3165522e9f196bd.mp3"
- },
- {
-  "key": "fr|1|Oui,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Oui,",
-  "voice": "estelle",
-  "file": "fr/4df1988f8e0132b1.mp3"
  },
  {
   "key": "fr|1|On lui en donne 1,",
@@ -69372,6 +69300,15 @@
   "file": "fr/b000f2b0fae9e0ba.mp3"
  },
  {
+  "key": "fr|1|et encore une :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et encore une :",
+  "voice": "estelle",
+  "file": "fr/1f706a867e05d0e0.mp3"
+ },
+ {
   "key": "fr|1|100,",
   "lang": "fr",
   "rate": 1,
@@ -69442,15 +69379,6 @@
   "text": "Dans une demi-heure,",
   "voice": "estelle",
   "file": "fr/71caeb7ce1b0683f.mp3"
- },
- {
-  "key": "fr|1|ça finit pareil !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ça finit pareil !",
-  "voice": "estelle",
-  "file": "fr/d851c515d26a64f9.mp3"
  },
  {
   "key": "fr|0.9|ka,",
@@ -69604,6 +69532,15 @@
   "text": "le terrier,",
   "voice": "estelle",
   "file": "fr/9b88fa54f9cd4d24.mp3"
+ },
+ {
+  "key": "fr|1|cadeau :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "cadeau :",
+  "voice": "estelle",
+  "file": "fr/d3232ff459264ca5.mp3"
  },
  {
   "key": "fr|1|et kangourou ?",
@@ -69820,15 +69757,6 @@
   "text": "italien",
   "voice": "estelle",
   "file": "fr/47d9579ec65fb3f2.mp3"
- },
- {
-  "key": "fr|1|bateau :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "bateau :",
-  "voice": "estelle",
-  "file": "fr/84bc9a3a5f5b8ba5.mp3"
  },
  {
   "key": "fr|1|57,",
@@ -70083,6 +70011,15 @@
   "file": "fr/abf7ea940901c7ca.mp3"
  },
  {
+  "key": "fr|1|ballon :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ballon :",
+  "voice": "estelle",
+  "file": "fr/54925afdcc1d11b5.mp3"
+ },
+ {
   "key": "fr|1|et 2 unités :",
   "lang": "fr",
   "rate": 1,
@@ -70162,6 +70099,15 @@
   "text": "ou soleil",
   "voice": "estelle",
   "file": "fr/041558ed39392136.mp3"
+ },
+ {
+  "key": "fr|1|2 mètres,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "2 mètres,",
+  "voice": "estelle",
+  "file": "fr/0d7bb0357451d3d7.mp3"
  },
  {
   "key": "fr|1|96,",
@@ -70371,6 +70317,15 @@
   "file": "fr/58aa7be8e26d7825.mp3"
  },
  {
+  "key": "fr|1|melon :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "melon :",
+  "voice": "estelle",
+  "file": "fr/5abdc5554e7bdbf9.mp3"
+ },
+ {
   "key": "fr|1|2 paquets de 2",
   "lang": "fr",
   "rate": 1,
@@ -70486,6 +70441,15 @@
   "text": "et nez ?",
   "voice": "estelle",
   "file": "fr/4a1f890c36ff9d58.mp3"
+ },
+ {
+  "key": "fr|1|raisin :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "raisin :",
+  "voice": "estelle",
+  "file": "fr/055574c7080f9832.mp3"
  },
  {
   "key": "fr|0.9|dé,",
@@ -70738,15 +70702,6 @@
   "text": "ou sur la banquise",
   "voice": "estelle",
   "file": "fr/7d629f1810a59883.mp3"
- },
- {
-  "key": "fr|1|et encore une :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et encore une :",
-  "voice": "estelle",
-  "file": "fr/1f706a867e05d0e0.mp3"
  },
  {
   "key": "fr|1|5 centaines,",
@@ -71028,6 +70983,15 @@
   "file": "fr/7a7db248e96b3e00.mp3"
  },
  {
+  "key": "fr|1|vélo :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "vélo :",
+  "voice": "estelle",
+  "file": "fr/c11b2a595197aa6c.mp3"
+ },
+ {
   "key": "fr|1|dans une semaine ?",
   "lang": "fr",
   "rate": 1,
@@ -71118,6 +71082,15 @@
   "file": "fr/7626b10cc4626ab4.mp3"
  },
  {
+  "key": "fr|1|gâteau :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "gâteau :",
+  "voice": "estelle",
+  "file": "fr/f757df5167936b86.mp3"
+ },
+ {
   "key": "fr|1|l'éléphanteau",
   "lang": "fr",
   "rate": 1,
@@ -71188,6 +71161,24 @@
   "text": "ou étoile",
   "voice": "estelle",
   "file": "fr/5e77cdb6518d3abe.mp3"
+ },
+ {
+  "key": "fr|1|chapeau :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "chapeau :",
+  "voice": "estelle",
+  "file": "fr/a6afe46c397f0f64.mp3"
+ },
+ {
+  "key": "fr|1|dauphin :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "dauphin :",
+  "voice": "estelle",
+  "file": "fr/ae42c52f80b0a126.mp3"
  },
  {
   "key": "fr|1|7 centaines,",
@@ -71269,6 +71260,15 @@
   "text": "Sur la banquise,",
   "voice": "estelle",
   "file": "fr/06e42d2dcd31ddd3.mp3"
+ },
+ {
+  "key": "fr|1|café :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "café :",
+  "voice": "estelle",
+  "file": "fr/b78c9cc1c6c0ae74.mp3"
  },
  {
   "key": "fr|1|4 paquets de 2 :",
@@ -71514,6 +71514,15 @@
   "file": "fr/aa2918bbccd039ec.mp3"
  },
  {
+  "key": "fr|1|égale 2",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "égale 2",
+  "voice": "estelle",
+  "file": "fr/11f6fd998b26042e.mp3"
+ },
+ {
   "key": "fr|1|et 3 unités :",
   "lang": "fr",
   "rate": 1,
@@ -71539,15 +71548,6 @@
   "text": "ou la porcherie ?",
   "voice": "estelle",
   "file": "fr/9ed53d98a68be6db.mp3"
- },
- {
-  "key": "fr|1|melon :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "melon :",
-  "voice": "estelle",
-  "file": "fr/5abdc5554e7bdbf9.mp3"
  },
  {
   "key": "fr|1|c'est un dimanche.",
@@ -71647,15 +71647,6 @@
   "text": "égale 6",
   "voice": "estelle",
   "file": "fr/d2e3716121f1b65e.mp3"
- },
- {
-  "key": "fr|1|cadeau :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "cadeau :",
-  "voice": "estelle",
-  "file": "fr/d3232ff459264ca5.mp3"
  },
  {
   "key": "fr|1|égale 18",
@@ -71793,15 +71784,6 @@
   "file": "fr/1e3610a784e47a02.mp3"
  },
  {
-  "key": "fr|1|2 mètres,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "2 mètres,",
-  "voice": "estelle",
-  "file": "fr/0d7bb0357451d3d7.mp3"
- },
- {
   "key": "fr|1|0 dizaine",
   "lang": "fr",
   "rate": 1,
@@ -71845,6 +71827,15 @@
   "text": "600,",
   "voice": "estelle",
   "file": "fr/4ddec89bc40c7c56.mp3"
+ },
+ {
+  "key": "fr|1|main :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "main :",
+  "voice": "estelle",
+  "file": "fr/5fb29b65f7cb6cc5.mp3"
  },
  {
   "key": "fr|1|arbre,",
@@ -71926,15 +71917,6 @@
   "text": "2 paquets de 5 :",
   "voice": "estelle",
   "file": "fr/c505c9c18f7c7ce1.mp3"
- },
- {
-  "key": "fr|1|ballon :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ballon :",
-  "voice": "estelle",
-  "file": "fr/54925afdcc1d11b5.mp3"
  },
  {
   "key": "fr|1|le girafon",
@@ -72027,6 +72009,15 @@
   "file": "en/d63d9c7636129668.mp3"
  },
  {
+  "key": "fr|1|robot :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "robot :",
+  "voice": "estelle",
+  "file": "fr/4bf58e398c910d14.mp3"
+ },
+ {
   "key": "fr|1|et 200.",
   "lang": "fr",
   "rate": 1,
@@ -72061,6 +72052,15 @@
   "text": "égale 11.",
   "voice": "estelle",
   "file": "fr/460dd607f48e79b4.mp3"
+ },
+ {
+  "key": "fr|1|ce sont des contraires !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ce sont des contraires !",
+  "voice": "estelle",
+  "file": "fr/cf02533d6aa91433.mp3"
  },
  {
   "key": "fr|1|Ottawa",
@@ -72126,13 +72126,22 @@
   "file": "fr/23ecd0d2147189e4.mp3"
  },
  {
-  "key": "fr|1|vélo :",
+  "key": "fr|1|moto :",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "vélo :",
+  "text": "moto :",
   "voice": "estelle",
-  "file": "fr/c11b2a595197aa6c.mp3"
+  "file": "fr/4f6411d5d2381746.mp3"
+ },
+ {
+  "key": "fr|1|bébé :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "bébé :",
+  "voice": "estelle",
+  "file": "fr/b9c020bed50de0eb.mp3"
  },
  {
   "key": "fr|1|les Italiens",
@@ -72261,6 +72270,15 @@
   "file": "fr/57741dcac9faf79c.mp3"
  },
  {
+  "key": "fr|1|oiseau :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "oiseau :",
+  "voice": "estelle",
+  "file": "fr/0af515d0ee102dfd.mp3"
+ },
+ {
   "key": "fr|0.9|o,",
   "lang": "fr",
   "rate": 0.9,
@@ -72378,15 +72396,6 @@
   "file": "fr/91af0e009c8d4dbb.mp3"
  },
  {
-  "key": "fr|1|et tracteur !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et tracteur !",
-  "voice": "estelle",
-  "file": "fr/a400bdf868f8d5f7.mp3"
- },
- {
   "key": "fr|1|ou le poulailler",
   "lang": "fr",
   "rate": 1,
@@ -72439,15 +72448,6 @@
   "text": "en hiver,",
   "voice": "estelle",
   "file": "fr/d00ffded01c08131.mp3"
- },
- {
-  "key": "fr|1|chapeau :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "chapeau :",
-  "voice": "estelle",
-  "file": "fr/a6afe46c397f0f64.mp3"
  },
  {
   "key": "fr|1|L'agneau,",
@@ -72538,6 +72538,15 @@
   "text": "et 4,",
   "voice": "estelle",
   "file": "fr/2d1b099568d9d59e.mp3"
+ },
+ {
+  "key": "fr|1|citron :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "citron :",
+  "voice": "estelle",
+  "file": "fr/c9463c539f5d472d.mp3"
  },
  {
   "key": "fr|1|et raisin ?",
@@ -72693,6 +72702,15 @@
   "file": "fr/b3d9d129ea6570b4.mp3"
  },
  {
+  "key": "fr|1|fusée :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "fusée :",
+  "voice": "estelle",
+  "file": "fr/533f497448ac264f.mp3"
+ },
+ {
   "key": "fr|1|ou un jour",
   "lang": "fr",
   "rate": 1,
@@ -72700,15 +72718,6 @@
   "text": "ou un jour",
   "voice": "estelle",
   "file": "fr/b3f3c02b22b40feb.mp3"
- },
- {
-  "key": "fr|1|et fleur !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et fleur !",
-  "voice": "estelle",
-  "file": "fr/25219d7c1f755047.mp3"
  },
  {
   "key": "fr|1|à 8 euros.",
@@ -72846,15 +72855,6 @@
   "file": "fr/8cca3bbbe44523c3.mp3"
  },
  {
-  "key": "fr|1|égale 2",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "égale 2",
-  "voice": "estelle",
-  "file": "fr/11f6fd998b26042e.mp3"
- },
- {
   "key": "fr|1|égale 10",
   "lang": "fr",
   "rate": 1,
@@ -72936,6 +72936,15 @@
   "file": "fr/c6fd246e54564edc.mp3"
  },
  {
+  "key": "fr|1|dragon :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "dragon :",
+  "voice": "estelle",
+  "file": "fr/e8eb1d094cdfa1ea.mp3"
+ },
+ {
   "key": "fr|1|les Américains",
   "lang": "fr",
   "rate": 1,
@@ -72997,6 +73006,15 @@
   "text": "ou les Italiens ?",
   "voice": "estelle",
   "file": "fr/c05ed327c76a0215.mp3"
+ },
+ {
+  "key": "fr|1|sapin :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "sapin :",
+  "voice": "estelle",
+  "file": "fr/13d48975c0c38967.mp3"
  },
  {
   "key": "fr|1|guitare,",
@@ -73098,24 +73116,6 @@
   "file": "fr/4b2913615ce4c1d6.mp3"
  },
  {
-  "key": "fr|1|main :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "main :",
-  "voice": "estelle",
-  "file": "fr/5fb29b65f7cb6cc5.mp3"
- },
- {
-  "key": "fr|1|moto :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "moto :",
-  "voice": "estelle",
-  "file": "fr/4f6411d5d2381746.mp3"
- },
- {
   "key": "fr|1|ou les Allemands ?",
   "lang": "fr",
   "rate": 1,
@@ -73143,13 +73143,13 @@
   "file": "fr/dc3af340f94d4e30.mp3"
  },
  {
-  "key": "fr|1|raisin :",
+  "key": "fr|1|requin :",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "raisin :",
+  "text": "requin :",
   "voice": "estelle",
-  "file": "fr/055574c7080f9832.mp3"
+  "file": "fr/972edc73882f873f.mp3"
  },
  {
   "key": "fr|1|5 centimètres",
@@ -73312,15 +73312,6 @@
   "text": "et 12 unités :",
   "voice": "estelle",
   "file": "fr/e93f5fb50354ae89.mp3"
- },
- {
-  "key": "fr|1|dauphin :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "dauphin :",
-  "voice": "estelle",
-  "file": "fr/ae42c52f80b0a126.mp3"
  },
  {
   "key": "fr|1|il sera 10 heures",
@@ -73611,15 +73602,6 @@
   "file": "fr/76e10819e52dcb02.mp3"
  },
  {
-  "key": "fr|1|et kangourou !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et kangourou !",
-  "voice": "estelle",
-  "file": "fr/3829c4cb746e3b2f.mp3"
- },
- {
   "key": "fr|1|c'est 7.",
   "lang": "fr",
   "rate": 1,
@@ -73665,6 +73647,15 @@
   "file": "fr/00e0239a5c353e8b.mp3"
  },
  {
+  "key": "fr|1|train :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "train :",
+  "voice": "estelle",
+  "file": "fr/e82e4991f0d1382c.mp3"
+ },
+ {
   "key": "fr|1|95",
   "lang": "fr",
   "rate": 1,
@@ -73699,6 +73690,15 @@
   "text": "ka",
   "voice": "estelle",
   "file": "fr/00741f429e84b747.mp3"
+ },
+ {
+  "key": "fr|1|20 centimètres",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "20 centimètres",
+  "voice": "estelle",
+  "file": "fr/640962db49b9ef06.mp3"
  },
  {
   "key": "fr|1|96",
@@ -73818,13 +73818,13 @@
   "file": "fr/4f8ba9b21f806729.mp3"
  },
  {
-  "key": "fr|1|dragon :",
+  "key": "fr|1|mouton :",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "dragon :",
+  "text": "mouton :",
   "voice": "estelle",
-  "file": "fr/e8eb1d094cdfa1ea.mp3"
+  "file": "fr/f2a6b2a8f7a237ad.mp3"
  },
  {
   "key": "fr|1|4 unités",
@@ -73971,6 +73971,15 @@
   "file": "fr/4997eab9ba890bda.mp3"
  },
  {
+  "key": "fr|1|avion :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "avion :",
+  "voice": "estelle",
+  "file": "fr/87403bca6ad2c4c9.mp3"
+ },
+ {
   "key": "fr|1|tu peux acheter le cerf-volant,",
   "lang": "fr",
   "rate": 1,
@@ -74077,15 +74086,6 @@
   "text": "il sera 2 heures",
   "voice": "estelle",
   "file": "fr/153d91044e6b376f.mp3"
- },
- {
-  "key": "fr|1|gâteau :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "gâteau :",
-  "voice": "estelle",
-  "file": "fr/f757df5167936b86.mp3"
  },
  {
   "key": "fr|1|ou Ottawa ?",
@@ -74248,6 +74248,24 @@
   "text": "et 400.",
   "voice": "estelle",
   "file": "fr/f73fe18a1bc455d1.mp3"
+ },
+ {
+  "key": "fr|1|cochon :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "cochon :",
+  "voice": "estelle",
+  "file": "fr/fb82d8f226e6e838.mp3"
+ },
+ {
+  "key": "fr|1|crayon :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "crayon :",
+  "voice": "estelle",
+  "file": "fr/ec44314a3aa67356.mp3"
  },
  {
   "key": "fr|1|dent,",
@@ -74682,6 +74700,15 @@
   "file": "fr/a62c33bfd07f155c.mp3"
  },
  {
+  "key": "fr|1|nez :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "nez :",
+  "voice": "estelle",
+  "file": "fr/1f5940ca73795f91.mp3"
+ },
+ {
   "key": "fr|1|700,",
   "lang": "fr",
   "rate": 1,
@@ -74916,15 +74943,6 @@
   "file": "fr/c3b0b14437b1ca92.mp3"
  },
  {
-  "key": "fr|1|café :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "café :",
-  "voice": "estelle",
-  "file": "fr/b78c9cc1c6c0ae74.mp3"
- },
- {
   "key": "fr|1|ça fait 15.",
   "lang": "fr",
   "rate": 1,
@@ -74961,13 +74979,13 @@
   "file": "fr/7ddaad3468b95233.mp3"
  },
  {
-  "key": "fr|1|et hibou !",
+  "key": "fr|1|bonbon :",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "et hibou !",
+  "text": "bonbon :",
   "voice": "estelle",
-  "file": "fr/b15aa6a89022d2a9.mp3"
+  "file": "fr/eb892f6c584a4469.mp3"
  },
  {
   "key": "fr|1|et 1 mètre.",
@@ -75013,6 +75031,15 @@
   "text": "ou en été ?",
   "voice": "estelle",
   "file": "fr/916a42e095a91f0e.mp3"
+ },
+ {
+  "key": "fr|1|ou 2 centimètres ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou 2 centimètres ?",
+  "voice": "estelle",
+  "file": "fr/ec1d97c02050c4a2.mp3"
  },
  {
   "key": "fr|1|Pays-Bas,",
@@ -75276,13 +75303,13 @@
   "file": "fr/bf8422183de73c9e.mp3"
  },
  {
-  "key": "fr|1|robot :",
+  "key": "fr|1|lapin :",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "robot :",
+  "text": "lapin :",
   "voice": "estelle",
-  "file": "fr/4bf58e398c910d14.mp3"
+  "file": "fr/1525229bf2247b49.mp3"
  },
  {
   "key": "fr|1|9 centaines",
@@ -75465,15 +75492,6 @@
   "file": "fr/84600e1f3c3d126a.mp3"
  },
  {
-  "key": "fr|1|et fusée !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et fusée !",
-  "voice": "estelle",
-  "file": "fr/46c6abefc18bca8a.mp3"
- },
- {
   "key": "fr|1|ou le girafon",
   "lang": "fr",
   "rate": 1,
@@ -75580,15 +75598,6 @@
   "text": "à 5 euros.",
   "voice": "estelle",
   "file": "fr/6d5ccbf63a09f961.mp3"
- },
- {
-  "key": "fr|1|et ordinateur !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et ordinateur !",
-  "voice": "estelle",
-  "file": "fr/9bcac6ae146d8df3.mp3"
  },
  {
   "key": "fr|1|et des étoiles.",
@@ -75816,13 +75825,13 @@
   "file": "fr/5b30bbd5632293fa.mp3"
  },
  {
-  "key": "fr|1|ce sont des contraires !",
+  "key": "fr|1|dé :",
   "lang": "fr",
   "rate": 1,
   "type": "proposition",
-  "text": "ce sont des contraires !",
+  "text": "dé :",
   "voice": "estelle",
-  "file": "fr/cf02533d6aa91433.mp3"
+  "file": "fr/cb0a8a85c45f2e22.mp3"
  },
  {
   "key": "fr|1|égale 9.",
@@ -75942,6 +75951,15 @@
   "file": "fr/d7bd5bcc72e2f28d.mp3"
  },
  {
+  "key": "fr|1|poisson :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "poisson :",
+  "voice": "estelle",
+  "file": "fr/04cf0391eac34b74.mp3"
+ },
+ {
   "key": "fr|1|6 bananes",
   "lang": "fr",
   "rate": 1,
@@ -75976,6 +75994,15 @@
   "text": "au printemps,",
   "voice": "estelle",
   "file": "fr/2630b8c80fbe6211.mp3"
+ },
+ {
+  "key": "fr|1|Après-demain,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Après-demain,",
+  "voice": "estelle",
+  "file": "fr/48a0834f04d2e871.mp3"
  },
  {
   "key": "fr|1|ou l'ourson ?",
@@ -76059,6 +76086,15 @@
   "file": "fr/b4de41c4bee932b5.mp3"
  },
  {
+  "key": "fr|1|le matin",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "le matin",
+  "voice": "estelle",
+  "file": "fr/ff501d2d4ab89eaa.mp3"
+ },
+ {
   "key": "fr|1|ou une nuit de sommeil",
   "lang": "fr",
   "rate": 1,
@@ -76084,15 +76120,6 @@
   "text": "égale 5.",
   "voice": "estelle",
   "file": "fr/d4ceb21463c1b6cd.mp3"
- },
- {
-  "key": "fr|1|train :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "train :",
-  "voice": "estelle",
-  "file": "fr/e82e4991f0d1382c.mp3"
  },
  {
   "key": "fr|1|et 4 citrons",
@@ -76383,24 +76410,6 @@
   "file": "fr/e05635c5eb443e8b.mp3"
  },
  {
-  "key": "fr|1|crayon :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "crayon :",
-  "voice": "estelle",
-  "file": "fr/ec44314a3aa67356.mp3"
- },
- {
-  "key": "fr|1|mouton :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "mouton :",
-  "voice": "estelle",
-  "file": "fr/f2a6b2a8f7a237ad.mp3"
- },
- {
   "key": "fr|1|30 centimètres,",
   "lang": "fr",
   "rate": 1,
@@ -76671,15 +76680,6 @@
   "file": "fr/529298a876b8394c.mp3"
  },
  {
-  "key": "fr|1|et bébé !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et bébé !",
-  "voice": "estelle",
-  "file": "fr/62fc0a37f2f7ca3a.mp3"
- },
- {
   "key": "fr|1|89",
   "lang": "fr",
   "rate": 1,
@@ -76849,24 +76849,6 @@
   "text": "et 2 poires",
   "voice": "estelle",
   "file": "fr/b2dcdc1f2fe88db1.mp3"
- },
- {
-  "key": "fr|1|sapin :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "sapin :",
-  "voice": "estelle",
-  "file": "fr/13d48975c0c38967.mp3"
- },
- {
-  "key": "fr|1|lapin :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "lapin :",
-  "voice": "estelle",
-  "file": "fr/1525229bf2247b49.mp3"
  },
  {
   "key": "fr|1|ou dent",
@@ -77139,6 +77121,15 @@
   "file": "fr/a2e4cfc93a414d11.mp3"
  },
  {
+  "key": "fr|1|le midi,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "le midi,",
+  "voice": "estelle",
+  "file": "fr/00fc617410515f85.mp3"
+ },
+ {
   "key": "fr|1|à 7 euros.",
   "lang": "fr",
   "rate": 1,
@@ -77146,24 +77137,6 @@
   "text": "à 7 euros.",
   "voice": "estelle",
   "file": "fr/a50b5fd2cd042bbb.mp3"
- },
- {
-  "key": "fr|1|requin :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "requin :",
-  "voice": "estelle",
-  "file": "fr/972edc73882f873f.mp3"
- },
- {
-  "key": "fr|1|oiseau :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "oiseau :",
-  "voice": "estelle",
-  "file": "fr/0af515d0ee102dfd.mp3"
  },
  {
   "key": "fr|0.9|ixe,",
@@ -77292,15 +77265,6 @@
   "file": "fr/3e670a6208532731.mp3"
  },
  {
-  "key": "fr|1|citron :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "citron :",
-  "voice": "estelle",
-  "file": "fr/c9463c539f5d472d.mp3"
- },
- {
   "key": "fr|1|ou olive",
   "lang": "fr",
   "rate": 1,
@@ -77418,6 +77382,15 @@
   "file": "fr/bb1a4140deb13712.mp3"
  },
  {
+  "key": "fr|1|Dans chaque boîte,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Dans chaque boîte,",
+  "voice": "estelle",
+  "file": "fr/4e84cf0bca418356.mp3"
+ },
+ {
   "key": "fr|1|ça fait 8.",
   "lang": "fr",
   "rate": 1,
@@ -77517,6 +77490,15 @@
   "file": "fr/8e8542be3e71cf41.mp3"
  },
  {
+  "key": "fr|1|loup :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "loup :",
+  "voice": "estelle",
+  "file": "fr/881fc942949983d5.mp3"
+ },
+ {
   "key": "fr|1|égale 27.",
   "lang": "fr",
   "rate": 1,
@@ -77524,15 +77506,6 @@
   "text": "égale 27.",
   "voice": "estelle",
   "file": "fr/013f8f32fe085ad5.mp3"
- },
- {
-  "key": "fr|1|et café !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et café !",
-  "voice": "estelle",
-  "file": "fr/4b62bb5aba62c594.mp3"
  },
  {
   "key": "fr|1|9 unités,",
@@ -77706,6 +77679,15 @@
   "file": "fr/4aa681c2a555a8bb.mp3"
  },
  {
+  "key": "fr|1|9 !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "9 !",
+  "voice": "estelle",
+  "file": "fr/94b125956d07f6db.mp3"
+ },
+ {
   "key": "fr|1|53",
   "lang": "fr",
   "rate": 1,
@@ -77713,6 +77695,15 @@
   "text": "53",
   "voice": "estelle",
   "file": "fr/9c9a3dbe98f98457.mp3"
+ },
+ {
+  "key": "fr|1|ce sera lundi.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ce sera lundi.",
+  "voice": "estelle",
+  "file": "fr/2a11ed6dd7cd0c0b.mp3"
  },
  {
   "key": "fr|1|ou une année ?",
@@ -77767,15 +77758,6 @@
   "text": "67",
   "voice": "estelle",
   "file": "fr/162e912e5b4e072e.mp3"
- },
- {
-  "key": "fr|1|avion :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "avion :",
-  "voice": "estelle",
-  "file": "fr/87403bca6ad2c4c9.mp3"
  },
  {
   "key": "fr|1|1 centaine",
@@ -77893,15 +77875,6 @@
   "text": "3 centimètres,",
   "voice": "estelle",
   "file": "fr/d5de47abc7897df1.mp3"
- },
- {
-  "key": "fr|1|20 centimètres",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "20 centimètres",
-  "voice": "estelle",
-  "file": "fr/640962db49b9ef06.mp3"
  },
  {
   "key": "fr|1|15 centimètres",
@@ -78075,42 +78048,6 @@
   "file": "fr/8ef095be687ea1be.mp3"
  },
  {
-  "key": "fr|1|et cadeau !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et cadeau !",
-  "voice": "estelle",
-  "file": "fr/55dbedfd72f7475d.mp3"
- },
- {
-  "key": "fr|1|et raisin !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et raisin !",
-  "voice": "estelle",
-  "file": "fr/9110c91931e8d888.mp3"
- },
- {
-  "key": "fr|1|et oiseau !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et oiseau !",
-  "voice": "estelle",
-  "file": "fr/a6cd171c3e3f5876.mp3"
- },
- {
-  "key": "fr|1|et gâteau !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et gâteau !",
-  "voice": "estelle",
-  "file": "fr/edbac7cd45cd7707.mp3"
- },
- {
   "key": "fr|1|Une minute,",
   "lang": "fr",
   "rate": 1,
@@ -78172,15 +78109,6 @@
   "text": "ça fait 18.",
   "voice": "estelle",
   "file": "fr/11ce3c5867aa4b44.mp3"
- },
- {
-  "key": "fr|1|et nez !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et nez !",
-  "voice": "estelle",
-  "file": "fr/748bbe1faae9318c.mp3"
  },
  {
   "key": "fr|1|15 centimètres,",
@@ -78363,6 +78291,15 @@
   "file": "fr/03292f82331654c5.mp3"
  },
  {
+  "key": "fr|1|7 !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "7 !",
+  "voice": "estelle",
+  "file": "fr/115b049c081ebf57.mp3"
+ },
+ {
   "key": "fr|1|le gros cube en a 27.",
   "lang": "fr",
   "rate": 1,
@@ -78462,15 +78399,6 @@
   "file": "fr/3b3ea439fcd77d2e.mp3"
  },
  {
-  "key": "fr|1|et loup !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et loup !",
-  "voice": "estelle",
-  "file": "fr/eb43aa18f2008ab3.mp3"
- },
- {
   "key": "fr|1|à 4 euros.",
   "lang": "fr",
   "rate": 1,
@@ -78532,15 +78460,6 @@
   "text": "et 13,",
   "voice": "estelle",
   "file": "fr/cecabf5bd973c3df.mp3"
- },
- {
-  "key": "fr|1|bébé :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "bébé :",
-  "voice": "estelle",
-  "file": "fr/b9c020bed50de0eb.mp3"
  },
  {
   "key": "fr|1|égale 38",
@@ -78885,15 +78804,6 @@
   "file": "fr/3abbfd7561f98c0f.mp3"
  },
  {
-  "key": "fr|1|et citron !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et citron !",
-  "voice": "estelle",
-  "file": "fr/09154fa0378d6f88.mp3"
- },
- {
   "key": "fr|1|et dragon ?",
   "lang": "fr",
   "rate": 1,
@@ -79045,15 +78955,6 @@
   "text": "104,",
   "voice": "estelle",
   "file": "fr/22a37471b293a57f.mp3"
- },
- {
-  "key": "fr|1|cochon :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "cochon :",
-  "voice": "estelle",
-  "file": "fr/fb82d8f226e6e838.mp3"
  },
  {
   "key": "fr|1|Le 3,",
@@ -79254,6 +79155,15 @@
   "file": "fr/fb2cdbcbc820ec2d.mp3"
  },
  {
+  "key": "fr|1|tôt,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "tôt,",
+  "voice": "estelle",
+  "file": "fr/28870c2e348109a3.mp3"
+ },
+ {
   "key": "fr|1|il y a des fraises",
   "lang": "fr",
   "rate": 1,
@@ -79360,15 +79270,6 @@
   "text": "145,",
   "voice": "estelle",
   "file": "fr/db059badd7e8037f.mp3"
- },
- {
-  "key": "fr|1|poisson :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "poisson :",
-  "voice": "estelle",
-  "file": "fr/04cf0391eac34b74.mp3"
  },
  {
   "key": "fr|1|20 papillons !",
@@ -79641,6 +79542,15 @@
   "file": "fr/7bb02bdf847b15b7.mp3"
  },
  {
+  "key": "fr|1|jamais :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "jamais :",
+  "voice": "estelle",
+  "file": "fr/1e5a9126291c91bd.mp3"
+ },
+ {
   "key": "fr|1|et 1 centaine :",
   "lang": "fr",
   "rate": 1,
@@ -79738,15 +79648,6 @@
   "text": "il sera 4 heures.",
   "voice": "estelle",
   "file": "fr/925775f10daf4f92.mp3"
- },
- {
-  "key": "fr|1|et robot !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et robot !",
-  "voice": "estelle",
-  "file": "fr/71a005df225d2a9f.mp3"
  },
  {
   "key": "fr|1|sans,",
@@ -79920,15 +79821,6 @@
   "file": "fr/aab259d97f111865.mp3"
  },
  {
-  "key": "fr|1|ou 2 centimètres ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ou 2 centimètres ?",
-  "voice": "estelle",
-  "file": "fr/ec1d97c02050c4a2.mp3"
- },
- {
   "key": "fr|1|ou 5 centimètres ?",
   "lang": "fr",
   "rate": 1,
@@ -80019,6 +79911,15 @@
   "file": "fr/068a3fb41fdd764e.mp3"
  },
  {
+  "key": "fr|1|toujours,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "toujours,",
+  "voice": "estelle",
+  "file": "fr/e257443eedda789a.mp3"
+ },
+ {
   "key": "fr|1|8 oranges",
   "lang": "fr",
   "rate": 1,
@@ -80080,15 +79981,6 @@
   "text": "ou fourmi",
   "voice": "estelle",
   "file": "fr/43fafba5dae627b6.mp3"
- },
- {
-  "key": "fr|1|et ballon !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et ballon !",
-  "voice": "estelle",
-  "file": "fr/c07e20ccfb9be176.mp3"
  },
  {
   "key": "fr|1|et 8 pommes",
@@ -80208,6 +80100,15 @@
   "file": "fr/2ffef3d78555ede3.mp3"
  },
  {
+  "key": "fr|1|tard :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "tard :",
+  "voice": "estelle",
+  "file": "fr/d7ddcb7dd4f7db84.mp3"
+ },
+ {
   "key": "fr|1|avec :",
   "lang": "fr",
   "rate": 1,
@@ -80323,24 +80224,6 @@
   "text": "568,",
   "voice": "estelle",
   "file": "fr/8535c2363de2ecbc.mp3"
- },
- {
-  "key": "fr|1|bonbon :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "bonbon :",
-  "voice": "estelle",
-  "file": "fr/eb892f6c584a4469.mp3"
- },
- {
-  "key": "fr|1|et dauphin !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et dauphin !",
-  "voice": "estelle",
-  "file": "fr/c70e5b4cef8c8e23.mp3"
  },
  {
   "key": "fr|1|Il en faut 13,",
@@ -80964,15 +80847,6 @@
   "file": "fr/c4648467f692951c.mp3"
  },
  {
-  "key": "fr|1|Après-demain,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Après-demain,",
-  "voice": "estelle",
-  "file": "fr/48a0834f04d2e871.mp3"
- },
- {
   "key": "fr|0.9|ache",
   "lang": "fr",
   "rate": 0.9,
@@ -81142,15 +81016,6 @@
   "text": "et 2 pommes dans le panier.",
   "voice": "estelle",
   "file": "fr/b30c50b66713a088.mp3"
- },
- {
-  "key": "fr|1|et sapin !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et sapin !",
-  "voice": "estelle",
-  "file": "fr/101b5aa8ac3f10f2.mp3"
  },
  {
   "key": "fr|1|avec,",
@@ -81396,24 +81261,6 @@
   "file": "fr/768ba7b5b6a0d4c2.mp3"
  },
  {
-  "key": "fr|1|et bateau !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et bateau !",
-  "voice": "estelle",
-  "file": "fr/73927d68d59e10d9.mp3"
- },
- {
-  "key": "fr|1|et requin !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et requin !",
-  "voice": "estelle",
-  "file": "fr/860bd13fae182c92.mp3"
- },
- {
   "key": "fr|1|et 5 pommes",
   "lang": "fr",
   "rate": 1,
@@ -81585,6 +81432,24 @@
   "file": "fr/0e34bdd79e4b2830.mp3"
  },
  {
+  "key": "fr|1|hérisson :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "hérisson :",
+  "voice": "estelle",
+  "file": "fr/0475dd405cbfd9e6.mp3"
+ },
+ {
+  "key": "fr|1|hibou :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "hibou :",
+  "voice": "estelle",
+  "file": "fr/e89031dab8ecedbc.mp3"
+ },
+ {
   "key": "fr|1|Mets une orange,",
   "lang": "fr",
   "rate": 1,
@@ -81682,6 +81547,15 @@
   "text": "5 plus 9,",
   "voice": "estelle",
   "file": "fr/f8b47ab46ce5eece.mp3"
+ },
+ {
+  "key": "fr|1|4 moins 2,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "4 moins 2,",
+  "voice": "estelle",
+  "file": "fr/59758de4790f5eb8.mp3"
  },
  {
   "key": "fr|1|13 papillons !",
@@ -82242,15 +82116,6 @@
   "file": "fr/227aaf4406a3e725.mp3"
  },
  {
-  "key": "fr|1|dé :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "dé :",
-  "voice": "estelle",
-  "file": "fr/cb0a8a85c45f2e22.mp3"
- },
- {
   "key": "fr|1|11 !",
   "lang": "fr",
   "rate": 1,
@@ -82528,15 +82393,6 @@
   "text": "et on te rend 9 euros.",
   "voice": "estelle",
   "file": "fr/e78436a7528995c8.mp3"
- },
- {
-  "key": "fr|1|le matin",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "le matin",
-  "voice": "estelle",
-  "file": "fr/ff501d2d4ab89eaa.mp3"
  },
  {
   "key": "fr|1|Le soir,",
@@ -83151,24 +83007,6 @@
   "file": "fr/2e032882467e6579.mp3"
  },
  {
-  "key": "fr|1|et bonbon !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et bonbon !",
-  "voice": "estelle",
-  "file": "fr/1e485b9851478a23.mp3"
- },
- {
-  "key": "fr|1|et cochon !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et cochon !",
-  "voice": "estelle",
-  "file": "fr/2715b1dd761870cb.mp3"
- },
- {
   "key": "fr|1|et 9 poires",
   "lang": "fr",
   "rate": 1,
@@ -83347,6 +83185,15 @@
   "text": "13 coccinelles !",
   "voice": "estelle",
   "file": "fr/fb5a20f4642426e9.mp3"
+ },
+ {
+  "key": "fr|1|ou la nuit",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou la nuit",
+  "voice": "estelle",
+  "file": "fr/1b2bfcb94c911bb7.mp3"
  },
  {
   "key": "fr|1|il en reste 8 !",
@@ -83601,6 +83448,15 @@
   "file": "fr/8a60ee420a03657f.mp3"
  },
  {
+  "key": "fr|1|ordinateur :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ordinateur :",
+  "voice": "estelle",
+  "file": "fr/4cc0096ec6fb79cc.mp3"
+ },
+ {
   "key": "fr|1|et 9 poires.",
   "lang": "fr",
   "rate": 1,
@@ -83707,24 +83563,6 @@
   "text": "koala :",
   "voice": "estelle",
   "file": "fr/836ba75a5d179a54.mp3"
- },
- {
-  "key": "fr|1|fusée :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "fusée :",
-  "voice": "estelle",
-  "file": "fr/533f497448ac264f.mp3"
- },
- {
-  "key": "fr|1|et dé !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et dé !",
-  "voice": "estelle",
-  "file": "fr/2e0c5bf6bb638168.mp3"
  },
  {
   "key": "fr|1|ou pied",
@@ -84184,6 +84022,24 @@
   "text": "6 moins 2,",
   "voice": "estelle",
   "file": "fr/97a4313322aa902d.mp3"
+ },
+ {
+  "key": "fr|1|il y a 2 crayons.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "il y a 2 crayons.",
+  "voice": "estelle",
+  "file": "fr/a5c3c6fa1f9ca40f.mp3"
+ },
+ {
+  "key": "fr|1|il y a 5 crayons.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "il y a 5 crayons.",
+  "voice": "estelle",
+  "file": "fr/564af55bb81718b6.mp3"
  },
  {
   "key": "fr|1|il sera 8 heures.",
@@ -85392,6 +85248,15 @@
   "file": "fr/b2bcbe4f15066261.mp3"
  },
  {
+  "key": "fr|1|c'est mai.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est mai.",
+  "voice": "estelle",
+  "file": "fr/d05f62a97d351603.mp3"
+ },
+ {
   "key": "fr|1|6 fleurs !",
   "lang": "fr",
   "rate": 1,
@@ -85471,24 +85336,6 @@
   "text": "Viêt Nam ?",
   "voice": "estelle",
   "file": "fr/e9ad325f146b2b12.mp3"
- },
- {
-  "key": "fr|1|et melon !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et melon !",
-  "voice": "estelle",
-  "file": "fr/3cbe98b57c24fe09.mp3"
- },
- {
-  "key": "fr|1|et avion !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et avion !",
-  "voice": "estelle",
-  "file": "fr/547215f5f05c0ee7.mp3"
  },
  {
   "key": "fr|1|ou voiture",
@@ -86092,6 +85939,15 @@
   "text": "Le 31 mars,",
   "voice": "estelle",
   "file": "fr/4e692d68ef77cce1.mp3"
+ },
+ {
+  "key": "fr|1|Avant juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Avant juin,",
+  "voice": "estelle",
+  "file": "fr/50e0b4532e497909.mp3"
  },
  {
   "key": "fr|1|c'est août.",
@@ -86902,6 +86758,69 @@
   "text": "280,",
   "voice": "estelle",
   "file": "fr/bed65b9ba89cabac.mp3"
+ },
+ {
+  "key": "fr|1|138,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "138,",
+  "voice": "estelle",
+  "file": "fr/c9af5d5572aadae6.mp3"
+ },
+ {
+  "key": "fr|1|et 1500 grammes.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et 1500 grammes.",
+  "voice": "estelle",
+  "file": "fr/66cc86f75b4411b5.mp3"
+ },
+ {
+  "key": "fr|1|Les Indiens,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Les Indiens,",
+  "voice": "estelle",
+  "file": "fr/ee70bfe193c34fd3.mp3"
+ },
+ {
+  "key": "fr|1|9 poussins !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "9 poussins !",
+  "voice": "estelle",
+  "file": "fr/cb43c724c0fc0b15.mp3"
+ },
+ {
+  "key": "fr|1|10 étoiles !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "10 étoiles !",
+  "voice": "estelle",
+  "file": "fr/9329d8a3d34cb292.mp3"
+ },
+ {
+  "key": "fr|1|18 coccinelles !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "18 coccinelles !",
+  "voice": "estelle",
+  "file": "fr/1dddc0ccb04e7189.mp3"
+ },
+ {
+  "key": "fr|1|20 étoiles !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "20 étoiles !",
+  "voice": "estelle",
+  "file": "fr/b4f9575338ebe08a.mp3"
  },
  {
   "key": "fr|1|Bravo",
@@ -91683,15 +91602,6 @@
   "file": "fr/2fe60363c6074c16.mp3"
  },
  {
-  "key": "fr|1|enfants,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "enfants,",
-  "voice": "estelle",
-  "file": "fr/f1c7fc7519329782.mp3"
- },
- {
   "key": "fr|1|heures moins le quart.",
   "lang": "fr",
   "rate": 1,
@@ -91699,6 +91609,15 @@
   "text": "heures moins le quart.",
   "voice": "estelle",
   "file": "fr/97293e7076d3f85e.mp3"
+ },
+ {
+  "key": "fr|1|enfants,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "enfants,",
+  "voice": "estelle",
+  "file": "fr/f1c7fc7519329782.mp3"
  },
  {
   "key": "fr|1|Le groupe de",
@@ -91773,6 +91692,15 @@
   "file": "fr/65a88f968e84defd.mp3"
  },
  {
+  "key": "fr|1|font",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "font",
+  "voice": "estelle",
+  "file": "fr/947bdcbb15e62f07.mp3"
+ },
+ {
   "key": "fr|1|gâteaux.",
   "lang": "fr",
   "rate": 1,
@@ -91809,15 +91737,6 @@
   "file": "fr/a84a8a32b85ef5f8.mp3"
  },
  {
-  "key": "fr|1|font",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "font",
-  "voice": "estelle",
-  "file": "fr/947bdcbb15e62f07.mp3"
- },
- {
   "key": "fr|1|ballons.",
   "lang": "fr",
   "rate": 1,
@@ -91836,6 +91755,15 @@
   "file": "fr/e24bb47330671426.mp3"
  },
  {
+  "key": "fr|1|Déplace les aiguilles pour mettre l'horloge à",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Déplace les aiguilles pour mettre l'horloge à",
+  "voice": "estelle",
+  "file": "fr/32eedd216902a93d.mp3"
+ },
+ {
   "key": "fr|1|citrons",
   "lang": "fr",
   "rate": 1,
@@ -91852,15 +91780,6 @@
   "text": "Quel jour de la semaine est le",
   "voice": "estelle",
   "file": "fr/3de52eda1e0fc843.mp3"
- },
- {
-  "key": "fr|1|Déplace les aiguilles pour mettre l'horloge à",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Déplace les aiguilles pour mettre l'horloge à",
-  "voice": "estelle",
-  "file": "fr/32eedd216902a93d.mp3"
  },
  {
   "key": "fr|1|oranges",
@@ -91944,15 +91863,6 @@
   "file": "fr/0a5c5b913547a379.mp3"
  },
  {
-  "key": "fr|1|poussins !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "poussins !",
-  "voice": "estelle",
-  "file": "fr/9f635d2af3a99cbd.mp3"
- },
- {
   "key": "fr|1|kiwis",
   "lang": "fr",
   "rate": 1,
@@ -91969,6 +91879,15 @@
   "text": "petites voitures.",
   "voice": "estelle",
   "file": "fr/4e355e9cee2c1cde.mp3"
+ },
+ {
+  "key": "fr|1|poussins !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "poussins !",
+  "voice": "estelle",
+  "file": "fr/9f635d2af3a99cbd.mp3"
  },
  {
   "key": "fr|1|avril.",
@@ -91989,6 +91908,15 @@
   "file": "fr/59475725a1ff9938.mp3"
  },
  {
+  "key": "fr|1|Combien de fois",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Combien de fois",
+  "voice": "estelle",
+  "file": "fr/1da2817d6ea07ea7.mp3"
+ },
+ {
   "key": "fr|1|pommes !",
   "lang": "fr",
   "rate": 1,
@@ -92007,15 +91935,6 @@
   "file": "fr/64f719c1337ccfc7.mp3"
  },
  {
-  "key": "fr|1|étoiles !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "étoiles !",
-  "voice": "estelle",
-  "file": "fr/d81de9254d320851.mp3"
- },
- {
   "key": "fr|1|novembre.",
   "lang": "fr",
   "rate": 1,
@@ -92023,15 +91942,6 @@
   "text": "novembre.",
   "voice": "estelle",
   "file": "fr/95064aeb0a744f5d.mp3"
- },
- {
-  "key": "fr|1|Combien de fois",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Combien de fois",
-  "voice": "estelle",
-  "file": "fr/1da2817d6ea07ea7.mp3"
  },
  {
   "key": "fr|1|mars.",
@@ -92178,13 +92088,13 @@
   "file": "fr/855e149f38a6b2b8.mp3"
  },
  {
-  "key": "fr|1|coccinelles !",
+  "key": "fr|1|étoiles !",
   "lang": "fr",
   "rate": 1,
   "type": "morceau",
-  "text": "coccinelles !",
+  "text": "étoiles !",
   "voice": "estelle",
-  "file": "fr/d808d444d5ad85d4.mp3"
+  "file": "fr/d81de9254d320851.mp3"
  },
  {
   "key": "fr|1|carottes.",
@@ -92221,6 +92131,15 @@
   "text": "ballons !",
   "voice": "estelle",
   "file": "fr/5057fab4832f9b8e.mp3"
+ },
+ {
+  "key": "fr|1|coccinelles !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "coccinelles !",
+  "voice": "estelle",
+  "file": "fr/d808d444d5ad85d4.mp3"
  },
  {
   "key": "fr|1|septembre.",
@@ -92511,6 +92430,24 @@
   "file": "fr/decd16dbc89fafdb.mp3"
  },
  {
+  "key": "fr|1|Il y a",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Il y a",
+  "voice": "estelle",
+  "file": "fr/c480f62333ce8221.mp3"
+ },
+ {
+  "key": "fr|1|Le jeu coûte",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Le jeu coûte",
+  "voice": "estelle",
+  "file": "fr/96b87bd0431671c9.mp3"
+ },
+ {
   "key": "fr|1|mai,",
   "lang": "fr",
   "rate": 1,
@@ -92572,33 +92509,6 @@
   "text": "Entre quelles centaines se trouve",
   "voice": "estelle",
   "file": "fr/60be59167e1481cf.mp3"
- },
- {
-  "key": "fr|1|Il y a",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Il y a",
-  "voice": "estelle",
-  "file": "fr/c480f62333ce8221.mp3"
- },
- {
-  "key": "fr|1|grammes.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "grammes.",
-  "voice": "estelle",
-  "file": "fr/6162ecd5a798afcb.mp3"
- },
- {
-  "key": "fr|1|Le jeu coûte",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Le jeu coûte",
-  "voice": "estelle",
-  "file": "fr/96b87bd0431671c9.mp3"
  },
  {
   "key": "fr|1|Le livre coûte",
@@ -92671,6 +92581,15 @@
   "text": "août,",
   "voice": "estelle",
   "file": "fr/b0906d3077b0efe7.mp3"
+ },
+ {
+  "key": "fr|1|grammes.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "grammes.",
+  "voice": "estelle",
+  "file": "fr/6162ecd5a798afcb.mp3"
  },
  {
   "key": "fr|1|Le chiffre des dizaines de",
@@ -93663,6 +93582,15 @@
   "file": "fr/99fea746dde09cdf.mp3"
  },
  {
+  "key": "fr|1|Quelle est la moitié de",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Quelle est la moitié de",
+  "voice": "estelle",
+  "file": "fr/2d0a8ab92f0796a9.mp3"
+ },
+ {
   "key": "fr|1|heures moins le quart de l'après-midi.",
   "lang": "fr",
   "rate": 1,
@@ -93852,15 +93780,6 @@
   "file": "fr/3c0509a756247f54.mp3"
  },
  {
-  "key": "fr|1|Quelle est la moitié de",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Quelle est la moitié de",
-  "voice": "estelle",
-  "file": "fr/2d0a8ab92f0796a9.mp3"
- },
- {
   "key": "fr|1|ballons de moins.",
   "lang": "fr",
   "rate": 1,
@@ -94005,24 +93924,6 @@
   "file": "fr/b2e2df978a6ab6ed.mp3"
  },
  {
-  "key": "fr|1|Les Indiens,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Les Indiens,",
-  "voice": "estelle",
-  "file": "fr/ee70bfe193c34fd3.mp3"
- },
- {
-  "key": "fr|1|et chapeau !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et chapeau !",
-  "voice": "estelle",
-  "file": "fr/da6d7e4944a606ed.mp3"
- },
- {
   "key": "fr|1|cœur violet,",
   "lang": "fr",
   "rate": 1,
@@ -94084,15 +93985,6 @@
   "text": "école :",
   "voice": "estelle",
   "file": "fr/0fd892bf6ca02e56.mp3"
- },
- {
-  "key": "fr|1|le midi,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "le midi,",
-  "voice": "estelle",
-  "file": "fr/00fc617410515f85.mp3"
  },
  {
   "key": "fr|1|combien y aura-t-il de pommes ?",
@@ -94311,24 +94203,6 @@
   "file": "fr/8de871bc123f0743.mp3"
  },
  {
-  "key": "fr|1|et vélo !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et vélo !",
-  "voice": "estelle",
-  "file": "fr/af94e0eb873dc49d.mp3"
- },
- {
-  "key": "fr|1|et main !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et main !",
-  "voice": "estelle",
-  "file": "fr/10faac1ba1ce48ed.mp3"
- },
- {
   "key": "fr|1|combien y aura-t-il de poissons ?",
   "lang": "fr",
   "rate": 1,
@@ -94446,15 +94320,6 @@
   "file": "fr/b763ddc9dc42a557.mp3"
  },
  {
-  "key": "fr|1|et train !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et train !",
-  "voice": "estelle",
-  "file": "fr/2bb6df576c33c324.mp3"
- },
- {
   "key": "fr|0.9|i grec,",
   "lang": "fr",
   "rate": 0.9,
@@ -94462,6 +94327,15 @@
   "text": "i grec,",
   "voice": "estelle",
   "file": "fr/2626ead3f6a4164e.mp3"
+ },
+ {
+  "key": "fr|1|c'est le drapeau de la Suisse !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "c'est le drapeau de la Suisse !",
+  "voice": "estelle",
+  "file": "fr/463b88ac60ba6277.mp3"
  },
  {
   "key": "fr|1|petites voitures de moins.",
@@ -94489,15 +94363,6 @@
   "text": "une orange,",
   "voice": "estelle",
   "file": "fr/7c7cfbd412d8d173.mp3"
- },
- {
-  "key": "fr|1|et mouton !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et mouton !",
-  "voice": "estelle",
-  "file": "fr/d0684eb277f88d31.mp3"
  },
  {
   "key": "fr|1|combien y aura-t-il de fraises ?",
@@ -94581,15 +94446,6 @@
   "file": "fr/b95e4283752b5cc2.mp3"
  },
  {
-  "key": "fr|1|et poisson !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et poisson !",
-  "voice": "estelle",
-  "file": "fr/06010f7a8599a14d.mp3"
- },
- {
   "key": "fr|1|Le premier samedi d'avril,",
   "lang": "fr",
   "rate": 1,
@@ -94653,15 +94509,6 @@
   "file": "fr/5c9dffd68d6fc05b.mp3"
  },
  {
-  "key": "fr|1|nez :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "nez :",
-  "voice": "estelle",
-  "file": "fr/1f5940ca73795f91.mp3"
- },
- {
   "key": "fr|1|combien y aura-t-il de fleurs ?",
   "lang": "fr",
   "rate": 1,
@@ -94680,6 +94527,60 @@
   "file": "fr/122dc17c41e02f8c.mp3"
  },
  {
+  "key": "en|0.9|Five minus four?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "Five minus four?",
+  "voice": "estelle",
+  "file": "en/ea02dd56ad11012d.mp3"
+ },
+ {
+  "key": "en|1|seven plus one equals eight.",
+  "lang": "en",
+  "rate": 1,
+  "type": "morceau",
+  "text": "seven plus one equals eight.",
+  "voice": "estelle",
+  "file": "en/b2a54f9ba6a7fb17.mp3"
+ },
+ {
+  "key": "en|0.9|Seven minus six?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "Seven minus six?",
+  "voice": "estelle",
+  "file": "en/12e78d5b99a80ea3.mp3"
+ },
+ {
+  "key": "en|0.9|Eight minus two?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "Eight minus two?",
+  "voice": "estelle",
+  "file": "en/50eed80d1dc3e386.mp3"
+ },
+ {
+  "key": "en|0.9|Ten minus seven?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "Ten minus seven?",
+  "voice": "estelle",
+  "file": "en/7b860490ac31e9fb.mp3"
+ },
+ {
+  "key": "en|0.9|Nine minus five?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "Nine minus five?",
+  "voice": "estelle",
+  "file": "en/1e6d68b2db19fecf.mp3"
+ },
+ {
   "key": "fr|1|arbres ?",
   "lang": "fr",
   "rate": 1,
@@ -94696,6 +94597,114 @@
   "text": "Le premier lundi de janvier,",
   "voice": "estelle",
   "file": "fr/694f6dcf52c7d6fb.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de le Mali !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "C'est le drapeau de le Mali !",
+  "voice": "estelle",
+  "file": "fr/1780905b01a63c09.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de le Japon.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Voici le drapeau de le Japon.",
+  "voice": "estelle",
+  "file": "fr/d0c56ce87413c47c.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de l'Italie.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Voici le drapeau de l'Italie.",
+  "voice": "estelle",
+  "file": "fr/e315a231a96b85cb.mp3"
+ },
+ {
+  "key": "en|0.9|one plus six is seven!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "one plus six is seven!",
+  "voice": "estelle",
+  "file": "en/dde1260dd44f3558.mp3"
+ },
+ {
+  "key": "en|0.9|two plus eight is ten!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "two plus eight is ten!",
+  "voice": "estelle",
+  "file": "en/4e7fa057164b9ff8.mp3"
+ },
+ {
+  "key": "en|0.9|ten minus nine is one!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "ten minus nine is one!",
+  "voice": "estelle",
+  "file": "en/395100a0c06b599e.mp3"
+ },
+ {
+  "key": "en|0.9|The cloud is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "The cloud is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/d9e3cb9126c4b14b.mp3"
+ },
+ {
+  "key": "en|0.9|The horse is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "The horse is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/6f8de01cb5ac6969.mp3"
+ },
+ {
+  "key": "en|0.9|The paint is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "The paint is not food.",
+  "voice": "estelle",
+  "file": "en/c7250f5e47df0d9f.mp3"
+ },
+ {
+  "key": "en|0.9|The apple is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "The apple is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/94d3613ed78e9811.mp3"
+ },
+ {
+  "key": "en|0.9|The shoes is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "The shoes is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/fb10adcaa39ad539.mp3"
+ },
+ {
+  "key": "en|0.9|The bread is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "The bread is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/0e6fc219b110a0d0.mp3"
  },
  {
   "key": "fr|1|Sa copine en a",
@@ -95310,6 +95319,24 @@
   "file": "fr/1cd92c96aa5de2a8.mp3"
  },
  {
+  "key": "fr|1|bébé ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "bébé ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/dfebaeb03a4e416f.mp3"
+ },
+ {
+  "key": "fr|1|moto ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "moto ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/a47faf1909b19fdf.mp3"
+ },
+ {
   "key": "fr|1|les livres",
   "lang": "fr",
   "rate": 1,
@@ -95499,6 +95526,15 @@
   "file": "fr/3ac5b9e13e38f18a.mp3"
  },
  {
+  "key": "fr|1|melon ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "melon ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/31212d61ddec3397.mp3"
+ },
+ {
   "key": "fr|1|combien y aura-t-il d'étoiles ?",
   "lang": "fr",
   "rate": 1,
@@ -95643,6 +95679,15 @@
   "file": "en/80658088f0ee2c80.mp3"
  },
  {
+  "key": "fr|1|raisin ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "raisin ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/8a435b2bfb2b8a35.mp3"
+ },
+ {
   "key": "fr|1|combien restera-t-il de pommes ?",
   "lang": "fr",
   "rate": 1,
@@ -95767,204 +95812,6 @@
   "text": "C'est le drapeau de l'Inde !",
   "voice": "estelle",
   "file": "fr/d7314dea75b5ca7a.mp3"
- },
- {
-  "key": "en|0.9|seventy-four",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "seventy-four",
-  "voice": "estelle",
-  "file": "en/67fc630facd62198.mp3"
- },
- {
-  "key": "en|0.9|The bread is not for school.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "The bread is not for school.",
-  "voice": "estelle",
-  "file": "en/163c8cd612380a54.mp3"
- },
- {
-  "key": "en|0.9|The cheese is not an animal.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "The cheese is not an animal.",
-  "voice": "estelle",
-  "file": "en/156be6708dc8c06e.mp3"
- },
- {
-  "key": "en|0.9|The banana is not an animal.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "The banana is not an animal.",
-  "voice": "estelle",
-  "file": "en/ab900fe9a0656d74.mp3"
- },
- {
-  "key": "fr|1|et moto !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et moto !",
-  "voice": "estelle",
-  "file": "fr/086a1407d115e176.mp3"
- },
- {
-  "key": "fr|1|Si on enlève une fleur,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Si on enlève une fleur,",
-  "voice": "estelle",
-  "file": "fr/82e47e5ac029d2db.mp3"
- },
- {
-  "key": "fr|1|combien restera-t-il de poussins ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "combien restera-t-il de poussins ?",
-  "voice": "estelle",
-  "file": "fr/e8607016adfc47f0.mp3"
- },
- {
-  "key": "fr|1|C'est le drapeau de la Corée du Sud !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "C'est le drapeau de la Corée du Sud !",
-  "voice": "estelle",
-  "file": "fr/f1df69f7f8d6dd74.mp3"
- },
- {
-  "key": "fr|1|et une banane dans le panier.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et une banane dans le panier.",
-  "voice": "estelle",
-  "file": "fr/e3893459edae08c6.mp3"
- },
- {
-  "key": "en|1|eleven balloons",
-  "lang": "en",
-  "rate": 1,
-  "type": "morceau",
-  "text": "eleven balloons",
-  "voice": "estelle",
-  "file": "en/cfaa3bd6bd7d24bc.mp3"
- },
- {
-  "key": "fr|1|Voici le drapeau de la Suède.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Voici le drapeau de la Suède.",
-  "voice": "estelle",
-  "file": "fr/b7be38b6884e1c2d.mp3"
- },
- {
-  "key": "fr|1|Voici le drapeau de le Maroc.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Voici le drapeau de le Maroc.",
-  "voice": "estelle",
-  "file": "fr/f036c7dc8a8358b9.mp3"
- },
- {
-  "key": "en|0.9|The crayons is not an animal.",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "The crayons is not an animal.",
-  "voice": "estelle",
-  "file": "en/3d1071795b50d2ed.mp3"
- },
- {
-  "key": "fr|1|Un château de sable !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Un château de sable !",
-  "voice": "estelle",
-  "file": "fr/be338ded38d97634.mp3"
- },
- {
-  "key": "en|0.9|seventy-seven",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "seventy-seven",
-  "voice": "estelle",
-  "file": "en/f2f177194b2da414.mp3"
- },
- {
-  "key": "en|0.9|seventy-three",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "seventy-three",
-  "voice": "estelle",
-  "file": "en/8f615c015a151a3d.mp3"
- },
- {
-  "key": "fr|1|C'est le drapeau de la Côte d'Ivoire !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "C'est le drapeau de la Côte d'Ivoire !",
-  "voice": "estelle",
-  "file": "fr/bae55bacd2b5637e.mp3"
- },
- {
-  "key": "fr|1|Mets un citron dans le panier.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Mets un citron dans le panier.",
-  "voice": "estelle",
-  "file": "fr/db9c270db0908506.mp3"
- },
- {
-  "key": "fr|1|Mets une poire dans le panier.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Mets une poire dans le panier.",
-  "voice": "estelle",
-  "file": "fr/298befdc8393a215.mp3"
- },
- {
-  "key": "fr|1|Le manchot mange des poissons.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Le manchot mange des poissons.",
-  "voice": "estelle",
-  "file": "fr/7423b773e971656c.mp3"
- },
- {
-  "key": "fr|1|un citron,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "un citron,",
-  "voice": "estelle",
-  "file": "fr/6e5a7bdf71c81d4e.mp3"
- },
- {
-  "key": "fr|1|C'est le drapeau de l'Égypte !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "C'est le drapeau de l'Égypte !",
-  "voice": "estelle",
-  "file": "fr/b9615aeafb48f8b8.mp3"
  },
  {
   "key": "fr|1|frappe",
@@ -123442,5 +123289,3596 @@
   "text": "Zoé",
   "voice": "estelle",
   "file": "fr/d74d3e908a4944f5.mp3"
+ },
+ {
+  "key": "en|0.9|The bread is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The bread is not for school.",
+  "voice": "estelle",
+  "file": "en/163c8cd612380a54.mp3"
+ },
+ {
+  "key": "en|0.9|The cheese is not an animal.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cheese is not an animal.",
+  "voice": "estelle",
+  "file": "en/156be6708dc8c06e.mp3"
+ },
+ {
+  "key": "en|0.9|The banana is not an animal.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The banana is not an animal.",
+  "voice": "estelle",
+  "file": "en/ab900fe9a0656d74.mp3"
+ },
+ {
+  "key": "fr|1|Si on enlève une fleur,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Si on enlève une fleur,",
+  "voice": "estelle",
+  "file": "fr/82e47e5ac029d2db.mp3"
+ },
+ {
+  "key": "fr|1|combien restera-t-il de poussins ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "combien restera-t-il de poussins ?",
+  "voice": "estelle",
+  "file": "fr/e8607016adfc47f0.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Corée du Sud !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Corée du Sud !",
+  "voice": "estelle",
+  "file": "fr/f1df69f7f8d6dd74.mp3"
+ },
+ {
+  "key": "fr|1|et une banane dans le panier.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et une banane dans le panier.",
+  "voice": "estelle",
+  "file": "fr/e3893459edae08c6.mp3"
+ },
+ {
+  "key": "en|1|eleven balloons",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eleven balloons",
+  "voice": "estelle",
+  "file": "en/cfaa3bd6bd7d24bc.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Suède.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Suède.",
+  "voice": "estelle",
+  "file": "fr/b7be38b6884e1c2d.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de le Maroc.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de le Maroc.",
+  "voice": "estelle",
+  "file": "fr/f036c7dc8a8358b9.mp3"
+ },
+ {
+  "key": "en|0.9|The crayons is not an animal.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The crayons is not an animal.",
+  "voice": "estelle",
+  "file": "en/3d1071795b50d2ed.mp3"
+ },
+ {
+  "key": "fr|1|Un château de sable !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Un château de sable !",
+  "voice": "estelle",
+  "file": "fr/be338ded38d97634.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Côte d'Ivoire !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Côte d'Ivoire !",
+  "voice": "estelle",
+  "file": "fr/bae55bacd2b5637e.mp3"
+ },
+ {
+  "key": "fr|1|Mets un citron dans le panier.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Mets un citron dans le panier.",
+  "voice": "estelle",
+  "file": "fr/db9c270db0908506.mp3"
+ },
+ {
+  "key": "fr|1|Mets une poire dans le panier.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Mets une poire dans le panier.",
+  "voice": "estelle",
+  "file": "fr/298befdc8393a215.mp3"
+ },
+ {
+  "key": "fr|1|Le manchot mange des poissons.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le manchot mange des poissons.",
+  "voice": "estelle",
+  "file": "fr/7423b773e971656c.mp3"
+ },
+ {
+  "key": "fr|1|un citron,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "un citron,",
+  "voice": "estelle",
+  "file": "fr/6e5a7bdf71c81d4e.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de l'Égypte !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de l'Égypte !",
+  "voice": "estelle",
+  "file": "fr/b9615aeafb48f8b8.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de l'Espagne.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de l'Espagne.",
+  "voice": "estelle",
+  "file": "fr/e9ee4d504b2615d7.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de l'Ukraine.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de l'Ukraine.",
+  "voice": "estelle",
+  "file": "fr/74f98222545bd355.mp3"
+ },
+ {
+  "key": "fr|1|Le cheval a des poils :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le cheval a des poils :",
+  "voice": "estelle",
+  "file": "fr/3e045e3fb0d4d3a0.mp3"
+ },
+ {
+  "key": "en|1|seventeen apples",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seventeen apples",
+  "voice": "estelle",
+  "file": "en/da0b8ecdc958e581.mp3"
+ },
+ {
+  "key": "en|1|six frogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "six frogs",
+  "voice": "estelle",
+  "file": "en/683b5f3cc79a930a.mp3"
+ },
+ {
+  "key": "fr|1|Quel mois vient après juillet ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Quel mois vient après juillet ?",
+  "voice": "estelle",
+  "file": "fr/d6ce8c94361168ef.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de le Brésil !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de le Brésil !",
+  "voice": "estelle",
+  "file": "fr/cc16d9f2268c4a19.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Pologne.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Pologne.",
+  "voice": "estelle",
+  "file": "fr/64cb42141073ea82.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de le Mexique.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de le Mexique.",
+  "voice": "estelle",
+  "file": "fr/a29be81bb79c1829.mp3"
+ },
+ {
+  "key": "fr|1|Comment dit-on livre rouge en anglais ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Comment dit-on livre rouge en anglais ?",
+  "voice": "estelle",
+  "file": "fr/7a812646b67aabed.mp3"
+ },
+ {
+  "key": "en|1|fourteen balloons",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "fourteen balloons",
+  "voice": "estelle",
+  "file": "en/700db3f1a370d2b9.mp3"
+ },
+ {
+  "key": "fr|1|ou feu",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou feu",
+  "voice": "estelle",
+  "file": "fr/95c3a442059495b5.mp3"
+ },
+ {
+  "key": "fr|1|c'est une heure de l'après-midi.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est une heure de l'après-midi.",
+  "voice": "estelle",
+  "file": "fr/7e494ebe99d9a394.mp3"
+ },
+ {
+  "key": "fr|1|Le premier jeudi d'avril,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier jeudi d'avril,",
+  "voice": "estelle",
+  "file": "fr/d0e322c9e5e7ed1f.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier lundi de mars,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier lundi de mars,",
+  "voice": "estelle",
+  "file": "fr/bd53eeb75b888451.mp3"
+ },
+ {
+  "key": "en|1|six plus four equals ten.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "six plus four equals ten.",
+  "voice": "estelle",
+  "file": "en/bcf63184486d3a23.mp3"
+ },
+ {
+  "key": "en|1|eight cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eight cars",
+  "voice": "estelle",
+  "file": "en/4a6abd635c818237.mp3"
+ },
+ {
+  "key": "fr|1|Un papillon de plus ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Un papillon de plus ?",
+  "voice": "estelle",
+  "file": "fr/0398879c0bb51a6b.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de le Danemark !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de le Danemark !",
+  "voice": "estelle",
+  "file": "fr/fe55b973372062c2.mp3"
+ },
+ {
+  "key": "fr|1|vélo ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "vélo ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/b6c0245afb75c908.mp3"
+ },
+ {
+  "key": "fr|1|Un film au cinéma dure le moins longtemps.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Un film au cinéma dure le moins longtemps.",
+  "voice": "estelle",
+  "file": "fr/ec3c01c00aa12f56.mp3"
+ },
+ {
+  "key": "en|1|twelve cats",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twelve cats",
+  "voice": "estelle",
+  "file": "en/3047fc25ccf9d1d8.mp3"
+ },
+ {
+  "key": "fr|1|Le premier dimanche de mai,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier dimanche de mai,",
+  "voice": "estelle",
+  "file": "fr/1c20b28200e618c3.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième samedi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième samedi de juin,",
+  "voice": "estelle",
+  "file": "fr/3d9d6f2ca4c2d8c8.mp3"
+ },
+ {
+  "key": "en|1|six plus three equals nine.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "six plus three equals nine.",
+  "voice": "estelle",
+  "file": "en/00205c4ce697235c.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de le Royaume-Uni.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de le Royaume-Uni.",
+  "voice": "estelle",
+  "file": "fr/ba0cebc88554bb27.mp3"
+ },
+ {
+  "key": "fr|1|Écris le elle en lettres attachées.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Écris le elle en lettres attachées.",
+  "voice": "estelle",
+  "file": "fr/9d6635eccde9f1f7.mp3"
+ },
+ {
+  "key": "en|0.9|The duck is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The duck is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/c30cb6e21ce0c8e7.mp3"
+ },
+ {
+  "key": "en|0.9|The frog is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The frog is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/2ebdd013aa55f32b.mp3"
+ },
+ {
+  "key": "en|0.9|The lion is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The lion is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/2057d6029b20e90b.mp3"
+ },
+ {
+  "key": "en|0.9|The rain is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The rain is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/fe77a769a7c48850.mp3"
+ },
+ {
+  "key": "fr|1|Quel mois vient avant août ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Quel mois vient avant août ?",
+  "voice": "estelle",
+  "file": "fr/41d67023d4d5c86f.mp3"
+ },
+ {
+  "key": "fr|1|L'éléphant mange de l'herbe.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "L'éléphant mange de l'herbe.",
+  "voice": "estelle",
+  "file": "fr/dcc9be24a0264480.mp3"
+ },
+ {
+  "key": "en|1|four plus four equals eight.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "four plus four equals eight.",
+  "voice": "estelle",
+  "file": "en/55d9ae9a753f80e1.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième mardi d'octobre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième mardi d'octobre,",
+  "voice": "estelle",
+  "file": "fr/650ea2db1986769e.mp3"
+ },
+ {
+  "key": "en|1|seven apples",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seven apples",
+  "voice": "estelle",
+  "file": "en/990191819924122a.mp3"
+ },
+ {
+  "key": "en|1|eleven stars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eleven stars",
+  "voice": "estelle",
+  "file": "en/1fc3ac6abe60b438.mp3"
+ },
+ {
+  "key": "en|1|sixteen dogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "sixteen dogs",
+  "voice": "estelle",
+  "file": "en/5ab9cda7d1b75842.mp3"
+ },
+ {
+  "key": "en|1|twelve frogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twelve frogs",
+  "voice": "estelle",
+  "file": "en/2c4d6329194a4d9a.mp3"
+ },
+ {
+  "key": "fr|0.8|ou lapin",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "ou lapin",
+  "voice": "estelle",
+  "file": "fr/5e1df609b8663610.mp3"
+ },
+ {
+  "key": "fr|0.8|ou melon",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "ou melon",
+  "voice": "estelle",
+  "file": "fr/e95a0f279c8a7220.mp3"
+ },
+ {
+  "key": "fr|1|gâteau ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "gâteau ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/102e33d2d8c33978.mp3"
+ },
+ {
+  "key": "fr|1|ou poule",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou poule",
+  "voice": "estelle",
+  "file": "fr/bf70875b60f77fe6.mp3"
+ },
+ {
+  "key": "fr|1|combien y aura-t-il de grenouilles ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "combien y aura-t-il de grenouilles ?",
+  "voice": "estelle",
+  "file": "fr/97cd3287b0c8fdce.mp3"
+ },
+ {
+  "key": "en|0.9|The mouse is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The mouse is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/f44f6cd3c3555385.mp3"
+ },
+ {
+  "key": "en|0.9|The socks is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The socks is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/ea615db620179002.mp3"
+ },
+ {
+  "key": "fr|1|Mets une fraise dans le panier.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Mets une fraise dans le panier.",
+  "voice": "estelle",
+  "file": "fr/a14e432b99b1a8f5.mp3"
+ },
+ {
+  "key": "en|0.9|The pencil is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The pencil is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/8034b6d25b98d1de.mp3"
+ },
+ {
+  "key": "en|0.9|The cheese is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cheese is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/fbbd3833fab2db54.mp3"
+ },
+ {
+  "key": "en|0.9|The school is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The school is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/b231aa8954a87f72.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième mardi d'octobre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième mardi d'octobre,",
+  "voice": "estelle",
+  "file": "fr/a8a1a385a0ebf0b9.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième jeudi de juillet,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième jeudi de juillet,",
+  "voice": "estelle",
+  "file": "fr/9170fa09f9dbe7f6.mp3"
+ },
+ {
+  "key": "fr|1|Quel mois vient avant avril ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Quel mois vient avant avril ?",
+  "voice": "estelle",
+  "file": "fr/268f4e77f044302a.mp3"
+ },
+ {
+  "key": "en|0.9|eight minus six is two!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "eight minus six is two!",
+  "voice": "estelle",
+  "file": "en/f2bf7170d2d11a2c.mp3"
+ },
+ {
+  "key": "en|1|nineteen dogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "nineteen dogs",
+  "voice": "estelle",
+  "file": "en/bcaf4d7dc4498f33.mp3"
+ },
+ {
+  "key": "en|1|nineteen cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "nineteen cars",
+  "voice": "estelle",
+  "file": "en/a4072699b3327257.mp3"
+ },
+ {
+  "key": "en|1|sixteen ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "sixteen ducks",
+  "voice": "estelle",
+  "file": "en/51c773ff2b2e9395.mp3"
+ },
+ {
+  "key": "en|1|eighteen cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eighteen cars",
+  "voice": "estelle",
+  "file": "en/c0ca6b8966202d5b.mp3"
+ },
+ {
+  "key": "en|1|eighteen cats",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eighteen cats",
+  "voice": "estelle",
+  "file": "en/ec690c8118a9d106.mp3"
+ },
+ {
+  "key": "en|1|fifteen frogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "fifteen frogs",
+  "voice": "estelle",
+  "file": "en/213c63a61053bbaa.mp3"
+ },
+ {
+  "key": "fr|1|Si on ajoute un papillon,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Si on ajoute un papillon,",
+  "voice": "estelle",
+  "file": "fr/622155072e295d9d.mp3"
+ },
+ {
+  "key": "fr|0.8|ou renard",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "ou renard",
+  "voice": "estelle",
+  "file": "fr/bafa885e8c49bf4b.mp3"
+ },
+ {
+  "key": "fr|0.8|ou oiseau",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "ou oiseau",
+  "voice": "estelle",
+  "file": "fr/c84ecc5993b3a6fb.mp3"
+ },
+ {
+  "key": "fr|0.8|ou maison",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "ou maison",
+  "voice": "estelle",
+  "file": "fr/ac0db7451c6ec8fe.mp3"
+ },
+ {
+  "key": "fr|0.8|ou crayon",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "ou crayon",
+  "voice": "estelle",
+  "file": "fr/c6cb2fca9f75c5ed.mp3"
+ },
+ {
+  "key": "fr|0.8|ou cadeau",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "ou cadeau",
+  "voice": "estelle",
+  "file": "fr/febfaa2f30cd0636.mp3"
+ },
+ {
+  "key": "fr|1|tracteur ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "tracteur ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/c1dc6bb747cbc1f5.mp3"
+ },
+ {
+  "key": "fr|1|ces chats",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces chats",
+  "voice": "estelle",
+  "file": "fr/5323ff4cd0655025.mp3"
+ },
+ {
+  "key": "en|0.9|The crayons is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The crayons is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/f4d725c71806b504.mp3"
+ },
+ {
+  "key": "en|0.9|The T-shirt is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The T-shirt is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/383c460441c75ab4.mp3"
+ },
+ {
+  "key": "en|0.9|The rainbow is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The rainbow is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/015fe61cb8f2ab44.mp3"
+ },
+ {
+  "key": "fr|1|Comment dit-on cœur jaune en anglais ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Comment dit-on cœur jaune en anglais ?",
+  "voice": "estelle",
+  "file": "fr/2a8b051eb4063f3a.mp3"
+ },
+ {
+  "key": "fr|1|Mets une poire,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Mets une poire,",
+  "voice": "estelle",
+  "file": "fr/19274f3b25a6b472.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième vendredi d'avril,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième vendredi d'avril,",
+  "voice": "estelle",
+  "file": "fr/3b789877d449e8b7.mp3"
+ },
+ {
+  "key": "fr|1|combien restera-t-il de fleurs ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "combien restera-t-il de fleurs ?",
+  "voice": "estelle",
+  "file": "fr/bb9a28d154b8038d.mp3"
+ },
+ {
+  "key": "en|0.9|one plus seven is eight!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "one plus seven is eight!",
+  "voice": "estelle",
+  "file": "en/30a51fcc69b9da16.mp3"
+ },
+ {
+  "key": "en|0.9|nine minus two is seven!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "nine minus two is seven!",
+  "voice": "estelle",
+  "file": "en/31cf607ac48ac0b4.mp3"
+ },
+ {
+  "key": "en|0.9|seven minus two is five!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "seven minus two is five!",
+  "voice": "estelle",
+  "file": "en/89ef4c4026e5aa97.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Grèce.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Grèce.",
+  "voice": "estelle",
+  "file": "fr/eb305eed48ae55cb.mp3"
+ },
+ {
+  "key": "fr|1|Comment dit-on cœur violet en anglais ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Comment dit-on cœur violet en anglais ?",
+  "voice": "estelle",
+  "file": "fr/cda305a4a55331ca.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier dimanche de janvier,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier dimanche de janvier,",
+  "voice": "estelle",
+  "file": "fr/fcbe396ff174b608.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier mercredi de juillet,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier mercredi de juillet,",
+  "voice": "estelle",
+  "file": "fr/2c012b9252649741.mp3"
+ },
+ {
+  "key": "fr|1|Le premier samedi de septembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier samedi de septembre,",
+  "voice": "estelle",
+  "file": "fr/568164d51d79fe53.mp3"
+ },
+ {
+  "key": "fr|1|Quel mois vient avant octobre ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Quel mois vient avant octobre ?",
+  "voice": "estelle",
+  "file": "fr/fb9c84a36fa0da98.mp3"
+ },
+ {
+  "key": "en|1|eight balloons",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eight balloons",
+  "voice": "estelle",
+  "file": "en/bc714b2c04516dcb.mp3"
+ },
+ {
+  "key": "en|1|seventeen cats",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seventeen cats",
+  "voice": "estelle",
+  "file": "en/d11fbc614223cac8.mp3"
+ },
+ {
+  "key": "fr|1|Un ballon de moins ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Un ballon de moins ?",
+  "voice": "estelle",
+  "file": "fr/2b8e4ff2cbeddb73.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de le Maroc !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de le Maroc !",
+  "voice": "estelle",
+  "file": "fr/b90cb7e404774972.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Suède !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Suède !",
+  "voice": "estelle",
+  "file": "fr/a12f86f03c472020.mp3"
+ },
+ {
+  "key": "fr|1|ces avions",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces avions",
+  "voice": "estelle",
+  "file": "fr/e4e2ba17e7e0fbc1.mp3"
+ },
+ {
+  "key": "fr|1|ces fleurs",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces fleurs",
+  "voice": "estelle",
+  "file": "fr/e37fc53dd473be64.mp3"
+ },
+ {
+  "key": "fr|1|une pomme,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "une pomme,",
+  "voice": "estelle",
+  "file": "fr/0008f92bc87203df.mp3"
+ },
+ {
+  "key": "fr|1|ou Tokyo ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou Tokyo ?",
+  "voice": "estelle",
+  "file": "fr/205afcf13026eeb9.mp3"
+ },
+ {
+  "key": "en|0.9|The ice cream is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The ice cream is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/6cb79b9dbb9f2262.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième vendredi d'octobre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième vendredi d'octobre,",
+  "voice": "estelle",
+  "file": "fr/514e16cfc9f4aca6.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Nouvelle-Zélande !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Nouvelle-Zélande !",
+  "voice": "estelle",
+  "file": "fr/1c52220b144b4d51.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de l'Islande !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de l'Islande !",
+  "voice": "estelle",
+  "file": "fr/7773203883e12b54.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de l'Irlande !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de l'Irlande !",
+  "voice": "estelle",
+  "file": "fr/7446af403eb4d4ca.mp3"
+ },
+ {
+  "key": "fr|1|Touche le drapeau de le Brésil.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Touche le drapeau de le Brésil.",
+  "voice": "estelle",
+  "file": "fr/88478c6904baeb82.mp3"
+ },
+ {
+  "key": "fr|1|c'est le drapeau de le Brésil !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est le drapeau de le Brésil !",
+  "voice": "estelle",
+  "file": "fr/85ea84abf47b1b76.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de le Nigeria.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de le Nigeria.",
+  "voice": "estelle",
+  "file": "fr/169d6948589a3c3f.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de le Sénégal.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de le Sénégal.",
+  "voice": "estelle",
+  "file": "fr/1b18aca96079b28f.mp3"
+ },
+ {
+  "key": "fr|1|ce sera samedi.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ce sera samedi.",
+  "voice": "estelle",
+  "file": "fr/441157aa815fad04.mp3"
+ },
+ {
+  "key": "en|1|thirteen apples",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "thirteen apples",
+  "voice": "estelle",
+  "file": "en/c8d58d82627fd859.mp3"
+ },
+ {
+  "key": "en|1|eighteen apples",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eighteen apples",
+  "voice": "estelle",
+  "file": "en/045eeeb11e49dee6.mp3"
+ },
+ {
+  "key": "en|0.9|The coat is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The coat is not food.",
+  "voice": "estelle",
+  "file": "en/6712d0feee4b4009.mp3"
+ },
+ {
+  "key": "fr|1|Mets une carotte,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Mets une carotte,",
+  "voice": "estelle",
+  "file": "fr/388786aa9f832a17.mp3"
+ },
+ {
+  "key": "fr|1|ces gâteaux",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces gâteaux",
+  "voice": "estelle",
+  "file": "fr/872c69e324225975.mp3"
+ },
+ {
+  "key": "fr|1|ces oiseaux",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces oiseaux",
+  "voice": "estelle",
+  "file": "fr/10ea5a0a7a3a2664.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de le Mexique !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de le Mexique !",
+  "voice": "estelle",
+  "file": "fr/128ec67e4e2404ea.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Pologne !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Pologne !",
+  "voice": "estelle",
+  "file": "fr/3956724318d8a2b8.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Norvège !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Norvège !",
+  "voice": "estelle",
+  "file": "fr/56775775b79911d4.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de le Danemark.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de le Danemark.",
+  "voice": "estelle",
+  "file": "fr/48aa181515fcf73f.mp3"
+ },
+ {
+  "key": "en|0.9|The socks is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The socks is not food.",
+  "voice": "estelle",
+  "file": "en/9c7723325caa5401.mp3"
+ },
+ {
+  "key": "en|0.9|The mouse is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The mouse is not food.",
+  "voice": "estelle",
+  "file": "en/92cf2402c2f5b7bd.mp3"
+ },
+ {
+  "key": "en|0.9|The cloud is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cloud is not food.",
+  "voice": "estelle",
+  "file": "en/2cfe9418531dac6a.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de le Cameroun !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de le Cameroun !",
+  "voice": "estelle",
+  "file": "fr/ce43c61e3ff19792.mp3"
+ },
+ {
+  "key": "fr|1|Mets une orange dans le panier.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Mets une orange dans le panier.",
+  "voice": "estelle",
+  "file": "fr/f59021aaac7597d8.mp3"
+ },
+ {
+  "key": "fr|1|ces voitures",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces voitures",
+  "voice": "estelle",
+  "file": "fr/45a19221739dd409.mp3"
+ },
+ {
+  "key": "fr|1|Si on enlève un ballon,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Si on enlève un ballon,",
+  "voice": "estelle",
+  "file": "fr/f448d7b2cdd04248.mp3"
+ },
+ {
+  "key": "en|0.9|The leg is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The leg is not weather.",
+  "voice": "estelle",
+  "file": "en/06d017ad0c55c66e.mp3"
+ },
+ {
+  "key": "en|0.9|The egg is not clothes.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The egg is not clothes.",
+  "voice": "estelle",
+  "file": "en/a6b7427dadb4f435.mp3"
+ },
+ {
+  "key": "en|0.9|The pen is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The pen is not weather.",
+  "voice": "estelle",
+  "file": "en/6e5f7e7528381462.mp3"
+ },
+ {
+  "key": "en|0.9|The ear is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The ear is not weather.",
+  "voice": "estelle",
+  "file": "en/ad556a9a246283e9.mp3"
+ },
+ {
+  "key": "en|0.9|The rabbit is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The rabbit is not food.",
+  "voice": "estelle",
+  "file": "en/b8f38c5f7f268dcd.mp3"
+ },
+ {
+  "key": "en|0.9|The dog is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The dog is not weather.",
+  "voice": "estelle",
+  "file": "en/0ab82cde5a9d34e0.mp3"
+ },
+ {
+  "key": "en|1|thirteen balloons",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "thirteen balloons",
+  "voice": "estelle",
+  "file": "en/19633073354c9b3e.mp3"
+ },
+ {
+  "key": "en|1|nineteen balloons",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "nineteen balloons",
+  "voice": "estelle",
+  "file": "en/84185d53112beae6.mp3"
+ },
+ {
+  "key": "en|1|two plus seven equals nine.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "two plus seven equals nine.",
+  "voice": "estelle",
+  "file": "en/4fc2283b4b0e608c.mp3"
+ },
+ {
+  "key": "fr|1|ou champignon",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou champignon",
+  "voice": "estelle",
+  "file": "fr/513dcaf1f6721e5c.mp3"
+ },
+ {
+  "key": "fr|1|Regarde la jolie fusée !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde la jolie fusée !",
+  "voice": "estelle",
+  "file": "fr/b12ca541ac218628.mp3"
+ },
+ {
+  "key": "fr|1|Regarde le grand livre !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde le grand livre !",
+  "voice": "estelle",
+  "file": "fr/2d70f4f58c5159cf.mp3"
+ },
+ {
+  "key": "fr|1|Une compote !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Une compote !",
+  "voice": "estelle",
+  "file": "fr/911a27e3206ccfe2.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de le Bangladesh !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de le Bangladesh !",
+  "voice": "estelle",
+  "file": "fr/a56edef0bff21074.mp3"
+ },
+ {
+  "key": "en|0.9|The lion is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The lion is not weather.",
+  "voice": "estelle",
+  "file": "en/b2a0cb6b422b7afa.mp3"
+ },
+ {
+  "key": "en|0.9|The bird is not clothes.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The bird is not clothes.",
+  "voice": "estelle",
+  "file": "en/30d7260f33f12bb6.mp3"
+ },
+ {
+  "key": "en|0.9|The foot is not clothes.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The foot is not clothes.",
+  "voice": "estelle",
+  "file": "en/a0edffefd5d33a98.mp3"
+ },
+ {
+  "key": "en|0.9|The foot is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The foot is not weather.",
+  "voice": "estelle",
+  "file": "en/7e58f813360262a4.mp3"
+ },
+ {
+  "key": "fr|1|Regarde la jolie maison !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde la jolie maison !",
+  "voice": "estelle",
+  "file": "fr/dcb028909895a386.mp3"
+ },
+ {
+  "key": "fr|1|Regarde le grand oiseau !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde le grand oiseau !",
+  "voice": "estelle",
+  "file": "fr/a05cb37ae0a38df2.mp3"
+ },
+ {
+  "key": "fr|1|Regarde le petit ballon !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde le petit ballon !",
+  "voice": "estelle",
+  "file": "fr/4ea1e15184d893c7.mp3"
+ },
+ {
+  "key": "fr|1|Regarde la grande fleur !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde la grande fleur !",
+  "voice": "estelle",
+  "file": "fr/0469655564cd2c67.mp3"
+ },
+ {
+  "key": "en|0.9|The bread is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The bread is not weather.",
+  "voice": "estelle",
+  "file": "en/69a5d0903bbbc3d8.mp3"
+ },
+ {
+  "key": "en|0.9|The ruler is not clothes.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The ruler is not clothes.",
+  "voice": "estelle",
+  "file": "en/89d9b55dd3b3bb13.mp3"
+ },
+ {
+  "key": "en|0.9|The leg is not an animal.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The leg is not an animal.",
+  "voice": "estelle",
+  "file": "en/0b5819f3b3cfdb9b.mp3"
+ },
+ {
+  "key": "en|0.9|The pen is not an animal.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The pen is not an animal.",
+  "voice": "estelle",
+  "file": "en/dd30d8bc2e7f14ed.mp3"
+ },
+ {
+  "key": "en|0.9|The mouth is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The mouth is not weather.",
+  "voice": "estelle",
+  "file": "en/dc5eede4f81c77a2.mp3"
+ },
+ {
+  "key": "en|0.9|The ruler is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The ruler is not weather.",
+  "voice": "estelle",
+  "file": "en/42d92a4f96a3adbb.mp3"
+ },
+ {
+  "key": "en|1|five plus three equals eight.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "five plus three equals eight.",
+  "voice": "estelle",
+  "file": "en/a717b0da798a75fe.mp3"
+ },
+ {
+  "key": "en|1|four plus three equals seven.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "four plus three equals seven.",
+  "voice": "estelle",
+  "file": "en/189eae4ef4957712.mp3"
+ },
+ {
+  "key": "fr|1|lapin ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "lapin ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/3e211d30fe913943.mp3"
+ },
+ {
+  "key": "fr|1|fusée ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "fusée ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/781470e858f00829.mp3"
+ },
+ {
+  "key": "fr|1|Regarde les jolis lapins !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde les jolis lapins !",
+  "voice": "estelle",
+  "file": "fr/8248a70c255efdbe.mp3"
+ },
+ {
+  "key": "fr|1|Regarde la petite fraise !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde la petite fraise !",
+  "voice": "estelle",
+  "file": "fr/36d738d55eec45b8.mp3"
+ },
+ {
+  "key": "fr|1|Regarde les jolis avions !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde les jolis avions !",
+  "voice": "estelle",
+  "file": "fr/3c8c27a492af9e98.mp3"
+ },
+ {
+  "key": "en|0.9|The rabbit is not clothes.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The rabbit is not clothes.",
+  "voice": "estelle",
+  "file": "en/b5d11bc3dbda31fa.mp3"
+ },
+ {
+  "key": "en|0.9|The banana is not clothes.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The banana is not clothes.",
+  "voice": "estelle",
+  "file": "en/03105aeb69c420b7.mp3"
+ },
+ {
+  "key": "en|0.9|The cheese is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cheese is not weather.",
+  "voice": "estelle",
+  "file": "en/70add9add7ddc62e.mp3"
+ },
+ {
+  "key": "en|0.9|The gloves is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The gloves is not weather.",
+  "voice": "estelle",
+  "file": "en/a379d675d3e79bc3.mp3"
+ },
+ {
+  "key": "en|0.9|The pig is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The pig is not for school.",
+  "voice": "estelle",
+  "file": "en/bdd372e8b46f3308.mp3"
+ },
+ {
+  "key": "en|0.9|The cheese is not clothes.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cheese is not clothes.",
+  "voice": "estelle",
+  "file": "en/6dddd373d5c53cc4.mp3"
+ },
+ {
+  "key": "fr|1|combien y aura-t-il de papillons ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "combien y aura-t-il de papillons ?",
+  "voice": "estelle",
+  "file": "fr/f68bf7d838d83dc0.mp3"
+ },
+ {
+  "key": "fr|1|mouton ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "mouton ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/f7b7b6f690e58e95.mp3"
+ },
+ {
+  "key": "fr|1|ballon ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ballon ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/242dc979dd4df7e2.mp3"
+ },
+ {
+  "key": "fr|1|citron ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "citron ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/69908c173bcc44b2.mp3"
+ },
+ {
+  "key": "fr|1|un kiwi,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "un kiwi,",
+  "voice": "estelle",
+  "file": "fr/bf78a936a0aea519.mp3"
+ },
+ {
+  "key": "fr|1|Regarde les jolies fleurs !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde les jolies fleurs !",
+  "voice": "estelle",
+  "file": "fr/040d275e70ae33ec.mp3"
+ },
+ {
+  "key": "fr|1|Regarde la petite voiture !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde la petite voiture !",
+  "voice": "estelle",
+  "file": "fr/f525562ffd34b1d1.mp3"
+ },
+ {
+  "key": "fr|1|Regarde les petits livres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde les petits livres !",
+  "voice": "estelle",
+  "file": "fr/98d5ef8566ff33ec.mp3"
+ },
+ {
+  "key": "fr|1|Regarde les grands lapins !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde les grands lapins !",
+  "voice": "estelle",
+  "file": "fr/add02486be96795b.mp3"
+ },
+ {
+  "key": "fr|1|Regarde la grande abeille !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde la grande abeille !",
+  "voice": "estelle",
+  "file": "fr/9f17fa191c1370f0.mp3"
+ },
+ {
+  "key": "fr|1|Regarde les petits lapins !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde les petits lapins !",
+  "voice": "estelle",
+  "file": "fr/5c54a030ef56052d.mp3"
+ },
+ {
+  "key": "en|0.9|The frog is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The frog is not for school.",
+  "voice": "estelle",
+  "file": "en/8605d15d1aebc71c.mp3"
+ },
+ {
+  "key": "en|0.9|The milk is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The milk is not for school.",
+  "voice": "estelle",
+  "file": "en/16c438f28fd92d38.mp3"
+ },
+ {
+  "key": "en|0.9|The tooth is not an animal.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The tooth is not an animal.",
+  "voice": "estelle",
+  "file": "en/97a6a0d96d389aaf.mp3"
+ },
+ {
+  "key": "en|0.9|The foot is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The foot is not for school.",
+  "voice": "estelle",
+  "file": "en/112d2f6a6b04d995.mp3"
+ },
+ {
+  "key": "en|0.9|The lion is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The lion is not for school.",
+  "voice": "estelle",
+  "file": "en/c683d2ea6d3fa8e5.mp3"
+ },
+ {
+  "key": "en|0.9|The cake is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cake is not for school.",
+  "voice": "estelle",
+  "file": "en/788f68a8c51fad38.mp3"
+ },
+ {
+  "key": "fr|1|Regarde les grandes poules !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde les grandes poules !",
+  "voice": "estelle",
+  "file": "fr/93155c4b1fd28edf.mp3"
+ },
+ {
+  "key": "fr|1|Regarde les jolies fraises !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Regarde les jolies fraises !",
+  "voice": "estelle",
+  "file": "fr/3ca2b0ee34ba80c1.mp3"
+ },
+ {
+  "key": "fr|1|ou les Chinois ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou les Chinois ?",
+  "voice": "estelle",
+  "file": "fr/8b8a2ba71b621582.mp3"
+ },
+ {
+  "key": "fr|1|Touche le drapeau de l'Inde.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Touche le drapeau de l'Inde.",
+  "voice": "estelle",
+  "file": "fr/87c9f325bddbc34c.mp3"
+ },
+ {
+  "key": "fr|1|c'est le drapeau de l'Inde !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est le drapeau de l'Inde !",
+  "voice": "estelle",
+  "file": "fr/525882379a6fb46d.mp3"
+ },
+ {
+  "key": "en|0.9|The pencil is not an animal.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The pencil is not an animal.",
+  "voice": "estelle",
+  "file": "en/dbeba76dc0676500.mp3"
+ },
+ {
+  "key": "en|0.9|The pizza is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The pizza is not for school.",
+  "voice": "estelle",
+  "file": "en/e8326fe84d0f1a0e.mp3"
+ },
+ {
+  "key": "en|0.9|The apple is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The apple is not for school.",
+  "voice": "estelle",
+  "file": "en/114277f7d52d69fb.mp3"
+ },
+ {
+  "key": "en|0.9|The trousers is not weather.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The trousers is not weather.",
+  "voice": "estelle",
+  "file": "en/4c252ea7a9022ee6.mp3"
+ },
+ {
+  "key": "fr|1|le zèbre a…",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "le zèbre a…",
+  "voice": "estelle",
+  "file": "fr/f9569e3df8662640.mp3"
+ },
+ {
+  "key": "en|1|eleven cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eleven cars",
+  "voice": "estelle",
+  "file": "en/9557a585e3872244.mp3"
+ },
+ {
+  "key": "en|1|twenty dogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twenty dogs",
+  "voice": "estelle",
+  "file": "en/d6c3dddad5ddd3f2.mp3"
+ },
+ {
+  "key": "en|1|twelve cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twelve cars",
+  "voice": "estelle",
+  "file": "en/7dd4ce1b0bfcce2b.mp3"
+ },
+ {
+  "key": "en|0.9|The rabbit is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The rabbit is not for school.",
+  "voice": "estelle",
+  "file": "en/56bddd34044e9c97.mp3"
+ },
+ {
+  "key": "en|1|sixteen cats",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "sixteen cats",
+  "voice": "estelle",
+  "file": "en/f9300fb4b4cb6b93.mp3"
+ },
+ {
+  "key": "en|1|twenty frogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twenty frogs",
+  "voice": "estelle",
+  "file": "en/8b7dcee20cfda2d0.mp3"
+ },
+ {
+  "key": "en|1|twelve stars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twelve stars",
+  "voice": "estelle",
+  "file": "en/6a7c002de38b99c4.mp3"
+ },
+ {
+  "key": "en|1|eleven ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eleven ducks",
+  "voice": "estelle",
+  "file": "en/754cd622aaa4665e.mp3"
+ },
+ {
+  "key": "en|1|twenty ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twenty ducks",
+  "voice": "estelle",
+  "file": "en/c2f97540af13f8f7.mp3"
+ },
+ {
+  "key": "en|1|sixteen cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "sixteen cars",
+  "voice": "estelle",
+  "file": "en/00b9b78a70700443.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Suisse.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Suisse.",
+  "voice": "estelle",
+  "file": "fr/78707cc5efa39ba3.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Hongrie.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Hongrie.",
+  "voice": "estelle",
+  "file": "fr/9897d9544c52d29e.mp3"
+ },
+ {
+  "key": "en|0.9|The ice cream is not an animal.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The ice cream is not an animal.",
+  "voice": "estelle",
+  "file": "en/50b98af2c68803c8.mp3"
+ },
+ {
+  "key": "fr|1|Comment dit-on cœur orange en anglais ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Comment dit-on cœur orange en anglais ?",
+  "voice": "estelle",
+  "file": "fr/57c3318de48feec0.mp3"
+ },
+ {
+  "key": "fr|1|Le premier mardi de mai,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier mardi de mai,",
+  "voice": "estelle",
+  "file": "fr/8b05ebc6451facec.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier jeudi de mai,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier jeudi de mai,",
+  "voice": "estelle",
+  "file": "fr/b1fb7c6ed02c68f3.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier mardi de mai,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier mardi de mai,",
+  "voice": "estelle",
+  "file": "fr/46d4aa86fd7699c6.mp3"
+ },
+ {
+  "key": "en|1|fourteen cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "fourteen cars",
+  "voice": "estelle",
+  "file": "en/63033aa7193df767.mp3"
+ },
+ {
+  "key": "en|1|thirteen dogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "thirteen dogs",
+  "voice": "estelle",
+  "file": "en/3b40f8df2281a602.mp3"
+ },
+ {
+  "key": "en|1|twenty apples",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twenty apples",
+  "voice": "estelle",
+  "file": "en/898d1f95ef1efec0.mp3"
+ },
+ {
+  "key": "en|0.9|One plus six?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "One plus six?",
+  "voice": "estelle",
+  "file": "en/02ffdde3d79a0ac9.mp3"
+ },
+ {
+  "key": "fr|1|une banane,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "une banane,",
+  "voice": "estelle",
+  "file": "fr/edf750d43caa7009.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Hongrie !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Hongrie !",
+  "voice": "estelle",
+  "file": "fr/2c2d39521f2ef2dc.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Roumanie.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Roumanie.",
+  "voice": "estelle",
+  "file": "fr/cb755d911afe92a1.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Finlande.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Finlande.",
+  "voice": "estelle",
+  "file": "fr/31e479037fc638fe.mp3"
+ },
+ {
+  "key": "en|0.9|The ice cream is not for school.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The ice cream is not for school.",
+  "voice": "estelle",
+  "file": "en/6adecc9ed6cb0215.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier mardi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier mardi de juin,",
+  "voice": "estelle",
+  "file": "fr/bbb800898a4e447a.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier lundi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier lundi de juin,",
+  "voice": "estelle",
+  "file": "fr/79edebe8648fbda0.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier jeudi d'avril,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier jeudi d'avril,",
+  "voice": "estelle",
+  "file": "fr/02b80665b4a01d85.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier samedi d'août,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier samedi d'août,",
+  "voice": "estelle",
+  "file": "fr/a3dac4d057cf2c0c.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier mardi de mars,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier mardi de mars,",
+  "voice": "estelle",
+  "file": "fr/29c8e291be398607.mp3"
+ },
+ {
+  "key": "en|1|two plus two equals four.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "two plus two equals four.",
+  "voice": "estelle",
+  "file": "en/6d1e24ed40b6a6b0.mp3"
+ },
+ {
+  "key": "en|1|sixteen apples",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "sixteen apples",
+  "voice": "estelle",
+  "file": "en/93b48c4419715f85.mp3"
+ },
+ {
+  "key": "en|1|eighteen frogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eighteen frogs",
+  "voice": "estelle",
+  "file": "en/e4751dc61f2f0200.mp3"
+ },
+ {
+  "key": "en|1|thirteen stars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "thirteen stars",
+  "voice": "estelle",
+  "file": "en/96bd1b6a7f488033.mp3"
+ },
+ {
+  "key": "en|0.9|One plus nine?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "One plus nine?",
+  "voice": "estelle",
+  "file": "en/c2d30ce976a6eff1.mp3"
+ },
+ {
+  "key": "en|0.9|Ten minus one?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Ten minus one?",
+  "voice": "estelle",
+  "file": "en/fd5140c6ce31ff26.mp3"
+ },
+ {
+  "key": "fr|1|combien restera-t-il de ballons ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "combien restera-t-il de ballons ?",
+  "voice": "estelle",
+  "file": "fr/75551613c1cb7c6e.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de l'Australie !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de l'Australie !",
+  "voice": "estelle",
+  "file": "fr/79e2f36f9dc4f239.mp3"
+ },
+ {
+  "key": "fr|1|La piscine est à une heure",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "La piscine est à une heure",
+  "voice": "estelle",
+  "file": "fr/f28f9c47dd1dc251.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième samedi d'août,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième samedi d'août,",
+  "voice": "estelle",
+  "file": "fr/777f08e427568d88.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième samedi de mai,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième samedi de mai,",
+  "voice": "estelle",
+  "file": "fr/cf75c9e41c7d9acb.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième jeudi d'août,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième jeudi d'août,",
+  "voice": "estelle",
+  "file": "fr/9adb435b59f5730b.mp3"
+ },
+ {
+  "key": "fr|1|Le premier samedi de mars,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier samedi de mars,",
+  "voice": "estelle",
+  "file": "fr/3e0a9e12547d7938.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième lundi d'avril,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième lundi d'avril,",
+  "voice": "estelle",
+  "file": "fr/d1f9ae3282a6bc1b.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième mardi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième mardi de juin,",
+  "voice": "estelle",
+  "file": "fr/bcc30b85d9340554.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième lundi de mars,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième lundi de mars,",
+  "voice": "estelle",
+  "file": "fr/35cdf6f1b6816d4b.mp3"
+ },
+ {
+  "key": "en|1|five plus five equals ten.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "five plus five equals ten.",
+  "voice": "estelle",
+  "file": "en/cb6eac3ce7fcfd97.mp3"
+ },
+ {
+  "key": "en|1|ten minus six equals four.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ten minus six equals four.",
+  "voice": "estelle",
+  "file": "en/1a35588ff3e6ac36.mp3"
+ },
+ {
+  "key": "en|1|six plus one equals seven.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "six plus one equals seven.",
+  "voice": "estelle",
+  "file": "en/3f62ff14831113ec.mp3"
+ },
+ {
+  "key": "en|0.9|The cap is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cap is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/aeca85112291808d.mp3"
+ },
+ {
+  "key": "en|1|seventeen stars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seventeen stars",
+  "voice": "estelle",
+  "file": "en/003f61a3cd057c7a.mp3"
+ },
+ {
+  "key": "en|1|twenty balloons",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twenty balloons",
+  "voice": "estelle",
+  "file": "en/a3112caea1ce3b0d.mp3"
+ },
+ {
+  "key": "en|0.9|One plus three?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "One plus three?",
+  "voice": "estelle",
+  "file": "en/d84391be0ff2d708.mp3"
+ },
+ {
+  "key": "en|0.9|Six minus four?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Six minus four?",
+  "voice": "estelle",
+  "file": "en/56a2b2bd30fee201.mp3"
+ },
+ {
+  "key": "en|0.9|One plus seven?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "One plus seven?",
+  "voice": "estelle",
+  "file": "en/68b834429c9d3ed6.mp3"
+ },
+ {
+  "key": "en|0.9|Two plus eight?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Two plus eight?",
+  "voice": "estelle",
+  "file": "en/dccb7892f36655d1.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier dimanche de mai,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier dimanche de mai,",
+  "voice": "estelle",
+  "file": "fr/531caa8e7ebd79a8.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième jeudi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième jeudi de juin,",
+  "voice": "estelle",
+  "file": "fr/6ea1111f77292b5c.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier mardi d'octobre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier mardi d'octobre,",
+  "voice": "estelle",
+  "file": "fr/1e6c964e6d167e7e.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième lundi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième lundi de juin,",
+  "voice": "estelle",
+  "file": "fr/bcdf6f412f6589ea.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième samedi de mars,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième samedi de mars,",
+  "voice": "estelle",
+  "file": "fr/963433b6ee7f5b56.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième samedi d'avril,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième samedi d'avril,",
+  "voice": "estelle",
+  "file": "fr/e2c71fe59a8a4caa.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième lundi de mars,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième lundi de mars,",
+  "voice": "estelle",
+  "file": "fr/ea3b8731a9308177.mp3"
+ },
+ {
+  "key": "en|1|three plus six equals nine.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "three plus six equals nine.",
+  "voice": "estelle",
+  "file": "en/baa64ed3b24d029f.mp3"
+ },
+ {
+  "key": "en|1|five minus one equals four.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "five minus one equals four.",
+  "voice": "estelle",
+  "file": "en/a7a8ca27669f13c5.mp3"
+ },
+ {
+  "key": "en|1|four plus five equals nine.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "four plus five equals nine.",
+  "voice": "estelle",
+  "file": "en/cbb40d4a9b880e82.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de les États-Unis.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de les États-Unis.",
+  "voice": "estelle",
+  "file": "fr/7eb53d6891627d9c.mp3"
+ },
+ {
+  "key": "en|0.9|The book is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The book is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/f0e9de8e1e6817c6.mp3"
+ },
+ {
+  "key": "en|0.9|The bird is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The bird is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/831b22092f1d3389.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième mercredi d'août,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième mercredi d'août,",
+  "voice": "estelle",
+  "file": "fr/97a8c1bae1762c8c.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier mardi de janvier,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier mardi de janvier,",
+  "voice": "estelle",
+  "file": "fr/0fcc9c68768c6b82.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier vendredi d'avril,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier vendredi d'avril,",
+  "voice": "estelle",
+  "file": "fr/20e490f767950558.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier vendredi de mars,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier vendredi de mars,",
+  "voice": "estelle",
+  "file": "fr/ecf89ef549a5cb12.mp3"
+ },
+ {
+  "key": "fr|1|Le premier lundi de février,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier lundi de février,",
+  "voice": "estelle",
+  "file": "fr/493fb0933471ad0c.mp3"
+ },
+ {
+  "key": "fr|1|Le premier lundi de juillet,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier lundi de juillet,",
+  "voice": "estelle",
+  "file": "fr/f000ee4ee4098754.mp3"
+ },
+ {
+  "key": "fr|1|Le premier vendredi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier vendredi de juin,",
+  "voice": "estelle",
+  "file": "fr/418d252683342170.mp3"
+ },
+ {
+  "key": "fr|1|Le premier dimanche de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier dimanche de juin,",
+  "voice": "estelle",
+  "file": "fr/db12a09a457f4ee6.mp3"
+ },
+ {
+  "key": "fr|1|Le premier dimanche de mars,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier dimanche de mars,",
+  "voice": "estelle",
+  "file": "fr/64502cfaaca94be2.mp3"
+ },
+ {
+  "key": "en|1|sixteen balloons",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "sixteen balloons",
+  "voice": "estelle",
+  "file": "en/22006742c0465a35.mp3"
+ },
+ {
+  "key": "en|1|nine minus three equals six.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "nine minus three equals six.",
+  "voice": "estelle",
+  "file": "en/61c3deab6b9ced69.mp3"
+ },
+ {
+  "key": "en|1|five minus two equals three.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "five minus two equals three.",
+  "voice": "estelle",
+  "file": "en/4d7de0bf7da754fc.mp3"
+ },
+ {
+  "key": "en|1|three plus three equals six.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "three plus three equals six.",
+  "voice": "estelle",
+  "file": "en/45d3b34d3f4c3e68.mp3"
+ },
+ {
+  "key": "en|0.9|Seven minus one?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Seven minus one?",
+  "voice": "estelle",
+  "file": "en/18ae90f76c727047.mp3"
+ },
+ {
+  "key": "en|1|five minus three equals two.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "five minus three equals two.",
+  "voice": "estelle",
+  "file": "en/941efb47def0131a.mp3"
+ },
+ {
+  "key": "en|0.9|Eight minus one?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Eight minus one?",
+  "voice": "estelle",
+  "file": "en/f298e3316a6f7c75.mp3"
+ },
+ {
+  "key": "en|0.9|Ten minus three?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Ten minus three?",
+  "voice": "estelle",
+  "file": "en/8bd6dacf077ecf17.mp3"
+ },
+ {
+  "key": "en|0.9|The paint is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The paint is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/58351fa9d96896a1.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Côte d'Ivoire.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Côte d'Ivoire.",
+  "voice": "estelle",
+  "file": "fr/58539806ea5fa1ab.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième vendredi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième vendredi de juin,",
+  "voice": "estelle",
+  "file": "fr/9c5ccbec286d87ca.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier samedi de juillet,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier samedi de juillet,",
+  "voice": "estelle",
+  "file": "fr/0c61164d9a2b84e8.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième mardi de février,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième mardi de février,",
+  "voice": "estelle",
+  "file": "fr/ce9acfaacbf0989c.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième mercredi d'août,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième mercredi d'août,",
+  "voice": "estelle",
+  "file": "fr/a864c0ef87d9c25c.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième mercredi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième mercredi de juin,",
+  "voice": "estelle",
+  "file": "fr/41b7f667e7dee4dc.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième jeudi de janvier,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième jeudi de janvier,",
+  "voice": "estelle",
+  "file": "fr/dc1e1159825a859c.mp3"
+ },
+ {
+  "key": "fr|1|Le premier samedi de juillet,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier samedi de juillet,",
+  "voice": "estelle",
+  "file": "fr/a3727b7bd3a745ed.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier jeudi de décembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier jeudi de décembre,",
+  "voice": "estelle",
+  "file": "fr/aae746dfbc99fed7.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième lundi de juillet,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième lundi de juillet,",
+  "voice": "estelle",
+  "file": "fr/43c55f1c167ebad1.mp3"
+ },
+ {
+  "key": "en|0.9|Seven minus five?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Seven minus five?",
+  "voice": "estelle",
+  "file": "en/bf70187448b095e9.mp3"
+ },
+ {
+  "key": "en|0.9|Eight minus five?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Eight minus five?",
+  "voice": "estelle",
+  "file": "en/981dd4bf07bf25ce.mp3"
+ },
+ {
+  "key": "fr|1|ces lions",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces lions",
+  "voice": "estelle",
+  "file": "fr/75eb0db60828070b.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième jeudi de février,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième jeudi de février,",
+  "voice": "estelle",
+  "file": "fr/a5cb0bd0357d0942.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième mardi de novembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième mardi de novembre,",
+  "voice": "estelle",
+  "file": "fr/7630491fcd9b2702.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier samedi de décembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier samedi de décembre,",
+  "voice": "estelle",
+  "file": "fr/f648b9ae3f177b50.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier jeudi de septembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier jeudi de septembre,",
+  "voice": "estelle",
+  "file": "fr/e0cf5a57bd0480db.mp3"
+ },
+ {
+  "key": "fr|1|Le premier samedi de novembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier samedi de novembre,",
+  "voice": "estelle",
+  "file": "fr/24895834a2a97421.mp3"
+ },
+ {
+  "key": "fr|1|Le premier mercredi d'octobre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier mercredi d'octobre,",
+  "voice": "estelle",
+  "file": "fr/053641b318bb671e.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième lundi de novembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième lundi de novembre,",
+  "voice": "estelle",
+  "file": "fr/17c24648bb16b0e4.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième mercredi de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième mercredi de juin,",
+  "voice": "estelle",
+  "file": "fr/29095d5a8947d920.mp3"
+ },
+ {
+  "key": "fr|1|Le premier dimanche d'octobre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier dimanche d'octobre,",
+  "voice": "estelle",
+  "file": "fr/05e629f4f59481b2.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier lundi de septembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier lundi de septembre,",
+  "voice": "estelle",
+  "file": "fr/178486d65d994f86.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième dimanche de juin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième dimanche de juin,",
+  "voice": "estelle",
+  "file": "fr/9eeeebcd23087762.mp3"
+ },
+ {
+  "key": "en|0.9|nine minus three is six!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "nine minus three is six!",
+  "voice": "estelle",
+  "file": "en/15170f26f44ccfee.mp3"
+ },
+ {
+  "key": "en|0.9|The scissors is not a part of the body.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The scissors is not a part of the body.",
+  "voice": "estelle",
+  "file": "en/776d42d2eb415ad9.mp3"
+ },
+ {
+  "key": "fr|1|Le premier mercredi de juillet,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier mercredi de juillet,",
+  "voice": "estelle",
+  "file": "fr/e490242a60435084.mp3"
+ },
+ {
+  "key": "fr|1|Le premier dimanche de janvier,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier dimanche de janvier,",
+  "voice": "estelle",
+  "file": "fr/61c111a06ed11009.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier vendredi de janvier,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier vendredi de janvier,",
+  "voice": "estelle",
+  "file": "fr/8ec5073fd487e706.mp3"
+ },
+ {
+  "key": "fr|1|ces pommes",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces pommes",
+  "voice": "estelle",
+  "file": "fr/93dd86ed205f1bf7.mp3"
+ },
+ {
+  "key": "fr|1|ces arbres",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ces arbres",
+  "voice": "estelle",
+  "file": "fr/60387acdf1f7a9bc.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième samedi de décembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième samedi de décembre,",
+  "voice": "estelle",
+  "file": "fr/8dd82c9bcc5e51af.mp3"
+ },
+ {
+  "key": "fr|1|Le premier dimanche de décembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le premier dimanche de décembre,",
+  "voice": "estelle",
+  "file": "fr/5ef6a3189e3bc63c.mp3"
+ },
+ {
+  "key": "fr|1|Le deuxième mercredi de février,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le deuxième mercredi de février,",
+  "voice": "estelle",
+  "file": "fr/61169f0e4192f619.mp3"
+ },
+ {
+  "key": "fr|1|robot ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "robot ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/d56af7bc10d9f882.mp3"
+ },
+ {
+  "key": "fr|1|Le dernier vendredi de septembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dernier vendredi de septembre,",
+  "voice": "estelle",
+  "file": "fr/f2d1a7443830f0bd.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième dimanche de janvier,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième dimanche de janvier,",
+  "voice": "estelle",
+  "file": "fr/1ec7b52009b6a0a4.mp3"
+ },
+ {
+  "key": "fr|1|bonbon ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "bonbon ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/eefea217ea007e7d.mp3"
+ },
+ {
+  "key": "fr|1|requin ne rime pas avec les autres !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "requin ne rime pas avec les autres !",
+  "voice": "estelle",
+  "file": "fr/ce53650d982c6150.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième dimanche de décembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième dimanche de décembre,",
+  "voice": "estelle",
+  "file": "fr/bdd297c2ab77f57a.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième dimanche de novembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième dimanche de novembre,",
+  "voice": "estelle",
+  "file": "fr/eecbefaca10de745.mp3"
+ },
+ {
+  "key": "fr|1|Le troisième mercredi de septembre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le troisième mercredi de septembre,",
+  "voice": "estelle",
+  "file": "fr/370ee768a2bde213.mp3"
+ },
+ {
+  "key": "fr|1|c'est combien de kilomètres ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est combien de kilomètres ?",
+  "voice": "estelle",
+  "file": "fr/394d27c87e392e31.mp3"
+ },
+ {
+  "key": "fr|1|Le zèbre a des poils :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le zèbre a des poils :",
+  "voice": "estelle",
+  "file": "fr/02c973b9bacc147c.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de la Chine.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de la Chine.",
+  "voice": "estelle",
+  "file": "fr/8743a3b03163e8c2.mp3"
+ },
+ {
+  "key": "fr|1|Les Japonais,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Les Japonais,",
+  "voice": "estelle",
+  "file": "fr/a26d881252b1ae15.mp3"
+ },
+ {
+  "key": "fr|1|une poire,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "une poire,",
+  "voice": "estelle",
+  "file": "fr/bdc2a281aa8c6f7e.mp3"
+ },
+ {
+  "key": "fr|1|Touche le drapeau de le Maroc.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Touche le drapeau de le Maroc.",
+  "voice": "estelle",
+  "file": "fr/006fed3d5c7eabf5.mp3"
+ },
+ {
+  "key": "fr|1|c'est le drapeau de le Maroc !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est le drapeau de le Maroc !",
+  "voice": "estelle",
+  "file": "fr/91afccca90fc59ee.mp3"
+ },
+ {
+  "key": "fr|1|Touche le drapeau de la Grèce.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Touche le drapeau de la Grèce.",
+  "voice": "estelle",
+  "file": "fr/34bd11625c1bd741.mp3"
+ },
+ {
+  "key": "fr|1|c'est le drapeau de la Grèce !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est le drapeau de la Grèce !",
+  "voice": "estelle",
+  "file": "fr/71210288ad6f0a96.mp3"
+ },
+ {
+  "key": "fr|1|Touche le drapeau de le Chili.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Touche le drapeau de le Chili.",
+  "voice": "estelle",
+  "file": "fr/496dd46ff93bc19c.mp3"
+ },
+ {
+  "key": "fr|1|c'est le drapeau de le Chili !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est le drapeau de le Chili !",
+  "voice": "estelle",
+  "file": "fr/ccf0f04d4f769d6b.mp3"
+ },
+ {
+  "key": "fr|1|Touche le drapeau de la Chine.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Touche le drapeau de la Chine.",
+  "voice": "estelle",
+  "file": "fr/bb37d9ba773250c1.mp3"
+ },
+ {
+  "key": "fr|1|c'est le drapeau de la Chine !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est le drapeau de la Chine !",
+  "voice": "estelle",
+  "file": "fr/845c99932df5b73e.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Russie !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Russie !",
+  "voice": "estelle",
+  "file": "fr/51f63724b70e4ee7.mp3"
+ },
+ {
+  "key": "fr|1|Le repas est à une heure",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le repas est à une heure",
+  "voice": "estelle",
+  "file": "fr/f6e6a28dccf41030.mp3"
+ },
+ {
+  "key": "en|1|one plus one equals two.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "one plus one equals two.",
+  "voice": "estelle",
+  "file": "en/f8c150449aedf39f.mp3"
+ },
+ {
+  "key": "fr|1|C'est le drapeau de la Turquie !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "C'est le drapeau de la Turquie !",
+  "voice": "estelle",
+  "file": "fr/e7bb8d3dacd2660d.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de l'Australie.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de l'Australie.",
+  "voice": "estelle",
+  "file": "fr/27032225e5c6f14d.mp3"
+ },
+ {
+  "key": "fr|1|Voici le drapeau de l'Allemagne.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Voici le drapeau de l'Allemagne.",
+  "voice": "estelle",
+  "file": "fr/8569c3ecada1acd5.mp3"
+ },
+ {
+  "key": "en|1|six apples",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "six apples",
+  "voice": "estelle",
+  "file": "en/4ed7e6372abe8bfa.mp3"
+ },
+ {
+  "key": "en|1|one plus five equals six.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "one plus five equals six.",
+  "voice": "estelle",
+  "file": "en/72d1e4145bb7f78a.mp3"
+ },
+ {
+  "key": "en|1|four plus six equals ten.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "four plus six equals ten.",
+  "voice": "estelle",
+  "file": "en/ef98d3278fc398a3.mp3"
+ },
+ {
+  "key": "en|1|five plus one equals six.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "five plus one equals six.",
+  "voice": "estelle",
+  "file": "en/a05dd52c83da856f.mp3"
+ },
+ {
+  "key": "fr|1|Touche le drapeau de le Viêt Nam.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Touche le drapeau de le Viêt Nam.",
+  "voice": "estelle",
+  "file": "fr/a000e34da51b6f32.mp3"
+ },
+ {
+  "key": "fr|1|c'est le drapeau de le Viêt Nam !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est le drapeau de le Viêt Nam !",
+  "voice": "estelle",
+  "file": "fr/220eafeb15dd9c8f.mp3"
+ },
+ {
+  "key": "fr|1|une carotte,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "une carotte,",
+  "voice": "estelle",
+  "file": "fr/daad4cd8e790213f.mp3"
+ },
+ {
+  "key": "fr|1|Un film au cinéma dure le plus longtemps.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Un film au cinéma dure le plus longtemps.",
+  "voice": "estelle",
+  "file": "fr/c25d8e6163536f0e.mp3"
+ },
+ {
+  "key": "en|1|two plus one equals three.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "two plus one equals three.",
+  "voice": "estelle",
+  "file": "en/15b73932a0990eaf.mp3"
+ },
+ {
+  "key": "en|1|ten minus nine equals one.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ten minus nine equals one.",
+  "voice": "estelle",
+  "file": "en/d2acb237187231dd.mp3"
+ },
+ {
+  "key": "en|1|one plus four equals five.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "one plus four equals five.",
+  "voice": "estelle",
+  "file": "en/26b06459503762e5.mp3"
+ },
+ {
+  "key": "en|1|four plus one equals five.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "four plus one equals five.",
+  "voice": "estelle",
+  "file": "en/ea79f53606624879.mp3"
+ },
+ {
+  "key": "en|1|four minus two equals two.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "four minus two equals two.",
+  "voice": "estelle",
+  "file": "en/d3e549fe85a55d4c.mp3"
+ },
+ {
+  "key": "en|1|seven ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seven ducks",
+  "voice": "estelle",
+  "file": "en/00770d68b9977e65.mp3"
+ },
+ {
+  "key": "en|1|twelve dogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twelve dogs",
+  "voice": "estelle",
+  "file": "en/966961a1ce012fcf.mp3"
+ },
+ {
+  "key": "en|1|one plus eight equals nine.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "one plus eight equals nine.",
+  "voice": "estelle",
+  "file": "en/3e9eaac5613bc535.mp3"
+ },
+ {
+  "key": "en|1|ten minus eight equals two.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ten minus eight equals two.",
+  "voice": "estelle",
+  "file": "en/ea95a467b09c08a4.mp3"
+ },
+ {
+  "key": "en|1|twenty stars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twenty stars",
+  "voice": "estelle",
+  "file": "en/41890fb7ef27463f.mp3"
+ },
+ {
+  "key": "en|1|eleven frogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eleven frogs",
+  "voice": "estelle",
+  "file": "en/d3d56aa193b645c7.mp3"
+ },
+ {
+  "key": "en|1|nine minus four equals five.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "nine minus four equals five.",
+  "voice": "estelle",
+  "file": "en/975161ea193820da.mp3"
+ },
+ {
+  "key": "en|1|seven minus two equals five.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seven minus two equals five.",
+  "voice": "estelle",
+  "file": "en/084b195658728537.mp3"
+ },
+ {
+  "key": "en|1|three plus four equals seven.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "three plus four equals seven.",
+  "voice": "estelle",
+  "file": "en/aa5e9af39a2d207c.mp3"
+ },
+ {
+  "key": "en|1|three plus five equals eight.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "three plus five equals eight.",
+  "voice": "estelle",
+  "file": "en/7407ace426077cc0.mp3"
+ },
+ {
+  "key": "en|1|six minus three equals three.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "six minus three equals three.",
+  "voice": "estelle",
+  "file": "en/59ae21d752aa61de.mp3"
+ },
+ {
+  "key": "fr|1|Quelle est la date du premier samedi d'avril ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Quelle est la date du premier samedi d'avril ?",
+  "voice": "estelle",
+  "file": "fr/747a4c48a261054c.mp3"
+ },
+ {
+  "key": "en|1|sixteen frogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "sixteen frogs",
+  "voice": "estelle",
+  "file": "en/1005bb7ef51d77be.mp3"
+ },
+ {
+  "key": "en|1|twelve apples",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "twelve apples",
+  "voice": "estelle",
+  "file": "en/fe12f7b294ed2a01.mp3"
+ },
+ {
+  "key": "en|1|fifteen ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "fifteen ducks",
+  "voice": "estelle",
+  "file": "en/42b8245ca8f920db.mp3"
+ },
+ {
+  "key": "en|1|thirteen cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "thirteen cars",
+  "voice": "estelle",
+  "file": "en/f3c48503c1da0bdb.mp3"
+ },
+ {
+  "key": "en|1|seven minus four equals three.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seven minus four equals three.",
+  "voice": "estelle",
+  "file": "en/5d2afd32336e31cd.mp3"
+ },
+ {
+  "key": "en|1|seven minus three equals four.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seven minus three equals four.",
+  "voice": "estelle",
+  "file": "en/e58998fecd49eecc.mp3"
+ },
+ {
+  "key": "en|1|eight minus three equals five.",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eight minus three equals five.",
+  "voice": "estelle",
+  "file": "en/6cd6b986f075f224.mp3"
+ },
+ {
+  "key": "fr|1|il était une heure.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "il était une heure.",
+  "voice": "estelle",
+  "file": "fr/a51a1f5c8ba1c2a3.mp3"
+ },
+ {
+  "key": "fr|1|Le dessin animé est à une heure",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le dessin animé est à une heure",
+  "voice": "estelle",
+  "file": "fr/a92163c2e60b5a8d.mp3"
+ },
+ {
+  "key": "fr|1|Quelle est la date du premier lundi de janvier ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Quelle est la date du premier lundi de janvier ?",
+  "voice": "estelle",
+  "file": "fr/61713d4d312eea17.mp3"
+ },
+ {
+  "key": "en|1|seventeen cars",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seventeen cars",
+  "voice": "estelle",
+  "file": "en/35ee257a40fc5e88.mp3"
+ },
+ {
+  "key": "en|1|fourteen ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "fourteen ducks",
+  "voice": "estelle",
+  "file": "en/8de49b0fc086a6f8.mp3"
+ },
+ {
+  "key": "en|1|nineteen ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "nineteen ducks",
+  "voice": "estelle",
+  "file": "en/8acfd4ebd8d85d2f.mp3"
+ },
+ {
+  "key": "en|1|eighteen ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "eighteen ducks",
+  "voice": "estelle",
+  "file": "en/dcc97df5c84d0bae.mp3"
+ },
+ {
+  "key": "en|1|seventeen dogs",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "seventeen dogs",
+  "voice": "estelle",
+  "file": "en/9689078d1dda643c.mp3"
+ },
+ {
+  "key": "en|1|thirteen ducks",
+  "lang": "en",
+  "rate": 1,
+  "type": "proposition",
+  "text": "thirteen ducks",
+  "voice": "estelle",
+  "file": "en/d0a347d2ff08ac3f.mp3"
+ },
+ {
+  "key": "en|0.9|The pig is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The pig is not food.",
+  "voice": "estelle",
+  "file": "en/c1dd80e476460876.mp3"
+ },
+ {
+  "key": "en|0.9|The cow is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cow is not food.",
+  "voice": "estelle",
+  "file": "en/7dba49382c8c249f.mp3"
+ },
+ {
+  "key": "en|0.9|The cat is not food.",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "The cat is not food.",
+  "voice": "estelle",
+  "file": "en/d19b1c469d2e0767.mp3"
  }
 ]
