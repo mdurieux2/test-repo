@@ -20,6 +20,8 @@ const TYPES = {
   '.txt': 'text/plain; charset=utf-8',
   '.jpg': 'image/jpeg',
   '.pdf': 'application/pdf',
+  '.mp3': 'audio/mpeg',
+  '.json': 'application/json',
 };
 
 export function startServer(port = PORT, root = ROOT) {
@@ -32,7 +34,21 @@ export function startServer(port = PORT, root = ROOT) {
     }
     try {
       const body = await readFile(file);
-      res.writeHead(200, { 'Content-Type': TYPES[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
+      const type = TYPES[extname(file)] || 'application/octet-stream';
+      // une partie du fichier (« Range: bytes=a-b ») : un son pris dans un paquet de sons, comme sur GitHub Pages
+      const range = /^bytes=(\d+)-(\d*)$/.exec(req.headers.range || '');
+      if (range) {
+        const start = Number(range[1]);
+        const end = Math.min(range[2] ? Number(range[2]) : body.length - 1, body.length - 1);
+        if (start > end) {
+          res.writeHead(416, { 'Content-Range': `bytes */${body.length}` }).end();
+          return;
+        }
+        res.writeHead(206, { 'Content-Type': type, 'Content-Range': `bytes ${start}-${end}/${body.length}`, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache' });
+        res.end(body.subarray(start, end + 1));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache' });
       res.end(body);
     } catch {
       res.writeHead(404).end('Introuvable');

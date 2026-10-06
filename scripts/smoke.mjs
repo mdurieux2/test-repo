@@ -21,7 +21,7 @@ import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 import { seasonOf } from '../app/js/themes.js';
-import { cle } from '../app/js/voix-cles.js';
+import { cle, planLecture } from '../app/js/voix-cles.js';
 
 const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
@@ -1167,7 +1167,7 @@ await page.evaluate(() => { window.__spoken = []; window.__clips = []; window.__
 await page.click('.natural-voice input'); // coupée : la voix de l'appareil dit la phrase d'essai
 await page.waitForFunction((text) => window.__spoken.includes(text), VOICE_TEST);
 await page.click('.natural-voice input'); // rallumée
-if (voiceManifest.clips[cle(VOICE_TEST)]) {
+if (planLecture(VOICE_TEST, (key) => Object.hasOwn(voiceManifest.clips, key))?.length) {
   await page.waitForFunction(() => (window.__clips || []).some((src) => src.startsWith('blob:')));
   await page.waitForTimeout(300);
   if ((await page.evaluate(() => window.__spoken)).filter((t) => t === VOICE_TEST).length !== 1) fail('voix naturelle : la phrase a aussi été dite par la voix de l’appareil');
@@ -1177,6 +1177,28 @@ if (voiceManifest.clips[cle(VOICE_TEST)]) {
   console.log('✔ voix naturelle : réglage ; sons pas encore générés, la voix de l’appareil prend le relais');
 }
 await page.evaluate(() => { window.__voixNaturelle = false; });
+// téléchargement des sons pour le mode avion : en paquets, avec une barre en haut de l'écran
+if (voiceManifest.paquets?.length) {
+  const started = Date.now();
+  await page.evaluate(() => { window.__telechargerVoix = true; window.dispatchEvent(new Event('online')); });
+  await page.waitForSelector('.voice-progress', { timeout: 15000 });
+  const during = await page.textContent('.voice-progress-text');
+  if (!/^Voix d’Estelle : \d+ %$/.test(during)) fail(`barre de téléchargement : « ${during} »`);
+  await page.waitForSelector('.voice-progress.done', { timeout: 180000 });
+  const after = await page.textContent('.voice-progress-text');
+  if (after !== 'Voix d’Estelle prête ✓') fail(`barre de téléchargement à la fin : « ${after} »`);
+  await page.waitForSelector('.voice-progress', { state: 'detached', timeout: 5000 });
+  const files = new Set(Object.values(voiceManifest.clips));
+  const cached = await page.evaluate(async () => (await (await caches.open('lire-et-compter-voix')).keys())
+    .map((r) => new URL(r.url).pathname.split('/voix/')[1]));
+  const missing = [...files].filter((f) => !cached.includes(f));
+  if (missing.length) fail(`téléchargement des sons : ${missing.length} manquants (${missing.slice(0, 3).join(', ')})`);
+  // un son gardé est bien un MP3 (redécoupé au bon endroit dans son paquet)
+  const head = await page.evaluate(async (file) => [...new Uint8Array(await (await fetch(`voix/${file}`)).arrayBuffer()).slice(0, 2)], [...files][5]);
+  if (head[0] !== 0xff || (head[1] & 0xe0) !== 0xe0) fail(`son mal découpé : ${head}`);
+  await page.evaluate(() => { window.__telechargerVoix = false; });
+  console.log(`✔ voix : ${files.size} sons téléchargés en ${voiceManifest.paquets.length} paquets (${(voiceManifest.octets / 1e6).toFixed(0)} Mo) en ${((Date.now() - started) / 1000).toFixed(0)} s, barre « ${during} » puis « ${after} »`);
+}
 await page.click('[data-tab="enfants"]');
 await page.click('[data-edit="eva-rose"]');
 await page.setInputFiles('[data-photo-input="eva-rose"]', 'app/icons/icon-512.png');
