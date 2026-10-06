@@ -90,6 +90,7 @@ export function allUtterances() {
 }
 
 const has = (names, t) => names.some((n) => t.includes(n));
+const MANIFEST = new URL('../../app/voix/manifest.json', import.meta.url).pathname;
 
 function select(utterances) {
   const units = new Map(); // clé → { lang, rate, text, type }
@@ -111,7 +112,9 @@ function select(utterances) {
   }
   const score = (w, text) => w / (normaliser(text).length + 20);
   let spent = 0;
+  const considered = new Map(); // tous les candidats, choisis ou non
   const pick = (candidates, limit, type) => {
+    for (const [key, { text, opts }] of candidates) if (!considered.has(key)) considered.set(key, { text, opts, type });
     for (const [key, { w, text, opts }] of [...candidates].sort((a, b) => score(b[1].w, b[1].text) - score(a[1].w, a[1].text))) {
       if (spent >= limit) break;
       if (units.has(key)) continue;
@@ -200,7 +203,10 @@ function select(utterances) {
       repair.set(k, { w: (repair.get(k)?.w || 0) + w, text: p, opts });
     }
   }
-  pick(repair, spent + BUDGET * 0.05, 'proposition');
+  pick(repair, spent + BUDGET * 0.08, 'proposition');
+  // f. un son déjà fabriqué qui sert encore est gardé, même hors budget : il ne coûte plus rien
+  const made = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8')).clips : {};
+  for (const [key, { text, opts, type }] of considered) if (!units.has(key) && Object.hasOwn(made, key)) addUnit(text, opts, type);
   return { units, chosen, spent };
 }
 

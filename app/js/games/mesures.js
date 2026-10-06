@@ -415,13 +415,14 @@ function calendrierPlus(level, rng) {
     return {
       key: `calendrier:chercher:${month}:${firstWeekday}:${weekday}:${nth}`,
       text: question,
-      instruction: `Regarde le calendrier. Quelle est la date du ${ORDINALS[nth]} ${DAYS[weekday]} ${ofMonth(month)} ?`,
-      short: { key: 'calendrier:chercher', text: question },
+      // dit en phrases courtes, chacune enregistrée d'un seul tenant (le mois est sur le calendrier)
+      instruction: `Regarde le calendrier ${ofMonth(month)}. Quelle est la date du ${ORDINALS[nth]} ${DAYS[weekday]} ?`,
+      short: { key: 'calendrier:chercher', text: question, speak: `Le ${ORDINALS[nth]} ${DAYS[weekday]}, c’est le…` },
       stage: { type: 'calendar', month: MONTHS[month], days, firstWeekday },
       choices: options.map((d) => ({ value: d, label: dateLabel(d, month) })),
       choiceStyle: 'answers',
       answer,
-      success: { speak: `Le ${ORDINALS[nth]} ${DAYS[weekday]} ${ofMonth(month)}, c’est le ${dateLabel(answer, month)}.` },
+      success: { speak: `Le ${ORDINALS[nth]} ${DAYS[weekday]}, c’est le ${dateLabel(answer, month)}.` },
     };
   }
   // passer au mois suivant : après le 30 ou le 31, on recommence au 1er
