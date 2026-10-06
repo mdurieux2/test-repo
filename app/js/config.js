@@ -4,13 +4,24 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.8.1',
+  version: '1.9.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.9.0',
+    date: '2026-10-06',
+    changes: [
+      'Une seule voix, celle d’Estelle, partout : en anglais aussi, et plus jamais la voix de l’appareil au milieu d’une consigne (sauf pour un prénom rare, ou un son pas encore téléchargé).',
+      'Chaque phrase est dite d’un seul tenant, et les phrases d’une consigne s’enchaînent sans trou, avec une petite pause naturelle entre elles.',
+      'Voix plus égale : même volume d’un son à l’autre, même hauteur (les exclamations ne montent plus dans les aigus), et des mots moins ralentis.',
+      'Chaque son est vérifié par une reconnaissance vocale (la diction doit être claire), et refait s’il le faut.',
+      'Consignes réécrites en phrases entières (écrire les lettres, chemins de lettres…).',
+    ],
+  },
   {
     version: '1.8.1',
     date: '2026-10-06',

@@ -10,8 +10,8 @@ import {
 
 const FOLLOW = 'Suis le chemin avec ton doigt, en partant du point vert.';
 
-/** Le nom d'une lettre, dit lentement (« bé », « ache »…). */
-const spoken = (letter) => ({ text: LETTER_NAMES[letter.toLowerCase()] || letter, rate: 0.8 });
+/** Le nom d'une lettre, tel qu'on le dit (« bé », « ache »…) : il reste dans la phrase, pour une voix fluide. */
+const said = (letter) => LETTER_NAMES[letter.toLowerCase()] || letter;
 
 function traceQuestion({ key, set, glyph, strokes, text, instruction, short, success, word = null, position = null }) {
   return {
@@ -37,9 +37,9 @@ function capitalQuestion(rng, level) {
     glyph: letter,
     strokes: CAPITALES[letter],
     text,
-    instruction: ['Écris la lettre', spoken(letter), FOLLOW],
-    short: { key: 'ecrire:3', text, speak: ['La lettre', spoken(letter), '!'] },
-    success: { speak: ['Voilà un beau', spoken(letter), '!'] },
+    instruction: `Écris la lettre ${said(letter)}. ${FOLLOW}`,
+    short: { key: 'ecrire:3', text, speak: `La lettre ${said(letter)} !` },
+    success: { speak: `Voilà un beau ${said(letter)} !` },
   });
 }
 
@@ -65,9 +65,9 @@ function nameQuestion(rng, index, name) {
     glyph: letter,
     strokes: CAPITALES[letter],
     text,
-    instruction: ['Écris le', spoken(letter), `de ${name}.`, FOLLOW],
-    short: { key: 'ecrire:5', text, speak: ['Le', spoken(letter), `de ${name} !`] },
-    success: { speak: ['Voilà le', spoken(letter), `de ${name} !`] },
+    instruction: `Écris le ${said(letter)} de ${name}. ${FOLLOW}`,
+    short: { key: 'ecrire:5', text, speak: `Le ${said(letter)} de ${name} !` },
+    success: { speak: `Voilà le ${said(letter)} de ${name} !` },
     word,
     position,
   });
@@ -119,9 +119,9 @@ export const ecrire = {
         glyph: letter,
         strokes: CURSIVE[letter],
         text,
-        instruction: ['Écris le', spoken(letter), 'en lettres attachées.', FOLLOW],
-        short: { key: 'ecrire:4', text, speak: ['Le', spoken(letter), 'en attaché !'] },
-        success: { speak: ['Voilà un beau', spoken(letter), '!'] },
+        instruction: `Écris le ${said(letter)} en lettres attachées. ${FOLLOW}`,
+        short: { key: 'ecrire:4', text, speak: `Le ${said(letter)} en attaché !` },
+        success: { speak: `Voilà un beau ${said(letter)} !` },
       });
     }
     if (level === 5) return nameQuestion(rng, index, context?.name);

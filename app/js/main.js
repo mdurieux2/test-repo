@@ -920,7 +920,7 @@ function nextQuestion(session) {
   const badge = clock
     ? h('span', { class: 'level-badge chrono-badge' }, h('span', { class: 'chrono-level' }, levelText), clock)
     : h('span', { class: 'level-badge' }, levelText);
-  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}` },
+  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}`, 'data-game': game.id },
     session.duo
       ? topBar({ onBack: session.back, backLabel: 'Quitter', title: duoScoreboard(session, progress) })
       : topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
@@ -4004,7 +4004,7 @@ function settingsTab() {
         h('p', { class: 'contact' }, 'Une remarque, un bug, une idée ? Écrivez à ',
           h('a', { class: 'link-action', href: `mailto:${APP.contact}?subject=${encodeURIComponent(APP.name)}`, 'data-contact': '' }, APP.contact), '.'),
         h('p', { class: 'muted small' }, 'Police Andika © SIL International (licence OFL).'),
-        h('p', { class: 'muted small' }, 'Voix naturelle : Pocket TTS © Kyutai, voix « Estelle » (corpus CML-TTS) et « Alba » (licence CC-BY 4.0).'))));
+        h('p', { class: 'muted small' }, 'Voix naturelle : Pocket TTS © Kyutai, voix « Estelle » (corpus CML-TTS, licence CC-BY 4.0).'))));
 }
 
 // ---------------------------------------------------------------- Démarrage

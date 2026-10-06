@@ -1,14 +1,24 @@
 # Fabrique les sons de la voix naturelle (Pocket TTS de Kyutai, modèle normal) listés dans
-# scripts/voix/a-generer.json : un MP3 par phrase, nombre ou prénom.
+# scripts/voix/a-generer.json : un MP3 par phrase, proposition, morceau, mot, nombre ou prénom.
 # Les sons déjà présents dans app/voix/ sont sautés (seules les nouvelles phrases sont fabriquées).
 #
-# Usage : python scripts/voix/generer.py --shard 3/8 --sortie voix-sortie
+# Pour une voix égale d'un son à l'autre, chaque son est contrôlé, et refait s'il le faut :
+#  - hauteur de la voix proche de sa hauteur habituelle (une exclamation ne doit pas devenir aiguë) ;
+#  - débit plausible (ni son coupé, ni long silence au milieu d'un mot) ;
+#  - diction : la reconnaissance vocale (Whisper) doit retrouver le texte ;
+#  - volume égalisé, pauses raccourcies, silences du début et de la fin retirés.
+# Le meilleur essai est gardé ; chaque son est décrit dans rapport-k.json (hauteur, volume, débit,
+# texte reconnu), les sons ratés dans echecs-k.json.
+#
+# Usage : python scripts/voix/generer.py --shard 3/8 --sortie voix-sortie [--essais 4] [--whisper small]
 import argparse
+import difflib
 import json
 import re
 import subprocess
 import tempfile
 import time
+import unicodedata
 import wave
 from pathlib import Path
 
@@ -22,11 +32,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--shard', default='1/1')
 parser.add_argument('--sortie', default='voix-sortie')
 parser.add_argument('--liste', default=str(ROOT / 'scripts/voix/a-generer.json'))
+parser.add_argument('--essais', type=int, default=4)
+parser.add_argument('--whisper', default='small', help="modèle de reconnaissance vocale, ou 'aucun'")
 args = parser.parse_args()
 k, n = map(int, args.shard.split('/'))
 OUT = Path(args.sortie)
 EXISTING = ROOT / 'app/voix'
 LANGUAGES = {'fr': 'french', 'en': 'english'}
+# hauteur habituelle de la voix (Hz, médiane mesurée sur les sons de la version 1.8.1)
+PITCH = {'estelle': 254.0}
+PITCH_TOLERANCE = 0.15  # ± 15 % : au-delà, la voix paraît changer
+TARGET_DB = -20.0  # volume moyen des passages parlés (dBFS)
+MP3 = ['-ac', '1', '-ar', '24000', '-c:a', 'libmp3lame', '-b:a', '32k', '-write_xing', '0', '-id3v2_version', '0']
 
 items = json.loads(Path(args.liste).read_text(encoding='utf-8'))
 todo = [e for i, e in enumerate(items) if i % n == k - 1 and not (EXISTING / e['file']).exists()]
@@ -40,14 +57,16 @@ def tts_text(e):
     return re.sub(r'[«»“”"]', '', e['text']).strip()
 
 
+def frames(audio, rate, ms=20):
+    x = np.asarray(audio, dtype=np.float32).reshape(-1)
+    win = max(1, int(rate * ms / 1000))
+    count = len(x) // win
+    return x[: count * win].reshape(count, win)
+
+
 def longest_gap(audio, rate, threshold_db=-55):
     """Plus long silence (en secondes) au milieu du son, par fenêtres de 10 ms."""
-    x = np.abs(np.asarray(audio, dtype=np.float32).reshape(-1))
-    win = max(1, int(rate * 0.01))
-    n = len(x) // win
-    if n == 0:
-        return 0.0
-    env = x[: n * win].reshape(n, win).max(axis=1)
+    env = np.abs(frames(audio, rate, 10)).max(axis=1) if len(audio) else np.array([])
     loud = np.where(env > 10 ** (threshold_db / 20))[0]
     if len(loud) == 0:
         return float('inf')  # rien n'a été dit
@@ -58,11 +77,32 @@ def longest_gap(audio, rate, threshold_db=-55):
     return longest * 0.01
 
 
-# Sur un texte très court (une syllabe, une lettre, un prénom), la voix dit parfois un bout de son,
-# se tait une à deux secondes, puis reprend : un long silence au milieu signale un son raté. On
-# réessaie avec une ponctuation différente, puis on abandonne (la voix de l'appareil dira ce morceau).
-# Dans une vraie phrase, les silences sont des pauses : elles sont seulement raccourcies (encode).
-MAX_GAP_SHORT = 0.5
+def speech_level(audio, rate):
+    """Volume moyen des passages parlés (dBFS)."""
+    rms = np.sqrt((frames(audio, rate) ** 2).mean(axis=1))
+    active = rms[rms > 0.01]
+    return 20 * np.log10(np.sqrt((active ** 2).mean())) if len(active) else -99.0
+
+
+def pitch(audio, rate):
+    """Hauteur médiane de la voix (Hz), par autocorrélation sur les passages voisés ; None si trop court."""
+    x = np.asarray(audio, dtype=np.float32).reshape(-1)
+    win, hop = int(0.04 * rate), int(0.01 * rate)
+    lo, hi = rate // 450, rate // 110
+    values = []
+    for i in range(0, len(x) - win, hop):
+        f = x[i:i + win]
+        if np.sqrt(np.mean(f * f)) < 0.02:
+            continue
+        f = f - f.mean()
+        ac = np.correlate(f, f, 'full')[win - 1:]
+        if ac[0] <= 0:
+            continue
+        ac = ac / ac[0]
+        lag = lo + int(np.argmax(ac[lo:hi]))
+        if ac[lag] > 0.5:
+            values.append(rate / lag)
+    return float(np.median(values)) if len(values) >= 8 else None
 
 
 def is_short(text):
@@ -70,12 +110,46 @@ def is_short(text):
     return len(re.findall(r"[\w'-]+", text)) <= 2 and not re.search(r'[.,;:!?]', text.strip(' .!?,;:'))
 
 
-def variants(text):
-    yield text
-    if not text.endswith(('.', '!', '?')):
-        yield f'{text}.'
-        yield f'{text} !'
-    yield f'« {text} »'
+def attempts(text, count):
+    """Le texte tel quel (deux fois : chaque essai est différent), puis avec une autre ponctuation."""
+    out = [text, text]
+    if not text.endswith(('.', '!', '?', ',', ':')):
+        out += [f'{text}.', f'« {text} »']
+    elif text.endswith('!'):
+        out += [f'{text[:-1].rstrip()}.']  # une exclamation trop aiguë est redite plus posément
+    else:
+        out += [text]
+    return out[:count]
+
+
+def plain(text, lang):
+    """Texte comparable : minuscules, sans accents ni ponctuation, nombres en lettres."""
+    symbols = {'+': 'plus', '=': 'égale' if lang == 'fr' else 'equals', '×': 'fois' if lang == 'fr' else 'times'}
+    text = re.sub(r'[+=×]', lambda m: f' {symbols[m.group(0)]} ', text.lower())
+    text = re.sub(r'\d+', lambda m: ' ' + say_number(m.group(0), lang) + ' ', text)
+    text = unicodedata.normalize('NFD', text)
+    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+    return ' '.join(re.sub(r"[^a-z0-9']+", ' ', text.replace('-', ' ')).split())
+
+
+asr = None
+if args.whisper != 'aucun':
+    from faster_whisper import WhisperModel
+    asr = WhisperModel(args.whisper, device='cpu', compute_type='int8')
+
+
+def heard(path, lang):
+    """Ce que la reconnaissance vocale entend (le son est décodé par ffmpeg, en 16 kHz)."""
+    raw = subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', str(path), '-ac', '1', '-ar', '16000', '-f', 'f32le', '-'],
+                         capture_output=True, check=True).stdout
+    segments, _ = asr.transcribe(np.frombuffer(raw, dtype=np.float32), language=lang, beam_size=1, vad_filter=False,
+                                 condition_on_previous_text=False)
+    return ' '.join(s.text.strip() for s in segments)
+
+
+def checked_by_asr(text):
+    """La reconnaissance vocale n'est fiable qu'à partir de quelques lettres (« bo » ou « ré » seuls, non)."""
+    return asr is not None and len(re.sub(r'[^\w]', '', text)) >= 5
 
 
 def write_wav(path, audio, rate):
@@ -85,60 +159,87 @@ def write_wav(path, audio, rate):
         f.setsampwidth(2)
         f.setframerate(rate)
         f.writeframes((data * 32767).astype(np.int16).tobytes())
-    return len(data) / rate
 
 
-def encode(wav, mp3, rate):
+def level_up(audio, rate):
+    """Volume égalisé (passages parlés à TARGET_DB), sans dépasser -1 dBFS en crête."""
+    x = np.asarray(audio, dtype=np.float32).reshape(-1)
+    gain = float(np.clip(TARGET_DB - speech_level(x, rate), -12, 12))
+    y = x * 10 ** (gain / 20)
+    peak = float(np.abs(y).max()) if len(y) else 0
+    return y * (0.89 / peak) if peak > 0.89 else y
+
+
+def encode(wav, mp3, speed):
     """Pauses raccourcies (0,35 s au plus), silences du début et de la fin retirés, vitesse ajustée,
-    MP3 mono 32 kbit/s."""
+    MP3 mono 32 kbit/s sans en-tête (les sons se mettent bout à bout dans l'application)."""
     pauses = 'silenceremove=stop_periods=-1:stop_duration=0.45:stop_threshold=-50dB:stop_silence=0.35'
-    trim = ('silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.04,areverse,'
-            'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.08,areverse')
-    filters = f'{pauses},{trim}' + (f',atempo={rate}' if abs(rate - 1) > 0.001 else '')
+    trim = ('silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02,areverse,'
+            'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.04,areverse')
+    filters = f'{pauses},{trim}' + (f',atempo={speed}' if abs(speed - 1) > 0.001 else '')
     mp3.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(wav), '-af', filters,
-                    '-ac', '1', '-ar', '24000', '-c:a', 'libmp3lame', '-b:a', '32k', str(mp3)], check=True)
+    subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(wav), '-af', filters, *MP3, str(mp3)], check=True)
 
 
 models, states = {}, {}
-failures = []
+failures, report = [], []
 start = time.time()
 spoken = 0.0
 with tempfile.TemporaryDirectory() as tmp:
     wav = Path(tmp) / 'son.wav'
+    trial = Path(tmp) / 'essai.mp3'
     for i, e in enumerate(todo, 1):
         lang, voice = e['lang'], e['voice']
         if lang not in models:
             models[lang] = TTSModel.load_model(language=LANGUAGES[lang])
         if (lang, voice) not in states:
             states[(lang, voice)] = models[lang].get_state_for_audio_prompt(voice)
+        model, rate = models[lang], models[lang].sample_rate
         text = tts_text(e)
-        try:
-            problem = None
-            for attempt in variants(text):
-                audio = models[lang].generate_audio(states[(lang, voice)], attempt).numpy()
-                rate = models[lang].sample_rate
-                seconds = len(audio.reshape(-1)) / rate
-                gap = longest_gap(audio, rate)
-                # garde-fous : un son beaucoup trop long pour son texte, ou coupé par un long silence, est raté
-                if seconds > 2.5 + len(text) * 0.2:
-                    problem = f'son trop long ({seconds:.1f} s)'
-                elif is_short(text) and gap > MAX_GAP_SHORT:
-                    problem = f'silence de {gap:.1f} s au milieu'
-                else:
-                    problem = None
-                    break
-            if problem:
-                raise ValueError(problem)
-            write_wav(wav, audio, rate)
+        best = None  # (note, audio, mesures)
+        problems = []
+        for attempt in attempts(text, args.essais):
+            audio = model.generate_audio(states[(lang, voice)], attempt).numpy().reshape(-1)
+            seconds = len(audio) / rate
+            gap = longest_gap(audio, rate)
+            # garde-fous : un son beaucoup trop long pour son texte, ou coupé par un long silence, est raté
+            if seconds > 2.5 + len(text) * 0.2:
+                problems.append(f'son trop long ({seconds:.1f} s)')
+                continue
+            if is_short(text) and gap > 0.5:
+                problems.append(f'silence de {gap:.1f} s au milieu')
+                continue
+            if len(text) > 15 and len(text) / max(seconds, 0.1) > 30:
+                problems.append(f'son coupé ({seconds:.1f} s)')
+                continue
+            f0 = pitch(audio, rate)
+            off = abs(np.log(f0 / PITCH.get(voice, f0))) if f0 else 0.0
+            audio = level_up(audio, rate)
+            measures = {'hauteur': round(f0) if f0 else None, 'duree': round(seconds, 2), 'essai': attempt}
+            note = off / PITCH_TOLERANCE  # 1 = à la limite de la tolérance
+            if checked_by_asr(text):
+                write_wav(wav, audio, rate)
+                encode(wav, trial, 1)
+                said = heard(trial, lang)
+                similarity = difflib.SequenceMatcher(None, plain(text, lang), plain(said, lang)).ratio()
+                measures.update(entendu=said, ressemblance=round(similarity, 2))
+                note += max(0.0, 0.9 - similarity) * 10  # une diction douteuse compte plus qu'une voix un peu haute
+            if best is None or note < best[0]:
+                best = (note, audio, measures)
+            if note <= 1:
+                break
+        if best is None or best[0] > 4:
+            failures.append({'key': e['key'], 'text': text, 'erreur': '; '.join(problems) or f'meilleur essai : {best[2] if best else None}'})
+        else:
+            write_wav(wav, best[1], rate)
             encode(wav, OUT / e['file'], e['rate'])
-            spoken += seconds
-        except Exception as error:  # le son manquant sera dit par la voix de l'appareil
-            failures.append({'key': e['key'], 'text': text, 'erreur': str(error)})
+            spoken += best[2]['duree']
+            report.append({'key': e['key'], 'note': round(best[0], 2), **best[2]})
         if i % 200 == 0 or i == len(todo):
             spent = time.time() - start
             print(f'  {i}/{len(todo)} sons, {spoken:.0f} s de voix en {spent:.0f} s', flush=True)
 
 OUT.mkdir(parents=True, exist_ok=True)
 (OUT / f'echecs-{k}.json').write_text(json.dumps(failures, ensure_ascii=False, indent=1), encoding='utf-8')
+(OUT / f'rapport-{k}.json').write_text(json.dumps(report, ensure_ascii=False), encoding='utf-8')
 print(f'morceau {k}/{n} : {len(todo) - len(failures)} sons fabriqués, {len(failures)} échecs', flush=True)

@@ -35,7 +35,7 @@ for (const lang of ['fr', 'en']) {
 }
 
 const manifest = {
-  voix: 'Pocket TTS (Kyutai), voix « Estelle » (français) et « Alba » (anglais), licence CC-BY 4.0',
+  voix: 'Pocket TTS (Kyutai), voix « Estelle » (en français et en anglais), licence CC-BY 4.0',
   sons: Object.keys(clips).length,
   octets: bytes,
   clips: Object.fromEntries(Object.entries(clips).sort(([a], [b]) => a.localeCompare(b))),

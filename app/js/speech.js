@@ -1,13 +1,16 @@
 // Voix. Indispensable au CP : l'enfant entend chaque consigne sans avoir à la lire.
 //
 // 1. Voix naturelle : les phrases sont enregistrées à l'avance (Pocket TTS de Kyutai, voix
-//    « Estelle » ; voir scripts/voix/) et jouées depuis app/voix/. Une phrase absente est jouée
-//    en morceaux (texte, nombres, prénoms : voix-cles.js) si tous les morceaux existent.
+//    « Estelle » ; voir scripts/voix/) et jouées depuis app/voix/. Un énoncé est dit phrase par
+//    phrase, chaque phrase d'un seul son ; une phrase absente est dite par propositions, morceaux
+//    (nombres, prénoms) ou mots (voix-cles.js, planLecture). Tous les sons d'une même consigne
+//    sont mis bout à bout dans un seul fichier, joué d'un trait : pas de trou, pas de changement
+//    de voix.
 // 2. Sinon, synthèse vocale du système (sur iPhone et iPad, les voix françaises d'Apple) : on
 //    choisit automatiquement la meilleure voix installée (« Premium », puis « améliorée », puis la
 //    voix compacte). Les voix gadget (Grand-mère, Rocko…) sont écartées. Le parent peut la choisir.
 
-import { cle, langue, morceaux } from './voix-cles.js';
+import { PAUSES, planLecture } from './voix-cles.js';
 
 const synth = globalThis.speechSynthesis;
 let enabled = true;
@@ -90,7 +93,10 @@ export function isSpeechSupported() {
 // ---- Voix naturelle : sons enregistrés à l'avance
 
 const VOICE_BASE = 'voix/';
+// MP3 mono à débit constant (32 kbit/s) : la durée d'un son se déduit de sa taille
+const BYTES_PER_SECOND = 4000;
 const natural = { wanted: true, clips: null, files: [], names: [], unlocked: false, silence: null };
+const pauseFiles = {}; // pause → blob (gardés en mémoire)
 let player = null;
 let cancelClip = null;
 
@@ -149,22 +155,20 @@ export function unlockNaturalVoice() {
   audio.play()?.catch(() => { natural.unlocked = false; });
 }
 
-/** Les sons d'une phrase : la phrase entière, ou tous ses morceaux ; null s'il en manque un. */
+/**
+ * Les sons d'un morceau d'énoncé ({ text, lang, rate }) : [{ file, text, pause, kind }] dans l'ordre,
+ * [] s'il n'y a rien à dire, null s'il manque un son (la voix de l'appareil le dira).
+ */
 export function clipsFor(part, clips = natural.clips, names = natural.names) {
   if (!clips || !part?.text) return null;
-  const options = { lang: part.lang, rate: part.rate };
-  const whole = clips[cle(part.text, options)];
-  if (whole) return [{ file: whole, weight: 1 }];
-  const pieces = morceaux(part.text, names, langue(part.lang));
-  if (!pieces.length) return null;
-  const files = [];
-  for (const piece of pieces) {
-    // nombres et prénoms : à la vitesse demandée s'il existe, sinon à la vitesse normale
-    const file = clips[cle(piece.text, options)] || (piece.type !== 'texte' ? clips[cle(piece.text, { lang: part.lang })] : null);
-    if (!file) return null;
-    files.push({ file, weight: piece.text.length });
-  }
-  return files;
+  const plan = planLecture(part.text, (key) => Object.hasOwn(clips, key), { lang: part.lang, rate: part.rate, names });
+  return plan && plan.map((step) => ({ ...step, file: clips[step.key] }));
+}
+
+/** Pause entre deux morceaux d'une même consigne (« Touche le mot : » + « chat »). */
+export function pauseBetween(before, after = '') {
+  if (/[.!?…][»")\s]*$/.test(before) || /^\s*[«"]?\p{Lu}/u.test(after)) return 'phrase';
+  return 'virgule';
 }
 
 function stopClip() {
@@ -172,67 +176,117 @@ function stopClip() {
   cancelClip = null;
 }
 
+async function fetchBlob(file) {
+  const response = await fetch(VOICE_BASE + file);
+  if (!response.ok) throw new Error(`son absent : ${file}`);
+  return response.blob();
+}
+
+function pauseBlob(pause) {
+  pauseFiles[pause] ||= fetchBlob(`pause-${pause}.mp3`).catch((error) => {
+    delete pauseFiles[pause];
+    throw error;
+  });
+  return pauseFiles[pause];
+}
+
 /** Début de chaque mot, pour suivre la lecture en karaoké (comme les « boundary » de la synthèse). */
 function wordStarts(text) {
   return [...text.matchAll(/\S+/g)].map((m) => m.index);
 }
 
-async function playClips(list, part, id) {
-  // tous les sons sont chargés avant de commencer : pas de trou, et pas de mélange de voix
-  const blobs = await Promise.all(list.map(async ({ file }) => {
-    const response = await fetch(VOICE_BASE + file);
-    if (!response.ok) throw new Error(`son absent : ${file}`);
-    return response.blob();
-  }));
+/**
+ * Joue d'un trait les sons de plusieurs morceaux d'une consigne : tous sont chargés, mis bout à
+ * bout avec leurs pauses dans un seul fichier, puis joués. Chaque morceau reçoit onStart et
+ * onWord au bon moment (karaoké).
+ */
+async function playPlans(parts, plans, id) {
+  const steps = [];
+  plans.forEach((plan, p) => {
+    plan.forEach((clip, c) => {
+      steps.push({ file: clip.file, part: p, weight: clip.text.length || 1 });
+      const pause = c < plan.length - 1 ? clip.pause : p < plans.length - 1 ? pauseBetween(parts[p].text, parts[p + 1].text) : null;
+      if (PAUSES[pause]) steps.push({ pause, part: p, weight: 0 });
+    });
+  });
+  if (!steps.length) return;
+  const blobs = await Promise.all(steps.map((step) => (step.file ? fetchBlob(step.file) : pauseBlob(step.pause))));
   if (id !== queueId) return;
-  const total = list.reduce((sum, c) => sum + c.weight, 0);
-  const starts = wordStarts(part.text);
-  let before = 0;
-  let lastWord = -1;
-  part.onStart?.();
-  for (let i = 0; i < list.length; i++) {
-    if (id !== queueId) return;
-    const url = URL.createObjectURL(blobs[i]);
-    const weight = list[i].weight;
-    try {
-      await new Promise((resolve, reject) => {
-        const audio = audioPlayer();
-        let finished = false;
-        const finish = (error) => {
-          if (finished) return;
-          finished = true;
-          clearTimeout(timer);
-          audio.onended = audio.onerror = audio.ontimeupdate = null;
-          if (error) {
-            // le lecteur lâche ce son (il va être libéré) : il ne tentera pas de le recharger
-            audio.removeAttribute('src');
-            audio.load();
-            reject(error);
-          } else resolve();
-        };
-        const timer = setTimeout(() => finish(), 20000); // filet de sécurité
-        cancelClip = () => {
-          audio.pause();
-          finish();
-        };
-        audio.onended = () => finish();
-        audio.onerror = () => finish(new Error('son illisible'));
-        audio.ontimeupdate = () => {
-          if (!part.onWord || !audio.duration) return;
-          const at = ((before + (audio.currentTime / audio.duration) * weight) / total) * part.text.length;
-          const word = starts.filter((s) => s <= at).length - 1;
-          if (word >= 0 && word !== lastWord) {
-            lastWord = word;
-            part.onWord(starts[word]);
+  // où commence chaque son dans le fichier, et quelle part du texte de son morceau il couvre
+  let time = 0;
+  const done = new Array(parts.length).fill(0);
+  const totals = parts.map((_, p) => steps.filter((s) => s.part === p).reduce((sum, s) => sum + s.weight, 0) || 1);
+  steps.forEach((step, k) => {
+    step.start = time;
+    step.duration = blobs[k].size / BYTES_PER_SECOND;
+    step.from = done[step.part] / totals[step.part];
+    done[step.part] += step.weight;
+    step.to = done[step.part] / totals[step.part];
+    time += step.duration;
+  });
+  const url = URL.createObjectURL(new Blob(blobs, { type: 'audio/mpeg' }));
+  const starts = parts.map((part) => wordStarts(part.text));
+  const started = new Set();
+  const lastWord = parts.map(() => -1);
+  try {
+    await new Promise((resolve, reject) => {
+      const audio = audioPlayer();
+      let finished = false;
+      let frame = 0;
+      const finish = (error) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        globalThis.cancelAnimationFrame?.(frame);
+        audio.onended = audio.onerror = audio.ontimeupdate = null;
+        if (error) {
+          // le lecteur lâche ce son (il va être libéré) : il ne tentera pas de le recharger
+          audio.removeAttribute('src');
+          audio.load();
+          reject(error);
+        } else resolve();
+      };
+      const timer = setTimeout(() => finish(), (time + 5) * 1000); // filet de sécurité
+      cancelClip = () => {
+        audio.pause();
+        finish();
+      };
+      // suit la lecture : début de chaque morceau, et mot en cours pour le karaoké
+      const follow = () => {
+        const now = audio.currentTime;
+        for (const step of steps) {
+          if (now < step.start) break;
+          const part = parts[step.part];
+          if (!started.has(step.part)) {
+            started.add(step.part);
+            part.onStart?.();
           }
-        };
-        audio.src = url;
-        audio.play()?.catch((error) => finish(error));
-      });
-    } finally {
-      URL.revokeObjectURL(url);
-    }
-    before += weight;
+          if (!part.onWord || !step.file) continue;
+          const within = Math.min(1, (now - step.start) / (step.duration || 1));
+          const at = (step.from + (step.to - step.from) * within) * part.text.length;
+          const word = starts[step.part].filter((s) => s <= at).length - 1;
+          if (word >= 0 && word !== lastWord[step.part]) {
+            lastWord[step.part] = word;
+            part.onWord(starts[step.part][word]);
+          }
+        }
+      };
+      const tick = () => {
+        follow();
+        if (!finished) frame = globalThis.requestAnimationFrame?.(tick) ?? 0;
+      };
+      audio.onended = () => finish();
+      audio.onerror = () => finish(new Error('son illisible'));
+      audio.ontimeupdate = follow;
+      audio.src = url;
+      const playing = audio.play();
+      // le premier morceau commence tout de suite (le karaoké s'allume sans attendre)
+      follow();
+      if (parts.some((part) => part.onWord)) tick();
+      playing?.catch((error) => finish(error));
+    });
+  } finally {
+    URL.revokeObjectURL(url);
   }
 }
 
@@ -246,14 +300,6 @@ export function stopSpeaking() {
   stopClip();
   // Safari ignore parfois la phrase suivante si l'on annule une file déjà vide.
   if (synth && (synth.speaking || synth.pending)) synth.cancel();
-}
-
-function sayOne(part, id) {
-  if (id !== queueId) return Promise.resolve();
-  const clips = natural.wanted ? clipsFor(part) : null;
-  // son introuvable ou illisible (hors connexion, pas encore téléchargé…) : la synthèse prend le relais
-  if (clips) return playClips(clips, part, id).catch(() => (id === queueId ? saySynth(part, id) : undefined));
-  return saySynth(part, id);
 }
 
 function saySynth(part, id) {
@@ -287,17 +333,39 @@ function saySynth(part, id) {
 }
 
 /**
- * Dit une phrase ou une suite de morceaux (chaîne ou {text, rate}).
+ * Dit une phrase ou une suite de morceaux (chaîne ou {text, rate, lang}).
  * `style` ({voice: 'female'|'male', pitch}) donne la voix d'un personnage.
- * Interrompt ce qui était en cours. Ne bloque jamais l'interface.
+ * Les morceaux qui se suivent et que la voix naturelle sait dire sont joués d'un trait ; les
+ * autres passent par la synthèse du système. Interrompt ce qui était en cours. Ne bloque jamais
+ * l'interface.
  */
 export async function speak(parts, style = {}) {
   if (!enabled || !parts || (!synth && !natural.clips)) return;
   stopSpeaking();
   const id = queueId;
-  const list = Array.isArray(parts) ? parts : [parts];
-  for (const part of list) {
-    if (id !== queueId) return;
-    await sayOne({ ...style, ...(typeof part === 'string' ? { text: part } : part) }, id);
+  const list = (Array.isArray(parts) ? parts : [parts])
+    .map((part) => ({ ...style, ...(typeof part === 'string' ? { text: part } : part) }))
+    .filter((part) => part.text);
+  let i = 0;
+  while (i < list.length && id === queueId) {
+    const plans = [];
+    while (natural.wanted && i + plans.length < list.length) {
+      const plan = clipsFor(list[i + plans.length]);
+      if (!plan) break;
+      plans.push(plan);
+    }
+    if (!plans.length) {
+      await saySynth(list[i], id);
+      i++;
+      continue;
+    }
+    const group = list.slice(i, i + plans.length);
+    i += plans.length;
+    try {
+      await playPlans(group, plans, id);
+    } catch {
+      // son introuvable ou illisible (hors connexion, pas encore téléchargé…) : la synthèse prend le relais
+      for (const part of group) if (id === queueId) await saySynth(part, id);
+    }
   }
 }

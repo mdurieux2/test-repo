@@ -1,47 +1,40 @@
-// Choisit les phrases de la voix naturelle et écrit scripts/voix/a-generer.json.
+// Choisit les sons de la voix naturelle et écrit scripts/voix/a-generer.json.
 //
 // Deux sources, pondérées par la fréquence à laquelle l'enfant les entend :
 //  - les questions de tous les jeux, à tous les niveaux (tirages au hasard) ;
 //  - ce que dit l'application pendant le parcours complet du test de bout en bout
 //    (félicitations, menus, encouragements…) : scripts/voix/parole-e2e.json, produit par
 //    « SPEECH_LOG=scripts/voix/parole-e2e.json PARTS=scenario npm run test:e2e ».
-// Une phrase sans nombre ni prénom est enregistrée telle quelle ; sinon elle est découpée en
-// morceaux (texte, nombres, prénoms). Les nombres de 0 à 1000 et les prénoms courants sont
-// toujours enregistrés. Le reste est dit par la voix de l'appareil.
 //
-// Usage : node scripts/voix/phrases.mjs [nombre maximal de phrases et morceaux, 6000 par défaut]
+// Un énoncé est dit phrase par phrase (voix-cles.js, planLecture) : on enregistre d'abord les
+// phrases entières les plus entendues, puis, pour les autres, leurs propositions (coupées aux
+// virgules) et leurs morceaux, dans la limite d'un budget de caractères. Pour que rien ne soit
+// jamais dit par une autre voix, tous les mots, les nombres de 0 à 1000 et les prénoms courants
+// sont aussi enregistrés.
+//
+// Usage : node scripts/voix/phrases.mjs [budget en caractères, 200000 par défaut]
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { GAMES } from '../../app/js/games/index.js';
 import { createRng } from '../../app/js/random.js';
-import { cle, langue, morceaux, normaliser, utile, vitesse } from '../../app/js/voix-cles.js';
+import {
+  autourDesPrenoms, cle, enMots, langue, morceaux, mots, normaliser, phrases, planLecture, propositions, qualitePlan, utile,
+  vitesse,
+} from '../../app/js/voix-cles.js';
 
 const HERE = new URL('.', import.meta.url).pathname;
-const BUDGET = Number(process.argv[2]) || 6000;
-const SEEDS = 150;
+const BUDGET = Number(process.argv[2]) || 200000;
+const SEEDS = 300;
 const SEASONS = ['hiver', 'printemps', 'ete', 'automne', 'noel', 'halloween'];
 const PLACEHOLDER = 'Zélie'; // prénom de l'enfant pendant les tirages (découpé ensuite)
 const PRENOMS = readFileSync(`${HERE}prenoms.txt`, 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
-export const VOICES = { fr: 'estelle', en: 'alba' };
-export const MODEL = 'pocket-tts:french,english';
-
-const weights = new Map(); // clé → { lang, rate, text, type, poids }
-function add(text, { lang = 'fr-FR', rate } = {}, poids = 1, names = [PLACEHOLDER]) {
-  const t = normaliser(text);
-  if (!utile(t)) return;
-  const l = langue(lang);
-  const parts = /\d/.test(t) || names.some((n) => t.includes(n)) ? morceaux(t, names, l) : [{ type: 'texte', text: t }];
-  for (const m of parts) {
-    if (m.type === 'prenom') continue; // les prénoms viennent de la liste
-    const key = cle(m.text, { lang, rate });
-    const entry = weights.get(key) || { lang: l, rate: vitesse(rate), text: m.text, type: m.type, poids: 0 };
-    entry.poids += poids;
-    weights.set(key, entry);
-  }
-}
+// une seule voix : Estelle, en français comme en anglais (modèle anglais de Pocket TTS)
+export const VOICES = { fr: 'estelle', en: 'estelle' };
+// change à chaque nouvelle façon de fabriquer les sons : les noms de fichiers changent avec
+export const MODEL = 'pocket-tts-2:french,english';
 
 /** Ce qu'une question fait dire : consigne, consigne courte, réécoute, félicitation, histoire, paires… */
-function spoken(q) {
+export function spoken(q) {
   const out = [];
   const push = (p) => {
     if (p == null) return;
@@ -60,61 +53,168 @@ function spoken(q) {
   return out;
 }
 
-// 1. les questions de tous les jeux
-let draws = 0;
-for (const game of GAMES) {
-  for (let level = 1; level <= game.levels.length; level++) {
-    for (let s = 0; s < SEEDS; s++) {
-      let q;
-      try {
-        q = game.generate(level, createRng(s * 7919 + level * 31), s % 10, { name: PLACEHOLDER, season: SEASONS[s % SEASONS.length] });
-      } catch {
-        continue;
+/** Énoncés des jeux, avec leur poids (chaque jeu pèse autant, quel que soit son nombre de niveaux). */
+export function gameUtterances(seeds = SEEDS, offset = 0) {
+  const list = [];
+  for (const game of GAMES) {
+    for (let level = 1; level <= game.levels.length; level++) {
+      for (let s = 0; s < seeds; s++) {
+        let q;
+        try {
+          q = game.generate(level, createRng((s + offset) * 7919 + level * 31), s % 10, { name: PLACEHOLDER, season: SEASONS[s % SEASONS.length] });
+        } catch {
+          continue;
+        }
+        for (const part of spoken(q)) list.push({ ...part, game: game.id, poids: 1 / (seeds * game.levels.length), names: [PLACEHOLDER] });
       }
-      draws++;
-      // chaque jeu pèse autant, quel que soit son nombre de niveaux
-      for (const part of spoken(q)) add(part.text, part, 1 / (SEEDS * game.levels.length));
     }
   }
+  return list;
 }
 
-// 2. ce que dit l'application pendant le parcours complet
+// 1. ce que l'enfant entend
 const LOG = `${HERE}parole-e2e.json`;
 const SCENARIO_NAMES = ['Eva-Rose', 'Éva-Rose', 'Matteo', 'Lou', 'Zoé', 'Paris Saint-Germain Féminines'];
-if (existsSync(LOG)) {
-  for (const { text, lang, rate, count } of JSON.parse(readFileSync(LOG, 'utf8'))) add(text, { lang, rate }, count * 0.2, SCENARIO_NAMES);
-}
-
 // phrases fixes toujours enregistrées (dont celle du bouton d'essai des Réglages, vérifiée par le test)
 const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !', 'Bravo !', 'Choisis un jeu !', 'Choisis ton niveau !'];
 
-// 3. sélection : les plus entendues d'abord
-const ranked = [...weights].filter(([, e]) => e.type === 'texte').sort((a, b) => b[1].poids - a[1].poids);
-const total = ranked.reduce((s, [, e]) => s + e.poids, 0);
-const chosen = ranked.slice(0, BUDGET);
-const covered = chosen.reduce((s, [, e]) => s + e.poids, 0);
-
-// nombres et prénoms, toujours là
-const extra = [];
-for (let n = 0; n <= 1000; n++) extra.push([cle(String(n)), { lang: 'fr', rate: 1, text: String(n), type: 'nombre' }]);
-for (let n = 0; n <= 100; n++) extra.push([cle(String(n), { lang: 'en' }), { lang: 'en', rate: 1, text: String(n), type: 'nombre' }]);
-for (const [key, e] of weights) if (e.type === 'nombre' && !extra.some(([k]) => k === key)) extra.push([key, e]);
-for (const name of PRENOMS) extra.push([cle(name), { lang: 'fr', rate: 1, text: normaliser(name), type: 'prenom' }]);
-
-for (const text of TOUJOURS) extra.unshift([cle(text), { lang: 'fr', rate: 1, text: normaliser(text), type: 'texte' }]);
-
-const seen = new Set();
-const list = [];
-for (const [key, e] of [...chosen, ...extra]) {
-  if (seen.has(key)) continue;
-  seen.add(key);
-  const voice = VOICES[e.lang];
-  const file = `${e.lang}/${createHash('sha1').update(`${MODEL}|${voice}|${key}`).digest('hex').slice(0, 16)}.mp3`;
-  list.push({ key, lang: e.lang, rate: e.rate, type: e.type, text: e.text, voice, file });
+export function allUtterances() {
+  const list = gameUtterances();
+  if (existsSync(LOG)) {
+    for (const { text, lang, rate, count } of JSON.parse(readFileSync(LOG, 'utf8'))) {
+      list.push({ text, lang, rate, poids: count * 0.2, names: SCENARIO_NAMES, game: 'app' });
+    }
+  }
+  for (const text of TOUJOURS) list.push({ text, poids: 1, names: [], game: 'app' });
+  return list;
 }
-writeFileSync(`${HERE}a-generer.json`, `${JSON.stringify(list, null, 1)}\n`);
 
-const chars = list.reduce((s, e) => s + e.text.length, 0);
-console.log(`${draws} questions tirées, ${ranked.length} phrases et morceaux différents`);
-console.log(`${chosen.length} retenus : ${((covered / total) * 100).toFixed(1)} % de ce que l'enfant entend (hors nombres et prénoms)`);
-console.log(`${list.length} sons au total (${extra.length} nombres et prénoms), ${chars} caractères → ${HERE}a-generer.json`);
+const has = (names, t) => names.some((n) => t.includes(n));
+
+function select(utterances) {
+  const units = new Map(); // clé → { lang, rate, text, type }
+  const addUnit = (text, opts, type) => {
+    const key = cle(text, opts);
+    if (!units.has(key)) units.set(key, { lang: langue(opts.lang), rate: vitesse(opts.rate), text: normaliser(text), type });
+    return key;
+  };
+  // regroupe les poids par phrase
+  const sentenceW = new Map();
+  const info = new Map(); // clé de phrase → { text, opts, names }
+  for (const u of utterances) {
+    const opts = { lang: u.lang, rate: u.rate };
+    for (const s of phrases(enMots(u.text, langue(u.lang)))) {
+      const key = cle(s, opts);
+      sentenceW.set(key, (sentenceW.get(key) || 0) + u.poids);
+      if (!info.has(key)) info.set(key, { text: s, opts, names: u.names });
+    }
+  }
+  const score = (w, text) => w / (normaliser(text).length + 20);
+  let spent = 0;
+  const pick = (candidates, limit, type) => {
+    for (const [key, { w, text, opts }] of [...candidates].sort((a, b) => score(b[1].w, b[1].text) - score(a[1].w, a[1].text))) {
+      if (spent >= limit) break;
+      if (units.has(key)) continue;
+      addUnit(text, opts, type);
+      spent += normaliser(text).length;
+    }
+  };
+  // a. phrases entières (sans prénom : il est dit à part)
+  const sentences = new Map();
+  for (const [key, w] of sentenceW) {
+    const { text, opts, names } = info.get(key);
+    if (!has(names, text)) sentences.set(key, { w, text, opts });
+  }
+  pick(sentences, BUDGET * 0.8, 'phrase');
+  // b. propositions des phrases restantes
+  const clauses = new Map();
+  for (const [key, w] of sentenceW) {
+    if (units.has(key)) continue;
+    const { text, opts, names } = info.get(key);
+    const props = propositions(text);
+    if (props.length < 2) continue;
+    for (const p of props) {
+      if (has(names, p)) continue;
+      const k = cle(p, opts);
+      clauses.set(k, { w: (clauses.get(k)?.w || 0) + w, text: p, opts });
+    }
+  }
+  pick(clauses, BUDGET * 0.92, 'proposition');
+  // c. bouts entre les prénoms (« Zélie » + « a 2 pommes. »), puis morceaux entre les nombres
+  const remaining = []; // [texte, opts, w] des propositions restantes
+  for (const [key, w] of sentenceW) {
+    if (units.has(key)) continue;
+    const { text, opts, names } = info.get(key);
+    for (const p of propositions(text)) {
+      if (!units.has(cle(p, opts))) remaining.push({ text: p, opts, w, names });
+    }
+  }
+  const segments = new Map();
+  for (const { text, opts, w, names } of remaining) {
+    const parts = autourDesPrenoms(text, names).filter((m) => m.type === 'texte');
+    if (parts.length === autourDesPrenoms(text, names).length) continue; // sans prénom
+    for (const m of parts) {
+      const k = cle(m.text, opts);
+      segments.set(k, { w: (segments.get(k)?.w || 0) + w, text: m.text, opts });
+    }
+  }
+  pick(segments, BUDGET * 0.96, 'segment');
+  const pieces = new Map();
+  for (const { text, opts, w, names } of remaining) {
+    for (const part of autourDesPrenoms(text, names)) {
+      if (part.type !== 'texte' || units.has(cle(part.text, opts))) continue;
+      for (const m of morceaux(part.text, [], langue(opts.lang))) {
+        if (m.type !== 'texte') continue;
+        const k = cle(m.text, opts);
+        pieces.set(k, { w: (pieces.get(k)?.w || 0) + w, text: m.text, opts });
+      }
+    }
+  }
+  pick(pieces, BUDGET, 'morceau');
+  const chosen = units.size;
+  // d. toujours là : chaque mot (à la vitesse normale), les nombres, les prénoms ; les mots viennent
+  // aussi de tirages supplémentaires, pour que des questions jamais vues trouvent tous leurs mots
+  for (const u of [...utterances, ...gameUtterances(SEEDS * 3, 50000)]) {
+    const l = langue(u.lang);
+    for (const s of phrases(enMots(u.text, l))) {
+      for (const m of morceaux(s, u.names, l)) {
+        if (m.type === 'nombre') addUnit(m.text, { lang: u.lang, rate: u.rate }, 'nombre');
+        if (m.type === 'texte') for (const w of mots(m.text)) addUnit(w, { lang: u.lang }, 'mot');
+      }
+    }
+  }
+  for (let n = 0; n <= 1000; n++) addUnit(String(n), {}, 'nombre');
+  for (let n = 0; n <= 100; n++) addUnit(String(n), { lang: 'en' }, 'nombre');
+  for (const name of PRENOMS) addUnit(name, {}, 'prenom');
+  return { units, chosen, spent };
+}
+
+/** Comment chaque énoncé serait dit avec ces sons : part (pondérée) de chaque pire coupure. */
+export function coverage(utterances, available) {
+  const totals = {};
+  let sum = 0;
+  for (const u of utterances) {
+    const q = qualitePlan(planLecture(u.text, (k) => available.has(k), { lang: u.lang, rate: u.rate, names: u.names }));
+    totals[q] = (totals[q] || 0) + u.poids;
+    sum += u.poids;
+  }
+  return Object.fromEntries(Object.entries(totals).map(([k, v]) => [k, Math.round((v / sum) * 1000) / 10]));
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const utterances = allUtterances().filter((u) => utile(u.text) || /\d/.test(u.text));
+  const { units, chosen, spent } = select(utterances);
+  const list = [];
+  for (const [key, e] of units) {
+    const voice = VOICES[e.lang];
+    const file = `${e.lang}/${createHash('sha1').update(`${MODEL}|${voice}|${key}`).digest('hex').slice(0, 16)}.mp3`;
+    list.push({ key, lang: e.lang, rate: e.rate, type: e.type, text: e.text, voice, file });
+  }
+  writeFileSync(`${HERE}a-generer.json`, `${JSON.stringify(list, null, 1)}\n`);
+  const chars = list.reduce((s, e) => s + e.text.length, 0);
+  console.log(`${utterances.length} énoncés ; ${chosen} phrases, propositions et morceaux choisis (${spent} caractères)`);
+  console.log(`${list.length} sons au total, ${chars} caractères (~${Math.round((chars / 13.4) * 4 / 1000)} Mo) → ${HERE}a-generer.json`);
+  const keys = new Set(units.keys());
+  console.log('énoncés tirés pour la sélection :', coverage(utterances, keys));
+  console.log('autres tirages (jamais vus) :', coverage(gameUtterances(40, 100000), keys));
+}

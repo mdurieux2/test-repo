@@ -414,7 +414,7 @@ export const epelleAnglais = {
       key: `epelle-anglais:${word.en}`,
       interaction: 'order',
       text: silent ? silentText : 'Écris le mot anglais : touche les lettres dans l’ordre.',
-      instruction: silent ? silentText : ['Écris le mot anglais', sound, 'Touche les lettres dans l’ordre.'],
+      instruction: silent ? silentText : ['Écris le mot anglais :', sound, 'Touche les lettres dans l’ordre.'],
       short: silent ? { key: 'epelle-anglais:image', text: 'Écris le mot.' } : { text: 'Écris le mot.', speak: [sound] },
       replay: silent ? undefined : [sound],
       stage: listen ? { type: 'listen' } : pictureStage,

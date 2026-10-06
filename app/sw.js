@@ -2,7 +2,7 @@
 // (en voiture, en vacances…). Changer VERSION à chaque mise à jour publiée.
 // Tout nouveau fichier de l'app doit être ajouté à PRECACHE (vérifié par les tests).
 
-const VERSION = 'v13';
+const VERSION = 'v14';
 const CACHE = `lire-et-compter-${VERSION}`;
 // Sons de la voix naturelle (voix/fr/…, voix/en/…) : leurs noms changent avec leur contenu, on les
 // garde donc d'une version à l'autre (seuls ceux qui ne sont plus dans voix/manifest.json sont retirés).
@@ -62,6 +62,8 @@ const PRECACHE = [
   './manifest.webmanifest',
   './voix/manifest.json',
   './voix/silence.mp3',
+  './voix/pause-phrase.mp3',
+  './voix/pause-virgule.mp3',
 ];
 
 self.addEventListener('install', (event) => {

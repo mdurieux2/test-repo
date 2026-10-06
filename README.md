@@ -147,8 +147,9 @@ bonus et un jour de plus dans la série 🔥.
 
 ## Pédagogie
 
-- **Tout est lu à voix haute**, par une **voix naturelle** enregistrée à l'avance (Estelle, et Alba
-  pour l'anglais), qui marche aussi sans Internet. On réécoute en touchant le personnage ou la bulle.
+- **Tout est lu à voix haute**, par une seule **voix naturelle** enregistrée à l'avance (Estelle, en
+  français comme en anglais), qui marche aussi sans Internet. Chaque phrase est dite d'un seul tenant,
+  sans changer de voix. On réécoute en touchant le personnage ou la bulle.
 - **Consigne complète** à la première question, puis une **consigne courte** pour ne pas lasser.
 - **Niveau adaptatif** pour viser environ 80 % de réussite : 5 bonnes réponses d'affilée font
   monter d'un niveau, 3 erreurs sur 5 font redescendre, dans la fourchette de la classe.
@@ -183,10 +184,12 @@ Il ouvre trois onglets :
 
 Les consignes, les histoires, les nombres, les félicitations et environ 300 prénoms courants sont
 dits par une **voix enregistrée à l'avance** avec Pocket TTS (Kyutai), bien plus naturelle que les
-voix de synthèse. Les sons (environ 7 400) se téléchargent en arrière-plan après la première
-ouverture ; *Réglages* montre où en est le téléchargement. Ensuite, la voix marche aussi en mode avion.
-Les phrases rares et les prénoms peu courants sont dits par la voix de l'appareil, comme quand on
-coupe *Réglages → Voix naturelle*.
+voix de synthèse : une seule voix, Estelle, en français comme en anglais. Chaque phrase est dite d'un
+seul tenant, avec une petite pause entre les phrases ; les phrases rares sont dites par morceaux, mais
+toujours par Estelle. Les sons se téléchargent en arrière-plan après la première ouverture ;
+*Réglages* montre où en est le téléchargement. Ensuite, la voix marche aussi en mode avion. Un prénom
+peu courant, ou un son pas encore téléchargé, est dit par la voix de l'appareil, comme quand on coupe
+*Réglages → Voix naturelle*.
 
 Pour que la voix de l'appareil soit, elle aussi, plus naturelle :
 
@@ -258,13 +261,17 @@ mise en page.
 | `app/js/speech.js`, `app/js/voix-cles.js` | Voix naturelle (sons de `app/voix/`), sinon voix de l'appareil |
 | `scripts/voix/` | Fabrication des sons de la voix naturelle (voir ci-dessous) |
 
-**Voix naturelle.** `node scripts/voix/phrases.mjs` choisit les phrases à enregistrer : ce que
+**Voix naturelle.** `node scripts/voix/phrases.mjs` choisit les sons à enregistrer, d'après ce que
 disent les jeux à tous les niveaux et ce que dit l'app pendant le parcours complet
-(`scripts/voix/parole-e2e.json`, mis à jour avec `SPEECH_LOG=scripts/voix/parole-e2e.json PARTS=scenario npm run test:e2e`),
-les plus entendues d'abord, plus les nombres de 0 à 1000 et les prénoms de `scripts/voix/prenoms.txt`.
-En poussant la liste (`scripts/voix/a-generer.json`), le workflow GitHub « Voix naturelle » fabrique
-les sons manquants avec Pocket TTS (gratuit, sur 8 machines en même temps) ; `bash scripts/voix/recuperer.sh`
-les ajoute à `app/voix/` avec le manifeste.
+(`scripts/voix/parole-e2e.json`, mis à jour avec `SPEECH_LOG=scripts/voix/parole-e2e.json PARTS=scenario npm run test:e2e`) :
+d'abord les phrases entières les plus entendues, puis les propositions et morceaux des autres, et
+toujours chaque mot, les nombres de 0 à 1000 et les prénoms de `scripts/voix/prenoms.txt` (rien
+n'est donc jamais dit par une autre voix). En poussant la liste (`scripts/voix/a-generer.json`), le
+workflow GitHub « Voix naturelle » fabrique les sons manquants avec Pocket TTS (gratuit, sur
+16 machines en même temps) : chaque son est contrôlé (hauteur de la voix, débit, diction vérifiée par
+la reconnaissance vocale Whisper, volume égalisé) et refait s'il le faut. `bash scripts/voix/recuperer.sh`
+les ajoute à `app/voix/` avec le manifeste, et `node scripts/voix/rapport.mjs` dit, jeu par jeu et
+écran par écran, comment chaque phrase est dite (`scripts/voix/rapport-voix.md`).
 
 ## Affiche foot personnalisée (dossier `affiche/`)
 
@@ -323,7 +330,7 @@ npm run icons:affiche      # régénère les icônes de l'affiche
 
 Conçue par **Michaël Durieux**. Police : [Andika](https://software.sil.org/andika/)
 (SIL Open Font License), conçue pour l'apprentissage de la lecture. Voix naturelle :
-[Pocket TTS](https://github.com/kyutai-labs/pocket-tts) © Kyutai, voix « Estelle » (corpus CML-TTS)
-et « Alba », licence CC-BY 4.0. Affiche foot : polices
+[Pocket TTS](https://github.com/kyutai-labs/pocket-tts) © Kyutai, voix « Estelle » (corpus CML-TTS),
+licence CC-BY 4.0. Affiche foot : polices
 [Anton](https://fonts.google.com/specimen/Anton) et [Archivo Black](https://fonts.google.com/specimen/Archivo+Black)
 (SIL Open Font License).

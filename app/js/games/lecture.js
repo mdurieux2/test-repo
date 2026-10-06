@@ -170,7 +170,7 @@ function writeSyllable(rng) {
     key: `syllabes:ecris:${target}`,
     interaction: 'order',
     text: 'Écris la syllabe : touche les lettres dans l’ordre.',
-    instruction: ['Écris la syllabe', sound, 'Touche les lettres dans l’ordre.'],
+    instruction: ['Écris la syllabe :', sound, 'Touche les lettres dans l’ordre.'],
     short: { key: 'syllabes:ecris', text: 'Écris la syllabe.', speak: [sound] },
     replay: [sound],
     stage: { type: 'listen' },

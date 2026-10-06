@@ -32,14 +32,19 @@ const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
 // (la mise en page sur un quart des appareils). Sans rien, tout est fait.
 const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : ['scenario', 'layout'];
 const SHARD = process.env.SHARD ? process.env.SHARD.split('/').map(Number) : null;
-// SPEECH_LOG=fichier.json : tout ce que l'application dit est noté (avec le nombre de fois),
-// pour choisir les phrases de la voix naturelle (scripts/voix/phrases.mjs)
+// SPEECH_LOG=fichier.json : tout ce que l'application dit est noté (avec le nombre de fois et les
+// écrans où c'est dit), pour choisir les phrases de la voix naturelle (scripts/voix/phrases.mjs) et
+// vérifier écran par écran comment elles sont dites (scripts/voix/rapport.mjs)
 const SPEECH_LOG = process.env.SPEECH_LOG;
 const spokenLog = new Map();
+const spokenScreens = new Map();
 if (SPEECH_LOG) {
   // écrit à la fin, même si un test échoue : rien de ce qui a été noté n'est perdu
   process.on('exit', () => {
-    const entries = [...spokenLog].map(([key, count]) => { const [text, lang, rate] = JSON.parse(key); return { text, lang, rate, count }; });
+    const entries = [...spokenLog].map(([key, count]) => {
+      const [text, lang, rate] = JSON.parse(key);
+      return { text, lang, rate, count, ecrans: [...spokenScreens.get(key)] };
+    });
     writeFileSync(SPEECH_LOG, `${JSON.stringify(entries.sort((a, b) => b.count - a.count), null, 1)}\n`);
     console.log(`✔ paroles notées : ${entries.length} phrases différentes → ${SPEECH_LOG}`);
   });
@@ -65,9 +70,11 @@ async function newContext(viewport) {
     viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'fr-FR', permissions: ['microphone'],
   });
   if (SPEECH_LOG) {
-    await context.exposeBinding('__parole', (_source, text, lang, rate) => {
+    await context.exposeBinding('__parole', (_source, text, lang, rate, screen) => {
       const key = JSON.stringify([text, lang, rate]);
       spokenLog.set(key, (spokenLog.get(key) || 0) + 1);
+      if (!spokenScreens.has(key)) spokenScreens.set(key, new Set());
+      spokenScreens.get(key).add(screen);
     });
   }
   await context.addInitScript(() => {
@@ -75,7 +82,10 @@ async function newContext(viewport) {
       speaking: false, pending: false,
       speak(u) {
         (window.__spoken = window.__spoken || []).push(u.text);
-        window.__parole?.(u.text, u.lang, u.rate);
+        // l'écran où c'est dit : « play compter », « welcome », « parents voices »…
+        const main = document.querySelector('main.screen');
+        const screen = main ? [...main.classList].filter((c) => c !== 'screen' && !c.startsWith('domain-theme') && !c.startsWith('play-')).join(' ') : '';
+        window.__parole?.(u.text, u.lang, u.rate, main?.dataset.game ? `${screen} ${main.dataset.game}` : screen);
         setTimeout(() => u.onend && u.onend(), 5);
       },
       cancel() {}, getVoices: () => [], addEventListener() {},
