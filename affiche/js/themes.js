@@ -92,7 +92,9 @@ export const CHILD_HAIRS = [
   { id: 'couettes', name: 'Couettes', girl: true },
   { id: 'chignon', name: 'Chignon', girl: true },
   { id: 'carre', name: 'Carré', girl: true },
+  { id: 'frises', name: 'Longs et frisés' },
   { id: 'boucles', name: 'Bouclés' },
+  { id: 'crepus', name: 'Crépus' },
 ];
 
 /** Coiffures de l'adulte ; `mom` / `dad` : proposée seulement pour une maman / un papa. */
@@ -103,7 +105,9 @@ export const ADULT_HAIRS = [
   { id: 'queue', name: 'Queue de cheval', mom: true },
   { id: 'chignon', name: 'Chignon', mom: true },
   { id: 'carre', name: 'Carré', mom: true },
+  { id: 'frises', name: 'Longs et frisés' },
   { id: 'boucles', name: 'Bouclés' },
+  { id: 'crepus', name: 'Crépus' },
 ];
 
 /** Coiffures proposées pour un papa ou une maman. */

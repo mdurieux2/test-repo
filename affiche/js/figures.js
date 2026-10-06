@@ -3,84 +3,10 @@
 // Repère d'un adulte : celui de l'affiche « 1 parent, 1 enfant » (1000 de large, centre en x = 500).
 // Les formes symétriques sont décrites pour le côté gauche puis reproduites en miroir.
 
-const cache = new Map();
-/** Path2D mémorisé (le même tracé sert à chaque rendu). */
-function path(d) {
-  if (!cache.has(d)) cache.set(d, new Path2D(d));
-  return cache.get(d);
-}
-
-function fill(ctx, d, color) {
-  ctx.fillStyle = color;
-  ctx.fill(path(d));
-}
-
-function stroke(ctx, d, color, width) {
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.stroke(path(d));
-}
-
-/** Reflet : couleur claire à moitié transparente. */
-function sheen(ctx, d, color, alpha = 0.55) {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  fill(ctx, d, color);
-  ctx.restore();
-}
-
-/** Dessine `draw` à gauche, puis en miroir à droite. */
-function both(ctx, draw) {
-  draw();
-  ctx.save();
-  ctx.translate(1000, 0);
-  ctx.scale(-1, 1);
-  draw();
-  ctx.restore();
-}
-
-/** Remplit `d` en limitant les dessins de `inside` à cette forme. */
-function clipped(ctx, d, inside) {
-  ctx.save();
-  ctx.clip(path(d));
-  inside();
-  ctx.restore();
-}
-
-// ---------------------------------------------------------------- outils
-
-const f1 = (n) => n.toFixed(1);
-const pt = ([x, y]) => `${f1(x)} ${f1(y)}`;
-
-/**
- * Membre arrondi (bras) : passe par `points`, avec une demi-largeur par point.
- * Bout arrondi au dernier point, départ caché sous la manche.
- */
-function limb(points, widths) {
-  const n = points.length;
-  const normals = points.map((_, i) => {
-    const [a, b] = [points[Math.max(0, i - 1)], points[Math.min(n - 1, i + 1)]];
-    const len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-    return [-(b[1] - a[1]) / len, (b[0] - a[0]) / len];
-  });
-  const side = (k) => points.map((p, i) => [p[0] + normals[i][0] * widths[i] * k, p[1] + normals[i][1] * widths[i] * k]);
-  const [left, right] = [side(1), side(-1)];
-  const smooth = (list) => {
-    let d = '';
-    for (let i = 1; i < list.length - 1; i += 1) {
-      const m = [(list[i][0] + list[i + 1][0]) / 2, (list[i][1] + list[i + 1][1]) / 2];
-      d += `Q ${pt(list[i])} ${pt(m)} `;
-    }
-    return `${d}L ${pt(list.at(-1))} `;
-  };
-  const [end, prev] = [points[n - 1], points[n - 2]];
-  const len = Math.hypot(end[0] - prev[0], end[1] - prev[1]) || 1;
-  const tip = [end[0] + ((end[0] - prev[0]) / len) * widths[n - 1] * 1.3, end[1] + ((end[1] - prev[1]) / len) * widths[n - 1] * 1.3];
-  const back = [...right].reverse();
-  return `M ${pt(left[0])} ${smooth(left)}Q ${pt(tip)} ${pt(right[n - 1])} ${smooth(back)}Z`;
-}
+import {
+  both, clipped, fill, limb, pt, sheen, stroke,
+} from './draw.js';
+import { LONG_HAIRS, drawHair, drawHairBelow } from './hair.js';
 
 // ---------------------------------------------------------------- adulte
 
@@ -124,14 +50,8 @@ const FIST = 'M 132 458 C 121 436 119 408 125 392 C 129 378 141 371 152 374 C 16
 const FIST_KNUCKLES = ['M 141 381 C 139 388 139 394 141 400', 'M 156 377 C 155 385 155 391 157 397', 'M 171 379 C 171 386 171 392 172 398'];
 const THUMB = 'M 183 414 C 197 412 202 430 195 444 C 191 451 181 451 179 444 C 177 434 178 424 183 414 Z';
 
-// cheveux longs de l'adulte : dépassent sous l'enfant, sur le haut du dos
-const HAIR_BELOW = 'M 418 748 C 416 772 424 794 438 808 C 452 804 462 814 476 816 C 488 824 500 818 512 822 '
-  + 'C 526 816 538 820 552 810 C 566 806 578 792 582 770 C 584 760 584 752 582 748 Z';
-const HAIR_BELOW_SHADE = 'M 418 748 L 582 748 C 582 760 580 768 578 774 C 530 784 470 784 422 774 C 420 766 418 758 418 748 Z';
-const HAIR_BELOW_STRANDS = ['M 442 770 C 444 784 446 796 448 806', 'M 470 776 C 472 790 476 802 482 812',
-  'M 500 778 C 500 794 502 806 504 816', 'M 530 776 C 530 790 528 802 524 812', 'M 558 770 C 558 784 556 794 552 804'];
 /** Coiffures de l'adulte qui dépassent sous l'enfant quand sa tête est cachée. */
-export const HAIRS_BELOW = ['long', 'queue'];
+export const HAIRS_BELOW = ['long', 'queue', 'frises'];
 
 // tête de l'adulte (visible quand il porte deux enfants) : la tête de l'enfant, agrandie
 const ADULT_HEAD = { x: 500, y: 600, s: 1.04 };
@@ -196,9 +116,7 @@ function drawAdultBody(ctx, c, a, { headVisible, raised }) {
   }
 
   if (!headVisible && HAIRS_BELOW.includes(a.hair)) {
-    fill(ctx, HAIR_BELOW, a.hairColor.base);
-    clipped(ctx, HAIR_BELOW, () => fill(ctx, HAIR_BELOW_SHADE, a.hairColor.shade));
-    for (const d of HAIR_BELOW_STRANDS) stroke(ctx, d, a.hairColor.shade, 2.4);
+    drawHairBelow(ctx, a.hairColor, a.hair);
   }
 }
 
@@ -312,130 +230,10 @@ const CHILD_EAR_LINE = 'M 432 342 C 428 350 429 360 434 365';
 const CHILD_SHOULDERS = [[400, 494], [600, 494]];
 const CHILD_ARM_LENGTH = 232;
 
-/** Cheveux tirés en arrière (queue, chignon, couettes) : la nuque reste visible. */
-const HAIR_CAP = 'M 500 256 C 550 256 576 298 574 346 C 573 376 566 396 556 408 C 542 414 524 412 512 422 '
-  + 'C 505 428 495 428 488 422 C 476 412 458 414 444 408 C 434 396 427 376 426 346 C 424 298 450 256 500 256 Z';
-/** Cheveux qui couvrent les épaules : les inscriptions du maillot de l'enfant descendent un peu. */
-export const LONG_HAIRS = ['long'];
-
-/**
- * Cheveux, dans le repère de la tête de l'enfant (centre 500, 344). `h` : couleurs des cheveux,
- * `tie` : couleur de l'élastique ou de la barrette.
- */
-function drawHair(ctx, h, tie, style, gender) {
-  const strands = (list, color = h.shade, w = 2.4) => list.forEach((d) => stroke(ctx, d, color, w));
-  const cap = (to) => {
-    fill(ctx, HAIR_CAP, h.base);
-    strands([`M 452 398 C 448 350 462 310 ${to[0] - 10} ${to[1] + 8}`, `M 476 412 C 474 362 480 320 ${to[0] - 4} ${to[1] + 12}`,
-      `M 548 398 C 552 350 538 310 ${to[0] + 10} ${to[1] + 8}`, `M 524 412 C 526 362 520 320 ${to[0] + 4} ${to[1] + 12}`,
-      `M 436 350 C 442 320 458 300 ${to[0] - 14} ${to[1] + 4}`, `M 564 350 C 558 320 542 300 ${to[0] + 14} ${to[1] + 4}`]);
-    sheen(ctx, 'M 450 300 C 464 276 484 266 496 268 C 478 282 464 302 456 326 Z', h.light);
-  };
-
-  if (style === 'queue') {
-    cap([494, 282]);
-    // queue de cheval haute : part du sommet, monte un peu et retombe le long de l'arrière de la tête
-    const tail = 'M 480 286 C 468 252 494 226 524 232 C 560 240 566 296 552 346 C 542 384 526 420 508 456 '
-      + 'C 500 420 504 384 506 350 C 508 318 502 298 480 286 Z';
-    clipped(ctx, HAIR_CAP, () => {
-      ctx.save();
-      ctx.translate(-7, 5);
-      sheen(ctx, tail, h.shade, 0.7);
-      ctx.restore();
-    });
-    fill(ctx, tail, h.base);
-    clipped(ctx, tail, () => fill(ctx, 'M 548 250 C 572 300 560 380 526 456 L 580 456 L 580 250 Z', h.shade));
-    strands(['M 496 262 C 520 238 552 252 548 306 C 544 350 530 392 516 436', 'M 520 256 C 540 280 538 330 530 370',
-      'M 506 300 C 516 330 516 370 510 420']);
-    stroke(ctx, 'M 508 242 C 530 238 546 256 546 284', h.light, 3.5);
-    fill(ctx, 'M 478 288 C 476 276 490 268 504 273 C 511 278 508 290 497 294 C 488 296 480 294 478 288 Z', tie);
-  } else if (style === 'chignon') {
-    cap([500, 280]);
-    const bun = 'M 500 220 C 528 220 542 240 542 260 C 542 284 522 296 500 296 C 478 296 458 284 458 260 C 458 240 472 220 500 220 Z';
-    fill(ctx, bun, h.base);
-    clipped(ctx, bun, () => fill(ctx, 'M 458 270 C 480 292 522 292 542 270 L 542 300 L 458 300 Z', h.shade));
-    strands(['M 472 248 C 486 228 520 228 530 252', 'M 470 268 C 484 282 516 284 530 268', 'M 486 258 C 494 248 510 250 514 262']);
-    stroke(ctx, 'M 478 236 C 488 228 500 226 512 228', h.light, 3.5);
-    fill(ctx, 'M 468 290 C 480 302 520 302 532 290 L 530 302 C 516 310 484 310 470 302 Z', tie);
-  } else if (style === 'couettes') {
-    both(ctx, () => {
-      const tail = 'M 442 306 C 412 296 388 318 390 354 C 392 388 404 426 398 470 C 426 440 436 398 436 364 C 436 342 440 328 446 330 Z';
-      fill(ctx, tail, h.base);
-      strands(['M 428 312 C 406 326 402 362 408 398 C 412 422 410 444 404 460', 'M 420 342 C 418 370 424 400 420 428']);
-    });
-    fill(ctx, HAIR_CAP, h.base);
-    fill(ctx, 'M 498 260 L 502 260 L 503 418 L 497 418 Z', h.shade);
-    strands(['M 452 400 C 446 370 446 340 448 318', 'M 476 412 C 470 380 466 344 452 318', 'M 494 262 C 476 270 458 288 450 312',
-      'M 548 400 C 554 370 554 340 552 318', 'M 524 412 C 530 380 534 344 548 318', 'M 506 262 C 524 270 542 288 550 312']);
-    fill(ctx, 'M 456 284 C 466 272 480 266 490 266 C 476 280 466 296 460 314 Z', h.light);
-    both(ctx, () => fill(ctx, 'M 432 304 C 442 298 454 304 456 314 C 458 328 446 336 436 332 C 426 326 424 312 432 304 Z', tie));
-  } else if (style === 'carre') {
-    const bob = 'M 500 252 C 554 252 580 300 578 352 C 578 392 584 422 590 440 C 562 448 532 444 500 446 '
-      + 'C 468 444 438 448 410 440 C 416 422 422 392 422 352 C 420 300 446 252 500 252 Z';
-    fill(ctx, bob, h.base);
-    strands(['M 500 262 C 470 300 450 360 442 438', 'M 500 262 C 486 310 476 370 472 442', 'M 500 262 C 514 310 524 370 528 442',
-      'M 500 262 C 530 300 550 360 558 438', 'M 472 268 C 446 300 434 360 428 434', 'M 528 268 C 554 300 566 360 572 434']);
-    sheen(ctx, 'M 446 310 C 472 294 528 294 554 310 C 528 302 472 302 446 310 Z', h.light);
-  } else if (style === 'long') {
-    // longs et lisses : tombent sur les épaules
-    const hair = 'M 500 252 C 554 252 582 298 580 350 C 580 400 588 446 596 480 C 576 490 550 486 532 492 '
-      + 'C 520 488 510 494 500 490 C 490 494 480 488 468 492 C 450 486 424 490 404 480 C 412 446 420 400 420 350 '
-      + 'C 418 298 446 252 500 252 Z';
-    fill(ctx, hair, h.base);
-    clipped(ctx, hair, () => sheen(ctx, 'M 400 452 C 460 470 540 470 600 452 L 600 500 L 400 500 Z', h.shade, 0.5));
-    strands(['M 498 258 C 470 296 452 380 444 476', 'M 498 262 C 484 320 476 400 472 484', 'M 502 262 C 516 320 524 400 528 484',
-      'M 502 258 C 530 296 548 380 556 476', 'M 494 256 C 452 280 434 380 426 470', 'M 506 256 C 548 280 566 380 574 470']);
-    stroke(ctx, 'M 500 254 L 500 296', h.shade, 3);
-    sheen(ctx, 'M 446 300 C 462 280 480 270 494 266 C 476 284 464 304 458 330 Z', h.light);
-    sheen(ctx, 'M 554 300 C 538 280 520 270 506 266 C 524 284 536 304 542 330 Z', h.light, 0.35);
-  } else if (style === 'rase') {
-    // rasés : la peau du crâne reste visible sous des cheveux très courts
-    sheen(ctx, HAIR_CAP, h.base, 0.55);
-    sheen(ctx, 'M 452 300 C 466 280 484 270 496 270 C 480 284 468 300 462 320 Z', h.light, 0.35);
-  } else if (style === 'court') {
-    // courts : petites mèches en pointe sur le dessus, nuque dégagée
-    const [cx, cy, rx, ry, n] = [500, 344, 71, 85, 22];
-    const at = (t, k = 1) => [cx + Math.cos(t) * rx * k, cy + Math.sin(t) * ry * k].map((v) => v.toFixed(1)).join(' ');
-    const [t0, t1] = [Math.PI * 0.93, Math.PI * 2.07];
-    let crop = `M ${at(t0)} `;
-    const tips = [1.05, 1.08, 1.04, 1.07, 1.06, 1.09, 1.04, 1.07, 1.08, 1.05, 1.07, 1.04, 1.08, 1.06, 1.05, 1.08, 1.04, 1.07, 1.06, 1.08, 1.05, 1.06];
-    for (let i = 0; i < n; i += 1) {
-      const [a, b] = [t0 + ((t1 - t0) * i) / n, t0 + ((t1 - t0) * (i + 1)) / n];
-      crop += `L ${at((a + b) / 2 + 0.03, tips[i])} L ${at(b)} `;
-    }
-    crop += 'C 566 390 552 402 538 404 L 530 412 L 520 406 L 510 414 L 500 408 L 490 414 L 480 406 L 470 412 L 462 404 '
-      + 'C 448 402 434 390 431 368 Z';
-    fill(ctx, crop, h.base);
-    clipped(ctx, crop, () => sheen(ctx, 'M 430 380 C 470 396 530 396 570 380 L 570 420 L 430 420 Z', h.shade, 0.6));
-    strands(['M 508 298 C 488 296 470 310 462 330', 'M 508 298 C 528 300 542 316 548 336', 'M 508 298 C 502 326 500 350 502 372',
-      'M 508 298 C 482 312 470 338 466 362', 'M 508 298 C 534 314 544 340 542 364', 'M 508 298 C 512 284 500 274 486 276',
-      'M 476 398 L 472 384', 'M 494 402 L 492 388', 'M 516 402 L 518 388', 'M 536 398 L 540 384']);
-    fill(ctx, 'M 504 294 C 510 290 516 294 514 300 C 512 304 504 304 504 294 Z', h.shade);
-    sheen(ctx, 'M 454 302 C 466 282 484 272 496 272 C 480 286 468 302 462 322 Z', h.light);
-    if (gender === 'fille') fill(ctx, 'M 548 300 C 560 304 568 316 566 326 L 558 330 C 556 318 550 310 540 306 Z', tie);
-  } else {
-    // bouclés : contour en festons et petites boucles
-    let d = '';
-    const n = 18;
-    for (let i = 0; i <= n; i += 1) {
-      const a = (i / n) * Math.PI * 2 - Math.PI / 2;
-      const [x, y] = [500 + Math.cos(a) * 80, 336 + Math.sin(a) * 82];
-      if (i === 0) { d += `M ${x.toFixed(1)} ${y.toFixed(1)} `; continue; }
-      const m = a - Math.PI / n;
-      d += `Q ${(500 + Math.cos(m) * 98).toFixed(1)} ${(336 + Math.sin(m) * 100).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)} `;
-    }
-    fill(ctx, `${d}Z`, h.base);
-    const curls = [[470, 292], [520, 284], [448, 332], [500, 322], [552, 326], [462, 374], [512, 366], [556, 378], [486, 406], [532, 406], [434, 382], [572, 342]];
-    for (const [x, y] of curls) stroke(ctx, `M ${x - 9} ${y + 2} C ${x - 9} ${y - 10} ${x + 9} ${y - 10} ${x + 9} ${y} C ${x + 9} ${y + 8} ${x - 1} ${y + 9} ${x - 3} ${y + 2}`, h.shade, 3);
-    stroke(ctx, 'M 462 278 C 476 268 494 264 506 266', h.light, 4);
-  }
-}
-
-
 /** Tête vue de dos : crâne, oreilles et cheveux (repère de la tête de l'enfant). */
 function drawHead(ctx, c, person, gender) {
   fill(ctx, CHILD_HEAD, person.skin.base);
-  if (!['carre', 'boucles', 'long'].includes(person.hair)) {
+  if (!['carre', 'boucles', 'long', 'frises'].includes(person.hair)) {
     both(ctx, () => {
       fill(ctx, CHILD_EAR, person.skin.base);
       stroke(ctx, CHILD_EAR_LINE, person.skin.shade, 2.5);

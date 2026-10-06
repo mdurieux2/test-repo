@@ -237,6 +237,12 @@ test('options : genre, coiffures, couleurs de cheveux et de peau', () => {
   assert.ok(!adultHairsFor('maman').some((h) => h.id === 'rase'));
   assert.equal(new Set([...adultHairsFor('papa'), ...adultHairsFor('maman')].map((h) => h.id)).size, ADULT_HAIRS.length);
   for (const id of HAIRS_BELOW) assert.ok(adultHairsFor('maman').some((h) => h.id === id), id);
+  // longs et frisés, crépus : pour tous les enfants et tous les parents
+  for (const id of ['frises', 'crepus']) {
+    for (const list of [hairsFor('garcon'), hairsFor('fille'), adultHairsFor('papa'), adultHairsFor('maman')]) {
+      assert.ok(list.some((h) => h.id === id), id);
+    }
+  }
 });
 
 test('compositions : 1 ou 2 parents, un enfant sur les épaules ou un sur chaque épaule', () => {
