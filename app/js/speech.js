@@ -95,7 +95,7 @@ export function isSpeechSupported() {
 const VOICE_BASE = 'voix/';
 // MP3 mono à débit constant (32 kbit/s) : la durée d'un son se déduit de sa taille
 const BYTES_PER_SECOND = 4000;
-const natural = { wanted: true, clips: null, files: [], names: [], unlocked: false, silence: null };
+const natural = { wanted: true, clips: null, files: [], packs: [], names: [], unlocked: false, silence: null };
 const pauseFiles = {}; // pause → blob (gardés en mémoire)
 let player = null;
 let cancelClip = null;
@@ -117,6 +117,7 @@ export async function loadNaturalVoice(url = `${VOICE_BASE}manifest.json`) {
     const data = await response.json();
     natural.clips = data.clips || null;
     natural.files = [...new Set(Object.values(data.clips || {}))];
+    natural.packs = data.paquets || [];
     // un court silence, prêt à jouer au premier toucher (voir unlockNaturalVoice)
     fetch(`${VOICE_BASE}silence.mp3`).then((r) => (r.ok ? r.blob() : null)).then((blob) => {
       if (blob) natural.silence = URL.createObjectURL(blob);
@@ -130,6 +131,11 @@ export async function loadNaturalVoice(url = `${VOICE_BASE}manifest.json`) {
 /** Fichiers des sons (pour les télécharger tous à l'avance, et jouer hors connexion). */
 export function naturalVoiceFiles() {
   return natural.files;
+}
+
+/** Paquets de sons ({ nom, sons: [[fichier, taille]] }), les plus entendus d'abord. */
+export function naturalVoicePacks() {
+  return natural.packs;
 }
 
 export function setNaturalVoice(on) {

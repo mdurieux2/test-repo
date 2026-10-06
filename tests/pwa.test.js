@@ -17,8 +17,8 @@ test('le service worker met en cache tous les fichiers de l’app (et seulement 
   const sw = readFileSync(join(APP, 'sw.js'), 'utf8');
   const list = sw.match(/const PRECACHE = \[([\s\S]*?)\];/)[1];
   const cached = [...list.matchAll(/'\.\/([^']*)'/g)].map((m) => m[1]).filter(Boolean);
-  // les sons de la voix naturelle sont téléchargés à part (cache des voix, voir voix.test.js)
-  const files = listFiles(APP).filter((f) => !NOT_CACHED.has(f) && !/^voix\/(fr|en)\//.test(f));
+  // les sons de la voix naturelle sont téléchargés à part, en paquets (cache des voix, voir voix.test.js)
+  const files = listFiles(APP).filter((f) => !NOT_CACHED.has(f) && !/^voix\/((fr|en)\/|paquet-)/.test(f));
   assert.deepEqual([...cached].sort(), [...files].sort());
 });
 

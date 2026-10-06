@@ -74,14 +74,27 @@ test('voix naturelle : chaque phrase d’un seul son, sinon par propositions, mo
   assert.equal(pauseBetween('Bravo !', 'ou'), 'phrase');
 });
 
-test('voix naturelle : le manifeste et les sons correspondent', () => {
-  const files = new Set(Object.values(manifest.clips));
+test('voix naturelle : le manifeste et les paquets de sons correspondent', () => {
   assert.equal(manifest.sons, Object.keys(manifest.clips).length);
-  for (const file of files) assert.ok(existsSync(join(APP, 'voix', file)), `son absent : ${file}`);
-  for (const lang of ['fr', 'en']) {
-    if (!existsSync(join(APP, 'voix', lang))) continue;
-    for (const name of readdirSync(join(APP, 'voix', lang))) assert.ok(files.has(`${lang}/${name}`), `son inutile : ${lang}/${name}`);
+  assert.ok(manifest.paquets.length >= 1);
+  const stored = new Map();
+  let bytes = 0;
+  for (const pack of manifest.paquets) {
+    assert.match(pack.nom, /^paquet-[0-9a-f]{12}\.mp3$/);
+    const size = pack.sons.reduce((sum, [, n]) => sum + n, 0);
+    assert.equal(statSync(join(APP, 'voix', pack.nom)).size, size, `${pack.nom} : taille`);
+    bytes += size;
+    for (const [file] of pack.sons) {
+      assert.ok(!stored.has(file), `son en double : ${file}`);
+      stored.set(file, pack.nom);
+    }
   }
+  assert.equal(manifest.octets, bytes);
+  for (const file of new Set(Object.values(manifest.clips))) assert.ok(stored.has(file), `son absent des paquets : ${file}`);
+  // pas de son en dehors des paquets, ni de paquet oublié
+  for (const lang of ['fr', 'en']) assert.ok(!existsSync(join(APP, 'voix', lang)), `app/voix/${lang}/ doit être rangé en paquets`);
+  const names = new Set(manifest.paquets.map((p) => p.nom));
+  for (const name of readdirSync(join(APP, 'voix'))) if (name.startsWith('paquet-')) assert.ok(names.has(name), `paquet inutile : ${name}`);
   // les clés du manifeste sont bien celles que calcule l'application
   for (const key of Object.keys(manifest.clips).slice(0, 500)) {
     const [lang, rate, ...text] = key.split('|');
@@ -91,12 +104,18 @@ test('voix naturelle : le manifeste et les sons correspondent', () => {
 
 test('voix naturelle : sons et pauses en MP3 sans en-tête, mis bout à bout sans trou', () => {
   // 24 kHz, 32 kbit/s, mono, débit constant : des trames de 96 octets, la première dès le début
-  const sample = [...Object.values(manifest.clips).slice(0, 200), 'pause-phrase.mp3', 'pause-virgule.mp3'];
-  for (const file of sample) {
-    const path = join(APP, 'voix', file);
-    const head = readFileSync(path).subarray(0, 2);
-    assert.ok(head[0] === 0xff && (head[1] & 0xe0) === 0xe0, `${file} : pas de trame MP3 au début`);
-    assert.equal(statSync(path).size % 96, 0, `${file} : débit non constant`);
+  const isMp3 = (bytes, name) => {
+    assert.ok(bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0, `${name} : pas de trame MP3 au début`);
+    assert.equal(bytes.length % 96, 0, `${name} : débit non constant`);
+  };
+  for (const name of ['pause-phrase.mp3', 'pause-virgule.mp3']) isMp3(readFileSync(join(APP, 'voix', name)), name);
+  for (const pack of manifest.paquets) {
+    const body = readFileSync(join(APP, 'voix', pack.nom));
+    let start = 0;
+    for (const [file, n] of pack.sons) {
+      isMp3(body.subarray(start, start + n), file);
+      start += n;
+    }
   }
 });
 
