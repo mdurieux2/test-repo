@@ -19,7 +19,8 @@ export const CHANGELOG = [
       'Chaque phrase est dite d’un seul tenant, et les phrases d’une consigne s’enchaînent sans trou, avec une petite pause naturelle entre elles.',
       'Voix plus égale : même volume d’un son à l’autre, même hauteur (les exclamations ne montent plus dans les aigus), et des mots moins ralentis.',
       'Chaque son est vérifié par une reconnaissance vocale (la diction doit être claire), et refait s’il le faut.',
-      'Consignes réécrites en phrases entières (écrire les lettres, chemins de lettres…).',
+      'Consignes réécrites en phrases entières (écrire les lettres, chemins de lettres, calendrier, rimes…).',
+      'Premier lancement : la voix se télécharge bien plus vite (une quinzaine de paquets au lieu de milliers de petits fichiers), avec une barre en haut de l’écran qui montre l’avancement.',
     ],
   },
   {

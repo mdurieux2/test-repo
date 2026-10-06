@@ -1,42 +1,42 @@
 # Voix naturelle : écran par écran
 
-12894 sons. Colonnes : entier, virgule, prenom, court, mot, absent (voir scripts/voix/rapport.mjs).
+14242 sons. Colonnes : entier, virgule, prenom, court, mot, absent (voir scripts/voix/rapport.mjs).
 
 ## Jeux (tirages au hasard, tous les niveaux)
 
 | Jeu | entier | virgule | prenom | court | mot | absent |
 |---|---|---|---|---|---|---|
-| Frappe les syllabes | 79.9 % | 13.9 % | 0 % | 0 % | 1.7 % | 4.5 % |
-| Les rimes | 50.1 % | 23.6 % | 0 % | 0 % | 15.4 % | 10.9 % |
-| Les lettres | 91.6 % | 4.8 % | 0 % | 0.6 % | 2.2 % | 0.8 % |
-| Le premier son | 85.4 % | 6.4 % | 0 % | 0 % | 0.6 % | 7.7 % |
-| Les syllabes | 98.7 % | 0 % | 0 % | 0 % | 0 % | 1.3 % |
-| Le bon mot | 95.2 % | 0 % | 0 % | 0 % | 0 % | 4.8 % |
-| Les petits mots | 98.1 % | 0.4 % | 0 % | 0 % | 0 % | 1.5 % |
-| Lis la phrase | 98.7 % | 0 % | 0 % | 0 % | 1.3 % | 0 % |
+| Frappe les syllabes | 83.7 % | 16.3 % | 0 % | 0 % | 0 % | 0 % |
+| Les rimes | 53.1 % | 46.9 % | 0 % | 0 % | 0 % | 0 % |
+| Les lettres | 97.3 % | 2.7 % | 0 % | 0 % | 0 % | 0 % |
+| Le premier son | 90.9 % | 8.8 % | 0 % | 0 % | 0.3 % | 0 % |
+| Les syllabes | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Le bon mot | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Les petits mots | 99.2 % | 0.8 % | 0 % | 0 % | 0 % | 0 % |
+| Lis la phrase | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Le bon petit mot | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
-| Un, une, le, la | 88.5 % | 0.3 % | 0 % | 0 % | 4.3 % | 6.8 % |
-| Écris au doigt | 79.3 % | 0 % | 18.7 % | 0 % | 2 % | 0 % |
-| La dictée de mots | 94.6 % | 0 % | 0 % | 0 % | 0 % | 5.4 % |
-| Histoires lues | 99.7 % | 0 % | 0 % | 0 % | 0.3 % | 0 % |
-| Petits textes | 95.3 % | 0 % | 0 % | 0 % | 1.9 % | 2.8 % |
-| Combien ? | 73 % | 4.8 % | 0 % | 14.8 % | 2.7 % | 4.7 % |
-| Vite vu ! | 94.1 % | 1.9 % | 0 % | 1.1 % | 0 % | 2.9 % |
-| Le panier | 18.8 % | 2.7 % | 0 % | 47.4 % | 3.4 % | 27.7 % |
-| Fais des patates | 66.4 % | 4.7 % | 0 % | 3.6 % | 24.4 % | 0.8 % |
-| Dizaines et unités | 64.4 % | 0.7 % | 0 % | 18.1 % | 4.2 % | 12.6 % |
+| Un, une, le, la | 99.7 % | 0.3 % | 0 % | 0 % | 0 % | 0 % |
+| Écris au doigt | 80 % | 0 % | 20 % | 0 % | 0 % | 0 % |
+| La dictée de mots | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Histoires lues | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Petits textes | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Combien ? | 74 % | 9.1 % | 0 % | 16.9 % | 0 % | 0 % |
+| Vite vu ! | 94.1 % | 1.6 % | 0 % | 4.3 % | 0 % | 0 % |
+| Le panier | 21.8 % | 24.9 % | 0 % | 53.3 % | 0 % | 0 % |
+| Fais des patates | 66.3 % | 7.8 % | 0 % | 26 % | 0 % | 0 % |
+| Dizaines et unités | 69.3 % | 12.5 % | 0 % | 18.2 % | 0 % | 0 % |
 | Relie les quantités | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
-| Le plus grand | 58.8 % | 5.9 % | 0 % | 27.3 % | 0.6 % | 7.5 % |
-| La suite | 83.5 % | 16.4 % | 0 % | 0 % | 0 % | 0.1 % |
-| Calcul | 55.1 % | 0.9 % | 0 % | 21.2 % | 0 % | 22.8 % |
+| Le plus grand | 58.8 % | 7.1 % | 0 % | 34.1 % | 0 % | 0 % |
+| La suite | 84.3 % | 15.7 % | 0 % | 0 % | 0 % | 0 % |
+| Calcul | 55.2 % | 0.8 % | 0 % | 44 % | 0 % | 0 % |
 | Les calculs à trous | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Relie les calculs | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
-| Faire 10 | 89.1 % | 1.6 % | 0 % | 9.3 % | 0 % | 0 % |
-| Les tables | 76.3 % | 0 % | 9 % | 6.8 % | 1 % | 6.9 % |
-| Défi chrono des tables | 93.6 % | 0 % | 0 % | 6.4 % | 0 % | 0 % |
-| Range dans l’ordre | 73.3 % | 26.4 % | 0 % | 0 % | 0 % | 0.2 % |
-| Petits problèmes | 0 % | 0 % | 71.8 % | 22.4 % | 0.3 % | 5.4 % |
-| Doubles et moitiés | 96 % | 0.4 % | 0 % | 0.9 % | 2.7 % | 0 % |
+| Faire 10 | 89.1 % | 0 % | 0 % | 10.9 % | 0 % | 0 % |
+| Les tables | 76.8 % | 0 % | 9 % | 14.2 % | 0 % | 0 % |
+| Défi chrono des tables | 94.6 % | 0 % | 0 % | 5.4 % | 0 % | 0 % |
+| Range dans l’ordre | 73.3 % | 26.7 % | 0 % | 0 % | 0 % | 0 % |
+| Petits problèmes | 0 % | 0 % | 72 % | 27.2 % | 0.8 % | 0 % |
+| Doubles et moitiés | 98.7 % | 0 % | 0 % | 1.3 % | 0 % | 0 % |
 | Le puzzle | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Le memory | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Le coloriage magique | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
@@ -44,104 +44,70 @@
 | Les formes | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Les suites de motifs | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | L’intrus | 99.1 % | 0 % | 0 % | 0.9 % | 0 % | 0 % |
-| Les ombres | 82.4 % | 0 % | 0 % | 0 % | 0 % | 17.6 % |
+| Les ombres | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Sudoku | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | La symétrie | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Reproduis le dessin | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Les pièces du carré | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Compte les cubes | 99 % | 0 % | 0 % | 1 % | 0 % | 0 % |
 | Le labyrinthe | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
-| Le chemin des nombres | 93.9 % | 6.1 % | 0 % | 0 % | 0 % | 0 % |
-| Le chemin des lettres | 95.3 % | 0 % | 0 % | 0 % | 3.7 % | 1 % |
-| Quelle heure est-il ? | 82.3 % | 1.8 % | 0 % | 3.9 % | 0.5 % | 11.6 % |
-| Règle l’horloge | 56.7 % | 1.8 % | 0 % | 7.5 % | 2.7 % | 31.4 % |
-| Le calendrier | 30.2 % | 12.3 % | 0 % | 20.8 % | 22.8 % | 13.8 % |
-| Le temps qui passe | 89.2 % | 0.4 % | 0 % | 0 % | 5.5 % | 4.9 % |
-| La monnaie | 68.3 % | 12.1 % | 0 % | 18.6 % | 0 % | 1.1 % |
-| Mesurer | 84.4 % | 2.6 % | 0 % | 12.8 % | 0.3 % | 0 % |
-| Les animaux | 75 % | 0.7 % | 0 % | 0 % | 16.3 % | 8 % |
-| Les pays du monde | 91 % | 0 % | 0 % | 0 % | 6.5 % | 2.4 % |
-| Les drapeaux | 82.2 % | 7.3 % | 0 % | 0 % | 5.3 % | 5.2 % |
-| Écoute et touche | 98.4 % | 0 % | 0 % | 0 % | 0 % | 1.6 % |
-| Lis et touche | 98.8 % | 0 % | 0 % | 0 % | 0 % | 1.2 % |
-| Le mot anglais | 98 % | 0.1 % | 0 % | 0 % | 0 % | 1.9 % |
+| Le chemin des nombres | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Le chemin des lettres | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Quelle heure est-il ? | 82.3 % | 4 % | 0 % | 13.5 % | 0.2 % | 0 % |
+| Règle l’horloge | 57.8 % | 2.2 % | 0 % | 40 % | 0 % | 0 % |
+| Le calendrier | 39.3 % | 21.3 % | 0 % | 39.3 % | 0 % | 0 % |
+| Le temps qui passe | 89.8 % | 10.2 % | 0 % | 0 % | 0 % | 0 % |
+| La monnaie | 68.9 % | 11.3 % | 0 % | 19.8 % | 0 % | 0 % |
+| Mesurer | 84.5 % | 7.4 % | 0 % | 8.1 % | 0 % | 0 % |
+| Les animaux | 78.7 % | 20.9 % | 0 % | 0 % | 0.4 % | 0 % |
+| Les pays du monde | 91 % | 9 % | 0 % | 0 % | 0 % | 0 % |
+| Les drapeaux | 89.3 % | 10.7 % | 0 % | 0 % | 0 % | 0 % |
+| Écoute et touche | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Lis et touche | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Le mot anglais | 99.9 % | 0.1 % | 0 % | 0 % | 0 % | 0 % |
 | Relie en anglais | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
-| Épelle en anglais | 99.2 % | 0 % | 0 % | 0 % | 0 % | 0.8 % |
-| Compte en anglais | 93.1 % | 0.3 % | 0 % | 0.2 % | 5.7 % | 0.7 % |
-| Les nombres en anglais | 95.7 % | 0 % | 0 % | 1.4 % | 2.9 % | 0 % |
-| Calcule en anglais | 99.7 % | 0 % | 0 % | 0 % | 0.3 % | 0 % |
+| Épelle en anglais | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Compte en anglais | 98 % | 0.2 % | 0 % | 1 % | 0.8 % | 0 % |
+| Les nombres en anglais | 98.6 % | 0 % | 0 % | 1.4 % | 0 % | 0 % |
+| Calcule en anglais | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Mélange les couleurs | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
-| Colorie en anglais | 66.7 % | 0 % | 0 % | 0 % | 33.3 % | 0 % |
-| Le memory anglais | 91.3 % | 0 % | 0 % | 0 % | 8.7 % | 0 % |
-| L’intrus en anglais | 79.4 % | 11.3 % | 0 % | 0 % | 8.1 % | 1.3 % |
+| Colorie en anglais | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| Le memory anglais | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
+| L’intrus en anglais | 86.9 % | 12.5 % | 0 % | 0 % | 0.6 % | 0 % |
 | Les contraires | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Where is the cat? | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
 | Une phrase en anglais | 100 % | 0 % | 0 % | 0 % | 0 % | 0 % |
-| Parle anglais | 92.9 % | 0 % | 2.3 % | 0 % | 4.8 % | 0 % |
-| **Tous les jeux** | 86.5 % | 2.3 % | 1.3 % | 3.7 % | 2.3 % | 3.9 % |
+| Parle anglais | 97.7 % | 0 % | 2.3 % | 0 % | 0 % | 0 % |
+| **Tous les jeux** | 88.7 % | 3.9 % | 1.3 % | 6 % | 0 % | 0 % |
 
 ### Phrases dites mot à mot ou par la voix de l’appareil
 
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « hibou » → —
-- syllabes-rythme : « hibou » → —
-- syllabes-rythme : « hibou » → —
-- syllabes-rythme : « hibou » → —
-- syllabes-rythme : « hibou » → —
-- syllabes-rythme : « hibou » → —
-- syllabes-rythme : « oiseau » → —
-- syllabes-rythme : « oiseau » → —
-- syllabes-rythme : « oiseau » → —
-- syllabes-rythme : « kangourou » → —
-- syllabes-rythme : « kangourou » → —
-- syllabes-rythme : « kangourou » → —
-- syllabes-rythme : « kangourou » → —
-- syllabes-rythme : « kangourou » → —
-- syllabes-rythme : « kangourou » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « carotte, ballon, ou cadeau » → carotte, ▸ ballon, ▸ ou ▸ cadeau
-- syllabes-rythme : « carotte, ballon, ou cadeau » → carotte, ▸ ballon, ▸ ou ▸ cadeau
-- syllabes-rythme : « carotte, ballon, ou cadeau » → carotte, ▸ ballon, ▸ ou ▸ cadeau
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « éléphant, radio, ou canard » → éléphant ▸ radio, ▸ ou ▸ canard
-- syllabes-rythme : « éléphant, radio, ou canard » → éléphant ▸ radio, ▸ ou ▸ canard
-- syllabes-rythme : « éléphant, radio, ou canard » → éléphant ▸ radio, ▸ ou ▸ canard
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « panda » → —
-- syllabes-rythme : « renard, bébé, ou moto » → —
-- syllabes-rythme : « renard, bébé, ou moto » → —
-- syllabes-rythme : « renard, bébé, ou moto » → —
-- syllabes-rythme : « abeille, banane, ou poisson » → abeille, ▸ banane, ▸ ou ▸ poisson
-- syllabes-rythme : « abeille, banane, ou poisson » → abeille, ▸ banane, ▸ ou ▸ poisson
-- syllabes-rythme : « abeille, banane, ou poisson » → abeille, ▸ banane, ▸ ou ▸ poisson
-- syllabes-rythme : « canard, banane, ou poisson » → canard ▸ banane, ▸ ou ▸ poisson
-- syllabes-rythme : « canard, banane, ou poisson » → canard ▸ banane, ▸ ou ▸ poisson
-- syllabes-rythme : « canard, banane, ou poisson » → canard ▸ banane, ▸ ou ▸ poisson
-- syllabes-rythme : « tulipe, tortue, ou glaçon » → —
-- syllabes-rythme : « tulipe, tortue, ou glaçon » → —
-- syllabes-rythme : « tulipe, tortue, ou glaçon » → —
-- syllabes-rythme : « crayon, tulipe, ou soleil » → —
-- syllabes-rythme : « crayon, tulipe, ou soleil » → —
-- syllabes-rythme : « crayon, tulipe, ou soleil » → —
-- syllabes-rythme : « ballon, tulipe, ou fusée » → —
-- syllabes-rythme : « ballon, tulipe, ou fusée » → —
-- syllabes-rythme : « ballon, tulipe, ou fusée » → —
-- syllabes-rythme : « moto, bébé, ou canard » → moto, ▸ bébé, ▸ ou ▸ canard
-- syllabes-rythme : « moto, bébé, ou canard » → moto, ▸ bébé, ▸ ou ▸ canard
-- syllabes-rythme : « moto, bébé, ou canard » → moto, ▸ bébé, ▸ ou ▸ canard
+- premier-son : « moto, fourmi, robot, ou arbre » → moto, ▸ fourmi, ▸ robot, ▸ ou ▸ arbre
+- premier-son : « moto, fourmi, robot, ou arbre » → moto, ▸ fourmi, ▸ robot, ▸ ou ▸ arbre
+- premier-son : « moto, fourmi, robot, ou arbre » → moto, ▸ fourmi, ▸ robot, ▸ ou ▸ arbre
+- problemes : « Zélie a une étoile de moins. » → Zélie ▸ a ▸ une ▸ étoile ▸ de ▸ moins
+- problemes : « Zélie a un gâteau de plus. » → Zélie ▸ a ▸ un ▸ gâteau ▸ de ▸ plus
+- problemes : « Zélie a un bonbon de moins. » → Zélie ▸ a ▸ un ▸ bonbon ▸ de ▸ moins
+- problemes : « Zélie a 10 bonbons de plus. » → Zélie ▸ a ▸ 10 ▸ bonbons ▸ de ▸ plus
+- problemes : « Zélie a un gâteau de plus. » → Zélie ▸ a ▸ un ▸ gâteau ▸ de ▸ plus
+- problemes : « Zélie a une pomme de plus. » → Zélie ▸ a ▸ une ▸ pomme ▸ de ▸ plus
+- problemes : « Zélie a une petite voiture de moins. » → Zélie ▸ a ▸ une ▸ petite ▸ voiture ▸ de ▸ moins
+- heure : « Regarde l’horloge. Le spectacle est à une heure moins le quart. Dans combien de temps ? » → Regarde l'horloge. ▸ le ▸ spectacle ▸ est ▸ à ▸ une ▸ heure ▸ moins ▸ le ▸ quart ▸ Dans combien de temps ?
+- animaux-monde : « Que mange le cerf ? » → que ▸ mange ▸ le ▸ cerf
+- animaux-monde : « Que mange le cerf ? » → que ▸ mange ▸ le ▸ cerf
+- animaux-monde : « Que mange le cerf ? » → que ▸ mange ▸ le ▸ cerf
+- animaux-monde : « Que mange le cerf ? » → que ▸ mange ▸ le ▸ cerf
+- compte-anglais : « Two plus five? » → two ▸ plus ▸ five
+- compte-anglais : « Two plus five? » → two ▸ plus ▸ five
+- compte-anglais : « Two plus five? » → two ▸ plus ▸ five
+- compte-anglais : « two plus five equals seven. » → two ▸ plus ▸ five ▸ equals ▸ seven
+- compte-anglais : « Nine minus seven? » → nine ▸ minus ▸ seven
+- compte-anglais : « Nine minus seven? » → nine ▸ minus ▸ seven
+- compte-anglais : « Nine minus seven? » → nine ▸ minus ▸ seven
+- compte-anglais : « nine minus seven equals two. » → nine ▸ minus ▸ seven ▸ equals ▸ two
+- intrus-anglais : « Yes! The rabbit is not a part of the body. » → Yes! ▸ the ▸ rabbit ▸ is ▸ not ▸ a ▸ part ▸ of ▸ the ▸ body
+- intrus-anglais : « Yes! The elephant is not weather. » → Yes! ▸ the ▸ elephant ▸ is ▸ not ▸ weather
+- intrus-anglais : « Yes! The egg is not for school. » → Yes! ▸ the ▸ egg ▸ is ▸ not ▸ for ▸ school
 
 ## Parcours complet, écran par écran
 
@@ -209,28 +175,28 @@
 
 ### play animaux-monde : 22 phrases
 
-- `absent` « Dans la forêt, à la ferme ou dans la savane ? » → —
-- `absent` « à la ferme, sur la banquise ou dans la savane » → —
-- `absent` « dans la savane, sur la banquise ou à la ferme » → —
-- `absent` « Dans la savane, sur la banquise ou dans la mer ? » → —
-- `mot` « sur la banquise, dans la mer ou dans la forêt » → sur la banquise, ▸ dans ▸ la ▸ mer ▸ ou ▸ dans ▸ la ▸ forêt
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Bravo ! »
 - `entier` « Génial ! »
 - `entier` « Très bien ! »
 - `entier` « Où vit la vache ? »
+- `entier` « Dans la forêt, à la ferme ou dans la savane ? »
 - `entier` « La vache vit à la ferme. »
 - `entier` « La chouette ? »
+- `entier` « sur la banquise, dans la mer ou dans la forêt »
 - `entier` « La chouette vit dans la forêt. »
 - `entier` « Le zèbre ? »
 - `entier` « dans la savane, à la ferme ou dans la forêt »
 - `entier` « Le zèbre vit dans la savane. »
 - `entier` « Le cochon ? »
+- `entier` « à la ferme, sur la banquise ou dans la savane »
 - `entier` « Le cochon vit à la ferme. »
 - `entier` « Le canard ? »
+- `entier` « dans la savane, sur la banquise ou à la ferme »
 - `entier` « Le canard vit à la ferme. »
 - `entier` « Où vit la baleine ? »
+- `entier` « Dans la savane, sur la banquise ou dans la mer ? »
 
 ### play bon-mot : 12 phrases
 
@@ -249,7 +215,6 @@
 
 ### play calcul : 15 phrases
 
-- `court` « Combien font 4 plus 1 ? » → Combien font ▸ 4 ▸ plus ▸ 1
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
@@ -257,6 +222,7 @@
 - `entier` « Tout est relié ! »
 - `entier` « Tous les calculs sont justes ! »
 - `entier` « 4 plus 1, égale 5 »
+- `entier` « Combien font 4 plus 1 ? »
 - `entier` « Relie chaque calcul à son résultat. »
 - `entier` « 2 plus 2 ? »
 - `entier` « 2 plus 2, égale 4 »
@@ -286,28 +252,28 @@
 
 ### play calendrier : 22 phrases
 
-- `absent` « samedi, lundi ou jeudi ? » → —
-- `mot` « vendredi, mardi ou dimanche ? » → vendredi, ▸ mardi ▸ ou ▸ dimanche
-- `mot` « jeudi, mardi ou samedi ? » → jeudi, ▸ mardi ▸ ou ▸ samedi
-- `mot` « samedi, jeudi ou mercredi ? » → samedi, ▸ jeudi ▸ ou ▸ mercredi
-- `mot` « vendredi, dimanche ou jeudi ? » → vendredi, ▸ dimanche ▸ ou ▸ jeudi
-- `mot` « dimanche, jeudi ou vendredi ? » → dimanche, ▸ jeudi ▸ ou ▸ vendredi
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Bien joué ! »
 - `entier` « Génial ! »
 - `entier` « Aujourd’hui, c’est mercredi. Hier, c’était… »
+- `entier` « vendredi, mardi ou dimanche ? »
 - `entier` « Hier, c’était mardi. »
 - `entier` « Aujourd’hui, c’est vendredi. Hier, c’était… »
+- `entier` « samedi, lundi ou jeudi ? »
 - `entier` « Hier, c’était jeudi. »
 - `entier` « Aujourd’hui, c’est lundi. Demain, ce sera… »
+- `entier` « jeudi, mardi ou samedi ? »
 - `entier` « Demain, ce sera mardi. »
 - `entier` « Aujourd’hui, c’est dimanche. Hier, c’était… »
+- `entier` « samedi, jeudi ou mercredi ? »
 - `entier` « Hier, c’était samedi. »
 - `entier` « Aujourd’hui, c’est lundi. Hier, c’était… »
+- `entier` « vendredi, dimanche ou jeudi ? »
 - `entier` « Hier, c’était dimanche. »
 - `entier` « Aujourd’hui, c’est samedi. Hier, c’était… »
+- `entier` « dimanche, jeudi ou vendredi ? »
 
 ### play chemin-lettres : 9 phrases
 
@@ -352,16 +318,16 @@
 
 ### play colorie-anglais : 10 phrases
 
-- `mot` « Well done! It's a boat! » → well ▸ done ▸ It's a boat!
-- `mot` « Well done! It's a butterfly! » → well ▸ done ▸ It's a butterfly!
-- `mot` « Well done! It's a house! » → well ▸ done ▸ It's a house!
 - `entier` « Oui, c’est ça ! »
 - `entier` « Bravo ! »
 - `entier` « Bien joué ! »
 - `entier` « Parfait ! »
 - `entier` « Lis la couleur, et colorie ! »
+- `entier` « Well done! It's a boat! »
 - `entier` « Regarde bien le nombre ! »
 - `entier` « Lis la couleur en anglais à côté de chaque nombre, puis colorie les zones qui ont ce nombre. »
+- `entier` « Well done! It's a butterfly! »
+- `entier` « Well done! It's a house! »
 
 ### play comparer : 9 phrases
 
@@ -397,13 +363,13 @@
 
 ### play compter : 17 phrases
 
-- `court` « 1 grenouille » → 1 ▸ grenouille
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Super ! »
 - `entier` « Génial ! »
 - `entier` « Combien y a-t-il de grenouilles ? »
+- `entier` « 1 grenouille »
 - `entier` « Combien de pommes ? »
 - `entier` « 4 pommes »
 - `entier` « Combien de coccinelles ? »
@@ -556,23 +522,21 @@
 ### play drapeaux : 13 phrases
 
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
-- `virgule` « Suisse, Royaume-Uni, Belgique ? » → Suisse, ▸ Royaume-Uni, ▸ Belgique ?
-- `virgule` « Portugal, Royaume-Uni, France ? » → Portugal, ▸ Royaume-Uni, ▸ France ?
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Bien joué ! »
 - `entier` « Quel pays ? »
 - `entier` « À quel pays est ce drapeau ? »
+- `entier` « Suisse, Royaume-Uni, Belgique ? »
 - `entier` « C’est le drapeau de la Belgique ! »
 - `entier` « C’est le drapeau de la Suisse ! »
 - `entier` « C’est le drapeau de l’Espagne ! »
 - `entier` « C’est le drapeau de le Royaume-Uni ! »
 - `entier` « C’est le drapeau de l’Allemagne ! »
+- `entier` « Portugal, Royaume-Uni, France ? »
 
 ### play duo-play duo : 36 phrases
 
-- `absent` « Dans la savane, dans la mer ou dans la forêt ? » → —
-- `mot` « Yes! The nose is not food. » → yes ▸ the ▸ nose ▸ is ▸ not ▸ food
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `prenom` « Bravo Matteo ! » → Bravo ▸ Matteo
 - `virgule` « À toi, Eva-Rose ! » → À toi, ▸ Eva-Rose
@@ -596,6 +560,8 @@
 - `entier` « Compte, et relie chaque groupe à son nombre. »
 - `entier` « Retrouve les paires d’images. Retourne deux cartes à la fois. »
 - `entier` « Regarde bien la suite. Qu’est-ce qui vient après ? »
+- `entier` « Trouve l’intrus : celui qui n’est pas de la même famille que les autres. »
+- `entier` « Touche le crayon le plus long. »
 
 ### play ecoute : 21 phrases
 
@@ -692,17 +658,17 @@
 
 ### play genre : 15 phrases
 
-- `absent` « pomme ? » → —
-- `absent` « oiseau ? » → —
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Très bien ! »
 - `entier` « Quel petit mot va devant : poule ? »
 - `entier` « une poule »
+- `entier` « pomme ? »
 - `entier` « une pomme »
 - `entier` « voiture ? »
 - `entier` « une voiture »
+- `entier` « oiseau ? »
 - `entier` « un oiseau »
 - `entier` « abeille ? »
 - `entier` « une abeille »
@@ -781,8 +747,6 @@
 
 ### play intrus-anglais : 15 phrases
 
-- `mot` « Yes! The pen is not a part of the body. » → yes ▸ the ▸ pen ▸ is ▸ not ▸ a ▸ part ▸ of ▸ the ▸ body
-- `mot` « Yes! The tooth is not food. » → yes ▸ the ▸ tooth ▸ is ▸ not ▸ food
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Excellent ! »
@@ -792,6 +756,8 @@
 - `entier` « Which one is not an animal? »
 - `entier` « Lequel n’est pas une partie du corps ? »
 - `entier` « Which one is not a part of the body? »
+- `entier` « Yes! The pen is not a part of the body. »
+- `entier` « Yes! The tooth is not food. »
 - `entier` « Yes! The cake is not weather. »
 - `entier` « Yes! The rainbow is not an animal. »
 - `entier` « Yes! The bag is not food. »
@@ -858,12 +824,12 @@
 
 ### play memory-anglais : 14 phrases
 
-- `mot` « Well done! » → well ▸ done
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Excellent ! »
 - `entier` « Bien joué ! »
 - `entier` « Retrouve les paires. »
+- `entier` « Well done! »
 - `entier` « Retrouve les paires : chaque image va avec son mot anglais. Retourne deux cartes à la fois. »
 - `entier` « lion »
 - `entier` « pig »
@@ -948,7 +914,6 @@
 
 ### play ombres : 9 phrases
 
-- `absent` « Quelle est son ombre ? » → —
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Excellent ! »
@@ -956,6 +921,7 @@
 - `entier` « Bien joué ! »
 - `entier` « Génial ! »
 - `entier` « Bravo, c’est la bonne ombre ! »
+- `entier` « Quelle est son ombre ? »
 - `entier` « Regarde l’image. Touche son ombre. »
 
 ### play ou-est : 22 phrases
@@ -985,9 +951,6 @@
 
 ### play panier : 17 phrases
 
-- `mot` « un kiwi » → un ▸ kiwi
-- `court` « Mets 2 oranges. » → Mets ▸ 2 ▸ oranges
-- `court` « Mets 4 kiwis dans le panier. » → Mets ▸ 4 ▸ kiwis dans le panier.
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Excellent ! »
@@ -997,15 +960,17 @@
 - `entier` « 2 citrons »
 - `entier` « Mets un kiwi. »
 - `entier` « Il y en a trop ! »
+- `entier` « un kiwi »
 - `entier` « Mets une fraise. »
 - `entier` « une fraise »
+- `entier` « Mets 2 oranges. »
 - `entier` « 2 oranges »
 - `entier` « Mets un citron. »
 - `entier` « un citron »
+- `entier` « Mets 4 kiwis dans le panier. »
 
 ### play parle-anglais : 19 phrases
 
-- `mot` « Good night! » → good ▸ night
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Bravo ! »
@@ -1023,15 +988,11 @@
 - `entier` « Hello! »
 - `entier` « On te donne un cadeau. Tu dis… »
 - `entier` « Thank you! »
+- `entier` « Good night! »
 - `entier` « Happy birthday! »
 
 ### play patates : 21 phrases
 
-- `mot` « 4 paquets de 2 et 1 : 9 ballons ! » → 4 ▸ paquets ▸ de ▸ 2 ▸ et ▸ 1 ▸ 9 ▸ ballons !
-- `mot` « 3 paquets de 2 et 1 : 7 gâteaux ! » → 3 ▸ paquets ▸ de ▸ 2 ▸ et ▸ 1 ▸ 7 ▸ gâteaux
-- `mot` « 2 paquets de 2 et 1 : 5 poissons ! » → 2 ▸ paquets ▸ de ▸ 2 ▸ et ▸ 1 ▸ 5 ▸ poissons !
-- `mot` « 4 paquets de 2 et 1 : 9 coccinelles ! » → 4 ▸ paquets ▸ de ▸ 2 ▸ et ▸ 1 ▸ 9 ▸ coccinelles
-- `court` « 3 paquets de 2 : 6 voitures ! » → 3 paquets de 2 : ▸ 6 ▸ voitures !
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Bravo ! »
@@ -1044,9 +1005,14 @@
 - `entier` « 4 paquets de 2 et 1 tout seul. Combien y en a-t-il en tout ? »
 - `entier` « Fais des patates : entoure des paquets de 2 ballons avec ton doigt. Ensuite, on comptera combien il y en a en tout. »
 - `entier` « Il en faut 2 dans une patate. Tu en as entouré 1. »
+- `entier` « 4 paquets de 2 et 1 : 9 ballons ! »
 - `entier` « 3 paquets de 2 et 1 tout seul. Combien y en a-t-il en tout ? »
+- `entier` « 3 paquets de 2 et 1 : 7 gâteaux ! »
 - `entier` « 3 paquets de 2. Combien y en a-t-il en tout ? »
+- `entier` « 3 paquets de 2 : 6 voitures ! »
 - `entier` « 2 paquets de 2 et 1 tout seul. Combien y en a-t-il en tout ? »
+- `entier` « 2 paquets de 2 et 1 : 5 poissons ! »
+- `entier` « 4 paquets de 2 et 1 : 9 coccinelles ! »
 - `entier` « Fais des patates : entoure des paquets de 2 papillons avec ton doigt. Ensuite, on comptera combien il y en a en tout. »
 
 ### play pays : 14 phrases
@@ -1102,8 +1068,6 @@
 
 ### play phrase : 12 phrases
 
-- `mot` « Il dort. » → il ▸ dort
-- `mot` « Il neige. » → il ▸ neige
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
@@ -1112,8 +1076,10 @@
 - `entier` « Quelle phrase ? »
 - `entier` « Lis les phrases, et trouve celle qui va avec l’image. »
 - `entier` « La fusée décolle. »
+- `entier` « Il dort. »
 - `entier` « Le soleil brille. »
 - `entier` « Il peint. »
+- `entier` « Il neige. »
 
 ### play phrase-anglais : 14 phrases
 
@@ -1149,7 +1115,6 @@
 
 ### play premier-son : 18 phrases
 
-- `absent` « arbre » → —
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
@@ -1158,6 +1123,7 @@
 - `entier` « Bien joué ! »
 - `entier` « Quel son entends-tu au début du mot… »
 - `entier` « abeille »
+- `entier` « arbre »
 - `entier` « arbre »
 - `entier` « écureuil »
 - `entier` « écureuil »
@@ -1170,17 +1136,17 @@
 
 ### play problemes : 16 phrases
 
-- `prenom` « Eva-Rose a un bonbon. On lui en donne 4. Combien de bonbons a Eva-Rose maintenant ? » → Eva-Rose ▸ a un bonbon. ▸ On lui en donne 4. ▸ Combien de bonbons a ▸ Eva-Rose ▸ maintenant
+- `prenom` « Eva-Rose a un bonbon. On lui en donne 4. Combien de bonbons a Eva-Rose maintenant ? » → Eva-Rose ▸ a un bonbon. ▸ On lui en donne 4. ▸ Combien de bonbons a ▸ Eva-Rose ▸ maintenant ?
 - `prenom` « Eva-Rose a 5 bonbons. » → Eva-Rose ▸ a 5 bonbons.
-- `prenom` « Eva-Rose a 4 crayons. On lui en donne 1. Combien de crayons a Eva-Rose maintenant ? » → Eva-Rose ▸ a 4 crayons. ▸ On lui en donne 1. ▸ Combien de crayons a ▸ Eva-Rose ▸ maintenant
+- `prenom` « Eva-Rose a 4 crayons. On lui en donne 1. Combien de crayons a Eva-Rose maintenant ? » → Eva-Rose ▸ a 4 crayons. ▸ On lui en donne 1. ▸ Combien de crayons a ▸ Eva-Rose ▸ maintenant ?
 - `prenom` « Eva-Rose a 5 crayons. » → Eva-Rose ▸ a 5 crayons.
-- `prenom` « Eva-Rose a un poisson. On lui en donne 1. Combien de poissons a Eva-Rose maintenant ? » → Eva-Rose ▸ a un poisson. ▸ On lui en donne 1. ▸ Combien de poissons a ▸ Eva-Rose ▸ maintenant
+- `prenom` « Eva-Rose a un poisson. On lui en donne 1. Combien de poissons a Eva-Rose maintenant ? » → Eva-Rose ▸ a un poisson. ▸ On lui en donne 1. ▸ Combien de poissons a ▸ Eva-Rose ▸ maintenant ?
 - `prenom` « Eva-Rose a 2 poissons. » → Eva-Rose ▸ a 2 poissons.
-- `prenom` « Eva-Rose a 3 bonbons. On lui en donne 2. Combien de bonbons a Eva-Rose maintenant ? » → Eva-Rose ▸ a 3 bonbons. ▸ On lui en donne 2. ▸ Combien de bonbons a ▸ Eva-Rose ▸ maintenant
-- `prenom` « Eva-Rose a 2 pommes. On lui en donne 1. Combien de pommes a Eva-Rose maintenant ? » → Eva-Rose ▸ a 2 pommes. ▸ On lui en donne 1. ▸ Combien de pommes a ▸ Eva-Rose ▸ maintenant
+- `prenom` « Eva-Rose a 3 bonbons. On lui en donne 2. Combien de bonbons a Eva-Rose maintenant ? » → Eva-Rose ▸ a 3 bonbons. ▸ On lui en donne 2. ▸ Combien de bonbons a ▸ Eva-Rose ▸ maintenant ?
+- `prenom` « Eva-Rose a 2 pommes. On lui en donne 1. Combien de pommes a Eva-Rose maintenant ? » → Eva-Rose ▸ a 2 pommes. ▸ On lui en donne 1. ▸ Combien de pommes a ▸ Eva-Rose ▸ maintenant ?
 - `prenom` « Eva-Rose a 3 pommes. » → Eva-Rose ▸ a 3 pommes.
-- `prenom` « Eva-Rose a 6 petites voitures. On lui en donne 4. Combien de petites voitures a Eva-Rose maintenant ? » → Eva-Rose ▸ a 6 petites voitures. ▸ On lui en donne 4. ▸ Combien de petites voitures a ▸ Eva-Rose ▸ maintenant
-- `prenom` « Eva-Rose a un gâteau. On lui en donne 2. Combien de gâteaux a Eva-Rose maintenant ? » → Eva-Rose ▸ a un gâteau. ▸ On lui en donne 2. ▸ Combien de gâteaux a ▸ Eva-Rose ▸ maintenant
+- `prenom` « Eva-Rose a 6 petites voitures. On lui en donne 4. Combien de petites voitures a Eva-Rose maintenant ? » → Eva-Rose ▸ a 6 petites voitures. ▸ On lui en donne 4. ▸ Combien de petites voitures a ▸ Eva-Rose ▸ maintenant ?
+- `prenom` « Eva-Rose a un gâteau. On lui en donne 2. Combien de gâteaux a Eva-Rose maintenant ? » → Eva-Rose ▸ a un gâteau. ▸ On lui en donne 2. ▸ Combien de gâteaux a ▸ Eva-Rose ▸ maintenant ?
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Excellent ! »
@@ -1212,8 +1178,6 @@
 
 ### play regle-horloge : 18 phrases
 
-- `mot` « Il faut 12 heures. Mets les aiguilles sur les pointillés. » → il ▸ faut ▸ 12 ▸ heures. ▸ Mets les aiguilles sur les pointillés.
-- `court` « 9 heures. » → 9 ▸ heures.
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Super ! »
@@ -1223,9 +1187,11 @@
 - `entier` « L’horloge montre 5 heures. »
 - `entier` « 12 heures. »
 - `entier` « La petite aiguille montre les heures. »
+- `entier` « Il faut 12 heures. Mets les aiguilles sur les pointillés. »
 - `entier` « L’horloge montre 12 heures. »
 - `entier` « 8 heures. »
 - `entier` « L’horloge montre 8 heures. »
+- `entier` « 9 heures. »
 - `entier` « L’horloge montre 9 heures. »
 - `entier` « 7 heures. »
 - `entier` « L’horloge montre 7 heures. »
@@ -1289,9 +1255,7 @@
 
 ### play revision : 16 phrases
 
-- `absent` « arbre » → —
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
-- `virgule` « moto, avion, ou ballon » → moto, ▸ avion, ▸ ou ballon
 - `entier` « Excellent ! »
 - `entier` « Parfait ! »
 - `entier` « a »
@@ -1300,36 +1264,38 @@
 - `entier` « Quel son entends-tu au début du mot… »
 - `entier` « Touche la syllabe que tu entends : »
 - `entier` « arbre »
+- `entier` « arbre »
 - `entier` « li »
 - `entier` « ours »
 - `entier` « ours : 1 syllabe ! »
 - `entier` « Quel mot rime avec : robot ? »
+- `entier` « moto, avion, ou ballon »
 - `entier` « robot, moto : ça rime ! »
 
 ### play rimes : 22 phrases
 
-- `absent` « oiseau, moto : ça rime ! » → —
-- `absent` « chapeau, renard, ou dauphin » → —
-- `mot` « rat, sapin, ou poisson » → rat, ▸ sapin ▸ ou ▸ poisson
-- `mot` « lit, fusée, ou cadeau » → lit, ▸ fusée, ▸ ou ▸ cadeau
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
-- `virgule` « dauphin, requin, ou moto » → dauphin, ▸ requin, ▸ ou moto
-- `virgule` « hibou, fleur, ou fusée » → hibou, ▸ fleur, ▸ ou fusée
-- `virgule` « bébé, ballon, ou ordinateur » → bébé, ▸ ballon, ▸ ou ordinateur
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
 - `entier` « Bien joué ! »
 - `entier` « Génial ! »
 - `entier` « Quel mot rime avec : oiseau ? »
+- `entier` « dauphin, requin, ou moto »
+- `entier` « oiseau, moto : ça rime ! »
 - `entier` « canard ? »
+- `entier` « chapeau, renard, ou dauphin »
 - `entier` « canard, renard : ça rime ! »
 - `entier` « chat ? »
+- `entier` « rat, sapin, ou poisson »
 - `entier` « chat, rat : ça rime ! »
 - `entier` « ordinateur ? »
+- `entier` « hibou, fleur, ou fusée »
 - `entier` « ordinateur, fleur : ça rime ! »
 - `entier` « souris ? »
+- `entier` « lit, fusée, ou cadeau »
 - `entier` « souris, lit : ça rime ! »
 - `entier` « Quel mot rime avec : dragon ? »
+- `entier` « bébé, ballon, ou ordinateur »
 
 ### play saisons : 15 phrases
 
@@ -1441,7 +1407,6 @@
 
 ### play tables-chrono : 27 phrases
 
-- `court` « 5 fois 9 ? » → 5 ▸ fois ▸ 9
 - `prenom` « Bravo Eva-Rose ! » → Bravo ▸ Eva-Rose
 - `entier` « Oui, c’est ça ! »
 - `entier` « Essaie encore ! »
@@ -1457,6 +1422,7 @@
 - `entier` « Défi chrono ! Dix calculs, le plus vite possible. Combien font 5 fois 7 ? »
 - `entier` « 5 fois 2 ? »
 - `entier` « 5 fois 8 ? »
+- `entier` « 5 fois 9 ? »
 - `entier` « 2 fois 10 ? »
 - `entier` « 10 fois 5 ? »
 - `entier` « 5 fois 10 ? »
