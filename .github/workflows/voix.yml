@@ -11,7 +11,7 @@ name: Voix naturelle
 on:
   push:
     branches: ['claude/**']
-    paths: ['scripts/voix/a-generer.json', 'scripts/voix/generer.py', '.github/workflows/voix.yml']
+    paths: ['scripts/voix/a-generer.json', 'scripts/voix/a-refaire.json', 'scripts/voix/generer.py', '.github/workflows/voix.yml']
   workflow_dispatch:
 
 permissions:
@@ -33,8 +33,12 @@ jobs:
           python-version: '3.12'
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
       - run: pip install pocket-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
-      - run: python scripts/voix/generer.py --shard ${{ matrix.morceau }}/16 --sortie voix-sortie --essais 4 --whisper small
+      # a-refaire.json : sons douteux à refaire (l'ancien est gardé s'il reste le meilleur)
+      - run: >-
+          python scripts/voix/generer.py --shard ${{ matrix.morceau }}/16 --sortie voix-sortie --essais 4
+          --whisper large-v3-turbo $( [ -f scripts/voix/a-refaire.json ] && echo --refaire scripts/voix/a-refaire.json )
       - uses: actions/upload-artifact@v4
+        if: always() # même si le temps est écoulé : les sons déjà fabriqués ne sont pas perdus
         with:
           name: voix-${{ matrix.morceau }}
           path: voix-sortie

@@ -34,6 +34,7 @@ parser.add_argument('--sortie', default='voix-sortie')
 parser.add_argument('--liste', default=str(ROOT / 'scripts/voix/a-generer.json'))
 parser.add_argument('--essais', type=int, default=4)
 parser.add_argument('--whisper', default='small', help="modèle de reconnaissance vocale, ou 'aucun'")
+parser.add_argument('--refaire', help='liste JSON de clés à refaire même si leur son existe (le meilleur, ancien ou nouveau, est gardé)')
 args = parser.parse_args()
 k, n = map(int, args.shard.split('/'))
 OUT = Path(args.sortie)
@@ -49,7 +50,9 @@ items = json.loads(Path(args.liste).read_text(encoding='utf-8'))
 # sons déjà fabriqués : rangés dans les paquets (manifest.json), ou posés dans app/voix/fr|en
 manifest = EXISTING / 'manifest.json'
 packed = {f for p in json.loads(manifest.read_text(encoding='utf-8')).get('paquets', []) for f, _ in p['sons']} if manifest.exists() else set()
-todo = [e for i, e in enumerate(items) if i % n == k - 1 and e['file'] not in packed and not (EXISTING / e['file']).exists()]
+redo = set(json.loads(Path(args.refaire).read_text(encoding='utf-8'))) if args.refaire else set()
+todo = [e for i, e in enumerate(items) if i % n == k - 1
+        and (e['key'] in redo or (e['file'] not in packed and not (EXISTING / e['file']).exists()))]
 print(f'morceau {k}/{n} : {len(todo)} sons à fabriquer', flush=True)
 
 
@@ -57,7 +60,24 @@ def tts_text(e):
     if e['type'] == 'nombre':
         return say_number(e['text'], e['lang'])
     # guillemets et tirets décoratifs : ils ne se prononcent pas
-    return re.sub(r'[«»“”"]', '', e['text']).strip()
+    text = re.sub(r'[«»“”"]', '', e['text']).strip()
+    # nombres en lettres : la voix les dit mieux (« 44 » se coupait parfois en plein milieu)
+    return re.sub(r'\d+(?:[.,]\d+)?(?:er|re|ème|e)?(?![\w])', lambda m: say_number(m.group(0).replace('ème', 'e'), e['lang']), text)
+
+
+def existing_clip(e):
+    """Les octets du son déjà fabriqué (dans son paquet), ou None."""
+    if not manifest.exists():
+        return None
+    for pack in json.loads(manifest.read_text(encoding='utf-8')).get('paquets', []):
+        start = 0
+        for file, size in pack['sons']:
+            if file == e['file']:
+                with open(EXISTING / pack['nom'], 'rb') as f:
+                    f.seek(start)
+                    return f.read(size)
+            start += size
+    return None
 
 
 def frames(audio, rate, ms=20):
@@ -114,10 +134,14 @@ def is_short(text):
 
 
 def attempts(text, count):
-    """Le texte tel quel (deux fois : chaque essai est différent), puis avec une autre ponctuation."""
+    """Le texte tel quel (deux fois : chaque essai est différent), puis avec une autre ponctuation ;
+    un mot seul a deux essais de plus (la voix rate parfois les syllabes isolées)."""
     out = [text, text]
     if not text.endswith(('.', '!', '?', ',', ':')):
         out += [f'{text}.', f'« {text} »']
+        if is_short(text):
+            out += [f'{text[0].upper()}{text[1:]} !', f'{text}…']
+            count += 2
     elif text.endswith('!'):
         out += [f'{text[:-1].rstrip()}.']  # une exclamation trop aiguë est redite plus posément
     else:
@@ -199,9 +223,25 @@ with tempfile.TemporaryDirectory() as tmp:
             states[(lang, voice)] = models[lang].get_state_for_audio_prompt(voice)
         model, rate = models[lang], models[lang].sample_rate
         text = tts_text(e)
-        best = None  # (note, audio, mesures)
+        best = None  # (note, audio, mesures) ; audio vaut None pour l'ancien son, gardé tel quel
         problems = []
-        for attempt in attempts(text, args.essais):
+        old = existing_clip(e) if e['key'] in redo else None
+        if old:
+            # l'ancien son concourt aussi : il n'est remplacé que par un meilleur
+            trial.write_bytes(old)
+            raw = np.frombuffer(subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', str(trial), '-ac', '1', '-ar', str(rate), '-f', 'f32le', '-'],
+                                               capture_output=True, check=True).stdout, dtype=np.float32)
+            f0 = pitch(raw, rate)
+            note = (abs(np.log(f0 / PITCH.get(voice, f0))) if f0 else 0.0) / PITCH_TOLERANCE
+            measures = {'hauteur': round(f0) if f0 else None, 'duree': round(len(raw) / rate, 2), 'essai': 'ancien son'}
+            if checked_by_asr(text):
+                said = heard(trial, lang)
+                similarity = difflib.SequenceMatcher(None, plain(text, lang), plain(said, lang)).ratio()
+                measures.update(entendu=said, ressemblance=round(similarity, 2))
+                penalty = max(0.0, 0.9 - similarity) * 10
+                note += min(penalty, 3.0) if is_short(text) else penalty
+            best = (note, None, measures)
+        for attempt in ([] if best and best[0] <= 1 else attempts(text, args.essais)):
             audio = model.generate_audio(states[(lang, voice)], attempt).numpy().reshape(-1)
             seconds = len(audio) / rate
             gap = longest_gap(audio, rate)
@@ -209,7 +249,7 @@ with tempfile.TemporaryDirectory() as tmp:
             if seconds > 2.5 + len(text) * 0.2:
                 problems.append(f'son trop long ({seconds:.1f} s)')
                 continue
-            if is_short(text) and gap > 0.5:
+            if is_short(text) and gap > 0.8:
                 problems.append(f'silence de {gap:.1f} s au milieu')
                 continue
             if len(text) > 15 and len(text) / max(seconds, 0.1) > 30:
@@ -226,13 +266,17 @@ with tempfile.TemporaryDirectory() as tmp:
                 said = heard(trial, lang)
                 similarity = difflib.SequenceMatcher(None, plain(text, lang), plain(said, lang)).ratio()
                 measures.update(entendu=said, ressemblance=round(similarity, 2))
-                note += max(0.0, 0.9 - similarity) * 10  # une diction douteuse compte plus qu'une voix un peu haute
+                penalty = max(0.0, 0.9 - similarity) * 10  # une diction douteuse compte plus qu'une voix un peu haute
+                # sur un ou deux mots, la reconnaissance vocale se trompe souvent : elle départage, sans exclure
+                note += min(penalty, 3.0) if is_short(text) else penalty
             if best is None or note < best[0]:
                 best = (note, audio, measures)
             if note <= 1:
                 break
         if best is None or best[0] > 4:
             failures.append({'key': e['key'], 'text': text, 'erreur': '; '.join(problems) or f'meilleur essai : {best[2] if best else None}'})
+        elif best[1] is None:
+            report.append({'key': e['key'], 'note': round(best[0], 2), 'garde': True, **best[2]})
         else:
             write_wav(wav, best[1], rate)
             encode(wav, OUT / e['file'], e['rate'])

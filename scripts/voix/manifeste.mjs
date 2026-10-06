@@ -9,7 +9,8 @@
 //
 // Les paquets déjà publiés restent tels quels (l'appareil n'a pas à les retélécharger) ; les
 // nouveaux sons, posés dans app/voix/fr/ et app/voix/en/ par recuperer.sh (et retirés une fois
-// rangés), vont dans de nouveaux paquets. Un paquet dont plus d'un quart ne sert plus est refait.
+// rangés), vont dans de nouveaux paquets. Un paquet dont plus d'un quart ne sert plus, ou dont un son
+// a été refait (même nom, voir generer.py --refaire : seulement avant d'être publié), est refait.
 // Usage : node scripts/voix/manifeste.mjs
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -20,8 +21,15 @@ const VOIX = join(ROOT, 'app/voix');
 const PACK_SIZE = 4_000_000;
 const list = JSON.parse(readFileSync(join(ROOT, 'scripts/voix/a-generer.json'), 'utf8'));
 
-// 1. les paquets actuels : gardés s'ils servent encore aux trois quarts
+// 1. les nouveaux sons (posés par recuperer.sh) ; un son refait remplace l'ancien
 const wanted = new Map(list.map((e) => [e.file, e]));
+const loose = new Map();
+for (const lang of ['fr', 'en']) {
+  if (!existsSync(join(VOIX, lang))) continue;
+  for (const name of readdirSync(join(VOIX, lang))) loose.set(`${lang}/${name}`, readFileSync(join(VOIX, lang, name)));
+}
+
+// 2. les paquets actuels : gardés s'ils servent encore aux trois quarts et qu'aucun de leurs sons n'a été refait
 const old = existsSync(join(VOIX, 'manifest.json')) ? JSON.parse(readFileSync(join(VOIX, 'manifest.json'), 'utf8')) : {};
 const kept = [];
 const pool = new Map(); // fichier → octets, à ranger dans de nouveaux paquets
@@ -30,7 +38,7 @@ for (const pack of old.paquets || []) {
   if (!existsSync(path)) continue;
   const bytes = readFileSync(path);
   const useful = pack.sons.filter(([file]) => wanted.has(file)).reduce((sum, [, size]) => sum + size, 0);
-  if (useful >= bytes.length * 0.75) {
+  if (useful >= bytes.length * 0.75 && !pack.sons.some(([file]) => loose.has(file))) {
     kept.push({ nom: pack.nom, body: bytes, sons: pack.sons });
     continue;
   }
@@ -40,20 +48,14 @@ for (const pack of old.paquets || []) {
     offset += size;
   }
 }
-const inKept = new Set(kept.flatMap((p) => p.sons.map(([file]) => file)));
 let added = 0;
-for (const lang of ['fr', 'en']) {
-  if (!existsSync(join(VOIX, lang))) continue;
-  for (const name of readdirSync(join(VOIX, lang))) {
-    const file = `${lang}/${name}`;
-    if (!inKept.has(file) && wanted.has(file)) {
-      pool.set(file, readFileSync(join(VOIX, lang, name)));
-      added++;
-    }
-  }
+for (const [file, bytes] of loose) {
+  if (!wanted.has(file)) continue;
+  pool.set(file, bytes);
+  added++;
 }
 
-// 2. les autres sons, dans l'ordre de la liste (les plus entendus d'abord), en nouveaux paquets
+// 3. les autres sons, dans l'ordre de la liste (les plus entendus d'abord), en nouveaux paquets
 const packs = [...kept];
 let current = [];
 let size = 0;
@@ -82,7 +84,7 @@ for (const e of list) {
   else missing++;
 }
 
-// 3. écrit les paquets, retire les paquets refaits et les sons rangés
+// 4. écrit les paquets, retire les paquets refaits et les sons rangés
 const names = new Set(packs.map((p) => p.nom));
 for (const name of readdirSync(VOIX)) if (/^paquet-[0-9a-f]+\.mp3$/.test(name) && !names.has(name)) rmSync(join(VOIX, name));
 for (const pack of packs) if (!existsSync(join(VOIX, pack.nom))) writeFileSync(join(VOIX, pack.nom), pack.body);
