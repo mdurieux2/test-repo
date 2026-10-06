@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
       - run: pip install pocket-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
       - run: python scripts/voix/essai.py voix-essai
       - if: always()
