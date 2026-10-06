@@ -737,7 +737,9 @@ async function scenario() {
 const context = await newContext({ width: 390, height: 844 });
 const page = await context.newPage();
 page.on('pageerror', (e) => errors.push(e.message));
-page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+// un son de la voix naturelle pas encore téléchargé (mode avion) : la voix de l'appareil prend le relais
+const voiceClip = (m) => /\/voix\/(fr|en)\/[0-9a-f]+\.mp3$/.test(m.location()?.url || '');
+page.on('console', (m) => m.type() === 'error' && !voiceClip(m) && errors.push(m.text()));
 const shot = async (name) => SHOTS && page.screenshot({ path: `${SHOTS}/${name}.png` });
 
 // premier lancement : la famille crée les profils (prénom, dessin, classe)
