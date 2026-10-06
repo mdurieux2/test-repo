@@ -1245,7 +1245,11 @@ async function checkOffline(context, page) {
   for (const game of GAMES) {
     await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor(game.id)}';`);
     await page.evaluate(() => { window.__spoken = []; });
-    await openGame(page, game);
+    await openGame(page, game).catch(async (error) => {
+      // ce qu'affiche la page à ce moment-là, pour comprendre sans pouvoir rejouer
+      const seen = await page.evaluate(() => `${document.querySelector('main')?.className || '(aucun écran)'} : ${document.body.innerText.slice(0, 200)}`).catch(() => '?');
+      fail(`hors ligne : ${game.id} ne s'ouvre pas (${page.url()} ; ${seen.replace(/\s+/g, ' ')}) : ${error.message.split('\n')[0]}`);
+    });
     await page.waitForSelector('.choices');
     if (await page.locator('.choices').count() !== 1) fail(`hors ligne : ${game.id} ne s'affiche pas`);
     // la consigne est dite : par la voix naturelle si ses sons sont là, sinon par la voix de l'appareil
