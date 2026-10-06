@@ -22,6 +22,16 @@ test('le service worker met en cache tous les fichiers de l’app (et seulement 
   assert.deepEqual([...cached].sort(), [...files].sort());
 });
 
+test('hors ligne : un fichier de l’app est cherché dans le cache de l’app seul, un son par son adresse exacte', () => {
+  const sw = readFileSync(join(APP, 'sw.js'), 'utf8');
+  // caches.match(…, { ignoreSearch: true }) parcourt tous les caches, dont celui des 14 000 sons, en entier :
+  // 23 ms par fichier au lieu de 0,4 ms, et l'app mettait des dizaines de secondes à s'ouvrir hors ligne
+  assert.doesNotMatch(sw, /caches\.match\([^)]*ignoreSearch/);
+  const clips = sw.slice(sw.indexOf('if (isVoiceClip(url)) {'), sw.indexOf('voiceFromPack(event.request'));
+  assert.ok(clips.includes('cache.match(event.request)'), 'son cherché par adresse exacte');
+  assert.doesNotMatch(clips, /ignoreSearch/);
+});
+
 test('le manifeste et la page d’accueil pointent vers des fichiers existants', () => {
   const manifest = JSON.parse(readFileSync(join(APP, 'manifest.webmanifest'), 'utf8'));
   for (const icon of manifest.icons) assert.ok(statSync(join(APP, icon.src)).isFile(), icon.src);

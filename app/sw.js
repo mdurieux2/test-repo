@@ -141,10 +141,11 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || url.origin !== location.origin) return;
   // un paquet de sons : téléchargé par l'app, qui le redécoupe (jamais gardé en entier)
   if (isVoicePack(url)) return;
-  // un son de la voix naturelle ne change jamais : le cache d'abord, son paquet s'il n'y est pas encore
+  // un son de la voix naturelle ne change jamais : le cache d'abord, son paquet s'il n'y est pas encore.
+  // Recherche par adresse exacte : avec ignoreSearch, le navigateur parcourt les 14 000 sons à chaque fois.
   if (isVoiceClip(url)) {
     event.respondWith(caches.open(VOICE_CACHE).then(async (cache) => {
-      const hit = await cache.match(event.request, { ignoreSearch: true });
+      const hit = await cache.match(event.request);
       return hit || voiceFromPack(event.request, cache);
     }));
     return;
@@ -158,6 +159,8 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request, { ignoreSearch: true })),
+      // hors ligne : seulement dans le cache de l'app (petit), jamais dans celui des voix, qui serait
+      // parcouru en entier pour chaque fichier (l'app mettait alors des dizaines de secondes à s'ouvrir)
+      .catch(() => caches.open(CACHE).then((cache) => cache.match(event.request, { ignoreSearch: true }))),
   );
 });
