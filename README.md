@@ -284,8 +284,8 @@ d'accueil comme Lire & Compter et fonctionne ensuite sans Internet.
     passe l'autre bras autour de la taille de l'autre ;
   - 2 parents et 4 enfants : un sur chaque épaule de chaque parent.
 - **Pour chaque personne** : prénom, numéro (2 chiffres), papa ou maman / garçon ou fille,
-  coiffure (courts, longs et lisses, queue de cheval, couettes, chignon, carré, bouclés, rasés),
-  couleur des cheveux (6) et de peau (5).
+  coiffure (courts, crépus, longs et lisses, longs et frisés, queue de cheval, couettes,
+  chignon, carré, bouclés, rasés), couleur des cheveux (6) et de peau (5).
 - **Titre** libre (« PARIS SAINT-GERMAIN », « ALLEZ LES BLEUS »…) ou pas de titre ; 9 jeux de
   couleurs ou des couleurs personnalisées ; marge blanche ou affiche pleine page.
 - **Logo** : chacun importe l'image de son choix depuis son téléphone (en haut ou en bas, à
@@ -308,7 +308,7 @@ npm run icons:affiche      # régénère les icônes de l'affiche
 | Fichier | Rôle |
 |---|---|
 | `affiche/js/figures.js` | Les personnages vus de dos et les compositions (bras levés, tenus par le côté, par la taille) |
-| `affiche/js/hair.js` | Les coiffures : aplats de 4 tons, mèches effilées, contours en pointes |
+| `affiche/js/hair.js` | Les coiffures : tons emboîtés de l'ombre au reflet, pointes effilées, contours en duvet, boucles |
 | `affiche/js/draw.js` | Outils de dessin communs (tracés, mèches, membres) |
 | `affiche/js/poster.js` | Fond, bande, titre usé, prénoms et numéros, logo ; même dessin pour l'aperçu et les fichiers |
 | `affiche/js/themes.js` | Couleurs, peaux, cheveux, coiffures, compositions |

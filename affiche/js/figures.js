@@ -51,7 +51,7 @@ const FIST_KNUCKLES = ['M 141 381 C 139 388 139 394 141 400', 'M 156 377 C 155 3
 const THUMB = 'M 183 414 C 197 412 202 430 195 444 C 191 451 181 451 179 444 C 177 434 178 424 183 414 Z';
 
 /** Coiffures de l'adulte qui dépassent sous l'enfant quand sa tête est cachée. */
-export const HAIRS_BELOW = ['long', 'queue'];
+export const HAIRS_BELOW = ['long', 'queue', 'frises'];
 
 // tête de l'adulte (visible quand il porte deux enfants) : la tête de l'enfant, agrandie
 const ADULT_HEAD = { x: 500, y: 600, s: 1.04 };
@@ -233,7 +233,7 @@ const CHILD_ARM_LENGTH = 232;
 /** Tête vue de dos : crâne, oreilles et cheveux (repère de la tête de l'enfant). */
 function drawHead(ctx, c, person, gender) {
   fill(ctx, CHILD_HEAD, person.skin.base);
-  if (!['carre', 'boucles', 'long'].includes(person.hair)) {
+  if (!['carre', 'boucles', 'long', 'frises'].includes(person.hair)) {
     both(ctx, () => {
       fill(ctx, CHILD_EAR, person.skin.base);
       stroke(ctx, CHILD_EAR_LINE, person.skin.shade, 2.5);
