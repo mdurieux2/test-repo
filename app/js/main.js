@@ -1003,6 +1003,7 @@ function nextQuestion(session) {
   const custom = {
     build: buildZone, maze: mazeZone, roundmaze: roundMazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
     swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
+    picross: picrossZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -1839,6 +1840,133 @@ function symmetryZone(ctx) {
   const grid = h('div', { class: `sym-grid axis-${axis}`, style: { '--cols': cols, '--rows': rows } }, cells);
   const zone = h('div', { class: 'choices sym-zone' }, h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
   return { stage: h('div', { class: 'stage stage-sym' }, grid), zone };
+}
+
+// ---- Le dessin caché (picross) : colorier les cases d'après les nombres ; un dessin apparaît
+
+function picrossZone(ctx) {
+  const { q } = ctx;
+  const { cols, rows, rowClues, colClues, solution, given, colors, name } = q.stage;
+  const goal = new Set(solution);
+  const filled = new Set(given); // les cases données sont déjà coloriées (et ne s'effacent pas)
+  const crossed = new Set(); // les croix : des cases que l'enfant sait vides
+  let tool = 'fill';
+  let painting = null; // glisser le doigt colorie (ou efface) plusieurs cases d'un coup
+  const lineOf = (r) => Array.from({ length: cols }, (_, c) => (filled.has(r * cols + c) ? 1 : 0));
+  const colOf = (c) => Array.from({ length: rows }, (_, r) => (filled.has(r * cols + c) ? 1 : 0));
+  const runs = (line) => line.join('').split('0').filter(Boolean).map((s) => s.length).join(',');
+  const clueEl = (clue, cls, label) => h('span', { class: `pc-clue ${cls}`, 'aria-label': `${label} : ${clue.length ? clue.join(', ') : 'aucune case'}` },
+    (clue.length ? clue : [0]).map((n) => h('b', {}, n)));
+  const rowEls = rowClues.map((clue, r) => clueEl(clue, 'pc-row', `Ligne ${r + 1}`));
+  const colEls = colClues.map((clue, c) => clueEl(clue, 'pc-col', `Colonne ${c + 1}`));
+  const cellLabel = (i) => `Ligne ${Math.floor(i / cols) + 1}, colonne ${(i % cols) + 1}${filled.has(i) ? ', coloriée' : crossed.has(i) ? ', croix' : ''}`;
+  const cells = Array.from({ length: cols * rows }, (_, i) => h('button', { class: `pc-cell${given.includes(i) ? ' given' : ''}`, 'data-cell': i }));
+  const draw = (i) => {
+    cells[i].classList.toggle('on', filled.has(i));
+    cells[i].classList.toggle('crossed', crossed.has(i));
+    cells[i].setAttribute('aria-label', cellLabel(i));
+  };
+  // une ligne (ou une colonne) qui a ses bons nombres est barrée
+  const refreshClues = () => {
+    rowEls.forEach((el, r) => el.classList.toggle('done', runs(lineOf(r)) === rowClues[r].join(',')));
+    colEls.forEach((el, c) => el.classList.toggle('done', runs(colOf(c)) === colClues[c].join(',')));
+  };
+  const finished = () => filled.size === goal.size && [...goal].every((i) => filled.has(i));
+  const win = () => {
+    crossed.clear();
+    cells.forEach((el, i) => {
+      draw(i);
+      el.classList.remove('hint', 'wrong');
+      if (goal.has(i)) el.style.background = colors[i];
+    });
+    board.classList.add('finished');
+    zone.replaceChildren(h('span', { class: 'dots-name' }, `C’est ${name} !`));
+    zone.classList.add('answered');
+    markCorrect(ctx);
+  };
+  const apply = (i) => {
+    if (given.includes(i)) return;
+    const { mode } = painting;
+    if (mode === 'fill') { filled.add(i); crossed.delete(i); }
+    else if (mode === 'erase') filled.delete(i);
+    else if (mode === 'cross') { if (!filled.has(i)) crossed.add(i); }
+    else crossed.delete(i);
+    cells[i].classList.remove('wrong', 'hint');
+    draw(i);
+    refreshClues();
+  };
+  const start = (i) => {
+    if (ctx.session.locked || given.includes(i)) return;
+    painting = { mode: tool === 'fill' ? (filled.has(i) ? 'erase' : 'fill') : (crossed.has(i) ? 'uncross' : 'cross'), last: i };
+    apply(i);
+    playSound('tap');
+  };
+  const end = () => {
+    if (!painting) return;
+    painting = null;
+    if (finished()) win();
+  };
+  const board = h('div', {
+    class: 'picross',
+    role: 'group',
+    'aria-label': 'Grille du dessin caché',
+    style: {
+      '--cols': cols, '--rows': rows,
+      '--rw': Math.max(1, ...rowClues.map((c) => c.length)), '--ch': Math.max(1, ...colClues.map((c) => c.length)),
+    },
+  }, h('span', { class: 'pc-corner' }), colEls, rowEls.flatMap((el, r) => [el, ...cells.slice(r * cols, (r + 1) * cols)]));
+  board.addEventListener('pointerdown', (e) => {
+    const cell = e.target.closest('.pc-cell');
+    if (!cell) return;
+    e.preventDefault();
+    try { board.setPointerCapture(e.pointerId); } catch { /* le doigt peut sortir de la grille et revenir */ }
+    start(Number(cell.dataset.cell));
+  });
+  board.addEventListener('pointermove', (e) => {
+    if (!painting) return;
+    const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('.pc-cell');
+    const i = cell && board.contains(cell) ? Number(cell.dataset.cell) : -1;
+    if (i < 0 || i === painting.last) return;
+    painting.last = i;
+    apply(i);
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => board.addEventListener(type, end));
+  // au clavier (Entrée ou Espace sur une case), un appui = une case
+  board.addEventListener('click', (e) => {
+    const cell = e.target.closest('.pc-cell');
+    if (!cell || e.detail !== 0) return;
+    start(Number(cell.dataset.cell));
+    end();
+  });
+  const validate = () => {
+    if (ctx.session.locked) return;
+    if (finished()) return win();
+    const wrong = [...filled].filter((i) => !goal.has(i));
+    const missing = solution.filter((i) => !filled.has(i));
+    wrong.forEach((i) => cells[i].classList.add('wrong'));
+    setTimeout(() => wrong.forEach((i) => cells[i].classList.remove('wrong')), 1600);
+    if (ctx.session.attempts >= 1) missing.forEach((i) => cells[i].classList.add('hint'));
+    markWrong(ctx, {
+      message: wrong.length ? 'Regarde bien les nombres : une case est en trop !' : `Il manque ${missing.length} case${missing.length > 1 ? 's' : ''} !`,
+      given: `${filled.size} cases`,
+    });
+  };
+  const tools = [['fill', '✏️ Colorier'], ['cross', '✕ Croix']].map(([id, text]) => h('button', {
+    class: `pc-tool${id === tool ? ' on' : ''}`, 'data-tool': id, 'aria-pressed': String(id === tool),
+    onclick: () => {
+      tool = id;
+      tools.forEach((b) => {
+        b.classList.toggle('on', b.dataset.tool === id);
+        b.setAttribute('aria-pressed', String(b.dataset.tool === id));
+      });
+    },
+  }, text));
+  const zone = h('div', { class: 'choices picross-zone' },
+    h('div', { class: 'pc-tools', role: 'group', 'aria-label': 'Outil' }, tools),
+    h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ Vérifier'));
+  cells.forEach((_, i) => draw(i));
+  refreshClues();
+  return { stage: h('div', { class: 'stage stage-picross' }, board), zone };
 }
 
 // ---- Le puzzle : toucher deux pièces pour les échanger

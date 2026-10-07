@@ -190,6 +190,17 @@ function checkQuestion(q, ctx) {
       for (const [x, y] of points) assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100, ctx);
       break;
     }
+    case 'picross': {
+      // le dessin caché : les nombres sont ceux du dessin, les cases données en font partie
+      const { cols, rows, rowClues, colClues, solution, given, colors } = q.stage;
+      assert.equal(rowClues.length, rows, ctx);
+      assert.equal(colClues.length, cols, ctx);
+      assert.equal(colors.length, cols * rows, ctx);
+      assert.ok(solution.length >= 2 && solution.every((i) => i >= 0 && i < cols * rows && colors[i]), ctx);
+      assert.ok(given.every((i) => solution.includes(i)), `case donnée hors du dessin : ${ctx}`);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
     case 'setclock': {
       // l'heure à régler et l'heure de départ du cadran : de 1 h à 12 h, minutes de 5 en 5
       const { start } = q.stage;

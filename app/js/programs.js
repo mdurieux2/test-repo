@@ -59,7 +59,7 @@ export const PROGRAMS = {
       ['ranger', 1, 3], ['problemes', 1, 3], ['doubles', 1, 1],
     ],
     jeux: [
-      ['formes', 2, 8], ['algorithmes', 2, 7], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
+      ['formes', 2, 8], ['algorithmes', 2, 7], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2], ['tableau-logique', 1, 3], ['balances', 1, 2], ['picross', 1, 1],
       ['symetrie', 1, 1], ['reproduire', 1, 1], ['tangram', 1, 2], ['cubes', 1, 2], ['labyrinthe', 1, 3], ['labyrinthe-rond', 1, 2],
       ['chemin-nombres', 1, 2], ['chemin-lettres', 1, 2],
       ['puzzle', 1, 4], ['memory', 1, 5], ['coloriage-magique', 1, 3], ['points', 1, 3],
@@ -91,7 +91,7 @@ export const PROGRAMS = {
       ['faire-dix', 1, 3], ['ranger', 3, 5], ['problemes', 1, 5], ['doubles', 1, 3],
     ],
     jeux: [
-      ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['symetrie', 1, 3], ['reproduire', 1, 2],
+      ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['tableau-logique', 1, 6], ['balances', 1, 5], ['picross', 1, 3], ['symetrie', 1, 3], ['reproduire', 1, 2],
       ['tangram', 1, 2], ['cubes', 1, 3], ['labyrinthe', 2, 4], ['labyrinthe-rond', 1, 5], ['chemin-nombres', 2, 7],
       ['chemin-lettres', 2, 3],
       ['puzzle', 2, 5], ['memory', 3, 6], ['coloriage-magique', 2, 5], ['points', 2, 5],
@@ -125,7 +125,7 @@ export const PROGRAMS = {
       ['ranger', 5, 10], ['problemes', 4, 10], ['doubles', 2, 7],
     ],
     jeux: [
-      ['intrus', 2, 8], ['ombres', 3, 8], ['sudoku', 3, 10], ['symetrie', 2, 7], ['reproduire', 2, 8],
+      ['intrus', 2, 8], ['ombres', 3, 8], ['sudoku', 3, 10], ['tableau-logique', 3, 9], ['balances', 3, 8], ['picross', 2, 8], ['symetrie', 2, 7], ['reproduire', 2, 8],
       ['tangram', 2, 8], ['cubes', 2, 7], ['labyrinthe', 3, 10], ['labyrinthe-rond', 1, 9], ['chemin-nombres', 5, 10],
       ['chemin-lettres', 3, 7],
       ['puzzle', 3, 8], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],

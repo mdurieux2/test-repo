@@ -3,6 +3,7 @@
 import { ACCESSORIES, avatarSvg } from './characters.js';
 import { PIECES } from './games/logique.js';
 import { FLAGS, flagMarkup } from './games/drapeaux.js';
+import { balanceSvg, describeBalance, describeFigure, figureSvg } from './games/logique-plus.js';
 
 /** h('div', {class: 'x', onclick}, enfant1, enfant2…) */
 export function h(tag, attrs = {}, ...children) {
@@ -236,6 +237,10 @@ export function renderStage(stage, actions) {
       return frameStage(stage);
     case 'flag':
       return flagStage(stage);
+    case 'matrix':
+      return matrixStage(stage);
+    case 'scales':
+      return scalesStage(stage);
     case 'equation':
       return h('div', { class: 'equation big' },
         stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
@@ -399,7 +404,33 @@ function flagStage({ code, hole, caption }) {
   return h('div', { class: 'stage-flag' }, flagElement(code, hole), caption ? h('span', { class: 'flag-caption' }, caption) : null);
 }
 
+// Le tableau logique : chaque dessin a ses propres motifs (rayures, pois), d'où un numéro unique.
+let figureCount = 0;
+export function figureElement(fig, extraClass = '') {
+  const el = h('span', { class: `figure ${extraClass}`.trim(), role: 'img', 'aria-label': describeFigure(fig) });
+  el.innerHTML = figureSvg(fig, `fig${++figureCount}`);
+  return el;
+}
+
+/** La grille 3 × 3 du tableau logique ; la case vide porte un « ? ». */
+function matrixStage({ cells }) {
+  return h('div', { class: 'matrix', role: 'group', 'aria-label': 'Tableau de 3 lignes et 3 colonnes' },
+    cells.map((fig) => (fig ? h('span', { class: 'matrix-cell' }, figureElement(fig)) : h('span', { class: 'matrix-cell gap', 'aria-label': 'Case vide' }, '?'))));
+}
+
+/** Les balances en équilibre, et l'animal dont on cherche le poids. */
+function scalesStage({ balances, animals, ask }) {
+  return h('div', { class: `stage-scales n${balances.length}`, style: { '--n': balances.length } },
+    balances.map((b) => {
+      const el = h('span', { class: 'scale', role: 'img', 'aria-label': describeBalance(b, animals) });
+      el.innerHTML = balanceSvg(b, animals);
+      return el;
+    }),
+    h('div', { class: 'scales-ask' }, h('span', { class: 'scales-animal', 'aria-label': animals[ask].name }, animals[ask].emoji), ' = ', h('span', { class: 'gap' }, '?'), ' kg'));
+}
+
 export function renderChoiceContent(choice) {
+  if (choice.figure) return figureElement(choice.figure, 'figure-choice');
   if (choice.flag) return flagElement(choice.flag, null, 'flag-choice');
   if (choice.scene) return sceneContent(choice.scene, choice.name);
   if (choice.shadow) return shadowContent(choice.shadow, choice.name, choice.transform);

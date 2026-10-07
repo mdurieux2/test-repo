@@ -494,6 +494,33 @@ async function answer(page, q, wrongFirst) {
       await page.click('.sym-zone .validate-btn');
       break;
     }
+    case 'picross': {
+      const { solution, given, cols } = q.stage;
+      if (wrongFirst) {
+        await page.click('.picross-zone .validate-btn'); // rien de colorié : il manque des cases
+        await page.waitForSelector('.try-again');
+      }
+      // une ligne d'un seul geste (le doigt glisse sur les cases), le reste case par case
+      const todo = solution.filter((c) => !given.includes(c));
+      const run = todo.filter((c) => Math.floor(c / cols) === Math.floor(todo[0] / cols));
+      const contiguous = run.every((c, k) => !k || c === run[k - 1] + 1);
+      if (!wrongFirst && run.length >= 2 && contiguous) {
+        const box = async (c) => {
+          const r = await page.locator(`.pc-cell[data-cell="${c}"]`).boundingBox();
+          return [r.x + r.width / 2, r.y + r.height / 2];
+        };
+        await page.mouse.move(...await box(run[0]));
+        await page.mouse.down();
+        await page.mouse.move(...await box(run.at(-1)), { steps: 3 * run.length });
+        await page.mouse.up();
+        const painted = await page.locator('.pc-cell.on').count();
+        if (painted !== given.length + run.length) fail(`dessin caché : ${painted - given.length} cases coloriées d’un geste au lieu de ${run.length}`);
+      }
+      for (const cell of todo) {
+        if (!(await page.locator(`.pc-cell[data-cell="${cell}"].on`).count())) await page.click(`.pc-cell[data-cell="${cell}"]`);
+      }
+      break;
+    }
     case 'sudoku': {
       const { puzzle, solution } = q.stage;
       const empty = puzzle.map((v, i) => (v === null ? i : -1)).filter((i) => i >= 0);
