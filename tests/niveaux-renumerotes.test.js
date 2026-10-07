@@ -15,7 +15,7 @@ test('niveaux d’avant la 1.12 convertis une fois, sans dépasser le nombre de 
   const old = {
     order: ['lea'],
     profiles: {
-      lea: { name: 'Léa', grade: 'CE1', games: { ecoute: { level: 13 }, 'lis-anglais': { level: 4 }, 'chemin-nombres': { level: 11 }, compter: { level: 5 } } },
+      lea: { name: 'Léa', grade: 'CE1', games: { ecoute: { level: 13 }, 'lis-anglais': { level: 4 }, 'chemin-nombres': { level: 11 }, sudoku: { level: 9 }, compter: { level: 5 } } },
     },
   };
   const storage = memory(old);
@@ -23,6 +23,7 @@ test('niveaux d’avant la 1.12 convertis une fois, sans dépasser le nombre de 
   assert.equal(kid.games.ecoute.level, 9);
   assert.equal(kid.games['lis-anglais'].level, 3);
   assert.equal(kid.games['chemin-nombres'].level, 10);
+  assert.equal(kid.games.sudoku.level, 6);
   assert.equal(kid.games.compter.level, 5);
   for (const [id, { level }] of Object.entries(kid.games)) assert.ok(level <= findGame(id).levels.length, id);
   // enregistré puis relu : pas de seconde conversion

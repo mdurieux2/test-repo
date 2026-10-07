@@ -19,6 +19,7 @@ export const CHANGELOG = [
       'Français : recoller les syllabes, sons proches (p/b, f/v…), syllabe de la fin, lettres muettes, mots qui regroupent, qui/où/quand/pourquoi, il/elle/ils/elles, phrases à remettre en ordre, phrase négative, la/là, ce/se, c’est/s’est, pluriel et accords.',
       'Écrire au doigt : nombres à 2 chiffres, syllabes et petits mots attachés. Dictée : lettres muettes et accents. Histoires : le sens des mots, vrai/faux/on ne sait pas. Petits textes documentaires et recettes.',
       'Maths et logique : compléter à 100, un de moins, la moitié, formes de la vie courante, devinettes, ombres tournées, fois 10 et fois 100, durées, « moins dix ». Puzzles de 30 et 36 pièces, coins coupés, rétrécir un dessin.',
+      'Sudoku plus difficiles : grilles 6 × 6 très dures, puis un vrai sudoku 9 × 9 en trois niveaux, toujours avec une seule solution (les niveaux faciles sont regroupés, le niveau atteint est conservé).',
       'Le monde : les voisins de la France, les océans, lire les couleurs d’un drapeau, le drapeau effacé.',
       'Anglais : thèmes regroupés deux par deux (10 niveaux au lieu de 13, le niveau atteint est conservé), phrases croisées, l’ordre des mots, histoires « Who is…? », politesse, nombres jusqu’à 100, calculs jusqu’à 20, mélanges de couleurs, nouveaux memory, intrus et contraires, questions.',
     ],

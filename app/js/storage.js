@@ -137,12 +137,14 @@ function mergeChild(id, saved) {
 }
 
 // Niveaux renumérotés dans la version 1.12 : les 13 niveaux des jeux d'anglais par thèmes deviennent
-// 10 (thèmes regroupés deux par deux), et le chemin des nombres passe de 11 à 10 niveaux.
+// 10 (thèmes regroupés deux par deux), le chemin des nombres passe de 11 à 10 niveaux, et les niveaux
+// faciles du sudoku sont regroupés deux par deux (place pour le 9 × 9).
 const THEMES_13_TO_10 = [1, 1, 2, 3, 4, 4, 5, 5, 6, 6, 7, 8, 9];
 const LEVEL_REMAPS = {
   ecoute: THEMES_13_TO_10, 'lis-anglais': THEMES_13_TO_10, 'mot-anglais': THEMES_13_TO_10,
   'relie-anglais': THEMES_13_TO_10, 'epelle-anglais': THEMES_13_TO_10,
   'chemin-nombres': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10],
+  sudoku: [1, 2, 3, 3, 4, 4, 5, 5, 6],
 };
 
 /** Convertit les niveaux enregistrés avant la renumérotation (une seule fois par profil). */

@@ -125,7 +125,7 @@ export const PROGRAMS = {
       ['ranger', 5, 10], ['problemes', 4, 10], ['doubles', 2, 7],
     ],
     jeux: [
-      ['intrus', 2, 8], ['ombres', 3, 8], ['sudoku', 3, 9], ['symetrie', 2, 7], ['reproduire', 2, 8],
+      ['intrus', 2, 8], ['ombres', 3, 8], ['sudoku', 3, 10], ['symetrie', 2, 7], ['reproduire', 2, 8],
       ['tangram', 2, 8], ['cubes', 2, 7], ['labyrinthe', 3, 9], ['chemin-nombres', 5, 10],
       ['chemin-lettres', 3, 7],
       ['puzzle', 3, 8], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
