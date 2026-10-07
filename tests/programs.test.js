@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PROGRAMS, programFor, levelRange } from '../app/js/programs.js';
-import { findGame } from '../app/js/games/index.js';
+import { findGame, GAMES } from '../app/js/games/index.js';
 import { GRADES } from '../app/js/storage.js';
 import { dayKey, frequentMistakes, lastSevenDays, skillStatus, streakDays } from '../app/js/dashboard.js';
 
@@ -57,4 +57,11 @@ test('suivi : état des compétences et erreurs fréquentes', () => {
   const top = frequentMistakes(mistakes);
   assert.equal(top[0].count, 2);
   assert.equal(top.length, 2);
+});
+
+test('chaque jeu a de 7 à 10 niveaux (sauf les 36 paliers du calcul)', () => {
+  for (const game of GAMES) {
+    if (game.id === 'calcul') continue;
+    assert.ok(game.levels.length >= 7 && game.levels.length <= 10, `${game.id} : ${game.levels.length} niveaux`);
+  }
 });

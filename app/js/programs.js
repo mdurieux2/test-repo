@@ -46,7 +46,7 @@ export const PROGRAMS = {
   },
   GS: {
     francais: [
-      ['syllabes-rythme', 1, 6], ['rimes', 1, 5], ['lettres', 2, 7], ['premier-son', 1, 2],
+      ['syllabes-rythme', 1, 8], ['rimes', 1, 8], ['lettres', 2, 7], ['premier-son', 1, 2],
       ['syllabes', 1, 1], ['ecrire', 1, 6],
       ['dictee', 1, 1],
     ],
@@ -78,7 +78,7 @@ export const PROGRAMS = {
   },
   CP: {
     francais: [
-      ['premier-son', 1, 6], ['syllabes', 1, 6], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
+      ['premier-son', 1, 8], ['syllabes', 1, 8], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
       ['ecrire', 2, 8],
       ['dictee', 1, 5],
     ],
@@ -112,7 +112,7 @@ export const PROGRAMS = {
   },
   CE1: {
     francais: [
-      ['bon-mot', 2, 6], ['petits-mots', 2, 6], ['phrase', 1, 5], ['homophones', 1, 5], ['genre', 1, 6],
+      ['bon-mot', 2, 8], ['petits-mots', 2, 8], ['phrase', 1, 8], ['homophones', 1, 8], ['genre', 1, 8],
       ['ecrire', 4, 8],
       ['dictee', 2, 8],
     ],
