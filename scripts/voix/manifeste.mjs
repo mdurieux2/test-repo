@@ -9,8 +9,9 @@
 //
 // Les paquets déjà publiés restent tels quels (l'appareil n'a pas à les retélécharger) ; les
 // nouveaux sons, posés dans app/voix/fr/ et app/voix/en/ par recuperer.sh (et retirés une fois
-// rangés), vont dans de nouveaux paquets. Un paquet dont plus d'un quart ne sert plus, ou dont un son
-// a été refait (même nom, voir generer.py --refaire : seulement avant d'être publié), est refait.
+// rangés), vont dans de nouveaux paquets. Un paquet dont plus d'un quart ne sert plus est refait.
+// Un son refait (generer.py --refaire) change de nom (empreinte de son contenu) : un appareil qui a
+// gardé l'ancien son télécharge le nouveau, et l'ancien est retiré (service worker, pruneVoices).
 // Usage : node scripts/voix/manifeste.mjs
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -22,19 +23,29 @@ const PACK_SIZE = 4_000_000;
 const MIN_SIZE = 480; // un son plus court (un dixième de seconde) est raté : il sera refait
 const list = JSON.parse(readFileSync(join(ROOT, 'scripts/voix/a-generer.json'), 'utf8'));
 
-// 1. les nouveaux sons (posés par recuperer.sh) ; un son refait remplace l'ancien
-const wanted = new Map(list.map((e) => [e.file, e]));
-const loose = new Map();
-for (const lang of ['fr', 'en']) {
-  if (!existsSync(join(VOIX, lang))) continue;
-  for (const name of readdirSync(join(VOIX, lang))) {
-    const bytes = readFileSync(join(VOIX, lang, name));
-    if (bytes.length >= MIN_SIZE) loose.set(`${lang}/${name}`, bytes);
-  }
-}
-
-// 2. les paquets actuels : gardés s'ils servent encore aux trois quarts et qu'aucun de leurs sons n'a été refait
+// 1. les nouveaux sons (posés par recuperer.sh sous le nom de a-generer.json) ; un son refait remplace l'ancien
 const old = existsSync(join(VOIX, 'manifest.json')) ? JSON.parse(readFileSync(join(VOIX, 'manifest.json'), 'utf8')) : {};
+const published = new Set((old.paquets || []).flatMap((p) => p.sons.map(([file]) => file)));
+const loose = new Map(); // clé → [fichier, octets]
+for (const e of list) {
+  const path = join(VOIX, e.file);
+  if (!existsSync(path)) continue;
+  const bytes = readFileSync(path);
+  if (bytes.length < MIN_SIZE) continue;
+  // déjà publié sous ce nom : le son refait prend le nom de son contenu
+  const file = published.has(e.file) || (old.clips?.[e.key] && old.clips[e.key] !== e.file)
+    ? `${e.lang}/${createHash('sha1').update(bytes).digest('hex').slice(0, 16)}.mp3` : e.file;
+  loose.set(e.key, [file, bytes]);
+}
+// le fichier de chaque clé : le nouveau son, sinon celui du manifeste actuel
+const fileOf = new Map();
+for (const e of list) {
+  const file = loose.get(e.key)?.[0] || old.clips?.[e.key];
+  if (file) fileOf.set(e.key, file);
+}
+const wanted = new Set(fileOf.values());
+
+// 2. les paquets actuels : gardés s'ils servent encore aux trois quarts (un son refait ou retiré n'y sert plus)
 const kept = [];
 const pool = new Map(); // fichier → octets, à ranger dans de nouveaux paquets
 for (const pack of old.paquets || []) {
@@ -42,7 +53,7 @@ for (const pack of old.paquets || []) {
   if (!existsSync(path)) continue;
   const bytes = readFileSync(path);
   const useful = pack.sons.filter(([file]) => wanted.has(file)).reduce((sum, [, size]) => sum + size, 0);
-  if (useful >= bytes.length * 0.75 && !pack.sons.some(([file, size]) => loose.has(file) || size < MIN_SIZE)) {
+  if (useful >= bytes.length * 0.75 && !pack.sons.some(([, size]) => size < MIN_SIZE)) {
     kept.push({ nom: pack.nom, body: bytes, sons: pack.sons });
     continue;
   }
@@ -53,8 +64,7 @@ for (const pack of old.paquets || []) {
   }
 }
 let added = 0;
-for (const [file, bytes] of loose) {
-  if (!wanted.has(file)) continue;
+for (const [file, bytes] of loose.values()) {
   pool.set(file, bytes);
   added++;
 }
@@ -72,10 +82,11 @@ const close = () => {
   size = 0;
 };
 for (const e of list) {
-  const bytes = pool.get(e.file);
+  const file = fileOf.get(e.key);
+  const bytes = pool.get(file);
   if (!bytes) continue;
-  pool.delete(e.file);
-  current.push([e.file, bytes]);
+  pool.delete(file);
+  current.push([file, bytes]);
   size += bytes.length;
   if (size >= PACK_SIZE) close();
 }
@@ -84,7 +95,7 @@ const stored = new Set(packs.flatMap((p) => p.sons.map(([file]) => file)));
 const clips = {};
 let missing = 0;
 for (const e of list) {
-  if (stored.has(e.file)) clips[e.key] = e.file;
+  if (stored.has(fileOf.get(e.key))) clips[e.key] = fileOf.get(e.key);
   else missing++;
 }
 

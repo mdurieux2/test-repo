@@ -35,6 +35,8 @@ parser.add_argument('--liste', default=str(ROOT / 'scripts/voix/a-generer.json')
 parser.add_argument('--essais', type=int, default=4)
 parser.add_argument('--whisper', default='small', help="modèle de reconnaissance vocale, ou 'aucun'")
 parser.add_argument('--refaire', help='liste JSON de clés à refaire même si leur son existe (le meilleur, ancien ou nouveau, est gardé)')
+parser.add_argument('--phonemes', action='store_true', help='prononciation vérifiée phonème par phonème (phonemes.py)')
+parser.add_argument('--verifier-mots', action='store_true', help='réécouter les mots déjà faits et refaire ceux qui sont mal prononcés')
 args = parser.parse_args()
 k, n = map(int, args.shard.split('/'))
 OUT = Path(args.sortie)
@@ -47,12 +49,13 @@ TARGET_DB = -20.0  # volume moyen des passages parlés (dBFS)
 MP3 = ['-ac', '1', '-ar', '24000', '-c:a', 'libmp3lame', '-b:a', '32k', '-write_xing', '0', '-id3v2_version', '0']
 
 items = json.loads(Path(args.liste).read_text(encoding='utf-8'))
-# sons déjà fabriqués : rangés dans les paquets (manifest.json), ou posés dans app/voix/fr|en
+# sons déjà fabriqués : rangés dans les paquets (manifest.json, par phrase : un son refait change de
+# nom), ou posés dans app/voix/fr|en
 manifest = EXISTING / 'manifest.json'
-packed = {f for p in json.loads(manifest.read_text(encoding='utf-8')).get('paquets', []) for f, _ in p['sons']} if manifest.exists() else set()
+made = json.loads(manifest.read_text(encoding='utf-8')).get('clips', {}) if manifest.exists() else {}
 redo = set(json.loads(Path(args.refaire).read_text(encoding='utf-8'))) if args.refaire else set()
 todo = [e for i, e in enumerate(items) if i % n == k - 1
-        and (e['key'] in redo or (e['file'] not in packed and not (EXISTING / e['file']).exists()))]
+        and (e['key'] in redo or (e['key'] not in made and not (EXISTING / e['file']).exists()))]
 print(f'morceau {k}/{n} : {len(todo)} sons à fabriquer', flush=True)
 
 
@@ -74,7 +77,7 @@ def existing_clip(e):
     for pack in json.loads(manifest.read_text(encoding='utf-8')).get('paquets', []):
         start = 0
         for file, size in pack['sons']:
-            if file == e['file']:
+            if file == made.get(e['key']):
                 with open(EXISTING / pack['nom'], 'rb') as f:
                     f.seek(start)
                     return f.read(size)
@@ -135,9 +138,22 @@ def is_short(text):
     return len(re.findall(r"[\w'-]+", text)) <= 2 and not re.search(r'[.,;:!?]', text.strip(' .!?,;:'))
 
 
-def attempts(text, count):
+# Un mot dit seul est souvent mal prononcé (« souris » avec son « s », « singe » dit « sing ») ; dit après
+# une courte phrase, il l'est bien mieux : on garde alors ce qui suit la pause.
+APPELS = {'fr': ['Écoute bien. {}.', 'Écoute bien. {}.', 'Voici le mot. {}.'], 'en': ['Listen. {}.', 'Listen. {}.', 'Here is the word. {}.']}
+
+
+def attempts(text, count, lang='fr'):
     """Le texte tel quel (deux fois : chaque essai est différent), puis avec une autre ponctuation ;
-    un mot seul a deux essais de plus (la voix rate parfois les syllabes isolées)."""
+    un mot seul a deux essais de plus (la voix rate parfois les syllabes isolées), et trois essais dits
+    après une courte phrase (« Écoute bien. Souris. », coupés à la pause)."""
+    if is_short(text) and args.phonemes:
+        word = text.strip(' .!?,;:…')
+        return attempts_plain(text, count) + [('appel', a.format(f'{word[0].upper()}{word[1:]}')) for a in APPELS[lang]]
+    return attempts_plain(text, count)
+
+
+def attempts_plain(text, count):
     out = [text, text]
     if not text.endswith(('.', '!', '?', ',', ':')):
         out += [f'{text}.', f'« {text} »']
@@ -257,6 +273,28 @@ def checked_by_asr(text):
     return asr is not None and len(re.sub(r'[^\w]', '', text)) >= 5
 
 
+def after_pause(audio, rate):
+    """Ce qui suit la plus longue pause (la fin de la phrase d'appel), ou None s'il n'y en a pas."""
+    win = max(1, int(rate * 0.01))
+    x = np.asarray(audio, dtype=np.float32).reshape(-1)
+    env = np.abs(x[: len(x) // win * win].reshape(-1, win)).max(axis=1)
+    quiet = env <= 10 ** (-45 / 20)
+    loud = np.where(~quiet)[0]
+    if len(loud) == 0:
+        return None
+    best, run = (0, 0), None
+    for i in range(loud[0], loud[-1] + 1):
+        if quiet[i] and run is None:
+            run = i
+        elif not quiet[i] and run is not None:
+            best = max(best, (i - run, run))
+            run = None
+    if best[0] < 12:  # moins de 0,12 s : pas une vraie pause entre deux phrases
+        return None
+    rest = x[max(0, (best[1] + best[0]) * win - int(rate * 0.03)):]
+    return rest if len(rest) > rate * 0.15 else None
+
+
 def write_wav(path, audio, rate):
     data = np.clip(np.asarray(audio, dtype=np.float32).reshape(-1), -1, 1)
     with wave.open(str(path), 'wb') as f:
@@ -286,6 +324,29 @@ def encode(wav, mp3, speed):
     subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(wav), '-af', filters, *MP3, str(mp3)], check=True)
 
 
+if args.phonemes:
+    import phonemes as ph
+
+checked = []  # mots déjà faits, réécoutés (--verifier-mots)
+if args.verifier_mots and args.phonemes:
+    queued = {e['key'] for e in todo}
+    for i, e in enumerate(items):
+        if i % n != k - 1 or e['key'] in queued or not is_short(tts_text(e)):
+            continue
+        data = existing_clip(e)
+        if not data:
+            continue
+        with tempfile.NamedTemporaryFile(suffix='.mp3') as f:
+            f.write(data)
+            f.flush()
+            gap, details = ph.judge(tts_text(e), e['lang'], decode16(f.name))
+        checked.append({'key': e['key'], 'ecart_phonemes': round(gap, 2), **details})
+        # une faute nette, ou un mot à peine reconnu : il est refait (l'ancien concourt)
+        if details['fautes'] or gap >= 0.75:
+            redo.add(e['key'])
+            todo.append(e)
+    print(f'mots réécoutés : {len(checked)}, à refaire : {sum(1 for c in checked if c["key"] in redo)}', flush=True)
+
 models, states = {}, {}
 failures, report = [], []
 start = time.time()
@@ -305,13 +366,21 @@ with tempfile.TemporaryDirectory() as tmp:
 
         def diction(path, measures):
             """Pénalité de diction (0 si la reconnaissance vocale retrouve le texte), notée dans `measures`."""
-            said = heard(path, lang, before)
-            score = similarity(text, said, lang)
-            measures.update(entendu=said, ressemblance=round(score, 2))
-            penalty = max(0.0, 0.9 - score) * 10  # une diction douteuse compte plus qu'une voix un peu haute
-            # sur un mot seul, même avec la phrase d'appel, la reconnaissance vocale se trompe parfois :
-            # elle départage les essais, et n'exclut que ce qu'elle n'a presque pas reconnu
-            return min(penalty, 4.5) if before is not None else penalty
+            penalty = 0.0
+            if checked_by_asr(text):
+                said = heard(path, lang, before)
+                score = similarity(text, said, lang)
+                measures.update(entendu=said, ressemblance=round(score, 2))
+                penalty = max(0.0, 0.9 - score) * 10  # une diction douteuse compte plus qu'une voix un peu haute
+                # sur un mot seul, même avec la phrase d'appel, la reconnaissance vocale se trompe parfois :
+                # elle départage les essais, et n'exclut que ce qu'elle n'a presque pas reconnu
+                penalty = min(penalty, 4.5) if before is not None else penalty
+            if args.phonemes:
+                # la prononciation elle-même : une lettre muette dite, un « in » à l'anglaise comptent lourd
+                gap, details = ph.judge(text, lang, decode16(path))
+                measures.update(details, ecart_phonemes=round(gap, 2))
+                penalty += gap * (3 if is_short(text) else 1.5)
+            return penalty
 
         best = None  # (note, audio, mesures) ; audio vaut None pour l'ancien son, gardé tel quel
         problems = []
@@ -324,11 +393,18 @@ with tempfile.TemporaryDirectory() as tmp:
             f0 = pitch(raw, rate)
             note = (abs(np.log(f0 / PITCH.get(voice, f0))) if f0 else 0.0) / PITCH_TOLERANCE
             measures = {'hauteur': round(f0) if f0 else None, 'duree': round(len(raw) / rate, 2), 'essai': 'ancien son'}
-            if checked_by_asr(text):
+            if checked_by_asr(text) or args.phonemes:
                 note += diction(trial, measures)
             best = (note, None, measures)
-        for attempt in ([] if best and best[0] <= 1 else attempts(text, args.essais)):
+        for attempt in ([] if best and best[0] <= 1 else attempts(text, args.essais, lang)):
+            cut = isinstance(attempt, tuple)
+            attempt = attempt[1] if cut else attempt
             audio = model.generate_audio(states[(lang, voice)], attempt).numpy().reshape(-1)
+            if cut:
+                audio = after_pause(audio, rate)
+                if audio is None:
+                    problems.append('pas de pause après la phrase d’appel')
+                    continue
             seconds = len(audio) / rate
             gap = longest_gap(audio, rate)
             # garde-fous : un son beaucoup trop long pour son texte, ou coupé par un long silence, est raté
@@ -346,7 +422,7 @@ with tempfile.TemporaryDirectory() as tmp:
             audio = level_up(audio, rate)
             measures = {'hauteur': round(f0) if f0 else None, 'duree': round(seconds, 2), 'essai': attempt}
             note = off / PITCH_TOLERANCE  # 1 = à la limite de la tolérance
-            if checked_by_asr(text):
+            if checked_by_asr(text) or args.phonemes:
                 write_wav(wav, audio, rate)
                 encode(wav, trial, 1)
                 note += diction(trial, measures)
@@ -374,4 +450,6 @@ with tempfile.TemporaryDirectory() as tmp:
 OUT.mkdir(parents=True, exist_ok=True)
 (OUT / f'echecs-{k}.json').write_text(json.dumps(failures, ensure_ascii=False, indent=1), encoding='utf-8')
 (OUT / f'rapport-{k}.json').write_text(json.dumps(report, ensure_ascii=False), encoding='utf-8')
+if checked:
+    (OUT / f'verification-{k}.json').write_text(json.dumps(checked, ensure_ascii=False), encoding='utf-8')
 print(f'morceau {k}/{n} : {len(todo) - len(failures)} sons fabriqués, {len(failures)} échecs', flush=True)

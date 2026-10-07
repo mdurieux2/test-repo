@@ -269,8 +269,10 @@ toujours chaque mot, les nombres de 0 à 1000 et les prénoms de `scripts/voix/p
 n'est donc jamais dit par une autre voix). En poussant la liste (`scripts/voix/a-generer.json`), le
 workflow GitHub « Voix naturelle » fabrique les sons manquants avec Pocket TTS (gratuit, sur
 16 machines en même temps) : chaque son est contrôlé (hauteur de la voix, débit, diction vérifiée par
-la reconnaissance vocale Whisper, volume égalisé) et refait s'il le faut. `bash scripts/voix/recuperer.sh`
-les ajoute à `app/voix/` avec le manifeste, et `node scripts/voix/rapport.mjs` dit, jeu par jeu et
+la reconnaissance vocale Whisper, prononciation vérifiée phonème par phonème par `scripts/voix/phonemes.py`,
+volume égalisé) et refait s'il le faut ; un mot seul est aussi essayé dit après « Écoute bien. », puis coupé
+à la pause. `bash scripts/voix/recuperer.sh` les ajoute à `app/voix/` avec le manifeste (un son refait
+change de nom, pour que les appareils le téléchargent), et `node scripts/voix/rapport.mjs` dit, jeu par jeu et
 écran par écran, comment chaque phrase est dite (`scripts/voix/rapport-voix.md`).
 
 ## Affiche foot personnalisée (dossier `affiche/`)
