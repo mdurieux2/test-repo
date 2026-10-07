@@ -1,0 +1,746 @@
+[
+ {
+  "key": "fr|1|o",
+  "attendu": "o",
+  "entendu": "fu5ə5",
+  "ecart": 5.0
+ },
+ {
+  "key": "fr|1|cri",
+  "attendu": "kʁi",
+  "entendu": "kvimɪnɪstɾɔ",
+  "ecart": 3.0
+ },
+ {
+  "key": "fr|1|l'eau",
+  "attendu": "lo",
+  "entendu": "pənu",
+  "ecart": 2.0
+ },
+ {
+  "key": "fr|1|longs",
+  "attendu": "lɔ̃",
+  "entendu": "bjuŋg",
+  "ecart": 1.67
+ },
+ {
+  "key": "en|1|song",
+  "attendu": "sɒŋ",
+  "entendu": "tsong5",
+  "ecart": 1.67
+ },
+ {
+  "key": "fr|1|ponts",
+  "attendu": "pɔ̃",
+  "entendu": "pong5",
+  "ecart": 1.33
+ },
+ {
+  "key": "fr|1|Dans",
+  "attendu": "dɑ̃",
+  "entendu": "dong5",
+  "ecart": 1.33
+ },
+ {
+  "key": "fr|1|chat",
+  "attendu": "ʃa",
+  "entendu": "tʃat",
+  "ecart": 1.0
+ },
+ {
+  "key": "fr|1|et",
+  "attendu": "e",
+  "entendu": "b",
+  "ecart": 1.0
+ },
+ {
+  "key": "fr|1|mon",
+  "attendu": "mɔ̃",
+  "entendu": "u",
+  "ecart": 1.0
+ },
+ {
+  "key": "fr|1|oiseaux",
+  "attendu": "wazo",
+  "entendu": "huezu",
+  "ecart": 1.0
+ },
+ {
+  "key": "fr|1|belle",
+  "attendu": "bɛl",
+  "entendu": "ven",
+  "ecart": 1.0
+ },
+ {
+  "key": "fr|1|tôt",
+  "attendu": "to",
+  "entendu": "tu5",
+  "ecart": 1.0
+ },
+ {
+  "key": "fr|1|boue",
+  "attendu": "bu",
+  "entendu": "i",
+  "ecart": 1.0
+ },
+ {
+  "key": "en|1|star",
+  "attendu": "stɑ",
+  "entendu": "ɪstaɹ",
+  "ecart": 1.0
+ },
+ {
+  "key": "fr|1|980",
+  "attendu": "nœfsɑ̃katʁvɛ̃",
+  "entendu": "akatquvantvisa",
+  "ecart": 0.92
+ },
+ {
+  "key": "fr|1|34",
+  "attendu": "tʁɑ̃tkatʁ",
+  "entendu": "fɔngɛɾtʁə",
+  "ecart": 0.89
+ },
+ {
+  "key": "en|1|hundred",
+  "attendu": "hʌndɹɪd",
+  "entendu": "aŋdʒt",
+  "ecart": 0.86
+ },
+ {
+  "key": "en|1|38",
+  "attendu": "θətieɪt",
+  "entendu": "fo5tiɛ5",
+  "ecart": 0.86
+ },
+ {
+  "key": "fr|1|new",
+  "attendu": "(en)nju(fʁ)",
+  "entendu": "nu",
+  "ecart": 0.82
+ },
+ {
+  "key": "fr|1|Mohamed",
+  "attendu": "(en)məʊhamɪd(fʁ)",
+  "entendu": "uamed",
+  "ecart": 0.81
+ },
+ {
+  "key": "fr|1|ou lit et renard ?",
+  "attendu": "ulieʁənaʁ",
+  "entendu": "qna",
+  "ecart": 0.78
+ },
+ {
+  "key": "fr|1|66, 67, 68, 69, 70",
+  "attendu": "swasɑ̃tsisswasɑ̃tsɛtswasɑ̃tyitswasɑ̃tnœfswasɑ̃tdis",
+  "entendu": "tsɛɾsɔnsiswɛsɔŋtɹitwɛɾsʊŋnə",
+  "ecart": 0.76
+ },
+ {
+  "key": "fr|1|oiseau",
+  "attendu": "wazo",
+  "entendu": "buazu",
+  "ecart": 0.75
+ },
+ {
+  "key": "fr|1|Lana",
+  "attendu": "lana",
+  "entendu": "bilna",
+  "ecart": 0.75
+ },
+ {
+  "key": "fr|1|31",
+  "attendu": "tʁɑ̃teœ̃",
+  "entendu": "tnt",
+  "ecart": 0.75
+ },
+ {
+  "key": "fr|1|Malo",
+  "attendu": "malo",
+  "entendu": "tmaluk",
+  "ecart": 0.75
+ },
+ {
+  "key": "fr|1|Combien font 1 plus 1 ?",
+  "attendu": "kɔ̃bjɛ̃fɔ̃tœ̃plyzœ̃",
+  "entendu": "komiafwaplysa",
+  "ecart": 0.74
+ },
+ {
+  "key": "fr|1|Combien de crayons avait",
+  "attendu": "kɔ̃bjɛ̃dəkʁɛjɔ̃zavɛ",
+  "entendu": "buŋjankjuave",
+  "ecart": 0.74
+ },
+ {
+  "key": "fr|1|c'est combien de mètres ?",
+  "attendu": "sɛkɔ̃bjɛ̃dəmɛtʁ",
+  "entendu": "zikomjɾmet",
+  "ecart": 0.73
+ },
+ {
+  "key": "fr|1|était-il",
+  "attendu": "etɛtil",
+  "entendu": "fetitsin",
+  "ecart": 0.67
+ },
+ {
+  "key": "fr|1|quart",
+  "attendu": "kaʁ",
+  "entendu": "kaxt",
+  "ecart": 0.67
+ },
+ {
+  "key": "fr|1|84",
+  "attendu": "katʁvɛ̃tkatʁ",
+  "entendu": "fkatʁʊndɛt",
+  "ecart": 0.67
+ },
+ {
+  "key": "fr|1|faon",
+  "attendu": "fɑ̃",
+  "entendu": "fʌŋ",
+  "ecart": 0.67
+ },
+ {
+  "key": "fr|1|a 11 petites voitures.",
+  "attendu": "aɔ̃zpətitvwatyʁ",
+  "entendu": "aspɪtidwɛtʃju",
+  "ecart": 0.67
+ },
+ {
+  "key": "en|1|dog",
+  "attendu": "dɒg",
+  "entendu": "ðog",
+  "ecart": 0.67
+ },
+ {
+  "key": "fr|1|6 fois combien font 36 ?",
+  "attendu": "sifwakɔ̃bjɛ̃fɔ̃tʁɑ̃tsis",
+  "entendu": "zifɔɾkʊmiɾfʊtɾɔntsi",
+  "ecart": 0.65
+ },
+ {
+  "key": "fr|1|428",
+  "attendu": "katʁsɑ̃vɛ̃tyit",
+  "entendu": "kɛtusɔngantʃut",
+  "ecart": 0.64
+ },
+ {
+  "key": "fr|1|537",
+  "attendu": "sɛ̃sɑ̃tʁɑ̃tsɛt",
+  "entendu": "θaŋksɔtɔntsɛt",
+  "ecart": 0.64
+ },
+ {
+  "key": "fr|1|nouvelle-zélande",
+  "attendu": "nuvɛlzelɑ̃d",
+  "entendu": "vɛlzdenɔt",
+  "ecart": 0.64
+ },
+ {
+  "key": "fr|1|3 paquets de 5 :",
+  "attendu": "tʁwapakɛdəsɛ̃k",
+  "entendu": "klɑpakdɪsɔŋ",
+  "ecart": 0.64
+ },
+ {
+  "key": "fr|1|384",
+  "attendu": "tʁwasɑ̃katʁvɛ̃tkatʁ",
+  "entendu": "asukɛtʁəmankɛt",
+  "ecart": 0.63
+ },
+ {
+  "key": "fr|1|223",
+  "attendu": "døsɑ̃vɛ̃ttʁwa",
+  "entendu": "disɔvanta",
+  "ecart": 0.62
+ },
+ {
+  "key": "fr|1|254",
+  "attendu": "døsɑ̃sɛ̃kɑ̃tkatʁ",
+  "entendu": "dysasakɔmkɛt",
+  "ecart": 0.62
+ },
+ {
+  "key": "fr|1|maroc",
+  "attendu": "maʁɔk",
+  "entendu": "naʁo",
+  "ecart": 0.6
+ },
+ {
+  "key": "fr|1|571",
+  "attendu": "sɛ̃sɑ̃swasɑ̃teɔ̃z",
+  "entendu": "saŋksɔswsɑ̃ŋtiuz",
+  "ecart": 0.59
+ },
+ {
+  "key": "fr|1|Mets 3 citrons dans le panier.",
+  "attendu": "mɛtʁwasitʁɔ̃dɑ̃ləpanje",
+  "entendu": "netxasitʁumalban",
+  "ecart": 0.59
+ },
+ {
+  "key": "fr|1|514",
+  "attendu": "sɛ̃sɑ̃katɔʁz",
+  "entendu": "saŋkfɔkɛtɔlz",
+  "ecart": 0.58
+ },
+ {
+  "key": "fr|1|finlande",
+  "attendu": "fɛ̃lɑ̃d",
+  "entendu": "faland",
+  "ecart": 0.57
+ },
+ {
+  "key": "fr|1|grand-père",
+  "attendu": "gʁɑ̃pɛʁ",
+  "entendu": "bhɔmpɛʁ",
+  "ecart": 0.57
+ },
+ {
+  "key": "fr|1|743",
+  "attendu": "sɛtsɑ̃kaʁɑ̃ttʁwa",
+  "entendu": "zɛtsukauntʁɔ",
+  "ecart": 0.56
+ },
+ {
+  "key": "fr|1|415",
+  "attendu": "katʁsɑ̃kɛ̃z",
+  "entendu": "kathusokalz",
+  "ecart": 0.55
+ },
+ {
+  "key": "fr|1|440",
+  "attendu": "katʁsɑ̃kaʁɑ̃t",
+  "entendu": "fkatxusukaʁut",
+  "ecart": 0.54
+ },
+ {
+  "key": "fr|1|747",
+  "attendu": "sɛtsɑ̃kaʁɑ̃tsɛt",
+  "entendu": "zɛtsʊkaʊmsɪt",
+  "ecart": 0.53
+ },
+ {
+  "key": "fr|1|singe",
+  "attendu": "sɛ̃ʒ",
+  "entendu": "sɪŋʒ",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|doux",
+  "attendu": "du",
+  "entendu": "tu",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|rémi",
+  "attendu": "ʁemi",
+  "entendu": "bami",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|Maëlle",
+  "attendu": "maɛl",
+  "entendu": "mɛn",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|drôle",
+  "attendu": "dʁol",
+  "entendu": "tʁɔl",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|611",
+  "attendu": "sisɑ̃ɔ̃z",
+  "entendu": "sisaʊuz",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|n'est",
+  "attendu": "nɛ",
+  "entendu": "ne",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|ses",
+  "attendu": "se",
+  "entendu": "si",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|plaque",
+  "attendu": "plak",
+  "entendu": "pɛk",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|sens",
+  "attendu": "sɑ̃s",
+  "entendu": "sas",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|Luna",
+  "attendu": "lyna",
+  "entendu": "buna",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|coffre",
+  "attendu": "kɔfʁ",
+  "entendu": "kof",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|ou dans la forêt",
+  "attendu": "udɑ̃lafoʁɛ",
+  "entendu": "budlafuʁe",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|Il est 16 heures 15.",
+  "attendu": "ilɛsɛzœʁkɛ̃z",
+  "entendu": "ilisazɔʁka",
+  "ecart": 0.5
+ },
+ {
+  "key": "en|1|thirty-five",
+  "attendu": "θətifaɪv",
+  "entendu": "ðɚɾifaɪ",
+  "ecart": 0.5
+ },
+ {
+  "key": "en|1|clap",
+  "attendu": "klap",
+  "entendu": "ka",
+  "ecart": 0.5
+ },
+ {
+  "key": "fr|1|266",
+  "attendu": "døsɑ̃swasɑ̃tsis",
+  "entendu": "dʊsɔsasomsis",
+  "ecart": 0.47
+ },
+ {
+  "key": "fr|1|636",
+  "attendu": "sisɑ̃tʁɑ̃tsis",
+  "entendu": "sisaltɾɔtsi",
+  "ecart": 0.46
+ },
+ {
+  "key": "fr|1|Si on enlève un gâteau, combien restera-t-il de gâteaux ?",
+  "attendu": "siɔ̃nɑ̃lɛvœ̃gatokɔ̃bjɛ̃ʁɛstʁatildəgato",
+  "entendu": "siunɑ̃lɛvagetukuminʁestoʁativdəget",
+  "ecart": 0.45
+ },
+ {
+  "key": "fr|1|il y a des poussins",
+  "attendu": "iliadepusɛ̃",
+  "entendu": "jadepusa",
+  "ecart": 0.45
+ },
+ {
+  "key": "fr|1|Suis les étoiles !",
+  "attendu": "syilezetwal",
+  "entendu": "ʃfilezitwɛn",
+  "ecart": 0.45
+ },
+ {
+  "key": "fr|1|349",
+  "attendu": "tʁwasɑ̃kaʁɑ̃tnœf",
+  "entendu": "tasəkaʁɔntnəf",
+  "ecart": 0.44
+ },
+ {
+  "key": "fr|1|968",
+  "attendu": "nœfsɑ̃swasɑ̃tyit",
+  "entendu": "nəfsɔsvasʊntit",
+  "ecart": 0.44
+ },
+ {
+  "key": "fr|1|Regarde les petites maisons !",
+  "attendu": "ʁəgaʁdlepətitmɛzɔ̃",
+  "entendu": "pgaʁdjapetitmezu",
+  "ecart": 0.44
+ },
+ {
+  "key": "fr|1|La maison du cochon ?",
+  "attendu": "lamɛzɔ̃dykoʃɔ̃",
+  "entendu": "bɛɾmezɔ̃dykoʃu",
+  "ecart": 0.43
+ },
+ {
+  "key": "fr|1|903",
+  "attendu": "nœfsɑ̃tʁwa",
+  "entendu": "nɛvsɑ̃tqa",
+  "ecart": 0.4
+ },
+ {
+  "key": "fr|1|poulain",
+  "attendu": "pulɛ̃",
+  "entendu": "pula",
+  "ecart": 0.4
+ },
+ {
+  "key": "fr|1|met-elle",
+  "attendu": "mɛtɛl",
+  "entendu": "mitel",
+  "ecart": 0.4
+ },
+ {
+  "key": "fr|1|malade, en anglais ?",
+  "attendu": "maladɑ̃nɑ̃glɛ",
+  "entendu": "maladonogle",
+  "ecart": 0.38
+ },
+ {
+  "key": "fr|1|7 plus 1, égale 8.",
+  "attendu": "sɛtplyzœ̃egalyit",
+  "entendu": "tatplyzaegalvi",
+  "ecart": 0.38
+ },
+ {
+  "key": "en|1|36",
+  "attendu": "θətisɪks",
+  "entendu": "θɚɾɪsɪks",
+  "ecart": 0.38
+ },
+ {
+  "key": "fr|1|313",
+  "attendu": "tʁwasɑ̃tʁɛz",
+  "entendu": "twasɔtʁez",
+  "ecart": 0.36
+ },
+ {
+  "key": "fr|1|773",
+  "attendu": "sɛtsɑ̃swasɑ̃ttʁɛz",
+  "entendu": "sɛtsɔ̃swasɔmpɾɛz",
+  "ecart": 0.35
+ },
+ {
+  "key": "fr|1|La moitié de 2, c'est 1.",
+  "attendu": "lamwatjedədøsɛtœ̃",
+  "entendu": "amwatedədysiɑ̃",
+  "ecart": 0.35
+ },
+ {
+  "key": "fr|1|chaise",
+  "attendu": "ʃɛz",
+  "entendu": "ʃez",
+  "ecart": 0.33
+ },
+ {
+  "key": "fr|1|260",
+  "attendu": "døsɑ̃swasɑ̃t",
+  "entendu": "dsɔswesɑ̃t",
+  "ecart": 0.33
+ },
+ {
+  "key": "fr|1|d'août",
+  "attendu": "dut",
+  "entendu": "dt",
+  "ecart": 0.33
+ },
+ {
+  "key": "fr|1|Ibrahim",
+  "attendu": "ibʁaim",
+  "entendu": "tibʁai",
+  "ecart": 0.33
+ },
+ {
+  "key": "fr|1|997",
+  "attendu": "nœfsɑ̃katʁvɛ̃disɛt",
+  "entendu": "nəvsɑ̃katʁəvɑ̃ndisɛ",
+  "ecart": 0.33
+ },
+ {
+  "key": "fr|1|tag",
+  "attendu": "tag",
+  "entendu": "tagɪ",
+  "ecart": 0.33
+ },
+ {
+  "key": "en|1|had",
+  "attendu": "had",
+  "entendu": "hd",
+  "ecart": 0.33
+ },
+ {
+  "key": "fr|1|300",
+  "attendu": "tʁwasɑ̃",
+  "entendu": "tʁasɔ̃",
+  "ecart": 0.29
+ },
+ {
+  "key": "fr|1|461",
+  "attendu": "katʁsɑ̃swasɑ̃teœ̃",
+  "entendu": "katʁsɑ̃asɑ̃ti",
+  "ecart": 0.29
+ },
+ {
+  "key": "fr|1|l'éléphant",
+  "attendu": "lelefɑ̃",
+  "entendu": "nelifɑ̃",
+  "ecart": 0.29
+ },
+ {
+  "key": "fr|1|872",
+  "attendu": "yisɑ̃swasɑ̃tduz",
+  "entendu": "isɑ̃swasomduz",
+  "ecart": 0.27
+ },
+ {
+  "key": "fr|1|La poule mange des graines.",
+  "attendu": "lapulmɑ̃ʒdegʁɛn",
+  "entendu": "vapulmoʒdegʁin",
+  "ecart": 0.27
+ },
+ {
+  "key": "fr|1|souris",
+  "attendu": "suʁi",
+  "entendu": "suʁis",
+  "ecart": 0.25
+ },
+ {
+  "key": "fr|1|tu peux acheter la petite voiture,",
+  "attendu": "typøzaʃtelapətitvwatyʁ",
+  "entendu": "sypyɛʃtelapətitvatyʁ",
+  "ecart": 0.23
+ },
+ {
+  "key": "fr|1|301",
+  "attendu": "tʁwasɑ̃œ̃",
+  "entendu": "tʁwasɑ̃a",
+  "ecart": 0.22
+ },
+ {
+  "key": "fr|1|Tout est relié !",
+  "attendu": "tutɛʁəlje",
+  "entendu": "tuteʁənje",
+  "ecart": 0.22
+ },
+ {
+  "key": "fr|1|896",
+  "attendu": "yisɑ̃katʁvɛ̃sɛz",
+  "entendu": "misɑ̃katʁəvɑ̃sɛz",
+  "ecart": 0.2
+ },
+ {
+  "key": "en|1|paint",
+  "attendu": "peɪnt",
+  "entendu": "peɪn",
+  "ecart": 0.2
+ },
+ {
+  "key": "fr|1|297",
+  "attendu": "døsɑ̃katʁvɛ̃disɛt",
+  "entendu": "dusɑ̃katʁəvɑ̃disɛt",
+  "ecart": 0.18
+ },
+ {
+  "key": "fr|1|Que mange la vache ?",
+  "attendu": "kəmɑ̃ʒlavaʃ",
+  "entendu": "kymɑ̃ʒlɛvaʃ",
+  "ecart": 0.18
+ },
+ {
+  "key": "fr|1|Maxime",
+  "attendu": "maksim",
+  "entendu": "dmaksim",
+  "ecart": 0.17
+ },
+ {
+  "key": "fr|1|Quel jour vient après jeudi ?",
+  "attendu": "kɛlʒuʁvjɛ̃apʁɛʒødi",
+  "entendu": "kɛlʒuʁvjɑ̃apʁeʒydi",
+  "ecart": 0.17
+ },
+ {
+  "key": "fr|1|Pour mesurer la longueur d'une table, on compte en quoi ?",
+  "attendu": "puʁməzyʁelalɔ̃gœʁdyntablɔ̃kɔ̃tɑ̃kwa",
+  "entendu": "pʁməzʁelalɔ̃gɛʁdyntablɔ̃nkɔ̃tɑ̃kwa",
+  "ecart": 0.11
+ },
+ {
+  "key": "en|1|sixty-seven",
+  "attendu": "sɪkstisɛvən",
+  "entendu": "sɪkstisɛbən",
+  "ecart": 0.09
+ },
+ {
+  "key": "fr|1|4",
+  "attendu": "katʁ",
+  "entendu": "katʁ",
+  "ecart": 0.0
+ },
+ {
+  "key": "fr|1|fa",
+  "attendu": "fa",
+  "entendu": "fa",
+  "ecart": 0.0
+ },
+ {
+  "key": "fr|1|no",
+  "attendu": "no",
+  "entendu": "no",
+  "ecart": 0.0
+ },
+ {
+  "key": "fr|1|cache",
+  "attendu": "kaʃ",
+  "entendu": "kaʃ",
+  "ecart": 0.0
+ },
+ {
+  "key": "fr|1|mi",
+  "attendu": "mi",
+  "entendu": "mi",
+  "ecart": 0.0
+ },
+ {
+  "key": "fr|1|na",
+  "attendu": "na",
+  "entendu": "na",
+  "ecart": 0.0
+ },
+ {
+  "key": "fr|1|Capucine",
+  "attendu": "kapysin",
+  "entendu": "kapysin",
+  "ecart": 0.0
+ },
+ {
+  "key": "fr|1|bouche",
+  "attendu": "buʃ",
+  "entendu": "buʃ",
+  "ecart": 0.0
+ },
+ {
+  "key": "en|1|car",
+  "attendu": "kɑ",
+  "entendu": "kɑ",
+  "ecart": 0.0
+ },
+ {
+  "key": "en|1|six",
+  "attendu": "sɪks",
+  "entendu": "sɪks",
+  "ecart": 0.0
+ },
+ {
+  "key": "en|1|seventy-two",
+  "attendu": "sɛvəntitu",
+  "entendu": "sɛvəntitu",
+  "ecart": 0.0
+ },
+ {
+  "key": "en|1|young",
+  "attendu": "jʌŋ",
+  "entendu": "jʌŋ",
+  "ecart": 0.0
+ }
+]
