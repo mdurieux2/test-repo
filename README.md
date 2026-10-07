@@ -7,7 +7,7 @@ Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la moye
 - Un profil par enfant (jusqu'à 6), avec son prénom, son personnage et sa photo.
 - Toutes les données restent **sur l'appareil**. Rien n'est envoyé ailleurs.
 
-👉 **Adresse de l'application : <https://mdurieux2.github.io/lire-compter-samuser/>**
+👉 **Adresse de l'application : <https://fun.ermdx.app>**
 
 ---
 
@@ -231,8 +231,9 @@ une voix installée.
 ## Pour les développeurs
 
 Aucune étape de compilation : HTML, CSS et JavaScript (modules ES) dans `app/`, publiés sur
-GitHub Pages à chaque fusion sur `master` (à activer une fois : *Settings → Pages → Source :
-GitHub Actions*).
+Cloudflare Pages (projet `lire-compter-samuser`, adresse `fun.ermdx.app`) à chaque fusion sur `master`.
+Réglages du projet : branche `master`, aucune commande de construction, dossier de sortie `app`.
+Chaque pull request reçoit aussi une adresse d'aperçu `….lire-compter-samuser.pages.dev`.
 
 ```bash
 npm install          # Playwright, pour le test de bout en bout et les icônes

@@ -6,6 +6,8 @@ Aucun prénom en dur dans les jeux : utiliser le prénom du profil (`me().name`,
 Interface et commentaires en français.
 
 - Pas de build : `app/` est servi tel quel (modules ES). Pas de dépendance à l'exécution.
+- Publication : Cloudflare Pages publie `app/` à chaque fusion sur `master`, à l'adresse https://fun.ermdx.app
+  (plus de GitHub Pages).
 - Un jeu = un objet `{ id, domain, section, title, icon, skill, levels, generate(level, rng, index) }`.
   `generate` renvoie des données pures (pas de DOM) ; `interaction` vaut `undefined` (choix multiple),
   `keypad`, `match`, `fill` ou `build`. Le rendu est dans `render.js` et `main.js`.
