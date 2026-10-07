@@ -47,7 +47,7 @@ export const PROGRAMS = {
   GS: {
     francais: [
       ['syllabes-rythme', 1, 6], ['rimes', 1, 5], ['lettres', 2, 7], ['premier-son', 1, 2],
-      ['syllabes', 1, 1], ['ecrire', 1, 5],
+      ['syllabes', 1, 1], ['ecrire', 1, 6],
       ['dictee', 1, 1],
     ],
     histoires: [
@@ -79,7 +79,7 @@ export const PROGRAMS = {
   CP: {
     francais: [
       ['premier-son', 1, 6], ['syllabes', 1, 6], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
-      ['ecrire', 2, 5],
+      ['ecrire', 2, 8],
       ['dictee', 1, 5],
     ],
     histoires: [
@@ -113,11 +113,11 @@ export const PROGRAMS = {
   CE1: {
     francais: [
       ['bon-mot', 2, 6], ['petits-mots', 2, 6], ['phrase', 1, 5], ['homophones', 1, 5], ['genre', 1, 6],
-      ['ecrire', 4, 5],
-      ['dictee', 2, 6],
+      ['ecrire', 4, 8],
+      ['dictee', 2, 8],
     ],
     histoires: [
-      ['histoires', 2, 6], ['petits-textes', 2, 6],
+      ['histoires', 2, 8], ['petits-textes', 2, 8],
     ],
     maths: [
       ['patates', 4, 8], ['dizaines', 2, 8], ['comparer', 2, 7], ['suite', 3, 8], ['calcul', 4, 36],
@@ -140,8 +140,8 @@ export const PROGRAMS = {
     anglais: [
       ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],
       ['compte-anglais', 3, 7], ['ou-est', 2, 8], ['epelle-anglais', 1, 10], ['parle-anglais', 1, 8],
-      ['nombres-anglais', 1, 6], ['calcul-anglais', 1, 4], ['couleurs-anglais', 1, 3], ['colorie-anglais', 1, 3],
-      ['memory-anglais', 1, 4], ['intrus-anglais', 1, 3], ['contraires-anglais', 1, 3], ['phrase-anglais', 1, 3],
+      ['nombres-anglais', 1, 8], ['calcul-anglais', 1, 8], ['couleurs-anglais', 1, 7], ['colorie-anglais', 1, 7],
+      ['memory-anglais', 1, 8], ['intrus-anglais', 1, 7], ['contraires-anglais', 1, 7], ['phrase-anglais', 1, 7],
     ],
   },
 };
