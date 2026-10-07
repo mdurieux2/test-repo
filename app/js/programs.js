@@ -60,7 +60,7 @@ export const PROGRAMS = {
     ],
     jeux: [
       ['formes', 2, 8], ['algorithmes', 2, 7], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
-      ['symetrie', 1, 1], ['reproduire', 1, 1], ['tangram', 1, 2], ['cubes', 1, 2], ['labyrinthe', 1, 3],
+      ['symetrie', 1, 1], ['reproduire', 1, 1], ['tangram', 1, 2], ['cubes', 1, 2], ['labyrinthe', 1, 3], ['labyrinthe-rond', 1, 2],
       ['chemin-nombres', 1, 2], ['chemin-lettres', 1, 2],
       ['puzzle', 1, 4], ['memory', 1, 5], ['coloriage-magique', 1, 3], ['points', 1, 3],
     ],
@@ -92,7 +92,7 @@ export const PROGRAMS = {
     ],
     jeux: [
       ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['symetrie', 1, 3], ['reproduire', 1, 2],
-      ['tangram', 1, 2], ['cubes', 1, 3], ['labyrinthe', 2, 4], ['chemin-nombres', 2, 7],
+      ['tangram', 1, 2], ['cubes', 1, 3], ['labyrinthe', 2, 4], ['labyrinthe-rond', 1, 5], ['chemin-nombres', 2, 7],
       ['chemin-lettres', 2, 3],
       ['puzzle', 2, 5], ['memory', 3, 6], ['coloriage-magique', 2, 5], ['points', 2, 5],
     ],
@@ -126,7 +126,7 @@ export const PROGRAMS = {
     ],
     jeux: [
       ['intrus', 2, 8], ['ombres', 3, 8], ['sudoku', 3, 10], ['symetrie', 2, 7], ['reproduire', 2, 8],
-      ['tangram', 2, 8], ['cubes', 2, 7], ['labyrinthe', 3, 9], ['chemin-nombres', 5, 10],
+      ['tangram', 2, 8], ['cubes', 2, 7], ['labyrinthe', 3, 10], ['labyrinthe-rond', 1, 9], ['chemin-nombres', 5, 10],
       ['chemin-lettres', 3, 7],
       ['puzzle', 3, 8], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
     ],
