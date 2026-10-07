@@ -1,4 +1,4 @@
-# Lire & Compter
+# Lire, compter et s’amuser !
 
 Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la moyenne section au CE1.
 
@@ -34,7 +34,7 @@ dans le menu Partager, tout en bas. Si elle n'y est pas : *Modifier les actions�
 ### Ordinateur (Windows, Mac, Linux)
 
 - **Chrome** ou **Edge** : ouvrir l'adresse, puis cliquer sur l'icône **Installer** à droite de
-  la barre d'adresse (ou menu ⋮ → *Installer Lire & Compter*).
+  la barre d'adresse (ou menu ⋮ → *Installer Lire, compter et s’amuser !*).
 - **Safari (Mac)** : menu *Fichier* → *Ajouter au Dock*.
 - **Firefox** : l'application fonctionne directement dans un onglet.
 
@@ -281,13 +281,13 @@ change de nom, pour que les appareils le téléchargent), et `node scripts/voix/
 
 ## Affiche foot personnalisée (dossier `affiche/`)
 
-Une deuxième application, indépendante de Lire & Compter : une **affiche de foot** où l'on voit
+Une deuxième application, indépendante de « Lire, compter et s’amuser ! » : une **affiche de foot** où l'on voit
 de dos un parent qui porte son enfant sur les épaules, avec **les prénoms et les numéros sur les
 maillots**, à imprimer en **A4, A3 ou grand format jusqu'à 40 × 60 cm**.
 
 👉 Adresse : celle de l'application suivie de `affiche/`
 (<https://mdurieux2.github.io/lire-compter-samuser/affiche/>). Elle s'installe sur l'écran
-d'accueil comme Lire & Compter et fonctionne ensuite sans Internet.
+d'accueil comme « Lire, compter et s’amuser ! » et fonctionne ensuite sans Internet.
 
 - **Composition** :
   - 1 parent et 1 enfant : le parent lui tient les mains, bras levés ;

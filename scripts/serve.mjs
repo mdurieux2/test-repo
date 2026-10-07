@@ -59,5 +59,5 @@ export function startServer(port = PORT, root = ROOT) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   await startServer();
-  console.log(`${APP === 'affiche' ? 'Affiche foot' : 'Lire & Compter'} : http://localhost:${PORT}`);
+  console.log(`${APP === 'affiche' ? 'Affiche foot' : 'Lire, compter et s’amuser !'} : http://localhost:${PORT}`);
 }

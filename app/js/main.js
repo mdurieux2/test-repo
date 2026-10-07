@@ -318,7 +318,7 @@ function installSteps() {
     ],
     desktop: [
       'Cliquez sur l’icône d’installation dans la barre d’adresse, ou ouvrez le menu du navigateur.',
-      'Choisissez « Installer Lire & Compter ».',
+      'Choisissez « Installer Lire, compter et s’amuser ! ».',
       'L’app s’ouvre alors dans sa propre fenêtre, même sans Internet.',
     ],
   };
@@ -3448,7 +3448,7 @@ function shareCard() {
   const share = async () => {
     try {
       if (navigator.share) {
-        await navigator.share({ title: APP.name, text: `${APP.name} : des jeux pour apprendre à lire, à compter et l’anglais.`, url });
+        await navigator.share({ title: APP.name, text: `${APP.name} Des jeux pour apprendre à lire, à compter et l’anglais.`, url });
         return;
       }
       await navigator.clipboard.writeText(url);

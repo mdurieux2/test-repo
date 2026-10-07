@@ -3,7 +3,7 @@
 // journal des modifications doit la décrire (vérifié par les tests).
 
 export const APP = {
-  name: 'Lire & Compter',
+  name: 'Lire, compter et s’amuser\u00a0!',
   version: '1.11.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
@@ -19,6 +19,7 @@ export const CHANGELOG = [
       'Voix remise pendant un jeu : la consigne est redite tout de suite.',
       'En bas de « Qui joue ? », en petit : le numéro de version et le contact.',
       '« Qui joue ? » : avec une photo, le prénom n’est plus écrit deux fois (il reste en gros sous la photo).',
+      'Nouveau nom : « Lire, compter et s’amuser ! » (titre de la page, nom de l’app et crédits ; l’icône garde « Lire&Compter », plus court).',
     ],
   },
   {
