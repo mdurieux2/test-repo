@@ -974,6 +974,44 @@ if (!(await page.evaluate(() => document.body.dataset.season))) fail('décor de 
 await setStore(page, "store.profiles['eva-rose'].easyRead = false;");
 console.log('✔ lecture facilitée et décor de saison');
 
+// musique et voix : deux boutons à côté des étoiles (les mêmes réglages que dans l'espace parents)
+await goProfile(page);
+const soundState = () => page.evaluate((key) => {
+  const { settings } = JSON.parse(localStorage.getItem(key));
+  const button = (kind) => document.querySelector(`.top-bar [data-toggle-${kind}]`);
+  return {
+    music: Boolean(settings.music), voice: settings.voice !== false,
+    musicBtn: button('music').getAttribute('aria-pressed'), voiceBtn: button('voice').getAttribute('aria-pressed'),
+    musicOff: button('music').classList.contains('off'), voiceIcon: button('voice').textContent,
+  };
+}, STORAGE_KEY);
+let sound = await soundState();
+if (sound.music || sound.musicBtn !== 'false' || !sound.musicOff) fail(`musique : allumée par défaut ? ${JSON.stringify(sound)}`);
+if (!sound.voice || sound.voiceBtn !== 'true' || sound.voiceIcon !== '🔊') fail(`voix : coupée par défaut ? ${JSON.stringify(sound)}`);
+await page.click('[data-toggle-music]');
+sound = await soundState();
+if (!sound.music || sound.musicBtn !== 'true' || sound.musicOff) fail(`musique : le bouton ne l’allume pas ${JSON.stringify(sound)}`);
+await page.click('[data-toggle-music]');
+await page.click('[data-toggle-voice]');
+sound = await soundState();
+if (sound.music || sound.voice || sound.voiceBtn !== 'false' || sound.voiceIcon !== '🔇') fail(`voix : le bouton ne la coupe pas ${JSON.stringify(sound)}`);
+// voix coupée (et gardée au prochain lancement) : la consigne d'un jeu n'est pas dite
+await goProfile(page);
+await page.evaluate(() => { window.__spoken = []; });
+await page.click('[data-domain="maths"]');
+await page.click('[data-game="compter"]');
+await page.waitForSelector('.choices');
+await page.waitForTimeout(400);
+const saidMuted = await page.evaluate(() => window.__spoken);
+if (saidMuted.length) fail(`voix coupée, mais « ${saidMuted[0]} » est dit`);
+// remise depuis l'accueil : Estelle dit bonjour
+await goProfile(page);
+await page.click('[data-toggle-voice]');
+await page.waitForFunction(() => (window.__spoken || []).some((t) => t.includes('Bonjour')), null, { timeout: 5000 })
+  .catch(() => fail('voix remise : pas de « Bonjour »'));
+if (!(await soundState()).voice) fail('voix : le bouton ne la remet pas');
+console.log('✔ musique et voix : boutons à côté des étoiles');
+
 // profils séparés : Matteo n'a pas les étoiles d'Eva-Rose
 await goProfiles(page);
 const matteoStars = await page.textContent('[data-profile="matteo"] .profile-stars');

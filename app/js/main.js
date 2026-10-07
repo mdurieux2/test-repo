@@ -120,6 +120,48 @@ function starCounter() {
   return h('div', { class: 'star-counter', 'aria-label': `${child().stars} étoiles` }, '⭐ ', child().stars);
 }
 
+/**
+ * Musique et voix, à couper ou remettre d'un geste depuis l'accueil (les mêmes réglages que dans
+ * l'espace parents). Coupé : l'icône est barrée, pas seulement plus pâle.
+ */
+function soundToggles() {
+  const button = (kind, label, isOn, onToggle) => {
+    const btn = h('button', { class: 'sound-toggle', [`data-toggle-${kind}`]: '', 'aria-label': label });
+    const paint = () => {
+      const on = isOn();
+      btn.classList.toggle('off', !on);
+      btn.setAttribute('aria-pressed', String(on));
+      btn.replaceChildren(h('span', { 'aria-hidden': 'true' }, kind === 'voice' ? (on ? '🔊' : '🔇') : '🎵'));
+    };
+    btn.addEventListener('click', () => {
+      onToggle(!isOn());
+      save();
+      paint();
+    });
+    paint();
+    return btn;
+  };
+  return [
+    button('music', 'Musique', () => Boolean(store.settings.music), (on) => {
+      store.settings.music = on;
+      if (on) startMusic();
+      else stopMusic();
+    }),
+    button('voice', 'Voix', () => store.settings.voice !== false, (on) => {
+      store.settings.voice = on;
+      applySettings();
+      stopStoryAudio();
+      if (on) say(me(), `Bonjour ${me().spoken} !`);
+    }),
+  ];
+}
+
+/** Barre du haut de l'accueil : qui joue, puis la musique, la voix et les étoiles. */
+function homeBar() {
+  return h('header', { class: 'top-bar' }, profileChip(), h('span'),
+    h('div', { class: 'home-actions' }, ...soundToggles(), starCounter()));
+}
+
 function topBar({ onBack, backLabel = 'Retour', title, right }) {
   return h('header', { class: 'top-bar' },
     onBack ? h('button', { class: 'icon-btn', onclick: onBack, 'aria-label': backLabel }, backLabel === 'Quitter' ? '✕' : '←') : h('span'),
@@ -528,7 +570,7 @@ function homeScreen() {
   const domains = programForChild(child());
   const featured = featuredBlock();
   show(h('main', { class: `screen home${featured ? ' has-featured' : ''}` },
-    h('header', { class: 'top-bar' }, profileChip(), h('span'), starCounter()),
+    homeBar(),
     h('div', { class: 'home-hero' },
       seasonDecor(),
       h('h1', { class: 'home-title' }, frenchSpacing(`Bonjour ${c.name} !`)),
@@ -684,7 +726,7 @@ function timeIsUp(kid = child()) {
 function pauseScreen() {
   const c = me();
   show(h('main', { class: 'screen pause' },
-    h('header', { class: 'top-bar' }, profileChip(), h('span'), starCounter()),
+    homeBar(),
     h('div', { class: 'pause-card' },
       avatar(c.id, 'avatar-md'),
       h('h1', {}, 'C’est l’heure de la pause !'),
@@ -1081,8 +1123,8 @@ function playAudio(blob, { into = null, duration = 0, onTime = null } = {}) {
  */
 async function readStory(stageEl, guide, q, before = []) {
   const id = q.stage.storyId;
-  // histoire non enregistrée : la voix de synthèse tout de suite
-  if (!id || (recordedIds && !recordedIds.has(id))) return karaoke(stageEl, guide, q.stage.sentences, q.instruction, before);
+  // histoire non enregistrée, ou voix coupée (l'enfant lit seul) : la voix de synthèse tout de suite
+  if (!id || store.settings.voice === false || (recordedIds && !recordedIds.has(id))) return karaoke(stageEl, guide, q.stage.sentences, q.instruction, before);
   stopSpeaking();
   stopStoryAudio();
   const run = storyRun;

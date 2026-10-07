@@ -132,7 +132,20 @@ input { -webkit-user-select: text; user-select: text; }
 }
 
 /* ---------- accueil ---------- */
-.home .top-bar .star-counter { justify-self: start; }
+/* musique et voix à côté des étoiles ; coupées, l'icône est barrée (pas seulement plus pâle) */
+.home-actions { display: flex; align-items: center; gap: 8px; justify-self: end; }
+.sound-toggle {
+  position: relative; flex: none;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--card); box-shadow: 0 3px 0 var(--line);
+  display: grid; place-items: center; font-size: 1.35rem; line-height: 1;
+}
+.sound-toggle:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.sound-toggle.off > span { opacity: 0.5; }
+.sound-toggle[data-toggle-music].off::after {
+  content: ''; position: absolute; left: 8px; right: 8px; top: calc(50% - 2px); height: 4px;
+  border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 2px var(--card); transform: rotate(-45deg);
+}
 .home-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 0 18px; }
 .home-title { margin: 6px 0 0; font-size: 2.1rem; }
 
@@ -450,10 +463,13 @@ input { -webkit-user-select: text; user-select: text; }
 .profile-stars { font-weight: 700; color: var(--muted); }
 .profile-chip {
   display: flex; align-items: center; gap: 8px; justify-self: start;
+  min-width: 0; max-width: 100%;
   background: var(--card); border-radius: 999px; padding: 4px 14px 4px 4px;
   font-weight: 700; box-shadow: 0 3px 0 var(--line);
 }
-.home .top-bar { grid-template-columns: auto 1fr auto; }
+/* un prénom très long (30 lettres) se termine par « … » ici : il est écrit en entier juste en dessous */
+.profile-chip > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home .top-bar, .pause .top-bar { grid-template-columns: minmax(0, auto) 1fr auto; }
 
 /* sections dans la liste des jeux */
 .section-title { grid-column: 1 / -1; margin: 10px 0 -4px; font-size: 1.05rem; color: var(--accent-dark); letter-spacing: 0.02em; }
@@ -1157,6 +1173,7 @@ input { -webkit-user-select: text; user-select: text; }
   }
   .top-bar { min-height: 46px; }
   .icon-btn { width: 42px; height: 42px; font-size: 1.3rem; }
+  .sound-toggle { width: 42px; height: 42px; font-size: 1.25rem; }
 
   /* écran de jeu en deux colonnes */
   .screen.play {

@@ -150,6 +150,9 @@ bonus et un jour de plus dans la série 🔥.
 - **Tout est lu à voix haute**, par une seule **voix naturelle** enregistrée à l'avance (Estelle, en
   français comme en anglais), qui marche aussi sans Internet. Chaque phrase est dite d'un seul tenant,
   sans changer de voix. On réécoute en touchant le personnage ou la bulle.
+- **Musique 🎵 et voix 🔊** se coupent d'un geste, avec les deux boutons à côté des étoiles de
+  l'accueil (bouton barré quand c'est coupé). Voix coupée, plus rien n'est lu, même les histoires
+  enregistrées par un parent.
 - **Consigne complète** à la première question, puis une **consigne courte** pour ne pas lasser.
 - **Niveau adaptatif** pour viser environ 80 % de réussite : 5 bonnes réponses d'affilée font
   monter d'un niveau, 3 erreurs sur 5 font redescendre, dans la fourchette de la classe.

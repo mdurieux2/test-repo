@@ -4,13 +4,22 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.9.1',
+  version: '1.10.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.10.0',
+    date: '2026-10-07',
+    changes: [
+      'Accueil : deux boutons à côté des étoiles pour couper ou remettre la musique 🎵 et la voix 🔊, d’un seul geste (les mêmes réglages que dans l’Espace parents). Coupé, le bouton est barré.',
+      'Voix coupée : plus aucune voix, même pas les histoires enregistrées par un parent ; l’enfant lit seul. En remettant la voix, Estelle dit bonjour.',
+      'Un prénom très long se termine par « … » dans le bouton du joueur, en haut de l’accueil (il reste écrit en entier dans « Bonjour … ! »).',
+    ],
+  },
   {
     version: '1.9.1',
     date: '2026-10-07',
