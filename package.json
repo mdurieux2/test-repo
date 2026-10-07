@@ -1,17 +1,14 @@
 {
   "name": "lire-et-compter",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "private": true,
   "description": "Jeux de français, de maths et d'anglais, de la moyenne section au CE1 : web app installable sur téléphone, tablette et ordinateur",
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "start:affiche": "node scripts/serve.mjs affiche",
     "test": "node --test \"tests/*.test.js\"",
     "test:e2e": "node scripts/smoke.mjs",
-    "test:e2e:affiche": "node scripts/smoke-affiche.mjs",
-    "icons": "node scripts/make-icons.mjs",
-    "icons:affiche": "node scripts/make-affiche-icons.mjs"
+    "icons": "node scripts/make-icons.mjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"
