@@ -20,7 +20,7 @@ jobs:
 
   # test de bout en bout découpé en morceaux qui tournent en même temps :
   # le parcours complet (tous les jeux joués, mode avion), la mise en page de chaque
-  # niveau de chaque jeu sur les 33 appareils répartie en 4 quarts, et l'affiche foot
+  # niveau de chaque jeu sur les 33 appareils répartie en 4 quarts
   e2e:
     name: e2e (${{ matrix.name }})
     runs-on: ubuntu-latest
@@ -33,7 +33,6 @@ jobs:
           - { name: mise en page 2/4, script: 'test:e2e', parts: layout, shard: 2/4 }
           - { name: mise en page 3/4, script: 'test:e2e', parts: layout, shard: 3/4 }
           - { name: mise en page 4/4, script: 'test:e2e', parts: layout, shard: 4/4 }
-          - { name: affiche foot, script: 'test:e2e:affiche', parts: '', shard: '' }
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5

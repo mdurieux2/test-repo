@@ -1,13 +1,11 @@
 // Petit serveur statique sans dépendance : `npm start` puis ouvrir l'adresse affichée.
 // Sur le même Wi-Fi, l'iPhone peut ouvrir http://<ip-de-l-ordinateur>:8080.
-// `npm run start:affiche` sert l'application d'affiches (dossier affiche/).
 
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 
-const APP = process.argv[2] === 'affiche' ? 'affiche' : 'app';
-const ROOT = new URL(`../${APP}/`, import.meta.url).pathname;
+const ROOT = new URL('../app/', import.meta.url).pathname;
 const PORT = Number(process.env.PORT) || 8080;
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -59,5 +57,5 @@ export function startServer(port = PORT, root = ROOT) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   await startServer();
-  console.log(`${APP === 'affiche' ? 'Affiche foot' : 'Lire, compter et s’amuser !'} : http://localhost:${PORT}`);
+  console.log(`Lire, compter et s’amuser ! : http://localhost:${PORT}`);
 }

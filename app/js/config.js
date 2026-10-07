@@ -23,6 +23,13 @@ export const CHANGELOG = [
     ],
   },
   {
+    version: '1.10.1',
+    date: '2026-10-07',
+    changes: [
+      'Préparation du déménagement de l’application vers sa nouvelle adresse : le mode hors ligne ne garde plus jamais une page de redirection à la place de l’application.',
+    ],
+  },
+  {
     version: '1.10.0',
     date: '2026-10-07',
     changes: [
