@@ -41,7 +41,7 @@ export const PROGRAMS = {
       ['animaux-monde', 1, 1],
     ],
     anglais: [
-      ['ecoute', 1, 3], ['compte-anglais', 1, 1], ['ou-est', 1, 1],
+      ['ecoute', 1, 2], ['compte-anglais', 1, 1], ['ou-est', 1, 1],
     ],
   },
   GS: {
@@ -54,12 +54,12 @@ export const PROGRAMS = {
       ['histoires', 1, 1],
     ],
     maths: [
-      ['compter', 1, 4], ['vite-vu', 1, 2], ['panier', 1, 4], ['patates', 1, 2], ['relier', 1, 6],
+      ['compter', 1, 4], ['vite-vu', 1, 2], ['panier', 1, 4], ['patates', 1, 2], ['relier', 1, 8],
       ['comparer', 1, 2], ['suite', 1, 2], ['calcul', 1, 6], ['relie-calculs', 1, 1], ['faire-dix', 1, 2],
       ['ranger', 1, 3], ['problemes', 1, 3], ['doubles', 1, 1],
     ],
     jeux: [
-      ['formes', 2, 6], ['algorithmes', 2, 7], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
+      ['formes', 2, 8], ['algorithmes', 2, 7], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2],
       ['symetrie', 1, 1], ['reproduire', 1, 1], ['tangram', 1, 2], ['cubes', 1, 2], ['labyrinthe', 1, 3],
       ['chemin-nombres', 1, 2], ['chemin-lettres', 1, 2],
       ['puzzle', 1, 4], ['memory', 1, 5], ['coloriage-magique', 1, 3], ['points', 1, 3],
@@ -72,7 +72,7 @@ export const PROGRAMS = {
       ['drapeaux', 1, 1],
     ],
     anglais: [
-      ['ecoute', 1, 5], ['compte-anglais', 1, 2], ['ou-est', 1, 2], ['parle-anglais', 1, 1],
+      ['ecoute', 1, 4], ['compte-anglais', 1, 2], ['ou-est', 1, 2], ['parle-anglais', 1, 1],
       ['nombres-anglais', 1, 1], ['couleurs-anglais', 1, 1], ['intrus-anglais', 1, 1], ['contraires-anglais', 1, 1],
     ],
   },
@@ -104,7 +104,7 @@ export const PROGRAMS = {
       ['drapeaux', 1, 4],
     ],
     anglais: [
-      ['ecoute', 1, 10], ['lis-anglais', 1, 4], ['relie-anglais', 1, 4], ['compte-anglais', 1, 3],
+      ['ecoute', 1, 6], ['lis-anglais', 1, 3], ['relie-anglais', 1, 3], ['compte-anglais', 1, 3],
       ['ou-est', 1, 3], ['parle-anglais', 1, 2],
       ['nombres-anglais', 1, 4], ['calcul-anglais', 1, 2], ['couleurs-anglais', 1, 2], ['colorie-anglais', 1, 2],
       ['memory-anglais', 1, 3], ['intrus-anglais', 1, 2], ['contraires-anglais', 1, 2], ['phrase-anglais', 1, 1],
@@ -121,25 +121,25 @@ export const PROGRAMS = {
     ],
     maths: [
       ['patates', 4, 8], ['dizaines', 2, 8], ['comparer', 2, 7], ['suite', 3, 8], ['calcul', 4, 36],
-      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 6], ['tables', 1, 9], ['tables-chrono', 1, 6],
+      ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 8], ['tables', 1, 9], ['tables-chrono', 1, 8],
       ['ranger', 5, 10], ['problemes', 4, 10], ['doubles', 2, 7],
     ],
     jeux: [
-      ['intrus', 2, 6], ['ombres', 3, 6], ['sudoku', 3, 9], ['symetrie', 2, 7], ['reproduire', 2, 6],
-      ['tangram', 2, 5], ['cubes', 2, 7], ['labyrinthe', 3, 9], ['chemin-nombres', 5, 11],
+      ['intrus', 2, 8], ['ombres', 3, 8], ['sudoku', 3, 9], ['symetrie', 2, 7], ['reproduire', 2, 8],
+      ['tangram', 2, 8], ['cubes', 2, 7], ['labyrinthe', 3, 9], ['chemin-nombres', 5, 10],
       ['chemin-lettres', 3, 7],
-      ['puzzle', 3, 6], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
+      ['puzzle', 3, 8], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
     ],
     temps: [
-      ['heure', 2, 7], ['regle-horloge', 1, 6], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
+      ['heure', 2, 7], ['regle-horloge', 1, 8], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
     ],
     monde: [
-      ['animaux-monde', 2, 7], ['pays', 1, 6],
-      ['drapeaux', 1, 6],
+      ['animaux-monde', 2, 7], ['pays', 1, 8],
+      ['drapeaux', 1, 8],
     ],
     anglais: [
-      ['ecoute', 2, 13], ['lis-anglais', 1, 13], ['mot-anglais', 1, 13], ['relie-anglais', 1, 13],
-      ['compte-anglais', 3, 7], ['ou-est', 2, 6], ['epelle-anglais', 1, 13], ['parle-anglais', 1, 6],
+      ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],
+      ['compte-anglais', 3, 7], ['ou-est', 2, 8], ['epelle-anglais', 1, 10], ['parle-anglais', 1, 8],
       ['nombres-anglais', 1, 6], ['calcul-anglais', 1, 4], ['couleurs-anglais', 1, 3], ['colorie-anglais', 1, 3],
       ['memory-anglais', 1, 4], ['intrus-anglais', 1, 3], ['contraires-anglais', 1, 3], ['phrase-anglais', 1, 3],
     ],
