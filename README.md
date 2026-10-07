@@ -1,4 +1,4 @@
-# Lire & Compter
+# Lire, compter et s’amuser !
 
 Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la moyenne section au CE1.
 
@@ -8,6 +8,10 @@ Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la moye
 - Toutes les données restent **sur l'appareil**. Rien n'est envoyé ailleurs.
 
 👉 **Adresse de l'application : <https://fun.ermdx.app>**
+
+L'ancienne adresse (`mdurieux2.github.io/lire-compter-samuser`) n'est plus publiée : ouvrir la
+nouvelle adresse et y remettre l'icône sur l'écran d'accueil. Les profils sont enregistrés sur
+l'appareil pour chaque adresse : ils sont à recréer à la nouvelle adresse.
 
 ---
 
@@ -34,7 +38,7 @@ dans le menu Partager, tout en bas. Si elle n'y est pas : *Modifier les actions�
 ### Ordinateur (Windows, Mac, Linux)
 
 - **Chrome** ou **Edge** : ouvrir l'adresse, puis cliquer sur l'icône **Installer** à droite de
-  la barre d'adresse (ou menu ⋮ → *Installer Lire & Compter*).
+  la barre d'adresse (ou menu ⋮ → *Installer Lire, compter et s’amuser !*).
 - **Safari (Mac)** : menu *Fichier* → *Ajouter au Dock*.
 - **Firefox** : l'application fonctionne directement dans un onglet.
 
@@ -49,7 +53,8 @@ aussi : en paysage, le dessin est à gauche, la consigne et les réponses à dro
 1. **Au premier lancement**, l'adulte crée le profil de chaque enfant : prénom, personnage
    (fille ou garçon) et classe. Le prénom est écrit sur le tee-shirt du personnage et sert à
    féliciter l'enfant (« Bravo Léa ! »). On peut ajouter une photo ensuite.
-2. **« Qui joue ? »** : l'enfant touche son portrait.
+2. **« Qui joue ? »** : l'enfant touche son portrait. Tout en bas : les boutons du son et de la
+   voix, le numéro de version, le contact et le **journal des modifications** (les nouveautés).
 3. Il choisit le **Défi du jour** (5 questions variées, une série de jours 🔥), **Je révise**
    (les jeux ratés qui reviennent), un des jeux **⭐ Conseillé pour toi** par ses parents, ou une
    rubrique : **Lire et écrire**, **Histoires**, **Nombres et calcul**, **Jeux et logique**,
@@ -87,7 +92,7 @@ l'enfant, et on peut aussi le choisir directement.
 - *Lettres et sons* : les lettres, le premier son, les syllabes.
 - *Lire* : le bon mot, les petits mots, la bonne phrase, **petits textes** avec des questions
   de compréhension (dont des textes de saison, plus fréquents pendant leur saison).
-- *Histoires* : lues en karaoké, par la voix de l'appareil ou **par la voix d'un parent** ;
+- *Histoires* : lues en karaoké, par la voix d'Estelle ou **par la voix d'un parent** ;
   des histoires d'Halloween, de Noël, d'hiver, de printemps, d'été et d'automne reviennent pendant leur saison.
 - *Grammaire* : le bon petit mot (a/à, et/est, son/sont, on/ont), le, la, les, un, une.
 - *Labyrinthes* : le chemin des lettres (alphabet, épeler un mot).
@@ -150,9 +155,10 @@ bonus et un jour de plus dans la série 🔥.
 - **Tout est lu à voix haute**, par une seule **voix naturelle** enregistrée à l'avance (Estelle, en
   français comme en anglais), qui marche aussi sans Internet. Chaque phrase est dite d'un seul tenant,
   sans changer de voix. On réécoute en touchant le personnage ou la bulle.
-- **Musique 🎵 et voix 🔊** se coupent d'un geste, avec les deux boutons à côté des étoiles de
-  l'accueil (bouton barré quand c'est coupé). Voix coupée, plus rien n'est lu, même les histoires
-  enregistrées par un parent.
+- **Son 🎵 et voix 🗣️** se coupent d'un geste sur chaque écran, même pendant un jeu : deux boutons
+  en haut à droite (en bas sur « Qui joue ? », avec la version, le contact et le journal). Coupé, le bouton est
+  barré. Le son regroupe la musique et les petits sons. Voix coupée, plus rien n'est lu, même les
+  histoires enregistrées par un parent ; remise pendant un jeu, la consigne est redite.
 - **Consigne complète** à la première question, puis une **consigne courte** pour ne pas lasser.
 - **Niveau adaptatif** pour viser environ 80 % de réussite : 5 bonnes réponses d'affilée font
   monter d'un niveau, 3 erreurs sur 5 font redescendre, dans la fourchette de la classe.

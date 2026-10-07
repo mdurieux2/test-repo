@@ -20,6 +20,7 @@ import { STORY_DATA } from '../app/js/games/histoires.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
+import { APP } from '../app/js/config.js';
 import { seasonOf } from '../app/js/themes.js';
 import { cle, planLecture } from '../app/js/voix-cles.js';
 
@@ -842,6 +843,7 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
   }
   await page.waitForSelector('.results');
   await assertNoJunk(page, `${game.id} résultats`);
+  if ((await page.locator('.results .bar-actions [data-toggle-voice]').count()) !== 1) fail(`${game.id} : pas de bouton pour la voix sur les résultats`);
   const stars = await page.locator('.big-star.on').count();
   if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (${count - wrongAt.length} bonnes sur ${count})`);
   if (game.timed) {
@@ -974,28 +976,62 @@ if (!(await page.evaluate(() => document.body.dataset.season))) fail('décor de 
 await setStore(page, "store.profiles['eva-rose'].easyRead = false;");
 console.log('✔ lecture facilitée et décor de saison');
 
-// musique et voix : deux boutons à côté des étoiles (les mêmes réglages que dans l'espace parents)
+// le son et la voix : deux boutons sur chaque écran (les mêmes réglages que dans l'espace parents)
 await goProfile(page);
-const soundState = () => page.evaluate((key) => {
+const soundState = (where = '.top-bar') => page.evaluate(([key, scope]) => {
   const { settings } = JSON.parse(localStorage.getItem(key));
-  const button = (kind) => document.querySelector(`.top-bar [data-toggle-${kind}]`);
+  const button = (kind) => document.querySelector(`${scope} [data-toggle-${kind}]`);
   return {
-    music: Boolean(settings.music), voice: settings.voice !== false,
-    musicBtn: button('music').getAttribute('aria-pressed'), voiceBtn: button('voice').getAttribute('aria-pressed'),
-    musicOff: button('music').classList.contains('off'), voiceIcon: button('voice').textContent,
+    sounds: settings.sounds !== false, music: Boolean(settings.music), voice: settings.voice !== false,
+    soundBtn: button('sound').getAttribute('aria-pressed'), voiceBtn: button('voice').getAttribute('aria-pressed'),
+    soundOff: button('sound').classList.contains('off'), voiceOff: button('voice').classList.contains('off'),
   };
-}, STORAGE_KEY);
+}, [STORAGE_KEY, where]);
 let sound = await soundState();
-if (sound.music || sound.musicBtn !== 'false' || !sound.musicOff) fail(`musique : allumée par défaut ? ${JSON.stringify(sound)}`);
-if (!sound.voice || sound.voiceBtn !== 'true' || sound.voiceIcon !== '🔊') fail(`voix : coupée par défaut ? ${JSON.stringify(sound)}`);
-await page.click('[data-toggle-music]');
+if (!sound.sounds || sound.soundBtn !== 'true' || sound.soundOff) fail(`son : coupé par défaut ? ${JSON.stringify(sound)}`);
+if (!sound.voice || sound.voiceBtn !== 'true' || sound.voiceOff) fail(`voix : coupée par défaut ? ${JSON.stringify(sound)}`);
+await page.click('.top-bar [data-toggle-sound]');
 sound = await soundState();
-if (!sound.music || sound.musicBtn !== 'true' || sound.musicOff) fail(`musique : le bouton ne l’allume pas ${JSON.stringify(sound)}`);
-await page.click('[data-toggle-music]');
-await page.click('[data-toggle-voice]');
+if (sound.sounds || sound.music || sound.soundBtn !== 'false' || !sound.soundOff) fail(`son : le bouton ne coupe pas les petits sons et la musique ${JSON.stringify(sound)}`);
+await page.click('.top-bar [data-toggle-sound]');
 sound = await soundState();
-if (sound.music || sound.voice || sound.voiceBtn !== 'false' || sound.voiceIcon !== '🔇') fail(`voix : le bouton ne la coupe pas ${JSON.stringify(sound)}`);
+if (!sound.sounds || !sound.music || sound.soundBtn !== 'true') fail(`son : le bouton ne remet pas les petits sons et la musique ${JSON.stringify(sound)}`);
+await setStore(page, 'store.settings.music = false;');
+// sur les autres écrans aussi : liste des jeux, niveaux, espace parents, « Qui joue ? » (en bas)
+await goProfile(page);
+await page.click('[data-domain="maths"]');
+if (!(await page.locator('.top-bar [data-toggle-sound]').count())) fail('son : pas de bouton dans la liste des jeux');
+await page.click('.top-bar .icon-btn');
+await goProfiles(page);
+const footer = await page.evaluate(() => {
+  const f = document.querySelector('.app-footer');
+  return f && {
+    text: f.textContent, mail: f.querySelector('a')?.getAttribute('href'),
+    toggles: f.querySelectorAll('[data-toggle-sound], [data-toggle-voice]').length,
+    changelog: f.querySelector('details.changelog .changelog-entry h3')?.textContent,
+  };
+});
+if (!footer || !footer.text.includes(`Version ${APP.version}`) || !footer.text.includes(`Contact : ${APP.author}`) || footer.mail !== `mailto:${APP.contact}`
+  || footer.toggles !== 2 || !footer.changelog?.startsWith(`Version ${APP.version}`)) {
+  fail(`« Qui joue ? » : version, contact, journal ou boutons absents en bas ${JSON.stringify(footer)}`);
+}
+// voix coupée pendant un jeu : la consigne n'est plus dite ; remise : elle est redite
+await goProfile(page);
+await page.click('[data-domain="maths"]');
+await page.click('[data-game="compter"]');
+await page.waitForSelector('.choices');
+await page.click('.top-bar [data-toggle-voice]');
+sound = await soundState();
+if (sound.voice || sound.voiceBtn !== 'false' || !sound.voiceOff) fail(`voix : le bouton du jeu ne la coupe pas ${JSON.stringify(sound)}`);
+await page.evaluate(() => { window.__spoken = []; });
+await page.click('.bubble');
+await page.waitForTimeout(300);
+if ((await page.evaluate(() => window.__spoken)).length) fail('voix coupée, mais la consigne est redite');
+await page.click('.top-bar [data-toggle-voice]');
+await page.waitForFunction(() => (window.__spoken || []).length > 0, null, { timeout: 5000 })
+  .catch(() => fail('voix remise pendant le jeu : la consigne n’est pas redite'));
 // voix coupée (et gardée au prochain lancement) : la consigne d'un jeu n'est pas dite
+await page.click('.top-bar [data-toggle-voice]');
 await goProfile(page);
 await page.evaluate(() => { window.__spoken = []; });
 await page.click('[data-domain="maths"]');
@@ -1006,11 +1042,11 @@ const saidMuted = await page.evaluate(() => window.__spoken);
 if (saidMuted.length) fail(`voix coupée, mais « ${saidMuted[0]} » est dit`);
 // remise depuis l'accueil : Estelle dit bonjour
 await goProfile(page);
-await page.click('[data-toggle-voice]');
+await page.click('.top-bar [data-toggle-voice]');
 await page.waitForFunction(() => (window.__spoken || []).some((t) => t.includes('Bonjour')), null, { timeout: 5000 })
   .catch(() => fail('voix remise : pas de « Bonjour »'));
 if (!(await soundState()).voice) fail('voix : le bouton ne la remet pas');
-console.log('✔ musique et voix : boutons à côté des étoiles');
+console.log('✔ son et voix : boutons sur chaque écran ; version, contact et journal en bas de « Qui joue ? »');
 
 // profils séparés : Matteo n'a pas les étoiles d'Eva-Rose
 await goProfiles(page);
@@ -1195,6 +1231,18 @@ if ((await page.textContent('[data-version]')) !== pkg.version) fail('version af
 if (!(await page.textContent('.credits')).includes('Michaël Durieux')) fail('crédits absents');
 if (!(await page.getAttribute('[data-contact]', 'href')).startsWith('mailto:')) fail('contact absent des crédits');
 if (!(await page.locator('.changelog-entry').count())) fail('journal des modifications absent');
+// le bouton du son (en haut) et les interrupteurs des réglages restent d'accord, dans les deux sens
+const soundsSwitch = '.settings input[data-setting="sounds"]';
+const musicSwitch = '.settings input[data-setting="music"]';
+if (!(await page.isChecked(soundsSwitch)) || await page.isChecked(musicSwitch)) fail('réglages : petits sons coupés ou musique allumée par défaut');
+await page.click('.top-bar [data-toggle-sound]');
+if (await page.isChecked(soundsSwitch) || await page.isChecked(musicSwitch)) fail('réglages : le bouton du son en haut ne met pas à jour les interrupteurs');
+await page.click(soundsSwitch);
+if ((await page.getAttribute('.top-bar [data-toggle-sound]', 'aria-pressed')) !== 'true') fail('réglages : l’interrupteur des petits sons ne met pas à jour le bouton du son en haut');
+await page.click('.settings input[data-setting="voice"]');
+if ((await page.getAttribute('.top-bar [data-toggle-voice]', 'aria-pressed')) !== 'false') fail('réglages : l’interrupteur de la voix ne met pas à jour le bouton en haut');
+await page.click('.top-bar [data-toggle-voice]');
+if (!(await page.isChecked('.settings input[data-setting="voice"]'))) fail('réglages : le bouton de la voix en haut ne met pas à jour l’interrupteur');
 // voix naturelle (Estelle) : allumée par défaut ; la phrase d'essai vient de ses sons (sinon, voix de l'appareil)
 const VOICE_TEST = 'Bravo ! Tu as trouvé la bonne réponse.';
 const voiceManifest = JSON.parse(readFileSync(new URL('../app/voix/manifest.json', import.meta.url), 'utf8'));

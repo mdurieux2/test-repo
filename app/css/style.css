@@ -1,4 +1,4 @@
-/* Lire & Compter — styles pensés pour un enfant de 6 ans sur iPhone :
+/* Lire, compter et s’amuser ! — styles pensés pour un enfant de 6 ans sur iPhone :
    grosses cibles tactiles, police Andika (a et g « scolaires »), couleurs franches. */
 
 @font-face {
@@ -131,21 +131,43 @@ input { -webkit-user-select: text; user-select: text; }
   white-space: nowrap;
 }
 
-/* ---------- accueil ---------- */
-/* musique et voix à côté des étoiles ; coupées, l'icône est barrée (pas seulement plus pâle) */
-.home-actions { display: flex; align-items: center; gap: 8px; justify-self: end; }
+/* son et voix à droite de chaque barre du haut ; coupés, l'icône est barrée (pas seulement plus pâle) */
+.bar-actions { display: flex; align-items: center; gap: 6px; justify-self: end; min-width: 0; }
 .sound-toggle {
   position: relative; flex: none;
-  width: 44px; height: 44px; border-radius: 50%;
+  width: 42px; height: 42px; border-radius: 50%;
   background: var(--card); box-shadow: 0 3px 0 var(--line);
-  display: grid; place-items: center; font-size: 1.35rem; line-height: 1;
+  display: grid; place-items: center; font-size: 1.3rem; line-height: 1;
 }
 .sound-toggle:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
 .sound-toggle.off > span { opacity: 0.5; }
-.sound-toggle[data-toggle-music].off::after {
+.sound-toggle.off::after {
   content: ''; position: absolute; left: 8px; right: 8px; top: calc(50% - 2px); height: 4px;
   border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 2px var(--card); transform: rotate(-45deg);
 }
+/* téléphone en portrait : un titre écrit passe sous la barre, pour ne pas être coupé en trois lignes
+   entre le bouton retour et les boutons de droite */
+@media (max-width: 500px) {
+  .top-bar.has-title { grid-template-columns: 52px 1fr auto; grid-template-areas: "back . actions" "title title title"; row-gap: 2px; }
+  .top-bar.has-title > :first-child { grid-area: back; }
+  .top-bar.has-title > .top-title { grid-area: title; }
+  .top-bar.has-title > :last-child { grid-area: actions; }
+}
+/* écrans sans barre (résultats, bienvenue) : dans le coin en haut à droite */
+.screen.welcome { position: relative; } /* .results l'est déjà */
+.bar-actions.corner { position: absolute; z-index: 5; top: calc(var(--safe-top) + 8px); right: 16px; }
+/* en bas de « Qui joue ? » : le son, la voix, puis la version et le contact en petit */
+.app-footer {
+  margin-top: auto; padding-top: 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--muted); font-size: 0.85rem; text-align: center;
+}
+.app-footer p { margin: 0; }
+.app-footer a { color: inherit; font-weight: 700; }
+.app-footer .changelog { align-self: stretch; text-align: left; color: var(--ink); font-size: 0.95rem; }
+.app-footer .changelog summary { justify-content: center; color: var(--muted); font-size: 0.85rem; }
+
+/* ---------- accueil ---------- */
 .home-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 0 18px; }
 .home-title { margin: 6px 0 0; font-size: 2.1rem; }
 
@@ -773,6 +795,8 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .avatar-xl .avatar-name { font-size: 1rem; }
 .avatar-xs .avatar-name, .avatar-sm .avatar-name { display: none; }
+/* « Qui joue ? » et « Jouer à deux » : le prénom est déjà écrit en gros sous la photo */
+.profile-card .avatar-name { display: none; }
 
 /* =====================================================================
    Version 1.2 : choix du niveau, ranger, labyrinthe, chemins, patates,
@@ -1173,7 +1197,7 @@ input { -webkit-user-select: text; user-select: text; }
   }
   .top-bar { min-height: 46px; }
   .icon-btn { width: 42px; height: 42px; font-size: 1.3rem; }
-  .sound-toggle { width: 42px; height: 42px; font-size: 1.25rem; }
+  .sound-toggle { width: 40px; height: 40px; font-size: 1.2rem; }
 
   /* écran de jeu en deux colonnes */
   .screen.play {
@@ -1892,7 +1916,7 @@ body[data-season="ete"] { background: #fffbea; }
 .duo-btn-icon { font-size: 1.3rem; line-height: 1; }
 
 /* choix des deux joueurs : le numéro indique qui commence (pas seulement le contour) */
-.duo-pick .top-bar { grid-template-columns: 52px minmax(0, 1fr) 52px; }
+.duo-pick .top-bar { grid-template-columns: 52px minmax(0, 1fr) auto; }
 .duo-hint { margin: 6px 0 16px; min-height: 1.3em; text-align: center; font-size: 1.3rem; font-weight: 700; }
 .duo-hint.warning { margin-left: auto; margin-right: auto; padding: 8px 14px; border-radius: 16px; background: #ffe3ec; color: #a61e4d; font-size: 1.2rem; }
 .duo-card { position: relative; }
@@ -1918,6 +1942,11 @@ body[data-season="ete"] { background: #fffbea; }
 .duo-player.turn .avatar { width: 38px; height: 38px; opacity: 1; }
 .duo-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; }
 .duo-player:not(.turn) .duo-name { display: none; }
+/* téléphone en portrait : le son et la voix prennent la place des prénoms ; qui joue se voit au grand
+   portrait entouré (et au portrait à côté de la consigne) */
+@media (max-width: 439px) {
+  .duo-player.turn .duo-name { display: none; }
+}
 .duo-points { flex: none; font-size: 0.95rem; }
 .duo-score .progress { gap: 3px; }
 .duo-score .step { width: 8px; height: 8px; }

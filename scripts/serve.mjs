@@ -57,5 +57,5 @@ export function startServer(port = PORT, root = ROOT) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   await startServer();
-  console.log(`Lire & Compter : http://localhost:${PORT}`);
+  console.log(`Lire, compter et s’amuser ! : http://localhost:${PORT}`);
 }
