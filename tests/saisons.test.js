@@ -55,7 +55,8 @@ test('histoires : identifiants stables, ordre et niveaux d’origine inchangés'
     ['pique-nique', 5], ['spectacle', 5], ['petit-bateau', 5], ['dent-qui-bouge', 5], ['herisson', 5], ['marche', 5],
     ['fleur-zoe', 6], ['bonhomme', 6], ['poussin', 6], ['chenille', 6], ['gateau-ines', 6], ['journee-leo', 6],
   ];
-  assert.deepEqual(STORY_DATA.filter((s) => !s.season).map((s) => [s.id, s.level]), ORIGINAL);
+  // les histoires ajoutées depuis (nouveaux niveaux) viennent après
+  assert.deepEqual(STORY_DATA.filter((s) => !s.season).slice(0, ORIGINAL.length).map((s) => [s.id, s.level]), ORIGINAL);
   const ids = STORY_DATA.map((s) => s.id);
   assert.equal(new Set(ids).size, ids.length, 'identifiants en double');
   for (const id of ids) assert.match(id, /^[a-z0-9]+(-[a-z0-9]+)*$/, `identifiant mal formé : ${id}`);

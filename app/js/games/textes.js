@@ -1,5 +1,6 @@
 // Petits textes à lire (CP, CE1) : un court texte, puis une question de compréhension.
 // Le bouton « Écouter le texte » aide l'enfant qui bloque ; la question est toujours lue.
+// Niveaux 7 et 8 (CE1) : textes documentaires, puis consignes et recettes à suivre.
 
 import { pick, shuffle } from '../random.js';
 import { pickSeasonal } from './helpers.js';
@@ -195,6 +196,58 @@ const TEXTS = [
     ['Que cueillent-ils ?', 'des pommes', 'des poires', 'des prunes'],
     ['Combien de paniers remplissent-ils ?', 'deux', 'trois', 'un'],
     ['Que préparent-ils ?', 'une compote', 'une tarte', 'un jus']] },
+
+  // ---- Niveau 7 : textes documentaires (on y apprend quelque chose sur le monde)
+  { level: 7, title: 'Le hérisson', text: 'Le hérisson est un petit animal couvert de piquants. Il dort le jour et se promène la nuit. Il mange des vers, des limaces et des insectes. En hiver, il hiberne : il dort jusqu’au printemps.', questions: [
+    ['Quand le hérisson se promène-t-il ?', 'la nuit', 'le matin', 'à midi'],
+    ['Que mange le hérisson ?', 'des insectes', 'des carottes', 'du pain'],
+    ['Que fait le hérisson en hiver ?', 'il dort', 'il nage', 'il chante']] },
+  { level: 7, title: 'Les abeilles', text: 'Les abeilles vivent ensemble dans une ruche. Elles volent de fleur en fleur pour récolter le nectar. Avec ce nectar, elles fabriquent le miel. Une seule ruche peut abriter des milliers d’abeilles.', questions: [
+    ['Où vivent les abeilles ?', 'dans une ruche', 'dans un nid', 'sous la terre'],
+    ['Avec quoi fabriquent-elles le miel ?', 'le nectar', 'les feuilles', 'l’eau'],
+    ['Combien d’abeilles vivent dans une ruche ?', 'des milliers', 'une seule', 'deux ou trois']] },
+  { level: 7, title: 'La grenouille', text: 'La grenouille pond ses œufs dans l’eau de la mare. Des œufs sortent des têtards : ils ont une queue, mais pas de pattes. Peu à peu, les pattes poussent et la queue disparaît.', questions: [
+    ['Où la grenouille pond-elle ses œufs ?', 'dans l’eau', 'dans un arbre', 'dans le sable'],
+    ['Qu’est-ce qui sort des œufs ?', 'des têtards', 'des poussins', 'des poissons'],
+    ['Que perd le têtard en grandissant ?', 'sa queue', 'ses pattes', 'ses yeux']] },
+  { level: 7, title: 'Le manchot', text: 'Le manchot est un oiseau, mais il ne vole pas. Il vit sur la glace, là où il fait très froid. Il nage très bien et attrape des poissons dans la mer. Ses plumes serrées le protègent du froid.', questions: [
+    ['Le manchot sait-il voler ?', 'non', 'oui', 'un peu'],
+    ['Que mange le manchot ?', 'des poissons', 'de l’herbe', 'des fruits'],
+    ['Qu’est-ce qui le protège du froid ?', 'ses plumes', 'sa maison', 'la glace']] },
+  { level: 7, title: 'Les dents', text: 'Les enfants ont d’abord des dents de lait. Vers six ans, elles commencent à tomber. De nouvelles dents poussent à leur place : elles doivent durer toute la vie. On les brosse matin et soir.', questions: [
+    ['Vers quel âge les dents de lait tombent-elles ?', 'vers six ans', 'vers deux ans', 'vers dix ans'],
+    ['Quand faut-il se brosser les dents ?', 'matin et soir', 'le dimanche', 'à midi'],
+    ['Combien de temps durent les nouvelles dents ?', 'toute la vie', 'un an', 'un mois']] },
+  { level: 7, title: 'La Lune', text: 'La Lune tourne autour de la Terre. Elle ne fait pas de lumière : c’est le Soleil qui l’éclaire. Selon les jours, on la voit ronde ou en croissant. En 1969, des astronautes ont marché sur la Lune.', questions: [
+    ['Autour de quoi tourne la Lune ?', 'la Terre', 'le Soleil', 'une étoile'],
+    ['Qui éclaire la Lune ?', 'le Soleil', 'la Terre', 'les nuages'],
+    ['Qui a marché sur la Lune ?', 'des astronautes', 'des pilotes', 'des enfants']] },
+
+  // ---- Niveau 8 : consignes et recettes (dans quel ordre ? avec quoi ?)
+  { level: 8, title: 'La salade de fruits', text: 'D’abord, lave une pomme et une poire. Ensuite, épluche une banane. Coupe tous les fruits en petits morceaux. Mets-les dans un saladier avec un peu de jus d’orange. Pour finir, mélange doucement.', questions: [
+    ['Que faut-il faire en premier ?', 'laver les fruits', 'couper les fruits', 'mélanger'],
+    ['Où met-on les morceaux ?', 'dans un saladier', 'dans un verre', 'dans le four'],
+    ['Quel fruit faut-il éplucher ?', 'la banane', 'la pomme', 'la poire']] },
+  { level: 8, title: 'Faire pousser un haricot', text: 'Prends un pot de yaourt et remplis-le de terre. Fais un petit trou avec ton doigt. Pose un haricot dedans et recouvre-le de terre. Arrose un peu. Place le pot près d’une fenêtre.', questions: [
+    ['Que met-on dans le pot de yaourt ?', 'de la terre', 'du sable', 'de l’eau'],
+    ['Avec quoi fait-on le trou ?', 'avec le doigt', 'avec une pelle', 'avec un crayon'],
+    ['Où faut-il placer le pot ?', 'près d’une fenêtre', 'dans le noir', 'dans le frigo']] },
+  { level: 8, title: 'Le jeu du loup', text: 'Un enfant est le loup. Les autres courent pour lui échapper. Quand le loup touche un enfant, cet enfant devient le loup à son tour. Attention : il est interdit de sortir de la cour !', questions: [
+    ['Que font les autres enfants ?', 'ils courent', 'ils se cachent', 'ils chantent'],
+    ['Qui devient le loup ?', 'l’enfant touché', 'le plus grand', 'la maîtresse'],
+    ['Qu’est-ce qui est interdit ?', 'sortir de la cour', 'courir vite', 'toucher un enfant']] },
+  { level: 8, title: 'Le masque de chat', text: 'Découpe un rond dans du carton. Fais deux trous pour les yeux. Colle deux triangles en haut pour les oreilles. Dessine des moustaches. Attache un élastique de chaque côté.', questions: [
+    ['Quelle forme faut-il découper ?', 'un rond', 'un carré', 'une étoile'],
+    ['À quoi servent les deux trous ?', 'à voir', 'à respirer', 'à manger'],
+    ['Que colle-t-on en haut du masque ?', 'deux triangles', 'deux ronds', 'un élastique']] },
+  { level: 8, title: 'Traverser la rue', text: 'Arrête-toi au bord du trottoir, sur le passage piéton. Regarde à gauche, puis à droite, puis encore à gauche. Si le petit bonhomme est vert et qu’aucune voiture n’arrive, traverse sans courir.', questions: [
+    ['Où faut-il traverser ?', 'au passage piéton', 'entre les voitures', 'au milieu de la rue'],
+    ['De quel côté regarde-t-on d’abord ?', 'à gauche', 'à droite', 'en haut'],
+    ['De quelle couleur doit être le bonhomme ?', 'vert', 'rouge', 'orange']] },
+  { level: 8, title: 'Le chocolat chaud', text: 'Verse du lait dans une casserole. Demande à un adulte de le faire chauffer. Ajoute deux cuillères de chocolat en poudre et mélange bien. Attends un peu avant de boire : c’est chaud !', questions: [
+    ['Qui fait chauffer le lait ?', 'un adulte', 'l’enfant', 'le chat'],
+    ['Combien de cuillères de chocolat faut-il ?', 'deux', 'une', 'cinq'],
+    ['Pourquoi faut-il attendre avant de boire ?', 'c’est chaud', 'c’est froid', 'c’est sucré']] },
 ];
 
 export const petitsTextes = {
@@ -204,7 +257,10 @@ export const petitsTextes = {
   title: 'Petits textes',
   icon: '📚',
   skill: 'Lire un petit texte et le comprendre (y compris ce qui n’est pas écrit)',
-  levels: ['Textes très courts', 'Petits textes', 'Textes de 4 phrases', 'Lire entre les lignes', 'Dialogues et pronoms', 'Titre et ordre des faits'],
+  levels: [
+    'Textes très courts', 'Petits textes', 'Textes de 4 phrases', 'Lire entre les lignes', 'Dialogues et pronoms',
+    'Titre et ordre des faits', 'Textes documentaires', 'Consignes et recettes',
+  ],
   // context.season : la saison du moment (seasonOf), pour les textes de saison
   generate(level, rng, _index, context = {}) {
     const story = pickSeasonal(rng, TEXTS.filter((t) => t.level === level), context.season);

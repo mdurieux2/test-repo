@@ -502,7 +502,7 @@ test('intrus et ombres : une seule bonne réponse, dans le bon sens', () => {
 test('petits textes : questions variées, réponses distinctes, textes courts', () => {
   for (const level of [1, 2, 3, 4, 5, 6]) assert.ok(TEXT_DATA.filter((t) => t.level === level).length >= 5);
   for (const t of TEXT_DATA) {
-    assert.ok(t.text.length <= [0, 80, 140, 220, 220, 220, 220][t.level], `${t.title} trop long (${t.text.length})`);
+    assert.ok(t.text.length <= [0, 80, 140, 220, 220, 220, 220, 220, 220][t.level], `${t.title} trop long (${t.text.length})`);
     for (const [question, ...answers] of t.questions) {
       assert.ok(question.endsWith('?') || question.endsWith('…'), question);
       assert.equal(new Set(answers).size, 3, question);

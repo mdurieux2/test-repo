@@ -1,5 +1,5 @@
-// Données des tracés de « Écris au doigt » : graphisme, chiffres, capitales (bâton) et
-// minuscules attachées (cursive scolaire).
+// Données des tracés de « Écris au doigt » : graphisme, chiffres, capitales (bâton),
+// minuscules attachées (cursive scolaire), nombres à deux chiffres, syllabes et petits mots attachés.
 //
 // Chaque glyphe est une liste de traits, dans l'ORDRE où on les trace à l'école ; chaque trait
 // est une liste de points [x, y] dans un carré 0–100 (y vers le bas), dans le SENS du geste :
@@ -391,8 +391,83 @@ export const CURSIVE = Object.fromEntries(Object.entries(FITTED).map(([letter, f
 /** … et ses lignes d'écriture : ligne de base et ligne de hauteur des minuscules. */
 export const WRITING_LINES = Object.fromEntries(Object.entries(FITTED).map(([letter, f]) => [letter, f.lines]));
 
+// ---------------------------------------------------------------- Nombres à deux chiffres
+
+/** Un chiffre réduit (scale) et centré en cx : les dizaines à gauche, les unités à droite. */
+const placeDigit = (strokes, cx, scale) =>
+  strokes.map((st) => st.map(([x, y]) => [round1((x - 50) * scale + cx), round1((y - 50) * scale + 50)]));
+
+/** Les nombres de 10 à 99 : le chiffre des dizaines, puis celui des unités. */
+export const NOMBRES = Object.fromEntries(Array.from({ length: 90 }, (_, i) => {
+  const n = String(i + 10);
+  return [n, [...placeDigit(CHIFFRES[n[0]], 27, 0.75), ...placeDigit(CHIFFRES[n[1]], 73, 0.75)]];
+}));
+
+// ---------------------------------------------------------------- Syllabes et mots attachés
+
+/**
+ * Un mot en lettres attachées, d'un seul geste : le trait de liaison de chaque lettre devient
+ * l'attaque de la suivante (on la rejoint là où elle monte à la même hauteur). Les points du i
+ * et du j, les barres du t et du x se font à la fin du mot, comme à l'école.
+ */
+function joinCursive(word) {
+  let main = null;
+  const extras = [];
+  for (const letter of word) {
+    const [first, ...rest] = CURSIVE_MODELS[letter](writer());
+    if (!main) {
+      main = first;
+      extras.push(...rest);
+      continue;
+    }
+    const end = main.at(-1);
+    const k = Math.max(1, first.findIndex((p) => p[1] <= end[1]));
+    const [a, b] = [first[k - 1], first[k]];
+    const t = a[1] === b[1] ? 0 : Math.min(1, Math.max(0, (a[1] - end[1]) / (a[1] - b[1])));
+    const dx = end[0] - (a[0] + (b[0] - a[0]) * t);
+    const move = (st) => st.map(([x, y]) => [x + dx, y]);
+    main = [...main, ...move(first.slice(k))];
+    extras.push(...rest.map(move));
+  }
+  return [main, ...extras];
+}
+
+/** Le mot centré dans le carré, aussi grand que possible, avec ses lignes d'écriture. */
+function fitWord(word) {
+  const strokes = joinCursive(word);
+  const points = strokes.flat();
+  const xs = points.map((p) => p[0]);
+  const ys = points.map((p) => p[1]);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  // un peu plus large que les lettres seules : les mots de 4 lettres restent lisibles
+  const scale = Math.min(1.7, 92 / (x1 - x0), 84 / (y1 - y0));
+  const [dx, dy] = [50 - ((x0 + x1) / 2) * scale, 50 - ((y0 + y1) / 2) * scale];
+  return {
+    // points de nouveau réguliers (≈ 5 unités) une fois le mot agrandi ou réduit
+    strokes: strokes.map((st) => resample(st.map(([x, y]) => [x * scale + dx, y * scale + dy]))),
+    lines: { base: round1(MODEL_LINES.base * scale + dy), x: round1(MODEL_LINES.x * scale + dy) },
+  };
+}
+
+// Syllabes simples (consonne + voyelle), puis petits mots aux sons simples (CP) : des mots de
+// 3 ou 4 lettres, pour que les lettres restent assez grandes ; pas de c ni de v, ni de b suivi
+// d'une lettre (attachés, ils se lisent mal à cette taille).
+export const SYLLABES_ATTACHEES = [
+  'la', 'le', 'li', 'lo', 'lu', 'ma', 'me', 'mi', 'mo', 'mu', 'ra', 're', 'ri', 'ro', 'ru', 'pa', 'pi', 'po', 'pu',
+  'ta', 'te', 'ti', 'to', 'tu', 'na', 'ne', 'ni', 'no', 'nu', 'sa', 'si', 'so', 'da', 'de', 'di', 'du', 'fa', 'fi',
+];
+export const MOTS_ATTACHES = [
+  'lit', 'ami', 'rue', 'mur', 'sol', 'riz', 'nid', 'roi', 'une', 'rat', 'pot', 'mot', 'sel', 'dos', 'jus',
+  'rose', 'pile', 'lait', 'lion', 'nuit', 'miel', 'loup', 'ours', 'moto', 'papa', 'midi', 'lire', 'rire', 'jupe',
+];
+
+/** Syllabes et mots en lettres attachées : leurs traits et leurs lignes d'écriture. */
+export const ATTACHE = Object.fromEntries([...SYLLABES_ATTACHEES, ...MOTS_ATTACHES].map((w) => [w, fitWord(w)]));
+
 /** Tous les jeux de glyphes, par catégorie. */
-export const GLYPHS = { graphisme: GRAPHISMES, chiffres: CHIFFRES, capitales: CAPITALES, cursive: CURSIVE };
+export const GLYPHS = {
+  graphisme: GRAPHISMES, chiffres: CHIFFRES, capitales: CAPITALES, cursive: CURSIVE, nombres: NOMBRES, attache: ATTACHE,
+};
 
 /**
  * Les lettres d'un prénom, telles qu'on les écrit en capitales : sans accent (É → E),

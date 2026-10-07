@@ -29,7 +29,7 @@ const sortedItems = (q) => [...q.items].sort((a, b) => a.value - b.value);
 test('trois niveaux ajoutés à la fin de chaque jeu, libellés courts', () => {
   for (const [id, levels] of Object.entries(NEW_LEVELS)) {
     const game = findGame(id);
-    assert.equal(game.levels.length, levels.at(-1), id);
+    assert.ok(game.levels.length >= levels.at(-1), id); // d'autres niveaux ont pu s'ajouter depuis
     for (const label of game.levels.slice(levels[0] - 1)) assert.ok(label.length <= 26, `${id} : libellé trop long « ${label} »`);
     assert.equal(new Set(game.levels).size, game.levels.length, `${id} : libellé en double`);
   }

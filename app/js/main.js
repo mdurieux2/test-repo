@@ -2226,7 +2226,10 @@ function traceZone(ctx) {
     for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
     return node;
   };
-  const what = { graphisme: 'Chemin', chiffres: `Chiffre ${glyph}`, capitales: `Lettre ${glyph}`, cursive: `Lettre ${glyph} attachée` }[set];
+  const what = {
+    graphisme: 'Chemin', chiffres: `Chiffre ${glyph}`, capitales: `Lettre ${glyph}`, cursive: `Lettre ${glyph} attachée`,
+    nombres: `Nombre ${glyph}`, attache: `« ${glyph} » en attaché`,
+  }[set];
   const svg = el('svg', {
     viewBox: `${TRACE_VIEW.x} ${TRACE_VIEW.x} ${TRACE_VIEW.size} ${TRACE_VIEW.size}`,
     class: `trace-drawing trace-${set}`, role: 'img', 'aria-label': `${what} à tracer`,
