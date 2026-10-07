@@ -36,7 +36,7 @@ function calc(text) {
 test('3 niveaux de plus par jeu, à la fin, libellés courts, accessibles dans une classe', () => {
   for (const [id, before] of Object.entries(BEFORE)) {
     const game = findGame(id);
-    assert.equal(game.levels.length, before + 3, id);
+    assert.ok(game.levels.length >= before + 3, id); // d'autres niveaux ont pu s'ajouter ensuite
     for (const label of game.levels.slice(before)) assert.ok(label.length <= 26, `${id} : « ${label} » trop long`);
     const entries = Object.values(PROGRAMS).flatMap((domains) => Object.values(domains).flat()).filter(([gid]) => gid === id);
     for (let level = before + 1; level <= before + 3; level++) {

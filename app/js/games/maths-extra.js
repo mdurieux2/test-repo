@@ -92,6 +92,68 @@ function shapeCount(rng) {
   };
 }
 
+// Niveau 7 : des objets de tous les jours qui ont la forme d'un rond, d'un carré, d'un triangle, d'un rectangle.
+export const SHAPE_OBJECTS = {
+  rond: [
+    { emoji: '⚽', name: 'le ballon' }, { emoji: '🍪', name: 'le biscuit' }, { emoji: '🍩', name: 'le beignet' },
+    { emoji: '🎯', name: 'la cible' }, { emoji: '🌕', name: 'la pleine lune' },
+  ],
+  carré: [{ emoji: '🧇', name: 'la gaufre' }, { emoji: '🎁', name: 'le cadeau' }, { emoji: '🧊', name: 'le glaçon' }],
+  triangle: [{ emoji: '🍕', name: 'la part de pizza' }, { emoji: '⛺', name: 'la tente' }, { emoji: '📐', name: 'l’équerre' }],
+  rectangle: [
+    { emoji: '🚪', name: 'la porte' }, { emoji: '📱', name: 'le téléphone' }, { emoji: '🍫', name: 'la tablette de chocolat' },
+    { emoji: '💵', name: 'le billet' },
+  ],
+};
+// Formes qu'on pourrait confondre sur un objet (une gaufre presque carrée…) : jamais proposées ensemble.
+const SHAPE_LOOKALIKE = { carré: 'rectangle', rectangle: 'carré' };
+const SHAPE_A = { rond: 'un rond', carré: 'un carré', triangle: 'un triangle', rectangle: 'un rectangle' };
+
+/** Niveau 7 : à quelle forme ressemble cet objet ? */
+function shapeObject(rng) {
+  const shape = pick(rng, Object.keys(SHAPE_OBJECTS));
+  const object = pick(rng, SHAPE_OBJECTS[shape]);
+  const others = ['rond', 'carré', 'triangle', 'rectangle', 'étoile'].filter((s) => s !== shape && s !== SHAPE_LOOKALIKE[shape]);
+  const options = shuffle(rng, [shape, ...sample(rng, others, 3)]);
+  return {
+    key: `formes:objet:${object.emoji}:${options.join('')}`,
+    text: 'À quelle forme ressemble cet objet ?',
+    instruction: 'Regarde bien l’objet. À quelle forme ressemble-t-il ? Touche la forme.',
+    short: { key: 'formes:objet', text: 'À quelle forme ressemble-t-il ?' },
+    stage: { type: 'picture', emoji: object.emoji },
+    choices: options.map((s) => ({ value: s, shape: s, color: pick(rng, COLORS) })),
+    choiceStyle: 'pictures',
+    answer: shape,
+    success: { speak: `Oui ! ${object.name[0].toUpperCase()}${object.name.slice(1)} ressemble à ${SHAPE_A[shape]}.` },
+  };
+}
+
+// Niveau 8 : devinettes à deux indices ; la forme « presque juste » (qui ne respecte qu'un indice)
+// est toujours parmi les choix.
+export const SHAPE_RIDDLES_2 = [
+  { text: 'la forme qui a 4 côtés, mais pas tous pareils', answer: 'rectangle', near: 'carré', others: ['rond', 'triangle', 'étoile'] },
+  { text: 'la forme qui a des côtés, mais moins de 4', answer: 'triangle', near: 'rond', others: ['carré', 'rectangle', 'étoile'] },
+  { text: 'la forme toute arrondie, avec une pointe', answer: 'cœur', near: 'rond', others: ['triangle', 'carré', 'étoile'] },
+  { text: 'la forme toute arrondie, sans pointe', answer: 'rond', near: 'cœur', others: ['triangle', 'carré', 'étoile'] },
+  { text: 'la forme qui a plus de 4 pointes', answer: 'étoile', near: 'carré', others: ['rond', 'triangle', 'cœur'] },
+];
+
+/** Niveau 8 : trouver la forme qui respecte deux indices. */
+function shapeRiddle2(rng) {
+  const riddle = pick(rng, SHAPE_RIDDLES_2);
+  const options = shuffle(rng, [riddle.answer, riddle.near, ...sample(rng, riddle.others, 2)]);
+  return {
+    key: `formes:indices:${riddle.answer}:${options.join('')}`,
+    text: `Touche ${riddle.text}.`,
+    instruction: `Écoute bien les deux indices. Touche ${riddle.text}.`,
+    stage: { type: 'none' },
+    choices: options.map((s) => ({ value: s, shape: s, color: pick(rng, COLORS) })),
+    choiceStyle: 'pictures',
+    answer: riddle.answer,
+    success: { speak: `Oui, c’est ${SHAPE_ARTICLE[riddle.answer]} !` },
+  };
+}
+
 export const formes = {
   id: 'formes',
   domain: 'maths',
@@ -99,11 +161,16 @@ export const formes = {
   title: 'Les formes',
   icon: '🔺',
   skill: 'Reconnaître et nommer les formes',
-  levels: ['Rond, carré, triangle', 'Avec le rectangle', 'Formes et couleurs mélangées', 'Combien de côtés ?', 'Côtés et pointes', 'Compte les formes'],
+  levels: [
+    'Rond, carré, triangle', 'Avec le rectangle', 'Formes et couleurs mélangées', 'Combien de côtés ?', 'Côtés et pointes',
+    'Compte les formes', 'Les formes autour de moi', 'Devinettes à deux indices',
+  ],
   generate(level, rng) {
     if (level === 4) return shapeSides(rng);
     if (level === 5) return shapeRiddle(rng);
     if (level === 6) return shapeCount(rng);
+    if (level === 7) return shapeObject(rng);
+    if (level === 8) return shapeRiddle2(rng);
     const pool = SHAPES_BY_LEVEL[level];
     const target = pick(rng, pool);
     const options = shuffle(rng, [target, ...sample(rng, pool.filter((s) => s !== target), level === 1 ? 2 : 3)]);
@@ -340,7 +407,8 @@ export const tables = {
 
 const COUNT_EMOJI = ['🍎', '⭐', '🐟', '🌸', '🍓', '🐞', '⚽', '🐥'];
 
-// Niveaux 4 à 6 : on compte, puis on relie au nombre qui a un de plus, au double, au complément à 10.
+// Niveaux 4 à 8 : on compte, puis on relie au nombre qui a un de plus, au double, au complément
+// à 10, au nombre qui a un de moins, à la moitié (des collections paires, de 2 à 10).
 export const RELIER_RULES = {
   4: {
     from: [1, 9], to: (n) => n + 1, key: 'plus',
@@ -354,6 +422,14 @@ export const RELIER_RULES = {
     from: [1, 9], to: (n) => 10 - n, key: 'dix',
     text: 'Relie chaque groupe au nombre qui manque pour faire 10.', short: 'Pour faire 10 !',
   },
+  7: {
+    from: [2, 10], to: (n) => n - 1, key: 'moins',
+    text: 'Relie chaque groupe au nombre qui a un de moins.', short: 'Un de moins !',
+  },
+  8: {
+    from: [2, 10], step: 2, to: (n) => n / 2, key: 'moitie',
+    text: 'Relie chaque groupe à sa moitié.', short: 'La moitié !',
+  },
 };
 
 export const relier = {
@@ -363,12 +439,13 @@ export const relier = {
   title: 'Relie les quantités',
   icon: '🔗',
   skill: 'Associer une quantité et son chiffre',
-  levels: ['De 1 à 4', 'De 1 à 6', 'De 1 à 10', 'Un de plus', 'Le double', 'Pour faire 10'],
+  levels: ['De 1 à 4', 'De 1 à 6', 'De 1 à 10', 'Un de plus', 'Le double', 'Pour faire 10', 'Un de moins', 'La moitié'],
   generate(level, rng) {
     const rule = RELIER_RULES[level];
     if (rule) {
       const [lo, hi] = rule.from;
-      const numbers = sample(rng, Array.from({ length: hi - lo + 1 }, (_, i) => lo + i), 4);
+      const step = rule.step || 1;
+      const numbers = sample(rng, Array.from({ length: Math.floor((hi - lo) / step) + 1 }, (_, i) => lo + i * step), 4);
       const emoji = pick(rng, COUNT_EMOJI);
       return {
         key: `relier:${rule.key}:${numbers.join('-')}`,
@@ -969,6 +1046,69 @@ function calcIntrus(rng) {
   };
 }
 
+/** Un calcul de dizaines (« 30 + 40 », « 90 − 20 ») qui donne `result` (de 20 à 100). */
+function tensCalcFor(rng, result) {
+  const r = result / 10;
+  if (r === 10 || rng() < 0.5) {
+    const a = randInt(rng, 1, r - 1);
+    return `${10 * a} + ${10 * (r - a)}`;
+  }
+  const b = randInt(rng, 1, 10 - r);
+  return `${10 * (r + b)} − ${10 * b}`;
+}
+
+/** Niveau 7 : trois calculs de dizaines ont le même résultat ; l'intrus fait 10 de plus ou de moins. */
+function tensIntrus(rng) {
+  const result = 10 * randInt(rng, 4, 10);
+  const group = new Set();
+  while (group.size < 3) group.add(tensCalcFor(rng, result));
+  const odd = tensCalcFor(rng, result === 100 ? 90 : result + pick(rng, [-10, 10]));
+  return {
+    key: `intrus:dizaines:${[...group].join(',')}:${odd}`,
+    text: 'Trouve le calcul intrus.',
+    instruction: 'Trois calculs donnent le même résultat. Trouve le calcul intrus. Pense aux dizaines !',
+    short: { key: 'intrus:calculs', text: 'Trouve le calcul intrus.' },
+    stage: { type: 'none' },
+    choices: shuffle(rng, [...group, odd]).map((c) => ({ value: c, label: c })),
+    choiceStyle: 'words',
+    answer: odd,
+    success: { speak: `Oui ! Les autres font ${result}.` },
+  };
+}
+
+/** Les écritures d'un produit des tables : « 3 × 4 », « 4 × 3 », « 4 + 4 + 4 » (3 nombres au plus, pour tenir). */
+export function productWritings(result) {
+  const out = [];
+  for (let a = 2; a <= 10; a++) {
+    if (result % a || result / a < 2 || result / a > 10) continue;
+    const b = result / a;
+    out.push(`${a} × ${b}`);
+    if (a <= 3) out.push(Array(a).fill(b).join(' + '));
+  }
+  return out;
+}
+
+/** Niveau 8 : trois écritures (fois, ou additions répétées) font le même nombre, pas la quatrième. */
+function productIntrus(rng) {
+  const result = pick(rng, [6, 8, 10, 12, 15, 16, 18, 20]);
+  const group = sample(rng, productWritings(result), 3);
+  // l'intrus : un nombre voisin qui s'écrit aussi en « fois » (12 → 10, 14, 15…)
+  const near = [-3, -2, -1, 1, 2, 3].map((d) => result + d).filter((n) => productWritings(n).length);
+  const other = pick(rng, near);
+  const odd = pick(rng, productWritings(other));
+  return {
+    key: `intrus:fois:${group.join(',')}:${odd}`,
+    text: 'Trouve le calcul intrus.',
+    instruction: 'Trois calculs donnent le même nombre. Trouve le calcul intrus.',
+    short: { key: 'intrus:calculs', text: 'Trouve le calcul intrus.' },
+    stage: { type: 'none' },
+    choices: shuffle(rng, [...group, odd]).map((c) => ({ value: c, label: c })),
+    choiceStyle: 'words',
+    answer: odd,
+    success: { speak: `Oui ! Les autres font ${result}.` },
+  };
+}
+
 export const intrus = {
   id: 'intrus',
   domain: 'maths',
@@ -976,8 +1116,13 @@ export const intrus = {
   title: 'L’intrus',
   icon: '🕵️',
   skill: 'Trouver l’intrus : classer, comparer, raisonner',
-  levels: ['Familles très différentes', 'Familles proches', 'Formes de toutes les couleurs', 'L’intrus des mots', 'L’intrus des nombres', 'L’intrus des calculs'],
+  levels: [
+    'Familles très différentes', 'Familles proches', 'Formes de toutes les couleurs', 'L’intrus des mots', 'L’intrus des nombres',
+    'L’intrus des calculs', 'Calculs avec des dizaines', 'Plus et fois mélangés',
+  ],
   generate(level, rng) {
+    if (level === 7) return tensIntrus(rng);
+    if (level === 8) return productIntrus(rng);
     if (level === 4) {
       const [fam, other] = sample(rng, WORD_FAMILIES, 2);
       const group = sample(rng, fam.words, 3);
@@ -1054,8 +1199,58 @@ const ORIENTATION_ASK = {
   couche: { text: 'Quelle ombre est couchée sur le côté ?', speak: 'Oui, elle est couchée sur le côté !' },
 };
 
-/** Niveaux 4 à 6 : ombres qui se ressemblent, positions à nommer, l'ombre qui n'est pas tournée comme les autres. */
+// Niveau 8 : des images tournées d'un côté (un miroir les change), par paires qui se ressemblent.
+export const SHADOW_LOOKALIKES = [
+  ['🐄', '🐖', '🐑', '🐐', '🐎', '🐕', '🐈'],
+  ['🦕', '🦖', '🦒', '🐘'],
+  ['🐌', '🐢', '🦔', '🐿️'],
+  ['🐓', '🦆', '🦜', '🐦'],
+];
+
+/**
+ * Niveaux 4 à 8 : ombres qui se ressemblent, positions à nommer, l'ombre qui n'est pas tournée
+ * comme les autres, ombres toutes tournées (il faut reconnaître l'image), même image et même sens.
+ */
 function ombresBeyond(level, rng) {
+  if (level === 7) {
+    // les quatre ombres sont tournées pareil (miroir, tête en bas, couchée) : laquelle est l'image ?
+    const options = sample(rng, pick(rng, SHADOW_FAMILIES), 4);
+    const target = options[0];
+    const turn = pick(rng, ORIENTATIONS.slice(1));
+    return {
+      key: `ombres:tournees:${target}:${turn.value}:${options.join('')}`,
+      text: 'Quelle est son ombre ?',
+      instruction: 'Attention, les ombres sont tournées ! Touche l’ombre de l’image.',
+      short: { key: 'ombres:tournees', text: 'Quelle est son ombre ?' },
+      stage: { type: 'picture', emoji: target },
+      choices: shuffle(rng, options).map((e) => ({ value: e, shadow: e, transform: turn.transform, name: 'ombre' })),
+      choiceStyle: 'pictures',
+      answer: target,
+      success: { speak: 'Bravo, tu l’as reconnue même tournée !' },
+    };
+  }
+  if (level === 8) {
+    // la bonne image dans le bon sens, la bonne image tournée, une image voisine dans les deux sens
+    const [target, lookalike] = sample(rng, pick(rng, SHADOW_LOOKALIKES), 2);
+    const turn = pick(rng, ORIENTATIONS.slice(1));
+    const options = [
+      { value: 'juste', shadow: target, transform: 'none' },
+      { value: 'tournee', shadow: target, transform: turn.transform },
+      { value: 'voisine', shadow: lookalike, transform: 'none' },
+      { value: 'voisine-tournee', shadow: lookalike, transform: turn.transform },
+    ];
+    return {
+      key: `ombres:exacte:${target}:${lookalike}:${turn.value}`,
+      text: 'Quelle ombre est la même, dans le même sens ?',
+      instruction: 'Regarde bien l’image. Touche son ombre : la même image, tournée dans le même sens.',
+      short: { key: 'ombres:exacte', text: 'Même image, même sens ?' },
+      stage: { type: 'picture', emoji: target },
+      choices: shuffle(rng, options).map((o) => ({ ...o, name: 'ombre' })),
+      choiceStyle: 'pictures',
+      answer: 'juste',
+      success: { speak: 'Oui, c’est la même image, dans le même sens !' },
+    };
+  }
   if (level === 4) {
     const options = sample(rng, pick(rng, SHADOW_FAMILIES), 4);
     const target = options[0];
@@ -1108,7 +1303,10 @@ export const ombres = {
   title: 'Les ombres',
   icon: '👤',
   skill: 'Reconnaître une forme, repérer l’orientation (droite, gauche, à l’envers)',
-  levels: ['Trouve l’ombre (3 ombres)', 'Trouve l’ombre (4 animaux)', 'Dans le bon sens', 'Ombres qui se ressemblent', 'Miroir, couché, à l’envers', 'L’intrus des ombres'],
+  levels: [
+    'Trouve l’ombre (3 ombres)', 'Trouve l’ombre (4 animaux)', 'Dans le bon sens', 'Ombres qui se ressemblent',
+    'Miroir, couché, à l’envers', 'L’intrus des ombres', 'Ombres tournées', 'Même image, même sens',
+  ],
   generate(level, rng) {
     if (level >= 4) return ombresBeyond(level, rng);
     if (level === 3) {
