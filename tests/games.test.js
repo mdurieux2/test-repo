@@ -63,6 +63,19 @@ function checkQuestion(q, ctx) {
       assert.equal(solution.at(-1), goal, ctx);
       assert.notEqual(start, goal, ctx);
       for (let i = 1; i < solution.length; i++) assert.ok(canMove(open, cols, solution[i - 1], solution[i]), ctx);
+      // les clés à ramasser sont sur le trajet, avant l'arrivée
+      for (const item of q.stage.items || []) assert.ok(solution.includes(item) && item !== goal, ctx);
+      break;
+    }
+    case 'roundmaze': {
+      // détails dans tests/labyrinthes-ronds.test.js
+      const { sectors, links, start, goal, solution } = q.stage;
+      assert.equal(links.length, sectors.reduce((a, b) => a + b, 0), ctx);
+      assert.equal(solution[0], start, ctx);
+      assert.equal(solution.at(-1), goal, ctx);
+      assert.notEqual(start, goal, ctx);
+      for (let i = 1; i < solution.length; i++) assert.ok(links[solution[i - 1]].includes(solution[i]), ctx);
+      assert.equal(q.answer, goal, ctx);
       break;
     }
     case 'path': {

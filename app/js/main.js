@@ -2,7 +2,7 @@
 
 import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
-import { canMove, solveMaze } from './games/labyrinthes.js';
+import { canMove, polarCell, ringOffsets, solveLinks, solveMaze } from './games/labyrinthes.js';
 import { clockLabel } from './games/maths-extra.js';
 import {
   clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
@@ -1001,7 +1001,7 @@ function nextQuestion(session) {
   let stage = null;
   let zone;
   const custom = {
-    build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
+    build: buildZone, maze: mazeZone, roundmaze: roundMazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
     swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
   }[q.interaction];
   if (custom) {
@@ -2698,21 +2698,60 @@ function orderZone(ctx) {
 
 // ---- Labyrinthe : glisser le doigt, toucher une case, ou les flèches
 
+/**
+ * Les objets à ramasser (des clés) avant d'atteindre l'arrivée d'un labyrinthe : l'arrivée est
+ * fermée (🔒) tant qu'il en reste. `solve(a, b)` donne le chemin de a à b.
+ */
+function mazeKeys(ctx, { items = [], goal, locked }, solve) {
+  const left = new Set(items);
+  let saidAt = 0;
+  return {
+    left,
+    /** L'arrivée est-elle encore fermée ? (on le dit, mais pas à chaque mouvement du doigt) */
+    blocked(target) {
+      if (target !== goal || !left.size) return false;
+      if (Date.now() - saidAt > 3000) {
+        saidAt = Date.now();
+        ctx.feedback.replaceChildren(h('p', { class: 'try-again' }, locked));
+        say(ctx.session.guide, locked);
+      }
+      return true;
+    },
+    /** La case atteinte a-t-elle une clé ? Renvoie vrai si on vient de la ramasser. */
+    collect(cell) {
+      if (!left.delete(cell)) return false;
+      playSound('tap');
+      if (!left.size) ctx.feedback.replaceChildren();
+      return true;
+    },
+    /** La prochaine étape : la clé la plus proche, ou l'arrivée quand on les a toutes. */
+    pathFrom(pos) {
+      const paths = [...left].map((c) => solve(pos, c));
+      return paths.length ? paths.reduce((a, b) => (b.length < a.length ? b : a)) : solve(pos, goal);
+    },
+  };
+}
+
 function mazeZone(ctx) {
   const { q } = ctx;
-  const { cols, rows, open, start, goal, hero, goalEmoji } = q.stage;
+  const { cols, rows, open, start, goal, hero, goalEmoji, items = [], itemEmoji } = q.stage;
   let pos = start;
+  const keys = mazeKeys(ctx, q.stage, (a, b) => solveMaze(open, cols, a, b));
   const cells = open.map((bits, i) => h('div', {
     class: ['maze-cell', ...['n', 'e', 's', 'w'].filter((_, k) => !(bits & (1 << k))).map((d) => `wall-${d}`)].join(' '),
     'data-cell': i,
   }));
   cells[goal].append(h('span', { class: 'maze-goal', 'aria-hidden': 'true' }, goalEmoji));
+  const lock = items.length ? h('span', { class: 'maze-lock', 'aria-hidden': 'true' }, '🔒') : null;
+  if (lock) cells[goal].append(lock);
+  const itemEls = new Map(items.map((c) => [c, h('span', { class: 'maze-item', 'aria-hidden': 'true' }, itemEmoji)]));
+  for (const [c, el] of itemEls) cells[c].append(el);
   cells[start].classList.add('maze-start');
   const heroEl = h('span', { class: 'maze-hero', 'aria-hidden': 'true' }, hero);
   const grid = h('div', {
     class: 'maze',
     role: 'img',
-    'aria-label': `Labyrinthe de ${cols} cases sur ${rows}`,
+    'aria-label': `Labyrinthe de ${cols} cases sur ${rows}${items.length ? `, avec ${items.length} clés à ramasser` : ''}`,
     style: { '--cols': cols, '--rows': rows },
   }, cells);
   const place = () => {
@@ -2726,10 +2765,18 @@ function mazeZone(ctx) {
   };
   const moveTo = (target) => {
     if (ctx.session.locked || !canMove(open, cols, pos, target)) return false;
+    if (keys.blocked(target)) {
+      bump();
+      return false;
+    }
     cells[pos].classList.add('trail');
     pos = target;
     place();
     cells[pos].classList.remove('hint');
+    if (keys.collect(pos)) {
+      itemEls.get(pos).remove();
+      if (!keys.left.size) lock?.remove();
+    }
     if (pos === goal) {
       grid.classList.add('solved');
       zone.classList.add('answered');
@@ -2771,17 +2818,210 @@ function mazeZone(ctx) {
     'aria-label': label,
     onclick: () => { if (!moveTo(pos + delta)) bump(); },
   }, symbol);
-  // L'indice montre les 3 prochaines cases ; il compte comme une aide (pas d'étoile « du premier coup »).
+  // L'indice montre les 3 prochaines cases (vers la clé la plus proche, s'il en reste) ;
+  // il compte comme une aide (pas d'étoile « du premier coup »).
   const hint = () => {
     if (ctx.session.locked) return;
     ctx.session.attempts++;
-    solveMaze(open, cols, pos, goal).slice(1, 4).forEach((c) => cells[c].classList.add('hint'));
+    keys.pathFrom(pos).slice(1, 4).forEach((c) => cells[c].classList.add('hint'));
     say(ctx.session.guide, 'Suis les étoiles !');
   };
   const zone = h('div', { class: 'choices maze-controls' },
     arrow('Gauche', '←', -1), arrow('Haut', '↑', -cols), arrow('Bas', '↓', cols), arrow('Droite', '→', 1),
     h('button', { class: 'maze-arrow maze-hint', 'aria-label': 'Indice', onclick: hint }, '💡'));
   return { stage: h('div', { class: 'stage stage-maze' }, grid), zone };
+}
+
+// ---- Labyrinthe rond : des anneaux découpés en cases ; glisser le doigt ou toucher une case
+
+function roundMazeZone(ctx) {
+  const { q } = ctx;
+  const { sectors, links, start, goal, door, hero, goalEmoji, items = [], itemEmoji } = q.stage;
+  const rings = sectors.length - 1;
+  const offsets = ringOffsets(sectors);
+  const T = 10; // épaisseur d'un anneau (et rayon de la case du centre), en unités du dessin
+  const R = (rings + 1) * T;
+  const V = R + 2; // marge pour le trait du bord
+  const linked = (a, b) => links[a].includes(b);
+  const solve = (a, b) => solveLinks(links, a, b);
+  const keys = mazeKeys(ctx, q.stage, solve);
+  let pos = start;
+
+  // géométrie : angle en fraction de tour, depuis midi, dans le sens des aiguilles d'une montre
+  const point = (rho, a) => [rho * Math.sin(2 * Math.PI * a), -rho * Math.cos(2 * Math.PI * a)];
+  const f = (n) => n.toFixed(2);
+  const arc = (rho, a0, a1) => {
+    const [x0, y0] = point(rho, a0);
+    const [x1, y1] = point(rho, a1);
+    return `M${f(x0)} ${f(y0)}A${rho} ${rho} 0 ${a1 - a0 > 0.5 ? 1 : 0} 1 ${f(x1)} ${f(y1)}`;
+  };
+  const radial = (rho0, rho1, a) => {
+    const [x0, y0] = point(rho0, a);
+    const [x1, y1] = point(rho1, a);
+    return `M${f(x0)} ${f(y0)}L${f(x1)} ${f(y1)}`;
+  };
+  const ringOf = (cell) => polarCell(sectors, cell);
+  const centreOf = (cell) => {
+    const { ring, index } = ringOf(cell);
+    return ring ? point((ring + 0.5) * T, (index + 0.5) / sectors[ring]) : [0, 0];
+  };
+
+  // les murs : pour chaque case, le mur côté centre et le mur suivant dans le sens des aiguilles
+  let walls = '';
+  for (let r = 1; r <= rings; r++) {
+    const s = sectors[r];
+    for (let i = 0; i < s; i++) {
+      const cell = offsets[r] + i;
+      const inner = offsets[r - 1] + Math.floor((i * sectors[r - 1]) / s);
+      if (!linked(cell, inner)) walls += arc(r * T, i / s, (i + 1) / s);
+      if (!linked(cell, offsets[r] + ((i + 1) % s))) walls += radial(r * T, (r + 1) * T, (i + 1) / s);
+      // le bord, ouvert devant l'entrée (ou la sortie)
+      if (r === rings && cell !== door) walls += arc(R, i / s, (i + 1) / s);
+    }
+  }
+  const svgEl = (tag, attrs) => {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  };
+  const svg = svgEl('svg', { class: 'rmaze-svg', viewBox: `${-V} ${-V} ${2 * V} ${2 * V}`, 'aria-hidden': 'true' });
+  const trail = svgEl('g', { class: 'rmaze-trail' });
+  const hints = svgEl('g', { class: 'rmaze-hints' });
+  svg.append(
+    svgEl('circle', { class: 'rmaze-floor', r: R }),
+    svgEl('circle', { class: 'rmaze-centre', r: T }),
+    trail, hints,
+    svgEl('path', { class: 'rmaze-walls', d: walls }),
+  );
+  // le personnage, l'arrivée et les clés : des émojis posés par-dessus le dessin
+  const at = (el, cell) => {
+    const [x, y] = centreOf(cell);
+    el.style.left = `${((x + V) / (2 * V)) * 100}%`;
+    el.style.top = `${((y + V) / (2 * V)) * 100}%`;
+    return el;
+  };
+  const token = (cls, emoji, cell) => at(h('span', { class: `rmaze-token ${cls}`, 'aria-hidden': 'true' }, emoji), cell);
+  const heroEl = token('rmaze-hero', hero, start);
+  const lock = items.length ? token('rmaze-lock', '🔒', goal) : null;
+  const itemEls = new Map(items.map((c) => [c, token('rmaze-item', itemEmoji, c)]));
+  const board = h('div', {
+    class: 'rmaze',
+    role: 'img',
+    'aria-label': `Labyrinthe rond de ${rings} anneaux${items.length ? ', avec une clé à ramasser' : ''}`,
+    style: { '--cell': (100 * T) / (2 * V) },
+  }, svg, token('rmaze-goal', goalEmoji, goal), lock, [...itemEls.values()], heroEl);
+
+  const bump = () => {
+    heroEl.classList.remove('bump');
+    void heroEl.offsetWidth; // relance l'animation
+    heroEl.classList.add('bump');
+  };
+  const clearHint = (cell) => hints.querySelectorAll(`[data-cell="${cell}"]`).forEach((n) => n.remove());
+  const moveTo = (target) => {
+    if (ctx.session.locked || !linked(pos, target)) return false;
+    if (keys.blocked(target)) {
+      bump();
+      return false;
+    }
+    const [x, y] = centreOf(pos);
+    trail.append(svgEl('circle', { cx: f(x), cy: f(y), r: T * 0.16 }));
+    pos = target;
+    at(heroEl, pos);
+    clearHint(pos);
+    if (keys.collect(pos)) {
+      itemEls.get(pos).remove();
+      if (!keys.left.size) lock?.remove();
+    }
+    if (pos === goal) {
+      board.classList.add('solved');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+    }
+    return true;
+  };
+  // Les cases entre deux cases « en ligne droite » : le long d'un anneau (dans un sens ou dans
+  // l'autre), ou le long d'un rayon. null si elles ne sont pas alignées.
+  const straightLine = (from, to) => {
+    const a = ringOf(from);
+    const b = ringOf(to);
+    if (a.ring === b.ring) {
+      const s = sectors[a.ring];
+      const lines = [1, -1].map((dir) => {
+        const cells = [from];
+        for (let i = a.index; i !== b.index;) {
+          i = (i + dir + s) % s;
+          cells.push(offsets[a.ring] + i);
+        }
+        return cells;
+      }).filter((cells) => cells.every((c, k) => !k || linked(cells[k - 1], c)));
+      return lines.sort((x, y) => x.length - y.length)[0] || null;
+    }
+    // le long d'un rayon : l'angle de la case la plus éloignée du centre
+    const outer = a.ring > b.ring ? a : b;
+    const angle = (outer.index + 0.5) / sectors[outer.ring];
+    const step = b.ring > a.ring ? 1 : -1;
+    const cells = [];
+    for (let r = a.ring; r !== b.ring + step; r += step) cells.push(offsets[r] + Math.floor(angle * sectors[r]));
+    return cells[0] === from && cells.at(-1) === to ? cells : null;
+  };
+  // Toucher une case : on y va si elle est en ligne droite sans mur ; en glissant le doigt, on suit
+  // aussi le chemin s'il fait un coude (3 pas au plus), pour ne pas rester bloqué si le doigt va vite.
+  const slideTo = (target, quiet = false) => {
+    if (target === pos) return;
+    let cells = straightLine(pos, target);
+    if (cells && !cells.every((c, k) => !k || linked(cells[k - 1], c))) cells = null;
+    if (!cells && quiet) {
+      const path = solve(pos, target);
+      if (path.length && path.length <= 4) cells = path;
+    }
+    if (!cells) return quiet ? null : bump();
+    for (const c of cells.slice(1)) if (!moveTo(c)) break;
+  };
+  const cellAt = (e) => {
+    const rect = svg.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 * V - V;
+    const y = ((e.clientY - rect.top) / rect.height) * 2 * V - V;
+    const rho = Math.hypot(x, y);
+    let ring = Math.floor(rho / T);
+    if (ring > rings) {
+      if (rho > R + T / 2) return null;
+      ring = rings; // juste au bord : la case du bord
+    }
+    if (ring === 0) return 0;
+    const angle = ((Math.atan2(x, -y) / (2 * Math.PI)) + 1) % 1;
+    return offsets[ring] + (Math.floor(angle * sectors[ring]) % sectors[ring]);
+  };
+  let dragging = false;
+  board.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    dragging = true;
+    board.setPointerCapture?.(e.pointerId);
+    const cell = cellAt(e);
+    if (cell !== null) slideTo(cell);
+  });
+  board.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const cell = cellAt(e);
+    if (cell !== null) slideTo(cell, true);
+  });
+  for (const type of ['pointerup', 'pointercancel']) board.addEventListener(type, () => { dragging = false; });
+
+  // L'indice montre les 3 prochaines cases ; il compte comme une aide (pas d'étoile « du premier coup »).
+  const hint = () => {
+    if (ctx.session.locked) return;
+    ctx.session.attempts++;
+    for (const c of keys.pathFrom(pos).slice(1, 4)) {
+      clearHint(c);
+      const [x, y] = centreOf(c);
+      const star = svgEl('text', { x: f(x), y: f(y), 'data-cell': c, 'font-size': T * 0.55 });
+      star.textContent = '⭐';
+      hints.append(star);
+    }
+    say(ctx.session.guide, 'Suis les étoiles !');
+  };
+  const zone = h('div', { class: 'choices rmaze-controls' },
+    h('button', { class: 'maze-arrow maze-hint', 'aria-label': 'Indice', onclick: hint }, '💡'));
+  return { stage: h('div', { class: 'stage stage-maze stage-rmaze' }, board), zone };
 }
 
 // ---- Chemin des nombres ou des lettres : toucher les cases dans l'ordre

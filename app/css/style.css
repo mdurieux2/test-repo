@@ -901,6 +901,37 @@ input { -webkit-user-select: text; user-select: text; }
 .maze-arrow:active { transform: translateY(3px); }
 .maze-hint { background: #fff6d6; }
 .maze-controls.answered .maze-arrow { opacity: 0.4; }
+/* clés à ramasser : la clé dans sa case, le cadenas sur l'arrivée tant qu'il en reste */
+.maze-item { position: absolute; line-height: 1; font-size: 20px; font-size: calc(55cqi / var(--cols)); }
+.maze-lock { position: absolute; right: -2px; bottom: -2px; line-height: 1; font-size: 12px; font-size: calc(32cqi / var(--cols)); z-index: 1; }
+
+/* labyrinthe rond : le dessin en SVG, les émojis posés par-dessus (--cell : épaisseur d'un anneau, en % de la largeur) */
+.stage-rmaze { display: flex; justify-content: center; }
+.rmaze {
+  position: relative; flex: none;
+  width: min(100%, 480px, calc(100vh / var(--zoom, 1) - 300px));
+  width: min(100%, 480px, calc(100dvh / var(--zoom, 1) - 300px));
+  aspect-ratio: 1;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  container-type: inline-size;
+}
+.rmaze-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.rmaze-floor { fill: var(--card); filter: drop-shadow(0 4px 0 var(--line)); }
+.rmaze-centre { fill: var(--accent-soft); }
+.rmaze-walls { fill: none; stroke: var(--ink); stroke-width: 2.5px; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.rmaze-trail circle { fill: var(--accent); opacity: 0.5; }
+.rmaze-hints text { text-anchor: middle; dominant-baseline: central; }
+.rmaze-token {
+  position: absolute; translate: -50% -50%; line-height: 1; pointer-events: none;
+  font-size: 18px; font-size: calc(var(--cell) * 0.8cqi);
+}
+.rmaze-item { font-size: calc(var(--cell) * 0.6cqi); }
+.rmaze-lock { translate: 0 -95%; font-size: calc(var(--cell) * 0.45cqi); z-index: 1; }
+.rmaze-hero { z-index: 2; }
+.rmaze-hero.bump { animation: shake 0.3s; }
+.rmaze.solved .rmaze-hero { animation: pop 0.4s ease-out; }
+.rmaze-controls { display: flex; justify-content: center; }
+.rmaze-controls.answered .maze-arrow { opacity: 0.4; }
 
 /* chemins de nombres et de lettres */
 .path-zone { flex: 1; display: flex; align-items: center; justify-content: center; }
@@ -1242,6 +1273,7 @@ input { -webkit-user-select: text; user-select: text; }
   .objects.per-10 .object { font-size: min(26px, 6.4dvh); }
   .scatter { width: min(100%, calc((100dvh - 80px) * 1.25)); }
   .maze, .sudoku { width: min(100%, calc(100dvh - 80px)); }
+  .rmaze { width: min(100%, calc(100dvh - 68px)); }
   .lasso-field, .path-grid, .path-grid.spell { width: min(100%, calc((100dvh - 80px) * var(--cols) / var(--rows))); }
   .stage-clock { width: min(220px, calc(100dvh - 90px)); }
   .equation { font-size: 2.4rem; }

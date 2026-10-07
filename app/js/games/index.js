@@ -52,7 +52,7 @@ const RUBRIQUES = [
     games: [
       'puzzle', 'memory', 'coloriage-magique', 'points',
       'formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'symetrie', 'reproduire', 'tangram', 'cubes',
-      'labyrinthe', 'chemin-nombres', 'chemin-lettres',
+      'labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres',
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
@@ -77,7 +77,7 @@ const SECTION_GAMES = {
   'Puzzles, memory et coloriages': ['puzzle', 'memory', 'coloriage-magique', 'points'],
   'Logique': ['formes', 'algorithmes', 'intrus', 'ombres', 'sudoku'],
   'Formes et espace': ['symetrie', 'reproduire', 'tangram', 'cubes'],
-  'Labyrinthes': ['labyrinthe', 'chemin-nombres', 'chemin-lettres'],
+  'Labyrinthes': ['labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres'],
   'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
   'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
   'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais'],

@@ -37,6 +37,10 @@ function calc(text) {
   return op === '+' ? Number(a) + Number(b) : Number(a) - Number(b);
 }
 
+// Niveaux ajoutés ensuite, encore après (vérifiés ailleurs) : le labyrinthe et ses trois clés
+// (tests/labyrinthes-ronds.test.js).
+const LATER = { labyrinthe: 1 };
+
 test('3 niveaux de plus par jeu, à la fin, libellés courts, accessibles dans une classe', () => {
   for (const [id, before] of Object.entries(BEFORE)) {
     const game = findGame(id);

@@ -425,6 +425,26 @@ async function answer(page, q, wrongFirst) {
       if (wrongFirst) await page.click('.maze-hint');
       for (const cell of q.stage.solution.slice(1)) await page.click(`.maze-cell[data-cell="${cell}"]`);
       break;
+    case 'roundmaze': {
+      // labyrinthe rond : on glisse le doigt de case en case (centre de chaque case, d'après le dessin)
+      if (wrongFirst) await page.click('.maze-hint');
+      const { sectors, solution } = q.stage;
+      const box = await page.locator('.rmaze-svg').boundingBox();
+      const V = sectors.length * 10 + 2; // comme dans main.js : centre et anneaux de 10, marge de 2
+      const centre = (cell) => {
+        let ring = 0;
+        let first = 0;
+        while (first + sectors[ring] <= cell) first += sectors[ring++];
+        const a = 2 * Math.PI * ((cell - first + 0.5) / sectors[ring]);
+        const rho = ring ? (ring + 0.5) * 10 : 0;
+        return [box.x + ((rho * Math.sin(a) + V) / (2 * V)) * box.width, box.y + ((V - rho * Math.cos(a)) / (2 * V)) * box.height];
+      };
+      await page.mouse.move(...centre(solution[0]));
+      await page.mouse.down();
+      for (const cell of solution.slice(1)) await page.mouse.move(...centre(cell), { steps: 2 });
+      await page.mouse.up();
+      break;
+    }
     case 'path': {
       const { path, cells } = q.stage;
       if (wrongFirst) {
