@@ -210,12 +210,22 @@ function cornerActions() {
   return h('div', { class: 'bar-actions corner' }, ...soundToggles());
 }
 
-/** En bas de « Qui joue ? » : le son, la voix, la version et le contact, en petit. */
+/** Le journal des modifications, replié (Réglages, et en bas de « Qui joue ? »). */
+function changelog() {
+  return h('details', { class: 'changelog' },
+    h('summary', {}, 'Journal des modifications'),
+    CHANGELOG.map((entry) => h('div', { class: 'changelog-entry' },
+      h('h3', {}, `Version ${entry.version}`, h('span', { class: 'muted small' }, ` · ${new Date(entry.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`)),
+      h('ul', { class: 'plain-list' }, entry.changes.map((c) => h('li', {}, c))))));
+}
+
+/** En bas de « Qui joue ? » : le son, la voix, la version, le contact et le journal, en petit. */
 function appFooter() {
   return h('footer', { class: 'app-footer' },
     h('div', { class: 'bar-actions' }, ...soundToggles()),
     h('p', {}, h('span', { 'data-version': APP.version }, `Version ${APP.version}`), ' · Contact : ',
-      h('a', { href: `mailto:${APP.contact}` }, APP.author)));
+      h('a', { href: `mailto:${APP.contact}` }, APP.author)),
+    changelog());
 }
 
 function isStandalone() {
@@ -4198,11 +4208,7 @@ function settingsTab() {
     h('section', { class: 'card about' },
       h('h2', {}, 'À propos'),
       h('div', { class: 'setting' }, h('span', {}, 'Version'), h('b', { 'data-version': APP.version }, APP.version)),
-      h('details', { class: 'changelog' },
-        h('summary', {}, 'Journal des modifications'),
-        CHANGELOG.map((entry) => h('div', { class: 'changelog-entry' },
-          h('h3', {}, `Version ${entry.version}`, h('span', { class: 'muted small' }, ` · ${new Date(entry.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`)),
-          h('ul', { class: 'plain-list' }, entry.changes.map((c) => h('li', {}, c)))))),
+      changelog(),
       h('div', { class: 'credits' },
         h('p', {}, h('b', {}, APP.name), ' · conçue par ', h('b', {}, APP.author)),
         h('p', { class: 'contact' }, 'Une remarque, un bug, une idée ? Écrivez à ',

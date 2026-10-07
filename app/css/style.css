@@ -164,6 +164,8 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .app-footer p { margin: 0; }
 .app-footer a { color: inherit; font-weight: 700; }
+.app-footer .changelog { align-self: stretch; text-align: left; color: var(--ink); font-size: 0.95rem; }
+.app-footer .changelog summary { justify-content: center; color: var(--muted); font-size: 0.85rem; }
 
 /* ---------- accueil ---------- */
 .home-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 0 18px; }

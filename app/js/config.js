@@ -17,7 +17,7 @@ export const CHANGELOG = [
     changes: [
       'Le son 🎵 et la voix 🗣️ se coupent ou se remettent d’un geste sur chaque écran, même pendant un jeu : deux boutons en haut à droite (sur « Qui joue ? », en bas). Le son regroupe la musique et les petits sons.',
       'Voix remise pendant un jeu : la consigne est redite tout de suite.',
-      'En bas de « Qui joue ? », en petit : le numéro de version et le contact.',
+      'En bas de « Qui joue ? », en petit : le numéro de version, le contact et le journal des modifications.',
       '« Qui joue ? » : avec une photo, le prénom n’est plus écrit deux fois (il reste en gros sous la photo).',
       'Nouveau nom : « Lire, compter et s’amuser ! » (titre de la page, nom de l’app et crédits ; l’icône garde « Lire&Compter », plus court).',
     ],

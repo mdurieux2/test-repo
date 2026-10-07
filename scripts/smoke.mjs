@@ -1005,10 +1005,15 @@ await page.click('.top-bar .icon-btn');
 await goProfiles(page);
 const footer = await page.evaluate(() => {
   const f = document.querySelector('.app-footer');
-  return f && { text: f.textContent, mail: f.querySelector('a')?.getAttribute('href'), toggles: f.querySelectorAll('[data-toggle-sound], [data-toggle-voice]').length };
+  return f && {
+    text: f.textContent, mail: f.querySelector('a')?.getAttribute('href'),
+    toggles: f.querySelectorAll('[data-toggle-sound], [data-toggle-voice]').length,
+    changelog: f.querySelector('details.changelog .changelog-entry h3')?.textContent,
+  };
 });
-if (!footer || !footer.text.includes(`Version ${APP.version}`) || !footer.text.includes(`Contact : ${APP.author}`) || footer.mail !== `mailto:${APP.contact}` || footer.toggles !== 2) {
-  fail(`« Qui joue ? » : version, contact ou boutons absents en bas ${JSON.stringify(footer)}`);
+if (!footer || !footer.text.includes(`Version ${APP.version}`) || !footer.text.includes(`Contact : ${APP.author}`) || footer.mail !== `mailto:${APP.contact}`
+  || footer.toggles !== 2 || !footer.changelog?.startsWith(`Version ${APP.version}`)) {
+  fail(`« Qui joue ? » : version, contact, journal ou boutons absents en bas ${JSON.stringify(footer)}`);
 }
 // voix coupée pendant un jeu : la consigne n'est plus dite ; remise : elle est redite
 await goProfile(page);
@@ -1041,7 +1046,7 @@ await page.click('.top-bar [data-toggle-voice]');
 await page.waitForFunction(() => (window.__spoken || []).some((t) => t.includes('Bonjour')), null, { timeout: 5000 })
   .catch(() => fail('voix remise : pas de « Bonjour »'));
 if (!(await soundState()).voice) fail('voix : le bouton ne la remet pas');
-console.log('✔ son et voix : boutons sur chaque écran ; version et contact en bas de « Qui joue ? »');
+console.log('✔ son et voix : boutons sur chaque écran ; version, contact et journal en bas de « Qui joue ? »');
 
 // profils séparés : Matteo n'a pas les étoiles d'Eva-Rose
 await goProfiles(page);
