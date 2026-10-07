@@ -209,10 +209,16 @@ const NUMBER_PATHS = [
   { label: 'De 10 en 10 jusqu’à 100', cols: 4, rows: 4, seq: range(10, 100, 10) },
   { label: 'À rebours, de 20 à 1', cols: 5, rows: 5, seq: range(1, 20, 1).reverse() },
   { label: 'De 3 en 3 jusqu’à 30', cols: 4, rows: 4, seq: range(3, 30, 3) },
-  // passer la centaine ; les intrus sont des nombres proches (87, 112…)
-  { label: 'De 95 à 110', cols: 5, rows: 4, seq: range(95, 110, 1), pool: range(80, 125, 1) },
-  // les intrus (150, 250…) ressemblent aux nombres du chemin ; 3 chiffres au plus, comme « 100 »
-  { label: 'De 100 en 100 jusqu’à 900', cols: 4, rows: 4, seq: range(100, 900, 100), pool: range(50, 950, 100) },
+  // Au-delà de 100 (les anciens niveaux 10 et 11, réunis) : un chemin sur deux passe la centaine
+  // (de 95 à 110, les intrus sont des nombres proches : 87, 112…), l'autre va de 100 en 100
+  // (les intrus, 150, 250…, ressemblent aux nombres du chemin ; 3 chiffres au plus, comme « 100 »).
+  {
+    label: 'Au-delà de 100',
+    paths: [
+      { cols: 5, rows: 4, seq: range(95, 110, 1), pool: range(80, 125, 1) },
+      { cols: 4, rows: 4, seq: range(100, 900, 100), pool: range(50, 950, 100) },
+    ],
+  },
 ];
 
 function range(from, to, step) {
@@ -239,7 +245,9 @@ export const cheminNombres = {
   skill: 'Réciter et lire la suite des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours)',
   levels: NUMBER_PATHS.map((p) => p.label),
   generate(level, rng) {
-    const { cols, rows, seq, pool: near } = NUMBER_PATHS[level - 1];
+    // un niveau enregistré au-delà du dernier (il y en avait 11) joue le dernier niveau
+    const path = NUMBER_PATHS[Math.min(level, NUMBER_PATHS.length) - 1];
+    const { cols, rows, seq, pool: near } = path.paths ? pick(rng, path.paths) : path;
     const max = Math.max(...seq);
     const pool = (near || range(1, max + 10, 1)).filter((n) => !seq.includes(n));
     const stage = pathStage(rng, cols, rows, seq, pool);

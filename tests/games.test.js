@@ -90,16 +90,19 @@ function checkQuestion(q, ctx) {
       const xs = model.map((c) => c % cols);
       const ys = model.map((c) => Math.floor(c / cols));
       const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
-      // ce qu'il faut colorier pour chaque case du modèle : reflet, copie, copie plus bas, demi-tour, agrandie
+      // ce qu'il faut colorier pour chaque case du modèle : reflet, copie, copie plus bas, demi-tour, agrandie,
+      // rétrécie (chaque carré de 2 × 2 cases du modèle donne une seule case)
       const image = (c) => {
         const [x, y] = [c % cols, Math.floor(c / cols)];
+        if (mode === 'shrink') return [Math.floor((y - y0) / 2) * cols + half + Math.floor((x - x0) / 2)];
         if (mode === 'copy') return [c + half];
         if (mode === 'shift') return [c + cols + half];
         if (mode === 'turn') return [(y0 + y1 - y) * cols + (x0 + x1 - x) + half];
         if (mode === 'zoom') return [0, 1, cols, cols + 1].map((d) => (2 * (y - y0)) * cols + half + 2 * (x - x0) + d);
         return [mirrorCell(c, cols, rows, axis)];
       };
-      const expected = model.flatMap(image).sort((a, b) => a - b);
+      const expected = [...new Set(model.flatMap(image))].sort((a, b) => a - b);
+      if (mode === 'shrink') assert.equal(model.length, 4 * expected.length, `le modèle est fait de carrés de 4 cases : ${ctx}`);
       assert.deepEqual(expected, solution, ctx);
       assert.equal(new Set(solution).size, solution.length, ctx);
       for (const c of solution) assert.ok(c >= 0 && c < cols * rows, `case hors du quadrillage : ${ctx}`);
@@ -431,10 +434,12 @@ test('labyrinthe : le chemin solution existe, la taille augmente avec le niveau'
 });
 
 test('chemins : suites de nombres et mots épelés', () => {
-  const steps = { 1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 6: 5, 7: 10, 8: -1, 9: 3, 10: 1, 11: 100 };
+  // niveau 10 : de 1 en 1 (de 95 à 110) ou de 100 en 100
+  const steps = { 1: [1], 2: [1], 3: [1], 4: [1], 5: [2], 6: [5], 7: [10], 8: [-1], 9: [3], 10: [1, 100] };
   for (const { level, q } of questions(findGame('chemin-nombres'))) {
     const { seq } = q.stage;
-    for (let i = 1; i < seq.length; i++) assert.equal(seq[i] - seq[i - 1], steps[level]);
+    assert.ok(steps[level].includes(seq[1] - seq[0]), q.key);
+    for (let i = 1; i < seq.length; i++) assert.equal(seq[i] - seq[i - 1], seq[1] - seq[0]);
   }
   for (const { level, q } of questions(findGame('chemin-lettres'))) {
     if (level === 3 || level === 4) assert.equal(q.stage.seq.join(''), q.answer);

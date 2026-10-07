@@ -229,19 +229,27 @@ const COPY_LEVELS = [
   { label: 'Copie décalée vers le bas', cols: 6, rows: 6, cells: 5, mode: 'shift' },
   { label: 'Copie tête en bas', cols: 6, rows: 6, cells: 5, mode: 'turn' },
   { label: 'Agrandis le dessin', cols: 8, rows: 8, cells: [3, 4], mode: 'zoom' },
+  // plus de cases à décaler, puis l'inverse de l'agrandissement (chaque carré de 4 cases devient une case)
+  { label: 'Copie décalée, 8 × 8', cols: 8, rows: 8, cells: 8, mode: 'shift' },
+  { label: 'Rétrécis le dessin', cols: 8, rows: 8, cells: [3, 4], mode: 'shrink' },
 ];
 
 /**
  * Les cases à colorier de l'autre côté du trait pour reproduire le modèle (à gauche) :
  * à la même place (copie), une case plus bas, la tête en bas (demi-tour dans le même
- * rectangle), ou deux fois plus grand (chaque case devient un carré de 4 cases, en
- * commençant en haut, contre le trait).
+ * rectangle), deux fois plus grand (chaque case devient un carré de 4 cases, en
+ * commençant en haut, contre le trait) ou deux fois plus petit (chaque carré de 4 cases
+ * du modèle devient une case, en commençant aussi en haut, contre le trait).
  */
 export function copyImage(model, cols, mode = 'copy') {
   const half = cols / 2;
   const xs = model.map((c) => c % cols);
   const ys = model.map((c) => Math.floor(c / cols));
   const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  if (mode === 'shrink') {
+    const small = model.map((c) => Math.floor((Math.floor(c / cols) - y0) / 2) * cols + half + Math.floor((c % cols - x0) / 2));
+    return [...new Set(small)].sort((a, b) => a - b);
+  }
   return model.flatMap((cell) => {
     const x = cell % cols;
     const y = Math.floor(cell / cols);
@@ -268,6 +276,14 @@ function copyModel(rng, cols, rows, mode, count) {
       // un dessin qui reste pareil après un demi-tour ne fait rien travailler
       const turned = copyImage(model, cols, 'turn');
       if (turned.every((c) => model.includes(c - cols / 2))) continue;
+    } else if (mode === 'shrink') {
+      // des carrés de 2 × 2 cases, posés sur un quadrillage de 2 en 2 dans la moitié gauche
+      const blocks = Array.from({ length: (cols / 4) * (rows / 2) }, (_, i) => i);
+      model = sample(rng, blocks, count).flatMap((b) => {
+        const bx = 2 * (b % (cols / 4));
+        const by = 2 * Math.floor(b / (cols / 4));
+        return [[0, 0], [1, 0], [0, 1], [1, 1]].map(([dx, dy]) => (by + dy) * cols + bx + dx);
+      });
     } else if (mode === 'zoom') {
       // assez petit pour tenir, agrandi, dans la moitié droite (2 colonnes, 4 lignes au plus)
       model = sample(rng, cells.filter((c) => xy(c)[0] < 2 && xy(c)[1] < rows / 2), count);
@@ -297,6 +313,12 @@ const COPY_TEXTS = {
     instruction: 'Fais le même dessin, deux fois plus grand : chaque case devient un carré de 4 cases. Commence en haut, à côté du trait. Puis touche « J’ai fini ».',
     short: { key: 'reproduire:grand', text: 'En plus grand !' },
     speak: 'Bravo, le dessin est deux fois plus grand !',
+  },
+  shrink: {
+    text: 'Fais le dessin en plus petit.',
+    instruction: 'Fais le même dessin, deux fois plus petit : chaque carré de 4 cases devient une seule case. Commence en haut, à côté du trait. Puis touche « J’ai fini ».',
+    short: { key: 'reproduire:petit', text: 'En plus petit !' },
+    speak: 'Bravo, le dessin est deux fois plus petit !',
   },
 };
 
@@ -346,7 +368,7 @@ export const reproduire = {
 // ---------------------------------------------------------------- Les pièces du carré (tangram simplifié)
 
 // Triangles dans une case de côté 1 : par les deux diagonales (niveau 1) ou par une seule (niveau 2) ;
-// rectangles : la case coupée en deux par le milieu (niveaux 4 et 5).
+// rectangles : la case coupée en deux par le milieu (niveaux 4 et 5) ; un petit coin coupé (niveaux 6 à 8).
 export const PIECES = {
   haut: [[0, 0], [1, 0], [0.5, 0.5]],
   droite: [[1, 0], [1, 1], [0.5, 0.5]],
@@ -360,6 +382,15 @@ export const PIECES = {
   'demi-bas': [[0, 0.5], [1, 0.5], [1, 1], [0, 1]],
   'demi-gauche': [[0, 0], [0.5, 0], [0.5, 1], [0, 1]],
   'demi-droite': [[0.5, 0], [1, 0], [1, 1], [0.5, 1]],
+  // niveaux 6 à 8 : un coin coupé entre les milieux de deux côtés (un petit triangle et un pentagone)
+  'petit-hg': [[0, 0], [0.5, 0], [0, 0.5]],
+  'petit-hd': [[0.5, 0], [1, 0], [1, 0.5]],
+  'petit-bg': [[0, 0.5], [0.5, 1], [0, 1]],
+  'petit-bd': [[1, 0.5], [1, 1], [0.5, 1]],
+  'penta-hg': [[0.5, 0], [1, 0], [1, 1], [0, 1], [0, 0.5]],
+  'penta-hd': [[0, 0], [0.5, 0], [1, 0.5], [1, 1], [0, 1]],
+  'penta-bg': [[0, 0], [1, 0], [1, 1], [0.5, 1], [0, 0.5]],
+  'penta-bd': [[0, 0], [1, 0], [1, 0.5], [0.5, 1], [0, 1]],
 };
 const PIECE_COLORS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f43', '#2ec4b6', '#f368e0'];
 
@@ -370,22 +401,33 @@ const CUTS = {
   '/': ['coin-hg', 'coin-bd'],
   '-': ['demi-haut', 'demi-bas'],
   '|': ['demi-gauche', 'demi-droite'],
+  'c-hg': ['petit-hg', 'penta-hg'],
+  'c-hd': ['petit-hd', 'penta-hd'],
+  'c-bg': ['petit-bg', 'penta-bg'],
+  'c-bd': ['petit-bd', 'penta-bd'],
 };
+const CORNER_CUTS = ['c-hg', 'c-hd', 'c-bg', 'c-bd'];
 const PIECE_FAMILIES = [
   ['haut', 'droite', 'bas', 'gauche'],
   ['coin-hg', 'coin-hd', 'coin-bg', 'coin-bd'],
   ['demi-haut', 'demi-bas', 'demi-gauche', 'demi-droite'],
+  ['petit-hg', 'petit-hd', 'petit-bg', 'petit-bd'],
+  ['penta-hg', 'penta-hd', 'penta-bg', 'penta-bd'],
 ];
-// Niveaux 3 à 5 : taille du carré, coupes possibles, et coupes qu'il faut voir au moins une fois.
+// Niveaux 3 à 8 : taille du carré, coupes possibles, coupes qu'il faut voir au moins une fois,
+// et choix : deux pièces de la même forme et une d'une autre forme, ou la même forme dans les 4 sens (`turns`).
 const TANGRAM_MIXES = {
   3: { grid: 2, cuts: ['x', '\\', '/'], need: [['x'], ['\\', '/']] },
   4: { grid: 2, cuts: ['\\', '/', '-', '|'], need: [['-', '|'], ['\\', '/']] },
-  5: { grid: 3, cuts: ['x', '\\', '/', '-', '|'], need: [['x'], ['\\', '/'], ['-', '|']] },
+  5: { grid: 3, cuts: ['x', '\\', '/', '-', '|'], need: [['x'], ['\\', '/'], ['-', '|']], turns: true },
+  6: { grid: 2, cuts: [...CORNER_CUTS, '\\', '/'], need: [CORNER_CUTS, ['\\', '/']] },
+  7: { grid: 3, cuts: [...CORNER_CUTS, '\\', '/', '-', '|'], need: [CORNER_CUTS, ['\\', '/'], ['-', '|']], turns: true },
+  8: { grid: 4, cuts: [...CORNER_CUTS, 'x', '\\', '/', '-', '|'], need: [CORNER_CUTS, ['x'], ['\\', '/'], ['-', '|']], turns: true },
 };
 
-/** Niveaux 3 à 5 : des carrés coupés de plusieurs façons ; les choix ressemblent à la bonne pièce. */
+/** Niveaux 3 à 8 : des carrés coupés de plusieurs façons ; les choix ressemblent à la bonne pièce. */
 function tangramMix(level, rng, colors) {
-  const { grid, cuts, need } = TANGRAM_MIXES[level];
+  const { grid, cuts, need, turns } = TANGRAM_MIXES[level];
   let cellCuts;
   do {
     cellCuts = Array.from({ length: grid * grid }, () => pick(rng, cuts));
@@ -396,7 +438,7 @@ function tangramMix(level, rng, colors) {
   const family = PIECE_FAMILIES.find((f) => f.includes(missing.shape));
   const sameFamily = family.filter((s) => s !== missing.shape);
   let options;
-  if (level === 5) {
+  if (turns) {
     options = family; // la même forme dans les 4 sens : il faut le bon
   } else {
     // deux de la même forme, une d'une autre forme
@@ -423,7 +465,10 @@ export const tangram = {
   title: 'Les pièces du carré',
   icon: '🔷',
   skill: 'Reconnaître une forme et son orientation pour compléter une figure',
-  levels: ['Un carré en 4 triangles', 'Quatre carrés coupés en deux', 'Petits et grands triangles', 'Avec des rectangles', 'Grand carré 3 × 3'],
+  levels: [
+    'Un carré en 4 triangles', 'Quatre carrés coupés en deux', 'Petits et grands triangles', 'Avec des rectangles', 'Grand carré 3 × 3',
+    'Des coins coupés', 'Coins coupés, 3 × 3', 'Grand carré 4 × 4',
+  ],
   generate(level, rng) {
     let pieces;
     let missing;

@@ -160,7 +160,78 @@ const COLOR_HEX = {
 
 const LEVELS = [
   'Drapeaux connus', 'Drapeaux du monde', 'Trouve le drapeau', 'Ils se ressemblent', 'Sur quel continent ?', 'Complète le drapeau',
+  'Lis les couleurs', 'Le drapeau effacé',
 ];
+
+// Les drapeaux à bandes (niveaux 6 à 8), et leur description : « v:vert-blanc-rouge ».
+const BANDED = WORLD.filter((c) => FLAGS[c].bands);
+const describe = (c) => `${FLAGS[c].bands.dir}:${FLAGS[c].bands.colors.join('-')}`;
+
+/** « le rouge », « l’orange » */
+const theColor = (c) => (/^[aeiouy]/.test(c) ? `l’${c}` : `le ${c}`);
+
+/** « vert, blanc et rouge » */
+function colorList(colors) {
+  return `${colors.slice(0, -1).join(', ')} et ${colors.at(-1)}`;
+}
+
+/** Les bandes qu'on voit encore quand la bande `hole` est effacée : « v:3:vert-?-rouge ». */
+function visibleBands(code, hole) {
+  const { dir, colors } = FLAGS[code].bands;
+  return `${dir}:${colors.length}:${colors.map((c, i) => (i === hole ? '?' : c)).join('-')}`;
+}
+
+/** Points communs de deux drapeaux à bandes : même sens, même nombre de bandes, mêmes couleurs. */
+function likeness(a, b) {
+  const [fa, fb] = [FLAGS[a].bands, FLAGS[b].bands];
+  return Number(fa.dir === fb.dir) + Number(fa.colors.length === fb.colors.length)
+    + fa.colors.filter((c) => fb.colors.includes(c)).length;
+}
+
+/** Deux intrus parmi les drapeaux à bandes : différents de la bonne réponse (`differs`), les plus ressemblants d'abord. */
+function bandedDecoys(rng, code, differs) {
+  const decoys = [];
+  for (const c of shuffle(rng, BANDED).sort((a, b) => likeness(code, b) - likeness(code, a))) {
+    if (c !== code && differs(c) && decoys.every((d) => describe(d) !== describe(c)) && decoys.length < 6) decoys.push(c);
+  }
+  return sample(rng, decoys, 2);
+}
+
+/** Niveaux 7 et 8 : lire la description d'un drapeau, reconnaître un drapeau dont une bande est effacée. */
+function bandsLevel(level, rng) {
+  const code = pick(rng, BANDED);
+  const { dir, colors } = FLAGS[code].bands;
+  if (level === 7) {
+    const options = shuffle(rng, [code, ...bandedDecoys(rng, code, (c) => describe(c) !== describe(code))]);
+    const how = dir === 'v' ? 'verticales' : 'horizontales';
+    const order = dir === 'v' ? 'de gauche à droite' : 'de haut en bas';
+    return {
+      key: `drapeaux:7:${code}:${options.join('')}`,
+      text: `Bandes ${how} : ${colorList(colors)}.`,
+      instruction: `Touche le drapeau aux bandes ${how} : ${colorList(colors)}, ${order}.`,
+      short: { key: 'drapeaux:7', text: `Bandes ${how} : ${colorList(colors)}.` },
+      stage: { type: 'none' },
+      choices: options.map((c) => ({ value: c, flag: c, name: FLAGS[c].label })),
+      choiceStyle: 'flags',
+      answer: code,
+      success: { speak: `Oui, c’est le drapeau de ${FLAGS[code].name} !` },
+    };
+  }
+  // une bande est effacée, sans le nom du pays : aucun intrus ne doit avoir les mêmes bandes visibles
+  const hole = Math.floor(rng() * colors.length);
+  const options = shuffle(rng, [code, ...bandedDecoys(rng, code, (c) => visibleBands(c, hole) !== visibleBands(code, hole))]);
+  return {
+    key: `drapeaux:8:${code}:${hole}:${options.join('')}`,
+    text: 'Une bande est effacée. Quel pays ?',
+    instruction: ['Une bande est effacée. À quel pays est ce drapeau ?', `${options.map((c) => FLAGS[c].label).join(', ')} ?`],
+    short: { key: 'drapeaux:8', text: 'Quel pays ?' },
+    stage: { type: 'flag', code, hole: { dir, index: hole, count: colors.length } },
+    choices: options.map((c) => ({ value: c, label: FLAGS[c].label })),
+    choiceStyle: 'answers',
+    answer: code,
+    success: { speak: `Oui, c’est le drapeau de ${FLAGS[code].name} : il manquait ${theColor(colors[hole])} !` },
+  };
+}
 
 export const drapeaux = {
   id: 'drapeaux',
@@ -211,6 +282,7 @@ export const drapeaux = {
         success: { speak: `Oui, c’est le drapeau de ${FLAGS[code].name} !` },
       };
     }
+    if (level >= 7) return bandsLevel(level, rng);
     if (level === 5) {
       const code = pick(rng, WORLD);
       const { continent } = FLAGS[code];
@@ -228,7 +300,7 @@ export const drapeaux = {
       };
     }
     // Complète le drapeau : une bande est effacée, quelle couleur manque ?
-    const code = pick(rng, WORLD.filter((c) => FLAGS[c].bands));
+    const code = pick(rng, BANDED);
     const { bands } = FLAGS[code];
     const hole = Math.floor(rng() * bands.colors.length);
     const missing = bands.colors[hole];
@@ -243,7 +315,7 @@ export const drapeaux = {
       choices: options.map((c) => ({ value: c, swatch: COLOR_HEX[c], name: c })),
       choiceStyle: 'pictures',
       answer: missing,
-      success: { speak: `Oui, il manquait le ${missing} !` },
+      success: { speak: `Oui, il manquait ${theColor(missing)} !` },
     };
   },
 };

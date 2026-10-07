@@ -401,6 +401,60 @@ const HELLOS = [
   { word: 'Salam !', say: 'Salam !', language: 'arabe', where: 'en Égypte' },
 ];
 
+// Niveau 7 : les pays qui touchent la France (en Europe). Pas de piège : le Royaume-Uni (relié par le
+// tunnel), les Pays-Bas et le Brésil (voisins de territoires d'outre-mer) ne sont jamais proposés.
+const FRANCE_NEIGHBOURS = [
+  { label: 'Belgique', name: 'la Belgique' }, { label: 'Luxembourg', name: 'le Luxembourg' },
+  { label: 'Allemagne', name: 'l’Allemagne' }, { label: 'Suisse', name: 'la Suisse' },
+  { label: 'Italie', name: 'l’Italie' }, { label: 'Espagne', name: 'l’Espagne' },
+];
+const NOT_NEIGHBOURS = ['Portugal', 'Pologne', 'Autriche', 'Grèce', 'Suède', 'Irlande', 'Danemark', 'Hongrie', 'Norvège', 'Roumanie'];
+
+// Niveau 8 : les cinq océans, repérés par rapport aux continents (comme sur un globe).
+const OCEAN_NAMES = ['Atlantique', 'Pacifique', 'Indien', 'Arctique', 'Austral'];
+const OCEANS = [
+  { clue: '🌍', ask: 'Entre l’Europe et l’Amérique, il y a l’océan…', answer: 'Atlantique' },
+  { clue: '🏖️', ask: 'La France est au bord de l’océan…', answer: 'Atlantique' },
+  { clue: '🌏', ask: 'Entre l’Asie et l’Amérique, il y a l’océan…', answer: 'Pacifique' },
+  { clue: '🌊', ask: 'Le plus grand océan du monde, c’est l’océan…', answer: 'Pacifique' },
+  { clue: '🌏', ask: 'Entre l’Afrique et l’Australie, il y a l’océan…', answer: 'Indien' },
+  { clue: '🐻‍❄️', ask: 'Au pôle Nord, il y a l’océan…', answer: 'Arctique' },
+  { clue: '🐧', ask: 'Autour de l’Antarctique, il y a l’océan…', answer: 'Austral' },
+];
+
+/** Niveaux 7 et 8 des pays : les voisins de la France, les océans. */
+function paysCarte(level, rng) {
+  if (level === 7) {
+    const neighbour = pick(rng, FRANCE_NEIGHBOURS);
+    const options = shuffle(rng, [neighbour.label, ...sample(rng, NOT_NEIGHBOURS, 2)]);
+    const question = 'Quel pays est voisin de la France ?';
+    return {
+      key: `pays:voisin:${neighbour.label}:${options.join('-')}`,
+      text: question,
+      instruction: [question, `${capitalize(spokenList(options))} ?`],
+      short: { key: 'pays:voisin', text: question },
+      stage: { type: 'flag', code: 'fr', caption: 'France' },
+      choices: options.map((c) => ({ value: c, label: c })),
+      choiceStyle: 'answers',
+      answer: neighbour.label,
+      success: { speak: `Oui, ${neighbour.name} est un pays voisin de la France.` },
+    };
+  }
+  const ocean = pick(rng, OCEANS);
+  const options = shuffle(rng, [ocean.answer, ...sample(rng, OCEAN_NAMES.filter((o) => o !== ocean.answer), 2)]);
+  return {
+    key: `pays:ocean:${ocean.ask}`,
+    text: ocean.ask,
+    instruction: [ocean.ask, `${capitalize(spokenList(options))} ?`],
+    short: { key: 'pays:ocean', text: 'Quel océan ?' },
+    stage: { type: 'picture', emoji: ocean.clue },
+    choices: options.map((o) => ({ value: o, label: o })),
+    choiceStyle: 'answers',
+    answer: ocean.answer,
+    success: { speak: `${ocean.ask.slice(0, -1)} ${ocean.answer}.` },
+  };
+}
+
 /** L'image d'un pays : celle de son premier lieu célèbre. */
 const countryClue = (country) => PLACES.find((p) => p.country === country).clue;
 
@@ -452,8 +506,12 @@ export const pays = {
   title: 'Les pays du monde',
   icon: '🗺️',
   skill: 'Situer quelques pays et les continents',
-  levels: ['Les pays d’Europe', 'Les pays du monde', 'Les continents', 'Les habitants des pays', 'Bonjour dans le monde', 'Les capitales'],
+  levels: [
+    'Les pays d’Europe', 'Les pays du monde', 'Les continents', 'Les habitants des pays', 'Bonjour dans le monde', 'Les capitales',
+    'Les voisins de la France', 'Les océans',
+  ],
   generate(level, rng) {
+    if (level >= 7) return paysCarte(level, rng);
     if (level >= 4) return paysPlus(level, rng);
     const field = level === 3 ? 'continent' : 'country';
     const place = pick(rng, PLACES.filter((p) => (level === 3 ? true : p.level === level)));

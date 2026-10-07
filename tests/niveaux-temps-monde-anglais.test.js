@@ -8,7 +8,7 @@ import { createRng } from '../app/js/random.js';
 import { COLOUR_PHRASES } from '../app/js/data/anglais-data.js';
 
 const LEVEL_COUNTS = {
-  calendrier: 7, monnaie: 7, mesures: 8, saisons: 7, 'animaux-monde': 7, pays: 6,
+  calendrier: 7, monnaie: 7, mesures: 8, saisons: 7, 'animaux-monde': 7, pays: 8,
   ecoute: 10, 'lis-anglais': 10, 'mot-anglais': 10, 'relie-anglais': 10, 'compte-anglais': 7,
   'ou-est': 8, 'epelle-anglais': 10, 'parle-anglais': 8,
 };
