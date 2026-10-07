@@ -507,9 +507,11 @@ test('petits textes : questions variées, réponses distinctes, textes courts', 
 
 test('anglais : relie, compte, où est, épelle', () => {
   for (const { q } of questions(findGame('epelle-anglais'))) {
-    const word = [...q.items].sort((a, b) => a.value - b.value).map((i) => i.label).join('');
+    // les lettres pièges (value null, dernier niveau) ne font pas partie du mot
+    const letters = q.items.filter((i) => i.value !== null);
+    const word = [...letters].sort((a, b) => a.value - b.value).map((i) => i.label).join('');
     assert.equal(word, q.answer);
-    assert.notEqual(q.items.map((i) => i.label).join(''), q.answer, 'déjà dans l’ordre');
+    assert.notEqual(letters.map((i) => i.label).join(''), q.answer, 'déjà dans l’ordre');
   }
   for (const { level, q } of questions(findGame('compte-anglais'))) {
     if (level <= 2) assert.equal(q.choices.find((c) => c.value === q.answer).objects.count, q.answer);

@@ -5,12 +5,25 @@ import { numberChoices, similarWords } from './helpers.js';
 import { COLOUR_PHRASES, ENGLISH_THEMES } from '../data/anglais-data.js';
 
 const EN = 'en-GB';
-const LEVELS = ENGLISH_THEMES.map((t) => `${t.icon} ${t.title}`);
-// Après les 10 thèmes, trois niveaux transversaux : tous les thèmes mélangés, des mots
-// proches (ou une variante du jeu), puis une petite phrase ou une variante plus difficile.
-const THEMES = ENGLISH_THEMES.length;
+const theme = (title) => ENGLISH_THEMES.find((t) => t.title === title);
+// Les 10 thèmes, deux par deux (sauf les animaux et « à manger », assez grands pour un niveau
+// à eux seuls) : les niveaux 1 à 6. Les plus petits (couleurs, nombres, animaux) d'abord.
+const GROUPS = [
+  { label: '🎨 Couleurs et nombres', themes: ['Les couleurs', 'Les nombres'] },
+  { label: '🐶 Les animaux', themes: ['Les animaux'] },
+  { label: '🍎 À manger', themes: ['À manger'] },
+  { label: '👕 Corps et vêtements', themes: ['Le corps', 'Les vêtements'] },
+  { label: '🎒 École et météo', themes: ["L'école", 'La météo'] },
+  { label: '😀 Émotions et famille', themes: ['Les émotions', 'La famille'] },
+].map((g) => ({ ...g, themes: g.themes.map(theme) }));
+const LEVELS = GROUPS.map((g) => g.label);
+// Après les 6 niveaux de thèmes, des niveaux transversaux : tous les thèmes mélangés (niveau 7),
+// des mots proches ou une variante du jeu (CLOSE), une petite phrase ou une variante plus
+// difficile (EXTRA), puis le niveau le plus difficile de chaque jeu (HARDEST).
+const THEMES = GROUPS.length;
 const CLOSE = THEMES + 2;
 const EXTRA = THEMES + 3;
+const HARDEST = THEMES + 4;
 const ALL_WORDS = ENGLISH_THEMES.flatMap((t) => t.words);
 
 function picture(word) {
@@ -19,16 +32,21 @@ function picture(word) {
   return { label: word.label };
 }
 
+/** Les mots d'un des thèmes du niveau (tiré au hasard) : les choix restent dans le même thème. */
+function levelTheme(level, rng) {
+  return pick(rng, GROUPS[level - 1].themes).words;
+}
+
 function themeWords(level, rng, count) {
-  const { words } = ENGLISH_THEMES[level - 1];
+  const words = levelTheme(level, rng);
   const target = pick(rng, words);
   const others = sample(rng, words.filter((w) => w !== target), count - 1);
   return { target, options: shuffle(rng, [target, ...others]) };
 }
 
 /**
- * Le mot à trouver et les images proposées : un thème (niveaux 1 à 10), tous les thèmes
- * mélangés (niveau 11), ou des mots qui se ressemblent (CLOSE : pig, pink, pen, pencil).
+ * Le mot à trouver et les images proposées : un thème (niveaux 1 à 6), tous les thèmes
+ * mélangés (niveau 7), ou des mots qui se ressemblent (CLOSE : pig, pink, pen, pencil).
  * `fits` limite le mot à trouver (par exemple sa longueur, pour qu'il tienne à l'écran).
  */
 function pickWords(level, rng, count, fits = () => true) {
@@ -65,6 +83,31 @@ export function phraseGrid(rng) {
   return COLOUR_PHRASES.filter((p) => [a, b].includes(p.thing) && colours.includes(p.colour));
 }
 
+/**
+ * Niveau le plus difficile d'« écoute » et de « lis » : les 4 images sont les 4 phrases
+ * croisées (a red book, a green book, a red heart, a green heart). Chaque mauvaise image a
+ * soit le bon objet, soit la bonne couleur : il faut comprendre les deux mots.
+ */
+function crossedPhrases(rng) {
+  const options = shuffle(rng, phraseGrid(rng));
+  return { target: pick(rng, options), options };
+}
+
+/** « a green book » → « a book green » : l'erreur d'un petit Français (le livre vert). */
+function frenchOrder(phrase) {
+  return { ...phrase, en: `a ${phrase.thing} ${phrase.colour}` };
+}
+
+/**
+ * L'ordre des mots : la bonne phrase, la même dans l'ordre du français (a book green) et
+ * le même objet d'une autre couleur, ou la même couleur sur un autre objet.
+ */
+function wordOrderOptions(rng) {
+  const target = pick(rng, COLOUR_PHRASES);
+  const near = pick(rng, COLOUR_PHRASES.filter((p) => p !== target && (p.thing === target.thing || p.colour === target.colour)));
+  return { target, options: shuffle(rng, [target, frenchOrder(target), near]) };
+}
+
 function successSpeech(word) {
   return [{ text: word.en, lang: EN }, `C’est ${word.fr} !`];
 }
@@ -75,10 +118,14 @@ export const ecoute = {
   title: 'Écoute et touche',
   icon: '👂',
   skill: 'Comprendre des mots anglais à l’oral',
-  levels: [...LEVELS, 'Tous les thèmes mélangés', '4 images, mots proches', 'Une petite phrase'],
+  levels: [...LEVELS, 'Tous les thèmes mélangés', '4 images, mots proches', 'Une petite phrase', 'Petites phrases croisées'],
   generate(level, rng) {
-    const phrase = level === EXTRA;
-    const { target, options } = phrase ? phraseOptions(rng, 4) : pickWords(level, rng, level === CLOSE ? 4 : 3);
+    const phrase = level >= EXTRA;
+    let words;
+    if (level === HARDEST) words = crossedPhrases(rng);
+    else if (phrase) words = phraseOptions(rng, 4);
+    else words = pickWords(level, rng, level === CLOSE ? 4 : 3);
+    const { target, options } = words;
     const sound = { text: target.en, lang: EN, rate: 0.8 };
     return {
       key: `ecoute:${target.en}`,
@@ -101,11 +148,15 @@ export const lisAnglais = {
   title: 'Lis et touche',
   icon: '📗',
   skill: 'Lire un mot anglais et le relier à son image',
-  levels: [...LEVELS, 'Tous les thèmes mélangés', 'Mots qui se ressemblent', 'Lis une petite phrase'],
+  levels: [...LEVELS, 'Tous les thèmes mélangés', 'Mots qui se ressemblent', 'Lis une petite phrase', 'Lis des phrases croisées'],
   generate(level, rng) {
-    const phrase = level === EXTRA;
+    const phrase = level >= EXTRA;
     // un mot de plus de 8 lettres ne tiendrait pas en gros caractères sur un petit téléphone
-    const { target, options } = phrase ? phraseOptions(rng, 4) : pickWords(level, rng, 4, (w) => w.en.length <= 8);
+    let words;
+    if (level === HARDEST) words = crossedPhrases(rng);
+    else if (phrase) words = phraseOptions(rng, 4);
+    else words = pickWords(level, rng, 4, (w) => w.en.length <= 8);
+    const { target, options } = words;
     return {
       key: `lis-anglais:${target.en}`,
       text: phrase ? 'Lis la petite phrase anglaise. Quelle image va avec ?' : 'Lis le mot anglais. Quelle image va avec ?',
@@ -129,14 +180,19 @@ export const motAnglais = {
   title: 'Le mot anglais',
   icon: '🇬🇧',
   skill: 'Retrouver le mot anglais qui correspond à une image',
-  levels: [...LEVELS, 'Tous les thèmes mélangés', 'Mots qui se ressemblent', 'Une petite phrase'],
+  levels: [...LEVELS, 'Tous les thèmes mélangés', 'Mots qui se ressemblent', 'Une petite phrase', 'L’ordre des mots'],
   generate(level, rng) {
-    const { target, options } = level === EXTRA ? phraseOptions(rng, 3) : pickWords(level, rng, 3);
+    let words;
+    if (level === HARDEST) words = wordOrderOptions(rng);
+    else if (level === EXTRA) words = phraseOptions(rng, 3);
+    else words = pickWords(level, rng, 3);
+    const { target, options } = words;
     const pic = picture(target);
+    const order = level === HARDEST ? ' Attention à l’ordre des mots !' : '';
     return {
       key: `mot-anglais:${target.en}`,
-      text: 'Comment dit-on en anglais ?',
-      instruction: `Comment dit-on ${target.fr.replace(/^(le|la|les|l')\s?/, '')} en anglais ?`,
+      text: `Comment dit-on en anglais ?${order}`,
+      instruction: `Comment dit-on ${target.fr.replace(/^(le|la|les|l')\s?/, '')} en anglais ?${order}`,
       short: { text: 'En anglais ?', speak: `${target.fr.replace(/^(le|la|les|l')\s?/, '')}, en anglais ?` },
       stage: pic.swatch ? { type: 'swatch', color: pic.swatch } : { type: 'picture', emoji: pic.label },
       choices: options.map((w) => ({ value: w.en, label: w.en, lang: 'en' })),
@@ -156,16 +212,22 @@ export const relieAnglais = {
   title: 'Relie en anglais',
   icon: '🔗',
   skill: 'Associer des mots anglais écrits à leur image',
-  levels: [...LEVELS, 'Tous les thèmes mélangés', 'Mot français ↔ anglais', 'Une petite phrase'],
+  levels: [...LEVELS, 'Tous les thèmes mélangés', 'Mot français ↔ anglais', 'Une petite phrase', 'Sans image, mots proches'],
   generate(level, rng) {
-    // sans image (CLOSE) : le mot français à gauche ; un mot de plus de 8 lettres ne tiendrait pas
-    const french = level === CLOSE;
+    // sans image (CLOSE, HARDEST) : le mot français à gauche ; un mot de plus de 8 lettres ne tiendrait pas
+    const french = level === CLOSE || level === HARDEST;
     const shortFrench = (w) => w.fr.split(/[\s'’-]/).every((part) => part.length <= 8);
     const phrase = level === EXTRA;
     let words;
-    if (level <= THEMES) words = sample(rng, ENGLISH_THEMES[level - 1].words, 4);
+    if (level <= THEMES) words = sample(rng, levelTheme(level, rng), 4);
     else if (phrase) words = shuffle(rng, phraseGrid(rng));
-    else words = sample(rng, french ? ALL_WORDS.filter(shortFrench) : ALL_WORDS, 4);
+    else if (level === HARDEST) {
+      // des mots anglais qui se ressemblent (pig, pink, pen, pencil) : il faut bien les lire
+      const pool = ALL_WORDS.filter(shortFrench);
+      const target = pick(rng, pool);
+      const close = similarWords(rng, target.en, pool.map((w) => w.en), 3).map((en) => pool.find((w) => w.en === en));
+      words = shuffle(rng, [target, ...close]);
+    } else words = sample(rng, french ? ALL_WORDS.filter(shortFrench) : ALL_WORDS, 4);
     let goal = 'chaque image à son mot anglais';
     if (french) goal = 'chaque mot français à son mot anglais';
     if (phrase) goal = 'chaque image à sa petite phrase anglaise';
@@ -322,6 +384,7 @@ const scene = (pet, place) => ({ value: `${pet.en}:${place.key}`, scene: { who: 
  * puis une petite histoire de deux phrases suivie d'une question.
  */
 function ouEstPlus(level, rng) {
+  if (level >= 7) return ouEstHistoire(level, rng);
   const [pet, other] = sample(rng, PETS, 2);
   const [place, otherPlace] = sample(rng, PLACES, 2);
   const sentence = `The ${pet.en} is ${place.en}.`;
@@ -354,6 +417,45 @@ function ouEstPlus(level, rng) {
   };
 }
 
+const capital = (text) => `${text[0].toUpperCase()}${text.slice(1)}`;
+
+/**
+ * Niveaux 7 et 8 : une petite histoire entendue, puis la question « Who is under the table? »
+ * (on touche l'animal), ou, au niveau 8, une histoire de trois phrases suivie de
+ * « Where is the dog? » (le chien aux quatre endroits) ou de « Who is… ? ».
+ */
+function ouEstHistoire(level, rng) {
+  const long = level === 8;
+  const pets = sample(rng, PETS, 3);
+  const places = sample(rng, PLACES, long ? 3 : 2);
+  const told = places.map((place, i) => ({ pet: pets[i], place }));
+  const story = { text: shuffle(rng, told.map(({ pet, place }) => `The ${pet.en} is ${place.en}.`)).join(' '), lang: EN, rate: 0.85 };
+  const { pet, place } = pick(rng, told);
+  const sentence = `The ${pet.en} is ${place.en}.`;
+  const success = { speak: [{ text: sentence, lang: EN }, `${capital(pet.fr)} est ${place.fr} !`] };
+  const where = long && rng() < 0.5;
+  const question = { text: where ? `Where is the ${pet.en}?` : `Who is ${place.en}?`, lang: EN, rate: 0.85 };
+  const base = {
+    key: `ou-est:histoire${level}:${told.map((t) => `${t.pet.en}:${t.place.key}`).join(':')}:${where ? pet.en : place.key}`,
+    text: 'Écoute la petite histoire, puis la question.',
+    instruction: ['Écoute la petite histoire, puis la question.', story, question],
+    short: { key: `ou-est:histoire${level}`, text: 'Écoute et touche.', speak: [story, question] },
+    replay: [story, question],
+    stage: { type: 'listen' },
+    success,
+  };
+  if (where) {
+    // le même animal aux quatre endroits : les endroits des autres animaux sont des pièges
+    return { ...base, choices: shuffle(rng, PLACES).map((p) => scene(pet, p)), choiceStyle: 'scenes', answer: `${pet.en}:${place.key}` };
+  }
+  return {
+    ...base,
+    choices: shuffle(rng, pets).map((p) => ({ value: p.en, label: p.emoji, name: p.fr })),
+    choiceStyle: 'pictures',
+    answer: pet.en,
+  };
+}
+
 export const ouEst = {
   id: 'ou-est',
   domain: 'anglais',
@@ -363,6 +465,7 @@ export const ouEst = {
   levels: [
     'Écoute : in, on, under', 'Écoute : in, on, under, next to', 'Lis la phrase',
     'Écoute : qui est où ?', 'Lis : qui est où ?', 'Écoute la petite histoire',
+    'Histoire : qui est là ?', 'Une histoire plus longue',
   ],
   generate(level, rng) {
     if (level >= 4) return ouEstPlus(level, rng);
@@ -392,33 +495,60 @@ export function spellable(word) {
   return /^[a-z]{3,6}$/.test(word.en) && new Set(word.en).size === word.en.length;
 }
 
+// Les lettres pièges ressemblent à une lettre du mot (b/d, m/n, i/l…) : il faut se souvenir du mot exact.
+const LOOKALIKE = {
+  a: 'o', b: 'd', c: 'k', d: 'b', e: 'a', f: 't', g: 'q', h: 'n', i: 'l', k: 'c', l: 'i', m: 'n', n: 'm',
+  o: 'a', p: 'q', q: 'p', r: 'n', s: 'z', t: 'f', u: 'v', v: 'u', w: 'v', y: 'j', z: 's',
+};
+
+/** `count` lettres absentes du mot : des sosies de ses lettres d'abord, sinon d'autres lettres. */
+export function trapLetters(rng, letters, count) {
+  const absent = (l) => !letters.includes(l);
+  const lookalikes = shuffle(rng, [...new Set(letters.map((l) => LOOKALIKE[l]).filter((l) => l && absent(l)))]);
+  const others = shuffle(rng, [...'abcdefghiklmnoprstuvwy'].filter((l) => absent(l) && !lookalikes.includes(l)));
+  return [...lookalikes, ...others].slice(0, count);
+}
+
+/** Glisse les lettres pièges (value null) parmi les lettres du mot, sans changer l'ordre de celles-ci. */
+function withTraps(rng, items, traps) {
+  const all = [...items];
+  for (const label of traps) all.splice(randInt(rng, 0, all.length), 0, { value: null, label });
+  return all;
+}
+
 export const epelleAnglais = {
   id: 'epelle-anglais',
   domain: 'anglais',
   title: 'Épelle en anglais',
   icon: '🔠',
   skill: 'Écrire un mot anglais en remettant ses lettres dans l’ordre',
-  levels: [...LEVELS, 'Tous les thèmes mélangés', 'Écoute sans l’image', 'L’image sans le son'],
+  levels: [...LEVELS, 'Tous les thèmes mélangés', 'Écoute sans l’image', 'L’image sans le son', 'Sans son, lettres pièges'],
   generate(level, rng) {
-    const word = pick(rng, (level <= THEMES ? ENGLISH_THEMES[level - 1].words : ALL_WORDS).filter(spellable));
+    const pool = level <= THEMES ? GROUPS[level - 1].themes.flatMap((t) => t.words) : ALL_WORDS;
+    const word = pick(rng, pool.filter(spellable));
     const letters = word.en.split('');
     let order = shuffle(rng, letters.map((_, i) => i));
     if (order.every((v, i) => v === i)) order = [...order.slice(1), order[0]]; // jamais déjà dans l'ordre
     const sound = { text: word.en, lang: EN, rate: 0.8 };
     const pic = picture(word);
     const listen = level === CLOSE; // on entend le mot, sans image
-    const silent = level === EXTRA; // on voit l'image, sans entendre le mot : il faut s'en souvenir
+    // on voit l'image, sans entendre le mot : il faut s'en souvenir (et, au dernier niveau,
+    // deux lettres pièges qui ressemblent à celles du mot se glissent parmi les lettres)
+    const silent = level >= EXTRA;
+    const traps = level === HARDEST ? trapLetters(rng, letters, 2) : [];
     const pictureStage = pic.swatch ? { type: 'swatch', color: pic.swatch } : { type: 'picture', emoji: pic.label };
-    const silentText = 'Écris le mot anglais de cette image : touche les lettres dans l’ordre.';
+    let silentText = 'Écris le mot anglais de cette image : touche les lettres dans l’ordre.';
+    if (traps.length) silentText = `${silentText} Attention, il y a deux lettres en trop !`;
+    const items = order.map((i) => ({ value: i, label: letters[i] }));
     return {
       key: `epelle-anglais:${word.en}`,
       interaction: 'order',
       text: silent ? silentText : 'Écris le mot anglais : touche les lettres dans l’ordre.',
       instruction: silent ? silentText : ['Écris le mot anglais :', sound, 'Touche les lettres dans l’ordre.'],
-      short: silent ? { key: 'epelle-anglais:image', text: 'Écris le mot.' } : { text: 'Écris le mot.', speak: [sound] },
+      short: silent ? { key: traps.length ? 'epelle-anglais:pieges' : 'epelle-anglais:image', text: 'Écris le mot.' } : { text: 'Écris le mot.', speak: [sound] },
       replay: silent ? undefined : [sound],
       stage: listen ? { type: 'listen' } : pictureStage,
-      items: order.map((i) => ({ value: i, label: letters[i] })),
+      items: withTraps(rng, items, traps),
       order: 'asc',
       sign: '',
       lang: 'en',
@@ -490,8 +620,98 @@ const NURSERY = [
   { line: 'The wheels on the…', word: 'bus', emoji: '🚌', fr: 'bus' },
 ];
 
-/** Niveaux 4 à 6 : comprendre les consignes, retrouver la question, compléter une phrase. */
+// Les formules de politesse : s'excuser, demander poliment, répondre à un merci…
+// `group` : deux formules du même groupe ne sont jamais proposées ensemble (sorry / excuse me).
+const POLITE = [
+  { emoji: '💥', situation: 'Tu as bousculé un copain. Tu dis…', en: 'Sorry!', group: 'pardon' },
+  { emoji: '🚶', situation: 'Tu veux passer devant quelqu’un. Tu dis…', en: 'Excuse me!', group: 'pardon' },
+  { emoji: '🍪', situation: 'Tu voudrais un biscuit. Tu dis…', en: 'A cookie, please!', group: 'please' },
+  { emoji: '🙏', situation: 'Ton ami te dit merci. Tu réponds…', en: 'You’re welcome!', group: 'welcome' },
+  { emoji: '📕', situation: 'Tu donnes un livre à la maîtresse. Tu dis…', en: 'Here you are!', group: 'here' },
+  { emoji: '🤕', situation: 'Ton copain est tombé. Tu lui demandes…', en: 'Are you OK?', group: 'ok' },
+  { emoji: '👧', situation: 'Tu présentes ta sœur. Tu dis…', en: 'This is my sister.', group: 'this' },
+  { emoji: '❓', situation: 'Tu n’as pas compris. Tu dis…', en: 'Can you repeat, please?', group: 'repeat' },
+];
+
+const WEATHER = [
+  { emoji: '☀️', en: 'sunny' }, { emoji: '🌧️', en: 'rainy' }, { emoji: '❄️', en: 'snowy' },
+  { emoji: '💨', en: 'windy' }, { emoji: '☁️', en: 'cloudy' },
+];
+
+/**
+ * Réponds selon l'image : la question est entendue, et la bonne réponse dépend de l'image
+ * (les mauvaises réponses sont du même genre : d'autres couleurs, d'autres animaux…).
+ */
+function pictureTalk(rng) {
+  const kind = pick(rng, ['colour', 'animal', 'feeling', 'weather', 'count']);
+  const three = (items) => {
+    const [target, ...others] = sample(rng, items, 3);
+    return { target, options: shuffle(rng, [target, ...others]) };
+  };
+  if (kind === 'colour') {
+    const { target, options } = three(theme('Les couleurs').words);
+    return { q: 'What colour is it?', a: `It’s ${target.en}.`, options: options.map((w) => `It’s ${w.en}.`), stage: { type: 'swatch', color: target.swatch } };
+  }
+  if (kind === 'animal') {
+    const { target, options } = three(theme('Les animaux').words);
+    const it = (w) => `It’s ${/^[aeiou]/.test(w.en) ? 'an' : 'a'} ${w.en}.`;
+    return { q: 'What is it?', a: it(target), options: options.map(it), stage: { type: 'picture', emoji: target.emoji } };
+  }
+  if (kind === 'feeling') {
+    const { target, options } = three(theme('Les émotions').words);
+    return { q: 'How are you?', a: `I’m ${target.en}.`, options: options.map((w) => `I’m ${w.en}.`), stage: { type: 'picture', emoji: target.emoji } };
+  }
+  if (kind === 'weather') {
+    const { target, options } = three(WEATHER);
+    return { q: 'What’s the weather like?', a: `It’s ${target.en}.`, options: options.map((w) => `It’s ${w.en}.`), stage: { type: 'picture', emoji: target.emoji } };
+  }
+  const n = randInt(rng, 2, 6);
+  const thing = pick(rng, COUNT_THINGS);
+  const say = (v) => `${capital(NUMBER_WORDS[v - 1])} ${thing.many}.`;
+  return {
+    q: `How many ${thing.many}?`,
+    a: say(n),
+    options: numberChoices(rng, n, 3, 2, 6).map(say),
+    stage: { type: 'objects', emoji: thing.emoji, count: n, perRow: 5 },
+  };
+}
+
+/** Niveaux 4 à 8 : comprendre les consignes, retrouver la question, compléter une phrase, être poli, répondre selon l'image. */
 function parlePlus(level, rng, name) {
+  if (level === 7) {
+    const target = pick(rng, POLITE);
+    const first = pick(rng, POLITE.filter((p) => p.group !== target.group));
+    const second = pick(rng, POLITE.filter((p) => p.group !== target.group && p.group !== first.group));
+    const others = [first, second];
+    const options = shuffle(rng, [target, ...others]);
+    return {
+      key: `parle:politesse:${target.en}`,
+      text: target.situation,
+      instruction: [target.situation, ...options.flatMap((o, i) => [i ? 'ou' : '', { text: o.en, lang: EN, rate: 0.85 }]).filter(Boolean)],
+      short: { key: 'parle:politesse', text: target.situation },
+      stage: { type: 'picture', emoji: target.emoji },
+      choices: options.map((o) => ({ value: o.en, label: o.en, lang: 'en' })),
+      choiceStyle: 'answers',
+      answer: target.en,
+      success: { speak: [{ text: target.en, lang: EN }] },
+    };
+  }
+  if (level === 8) {
+    const talk = pictureTalk(rng);
+    const ask = { text: talk.q, lang: EN, rate: 0.85 };
+    return {
+      key: `parle:image:${talk.a}`,
+      text: 'Regarde l’image, écoute la question, et choisis la bonne réponse.',
+      instruction: ['Regarde l’image, écoute la question, et choisis la bonne réponse.', ask],
+      short: { key: 'parle:image', text: 'Quelle réponse ?', speak: [ask] },
+      replay: [ask],
+      stage: talk.stage,
+      choices: talk.options.map((o) => ({ value: o, label: o, lang: 'en' })),
+      choiceStyle: 'answers',
+      answer: talk.a,
+      success: { speak: [{ text: talk.q, lang: EN }, { text: talk.a, lang: EN }] },
+    };
+  }
   if (level === 4) {
     const target = pick(rng, COMMANDS);
     const options = shuffle(rng, [target, ...sample(rng, COMMANDS.filter((c) => c !== target), 2)]);
@@ -555,10 +775,11 @@ export const parleAnglais = {
   domain: 'anglais',
   title: 'Parle anglais',
   icon: '💬',
-  skill: 'Saluer, se présenter, répondre en anglais ; comprendre les consignes ; connaître des comptines',
+  skill: 'Saluer, se présenter, être poli, répondre en anglais ; comprendre les consignes ; connaître des comptines',
   levels: [
     'Bonjour, merci, au revoir', 'Petites conversations', 'Les comptines',
     'Les consignes de classe', 'Trouve la question', 'Le mot qui manque',
+    'Être poli en anglais', 'Réponds selon l’image',
   ],
   generate(level, rng, index = 0, context = {}) {
     const name = context.name || 'Lou';
