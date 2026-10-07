@@ -20,6 +20,7 @@ export const CHANGELOG = [
       'Écrire au doigt : nombres à 2 chiffres, syllabes et petits mots attachés. Dictée : lettres muettes et accents. Histoires : le sens des mots, vrai/faux/on ne sait pas. Petits textes documentaires et recettes.',
       'Maths et logique : compléter à 100, un de moins, la moitié, formes de la vie courante, devinettes, ombres tournées, fois 10 et fois 100, durées, « moins dix ». Puzzles de 30 et 36 pièces, coins coupés, rétrécir un dessin.',
       'Nouveau jeu « Le labyrinthe rond » : des anneaux à traverser au doigt jusqu’au trésor du centre (ou du centre vers la sortie), avec des clés à ramasser. Le labyrinthe carré gagne un niveau « Les trois clés ».',
+      'Trois nouveaux jeux de logique : « Le tableau logique » (trouver le dessin qui manque, jusqu’à trois règles à la fois), « Les balances » (combien pèse l’animal ?) et « Le dessin caché » (picross de 4 × 4 à 8 × 8).',
       'Sudoku plus difficiles : grilles 6 × 6 très dures, puis un vrai sudoku 9 × 9 en trois niveaux, toujours avec une seule solution (les niveaux faciles sont regroupés, le niveau atteint est conservé).',
       'Le monde : les voisins de la France, les océans, lire les couleurs d’un drapeau, le drapeau effacé.',
       'Anglais : thèmes regroupés deux par deux (10 niveaux au lieu de 13, le niveau atteint est conservé), phrases croisées, l’ordre des mots, histoires « Who is…? », politesse, nombres jusqu’à 100, calculs jusqu’à 20, mélanges de couleurs, nouveaux memory, intrus et contraires, questions.',
