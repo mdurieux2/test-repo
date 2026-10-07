@@ -4,13 +4,21 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.9.0',
+  version: '1.9.1',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.9.1',
+    date: '2026-10-07',
+    changes: [
+      'Mots dits seuls mieux prononcés : chaque mot est réécouté son par son, et refait s’il est mal dit (par exemple « souris » sans le « s » final, « chat » sans le « t », et « singe » plus jamais dit comme l’anglais « sing »).',
+      'Seuls les sons corrigés sont téléchargés à nouveau : un petit paquet, pas toute la voix.',
+    ],
+  },
   {
     version: '1.9.0',
     date: '2026-10-06',
