@@ -33,4 +33,4 @@ Interface et commentaires en français.
   Pour mettre à jour ce que dit l'app hors des jeux : `SPEECH_LOG=scripts/voix/parole-e2e.json PARTS=scenario npm run test:e2e`.
 
 L'affiche foot, longtemps dans `affiche/`, vit désormais dans son propre dépôt (`affiche-foot`). Sa dernière
-version dans ce dépôt est marquée par l'étiquette git `affiche-avant-separation`.
+version dans ce dépôt est conservée dans la branche `archive/affiche-avant-separation`.
