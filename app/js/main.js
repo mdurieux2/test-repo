@@ -1739,8 +1739,14 @@ function sudokuZone(ctx) {
     });
     return el;
   });
+  // la ligne, la colonne et le carré de la case choisie sont teintés (repère pour le 9 × 9)
+  const sameBox = (a, b) => Math.floor(Math.floor(a / size) / br) === Math.floor(Math.floor(b / size) / br)
+    && Math.floor((a % size) / bc) === Math.floor((b % size) / bc);
+  const isPeer = (i) => selected >= 0 && i !== selected
+    && (Math.floor(i / size) === Math.floor(selected / size) || i % size === selected % size || sameBox(i, selected));
   const refresh = () => cells.forEach((el, i) => {
     el.classList.toggle('selected', i === selected);
+    el.classList.toggle('peer', isPeer(i));
     el.setAttribute('aria-label', label(i));
   });
   // pourquoi c'est faux : la même image est déjà dans la ligne, la colonne ou le carré
@@ -1749,7 +1755,7 @@ function sudokuZone(ctx) {
     const c = cell % size;
     if (grid.some((x, i) => x === v && Math.floor(i / size) === r)) return 'cette ligne';
     if (grid.some((x, i) => x === v && i % size === c)) return 'cette colonne';
-    if (grid.some((x, i) => x === v && Math.floor(Math.floor(i / size) / br) === Math.floor(r / br) && Math.floor((i % size) / bc) === Math.floor(c / bc))) return 'ce carré';
+    if (grid.some((x, i) => x === v && sameBox(i, cell))) return 'ce carré';
     return null;
   };
   const choose = (v) => {
@@ -1780,7 +1786,7 @@ function sudokuZone(ctx) {
   };
   const palette = symbols.map((sym, v) => h('button', { class: 'sudoku-symbol', 'data-symbol': v, onclick: () => choose(v) }, sym));
   const board = h('div', { class: `sudoku size-${size}`, style: { '--size': size } }, cells);
-  const zone = h('div', { class: 'choices sudoku-palette', style: { '--n': size } }, palette);
+  const zone = h('div', { class: `choices sudoku-palette size-${size}`, style: { '--n': size } }, palette);
   refresh();
   return { stage: h('div', { class: 'stage stage-sudoku' }, board), zone };
 }

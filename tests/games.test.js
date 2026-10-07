@@ -291,19 +291,23 @@ test('calculs à trous : 3 à 5 calculs, deux étiquettes par calcul, résultats
 });
 
 test('sudoku : grille juste, une seule solution, nombre de cases à trouver du niveau', () => {
-  const holes = { 1: 4, 2: 7, 3: 6, 4: 10, 5: 12, 6: 18, 7: 20, 8: 22, 9: 24 };
-  for (let level = 1; level <= 9; level++) {
+  // niveaux 1 à 7 (4 × 4 et 6 × 6) ; le 9 × 9 (niveaux 8 à 10) : voir sudoku-difficile.test.js
+  const holes = { 1: 4, 2: 7, 3: 8, 4: 15, 5: 21, 6: 24, 7: 26 };
+  for (let level = 1; level <= 7; level++) {
     const rng = createRng(level);
     for (let i = 0; i < 40; i++) {
       const q = findGame('sudoku').generate(level, rng);
       const { size, puzzle, solution, symbols } = q.stage;
       assert.equal(symbols.length, size);
       assert.equal(new Set(symbols).size, size);
-      assert.ok(size <= 6, 'grille trop grande pour un téléphone');
-      if (level === 7) assert.ok(symbols.every((s) => !/^[A-Z0-9]$/.test(s)), 'des images au niveau 7');
-      if (level === 8) assert.deepEqual(symbols, ['A', 'B', 'C', 'D', 'E', 'F']);
-      // les grilles les plus dures se résolvent sans jamais deviner
-      if (level >= 7) assert.ok(solvesBySingles(puzzle, size), q.key);
+      assert.equal(size, level <= 3 ? 4 : 6);
+      if (level <= 2) assert.ok(symbols.every((s) => !/^[A-Z0-9]$/.test(s)), 'des images aux niveaux 1 et 2');
+      // niveau 5 : des images ou les lettres A à F
+      if (level === 5 && /^[A-F]$/.test(symbols[0])) assert.deepEqual(symbols, ['A', 'B', 'C', 'D', 'E', 'F']);
+      if (level === 5 && !/^[A-F]$/.test(symbols[0])) assert.ok(symbols.every((s) => !/^[A-Z0-9]$/.test(s)), 'des images');
+      if (level === 3 || level === 4 || level >= 6) assert.deepEqual(symbols, Array.from({ length: size }, (_, i) => String(i + 1)));
+      // les grilles les plus dures (niveau 5 et plus) se résolvent sans jamais deviner
+      if (level >= 5) assert.ok(solvesBySingles(puzzle, size), q.key);
       assert.equal(puzzle.filter((v) => v === null).length, holes[level]);
       puzzle.forEach((v, k) => { if (v !== null) assert.equal(v, solution[k]); });
       solution.forEach((v, k) => {

@@ -11,9 +11,10 @@ import { PROGRAMS } from '../app/js/programs.js';
 import { createRng } from '../app/js/random.js';
 
 // Nombre de niveaux avant l'ajout : les 3 derniers niveaux de chaque jeu sont les nouveaux.
+// (Le sudoku a depuis été réorganisé en 10 niveaux : voir sudoku-difficile.test.js.)
 const BEFORE = {
   relier: 3, tables: 6, ranger: 7, problemes: 7, doubles: 4, formes: 3, algorithmes: 4, intrus: 3, ombres: 3,
-  sudoku: 6, heure: 4, symetrie: 4, reproduire: 3, tangram: 2, cubes: 4, labyrinthe: 6, 'chemin-nombres': 8,
+  heure: 4, symetrie: 4, reproduire: 3, tangram: 2, cubes: 4, labyrinthe: 6, 'chemin-nombres': 8,
   'chemin-lettres': 4,
 };
 // Nombre de niveaux aujourd'hui, quand il a encore changé depuis (niveaux ajoutés ensuite, ou le chemin

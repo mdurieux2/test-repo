@@ -1089,6 +1089,16 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .sudoku-symbol:active { transform: translateY(3px); }
 .sudoku-symbol.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 5px 0 #e6b800, 0 0 0 4px var(--hint) inset; }
+/* 9 × 9 : la grille la plus grande possible (cases d'au moins 32 px sur un iPhone SE ou un Android
+   de 360 px), un pavé de chiffres plus bas et plus serré, une place plus petite pour les messages */
+.sudoku.size-9 {
+  width: min(100%, 440px, calc(100vh / var(--zoom, 1) - 356px));
+  width: min(100%, 440px, calc(100dvh / var(--zoom, 1) - 356px));
+}
+.sudoku.size-9 .sudoku-cell.peer:not(.given) { background: #fff6d8; }
+.sudoku-palette.size-9 { gap: 4px; }
+.sudoku-palette.size-9 .sudoku-symbol { min-height: 52px; border-radius: 14px; font-size: min(1.8rem, 7vw); }
+.play-sudoku:has(.sudoku-palette.size-9) .feedback { min-height: 64px; }
 
 
 /* =====================================================================
@@ -1258,6 +1268,9 @@ input { -webkit-user-select: text; user-select: text; }
   .maze-controls .maze-arrow:nth-child(4) { grid-area: right; }
   .maze-controls .maze-arrow:nth-child(5) { grid-area: hint; }
   .sudoku-palette { grid-template-columns: repeat(min(var(--n), 3), minmax(0, 1fr)); }
+  .sudoku.size-9 { width: min(100%, calc(100dvh - 62px)); }
+  .sudoku-palette.size-9 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .sudoku-palette.size-9 .sudoku-symbol { min-height: 56px; }
 
   /* relier : les étiquettes sur deux lignes, les traits vont de haut en bas */
   .match { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; row-gap: 64px; width: 100%; }
