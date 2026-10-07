@@ -81,9 +81,7 @@ function show(...children) {
   document.body.dataset.season = store.settings.seasonal === false ? '' : currentSeason().id;
   app.replaceChildren(...children.filter(Boolean));
   window.scrollTo(0, 0);
-  const calm = app.querySelector('.screen.play, .screen.parents, .screen.gate');
-  if (store.settings.music && !calm) startMusic();
-  else stopMusic();
+  musicForScreen();
 }
 
 // ---------------------------------------------------------------- Saisons
@@ -120,53 +118,104 @@ function starCounter() {
   return h('div', { class: 'star-counter', 'aria-label': `${child().stars} étoiles` }, '⭐ ', child().stars);
 }
 
+/** La musique douce joue sur l'accueil et les menus, jamais pendant un jeu ni chez les parents. */
+function musicForScreen() {
+  const calm = app.querySelector('.screen.play, .screen.parents, .screen.gate');
+  if (store.settings.music && !calm) startMusic();
+  else stopMusic();
+}
+
+// Le son (musique et petits sons) et la voix : allumés ou non, d'après les réglages
+const SOUND_ON = {
+  sound: () => store.settings.sounds !== false || Boolean(store.settings.music),
+  voice: () => store.settings.voice !== false,
+};
+
 /**
- * Musique et voix, à couper ou remettre d'un geste depuis l'accueil (les mêmes réglages que dans
- * l'espace parents). Coupé : l'icône est barrée, pas seulement plus pâle.
+ * Met à jour les boutons du son et de la voix, et les interrupteurs des réglages des parents,
+ * après un changement fait par l'un ou par l'autre.
+ */
+function syncSoundControls() {
+  for (const btn of app.querySelectorAll('.sound-toggle')) {
+    const on = SOUND_ON[btn.dataset.kind]();
+    btn.classList.toggle('off', !on);
+    btn.setAttribute('aria-pressed', String(on));
+  }
+  for (const box of app.querySelectorAll('input[data-setting]')) {
+    const value = store.settings[box.dataset.setting];
+    box.checked = box.dataset.setting === 'music' ? Boolean(value) : value !== false;
+  }
+}
+
+/**
+ * Le son (musique et petits sons) et la voix, à couper ou remettre d'un geste sur chaque écran
+ * (les mêmes réglages que dans l'espace parents). Coupé : l'icône est barrée, pas seulement plus pâle.
+ * Le son coupé coupe la musique et les petits sons ; remis, il remet les deux.
  */
 function soundToggles() {
-  const button = (kind, label, isOn, onToggle) => {
-    const btn = h('button', { class: 'sound-toggle', [`data-toggle-${kind}`]: '', 'aria-label': label });
-    const paint = () => {
-      const on = isOn();
-      btn.classList.toggle('off', !on);
-      btn.setAttribute('aria-pressed', String(on));
-      btn.replaceChildren(h('span', { 'aria-hidden': 'true' }, kind === 'voice' ? (on ? '🔊' : '🔇') : '🎵'));
-    };
+  const button = (kind, label, emoji, onToggle) => {
+    const btn = h('button', { class: 'sound-toggle', 'data-kind': kind, [`data-toggle-${kind}`]: '', 'aria-label': label },
+      h('span', { 'aria-hidden': 'true' }, emoji));
     btn.addEventListener('click', () => {
-      onToggle(!isOn());
+      onToggle(!SOUND_ON[kind]());
       save();
-      paint();
+      syncSoundControls();
     });
-    paint();
+    btn.classList.toggle('off', !SOUND_ON[kind]());
+    btn.setAttribute('aria-pressed', String(SOUND_ON[kind]()));
     return btn;
   };
   return [
-    button('music', 'Musique', () => Boolean(store.settings.music), (on) => {
+    button('sound', 'Musique et sons', '🎵', (on) => {
+      store.settings.sounds = on;
       store.settings.music = on;
-      if (on) startMusic();
-      else stopMusic();
+      applySettings();
+      musicForScreen();
     }),
-    button('voice', 'Voix', () => store.settings.voice !== false, (on) => {
+    // pas 🔊 : dans les jeux, 🔊 fait réécouter la consigne
+    button('voice', 'Voix', '🗣️', (on) => {
       store.settings.voice = on;
       applySettings();
       stopStoryAudio();
-      if (on) say(me(), `Bonjour ${me().spoken} !`);
+      if (!on) return;
+      // la voix revient : pendant un jeu, la consigne est redite ; ailleurs, bonjour (pas chez les parents)
+      const instruction = app.querySelector('.screen.play .bubble');
+      if (instruction) instruction.click();
+      else if (child() && !app.querySelector('.screen.parents, .screen.gate')) say(me(), `Bonjour ${me().spoken} !`);
     }),
   ];
 }
 
-/** Barre du haut de l'accueil : qui joue, puis la musique, la voix et les étoiles. */
+/** Le son et la voix, puis ce qui est déjà à droite de la barre (les étoiles…). */
+function barActions(right) {
+  return h('div', { class: 'bar-actions' }, ...soundToggles(), right);
+}
+
+/** Barre du haut de l'accueil : qui joue, puis le son, la voix et les étoiles. */
 function homeBar() {
-  return h('header', { class: 'top-bar' }, profileChip(), h('span'),
-    h('div', { class: 'home-actions' }, ...soundToggles(), starCounter()));
+  return h('header', { class: 'top-bar' }, profileChip(), h('span'), barActions(starCounter()));
 }
 
 function topBar({ onBack, backLabel = 'Retour', title, right }) {
-  return h('header', { class: 'top-bar' },
+  const text = title && !(title instanceof Node);
+  // un titre écrit passe sous la barre sur un téléphone en portrait (voir .top-bar.has-title)
+  return h('header', { class: text ? 'top-bar has-title' : 'top-bar' },
     onBack ? h('button', { class: 'icon-btn', onclick: onBack, 'aria-label': backLabel }, backLabel === 'Quitter' ? '✕' : '←') : h('span'),
-    title instanceof Node ? title : title ? h('h1', { class: 'top-title' }, title) : h('span'),
-    right || h('span'));
+    text ? h('h1', { class: 'top-title' }, title) : title || h('span'),
+    barActions(right));
+}
+
+/** Le son et la voix dans le coin en haut à droite, sur les écrans sans barre (résultats, bienvenue). */
+function cornerActions() {
+  return h('div', { class: 'bar-actions corner' }, ...soundToggles());
+}
+
+/** En bas de « Qui joue ? » : le son, la voix, la version et le contact, en petit. */
+function appFooter() {
+  return h('footer', { class: 'app-footer' },
+    h('div', { class: 'bar-actions' }, ...soundToggles()),
+    h('p', {}, h('span', { 'data-version': APP.version }, `Version ${APP.version}`), ' · Contact : ',
+      h('a', { href: `mailto:${APP.contact}` }, APP.author)));
 }
 
 function isStandalone() {
@@ -233,7 +282,8 @@ function profileScreen() {
           h('span', { class: 'profile-grade' }, GRADES[kid.grade]),
           h('span', { class: 'profile-stars' }, '⭐ ', kid.stars));
       })),
-    installHint()));
+    installHint(),
+    appFooter()));
 }
 
 // ---------------------------------------------------------------- Installer l'icône
@@ -528,6 +578,7 @@ function childForm({ initial = {}, submitLabel, onSubmit }) {
 function welcomeScreen(adding = !store.order.length) {
   const added = store.order.map((id) => h('span', { class: 'child-chip', 'data-child': id }, avatar(id, 'avatar-xs'), store.profiles[id].name));
   show(h('main', { class: 'screen welcome' },
+    cornerActions(),
     h('div', { class: 'welcome-hero' },
       h('div', { class: 'welcome-avatars', 'aria-hidden': 'true' },
         avatar('apercu-fille', 'avatar-md', { look: 'fille' }), avatar('apercu-garcon', 'avatar-md', { look: 'garcon' })),
@@ -3053,6 +3104,7 @@ function finishSession(session) {
   const title = stars === 3 ? `Bravo ${me().name} !` : stars === 2 ? `Très bien ${me().name} !` : `Bien joué ${me().name} !`;
 
   show(h('main', { class: `screen results domain-theme-${game.domain}` },
+    cornerActions(),
     confetti(newRecord ? 3 : stars),
     h('div', { class: 'duo duo-results' }, avatar(me().id, 'avatar-md cheer')),
     h('div', { class: 'result-stars', 'aria-label': `${stars} étoiles sur 3` },
@@ -3315,9 +3367,13 @@ function parentGate(next) {
   setTimeout(() => input.focus(), 50);
 }
 
-function toggle(label, value, onChange) {
-  const box = h('input', { type: 'checkbox', checked: value, role: 'switch' });
-  box.addEventListener('change', () => onChange(box.checked));
+function toggle(label, value, onChange, setting) {
+  // `setting` : le réglage suivi aussi par les boutons du son et de la voix (voir syncSoundControls)
+  const box = h('input', { type: 'checkbox', checked: value, role: 'switch', 'data-setting': setting });
+  box.addEventListener('change', () => {
+    onChange(box.checked);
+    if (setting) syncSoundControls();
+  });
   return h('label', { class: 'setting' }, h('span', {}, label), box);
 }
 
@@ -4126,11 +4182,11 @@ function settingsTab() {
   return h('div', { class: 'tab-panel settings' },
     h('section', { class: 'card' },
       h('h2', {}, 'Voix et sons'),
-      toggle('Consignes lues à voix haute', store.settings.voice, (v) => { store.settings.voice = v; applySettings(); save(); }),
+      toggle('Consignes lues à voix haute', store.settings.voice, (v) => { store.settings.voice = v; applySettings(); save(); }, 'voice'),
       naturalVoiceRow(),
       voiceList.length ? voiceRow(voiceList) : null,
-      toggle('Petits sons', store.settings.sounds, (v) => { store.settings.sounds = v; applySettings(); save(); }),
-      toggle('Musique douce (accueil et menus)', Boolean(store.settings.music), (v) => { store.settings.music = v; save(); if (!v) stopMusic(); }),
+      toggle('Petits sons', store.settings.sounds, (v) => { store.settings.sounds = v; applySettings(); save(); }, 'sounds'),
+      toggle('Musique douce (accueil et menus)', Boolean(store.settings.music), (v) => { store.settings.music = v; save(); if (!v) stopMusic(); }, 'music'),
       toggle('Décors de saison (Noël, Halloween…)', store.settings.seasonal !== false, (v) => { store.settings.seasonal = v; save(); }),
       h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
       h('p', { class: 'muted small' }, 'Voix de l’appareil (phrases rares, ou voix naturelle coupée) : pour qu’elle soit plus naturelle, Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),

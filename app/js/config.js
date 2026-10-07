@@ -4,13 +4,23 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.10.0',
+  version: '1.11.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.11.0',
+    date: '2026-10-07',
+    changes: [
+      'Le son 🎵 et la voix 🗣️ se coupent ou se remettent d’un geste sur chaque écran, même pendant un jeu : deux boutons en haut à droite (sur « Qui joue ? », en bas). Le son regroupe la musique et les petits sons.',
+      'Voix remise pendant un jeu : la consigne est redite tout de suite.',
+      'En bas de « Qui joue ? », en petit : le numéro de version et le contact.',
+      '« Qui joue ? » : avec une photo, le prénom n’est plus écrit deux fois (il reste en gros sous la photo).',
+    ],
+  },
   {
     version: '1.10.0',
     date: '2026-10-07',
