@@ -104,20 +104,85 @@ function longestWord(rng) {
   };
 }
 
+// Niveau 7 : les syllabes orales de chaque mot, écrites comme elles se disent (« ca », « nar »).
+const SPOKEN_SYLLABLES = {
+  lapin: ['la', 'pin'], sapin: ['sa', 'pin'], lama: ['la', 'ma'], canard: ['ca', 'nar'], renard: ['re', 'nar'],
+  cadeau: ['ca', 'do'], café: ['ca', 'fé'], bateau: ['ba', 'to'], gâteau: ['gâ', 'to'], château: ['châ', 'to'],
+  ballon: ['ba', 'lon'], melon: ['me', 'lon'], moto: ['mo', 'to'], vélo: ['vé', 'lo'], robot: ['ro', 'bo'],
+  cochon: ['co', 'chon'], mouton: ['mou', 'ton'], hibou: ['i', 'bou'], panda: ['pan', 'da'], chapeau: ['cha', 'po'],
+  poisson: ['poi', 'son'], dragon: ['dra', 'gon'], citron: ['ci', 'tron'], requin: ['re', 'quin'],
+  papillon: ['pa', 'pi', 'yon'], pantalon: ['pan', 'ta', 'lon'], escargot: ['es', 'car', 'go'],
+  éléphant: ['é', 'lé', 'fant'], kangourou: ['kan', 'gou', 'rou'], parapluie: ['pa', 'ra', 'pluie'],
+};
+
+/**
+ * Niveau 7 : recoller les syllabes entendues une à une (« ca… nar ») pour trouver le mot.
+ * Les intrus ont une syllabe en commun avec le mot (« cadeau », « renard ») : il faut écouter les deux.
+ */
+function blendSyllables(rng) {
+  const words = Object.keys(SPOKEN_SYLLABLES);
+  const word = pick(rng, words);
+  const parts = SPOKEN_SYLLABLES[word];
+  const shares = (w) => w !== word && SPOKEN_SYLLABLES[w].some((p) => parts.includes(p));
+  const close = sample(rng, words.filter(shares), 2);
+  const rest = sample(rng, words.filter((w) => w !== word && !close.includes(w)), 2 - close.length);
+  const options = shuffle(rng, [word, ...close, ...rest]);
+  const said = parts.map((p) => ({ text: p, rate: 0.6 }));
+  return {
+    key: `syllabes-rythme:recolle:${word}`,
+    text: 'Recolle les syllabes : quel mot entends-tu ?',
+    instruction: ['Écoute les syllabes, et recolle-les. Quel mot entends-tu ?', ...said],
+    short: { key: 'syllabes-rythme:recolle', text: 'Quel mot ?', speak: said },
+    replay: said,
+    stage: { type: 'picture', emoji: '🧩' },
+    choices: options.map((w) => ({ value: w, label: pictureOf(w) })),
+    choiceStyle: 'pictures',
+    answer: word,
+    success: { speak: [...said, `${word} !`] },
+  };
+}
+
+/** Niveau 8 : ranger trois images, du mot le plus court au mot le plus long à dire. */
+function shortestToLongest(rng) {
+  const counts = sample(rng, [1, 2, 3, 4], 3).sort((a, b) => a - b);
+  const words = counts.map((n) => pick(rng, SYLLABLE_WORDS[n]));
+  let order = shuffle(rng, [0, 1, 2]);
+  if (order.every((v, i) => v === i)) order = [...order.slice(1), order[0]]; // jamais déjà rangées
+  const shown = order.map((i) => words[i]);
+  const spoken = shown.map((w, i) => ({ text: i === shown.length - 1 ? `et ${w}` : w, rate: 0.7 }));
+  return {
+    key: `syllabes-rythme:range:${words.join('-')}`,
+    interaction: 'order',
+    text: 'Range les images, du mot le plus court au mot le plus long.',
+    instruction: ['Range les images, du mot le plus court au mot le plus long à dire. Frappe les syllabes pour t’aider !', ...spoken],
+    short: { key: 'syllabes-rythme:range', text: 'Du plus court au plus long !', speak: spoken },
+    replay: spoken,
+    stage: { type: 'picture', emoji: '👏' },
+    items: order.map((i) => ({ value: counts[i], emoji: pictureOf(words[i]), label: words[i], scale: 1 })),
+    order: 'asc',
+    choices: [],
+    answer: words.join(','),
+    success: { speak: `${words.join(', ')} : du plus court au plus long !` },
+  };
+}
+
 export const syllabesRythme = {
   id: 'syllabes-rythme',
   domain: 'francais',
   section: 'Écouter les sons',
   title: 'Frappe les syllabes',
   icon: '👏',
-  skill: 'Compter et repérer les syllabes d’un mot à l’oral (conscience phonologique)',
+  skill: 'Compter, repérer et recoller les syllabes d’un mot à l’oral (conscience phonologique)',
   levels: [
     'Mots de 1 ou 2 syllabes', "Jusqu'à 3 syllabes", "Jusqu'à 4 syllabes",
     'Même syllabe au début', 'Même syllabe à la fin', 'Le mot le plus long',
+    'Recolle les syllabes', 'Du plus court au plus long',
   ],
   generate(level, rng) {
     if (level === 4 || level === 5) return sameSyllable(rng, level === 5);
     if (level === 6) return longestWord(rng);
+    if (level === 7) return blendSyllables(rng);
+    if (level === 8) return shortestToLongest(rng);
     const maxSyll = level + 1;
     const count = pick(rng, Array.from({ length: maxSyll }, (_, i) => i + 1));
     const word = pick(rng, SYLLABLE_WORDS[count]);
@@ -239,18 +304,124 @@ function rhymingPair(rng) {
   };
 }
 
+// Niveau 6 : [mot, piège] — le piège commence par la même syllabe que le mot, mais ne rime pas.
+const START_TRAPS = [
+  ['bateau', 'ballon'], ['bateau', 'banane'], ['ballon', 'bateau'], ['ballon', 'banane'], ['lapin', 'lama'],
+  ['chat', 'chapeau'], ['chat', 'château'], ['chapeau', 'chat'], ['canard', 'cadeau'], ['canard', 'café'],
+  ['cadeau', 'canard'], ['cadeau', 'café'], ['café', 'canard'], ['café', 'cadeau'], ['cochon', 'koala'],
+  ['sapin', 'salade'], ['rat', 'radio'], ['mouton', 'mouche'], ['requin', 'renard'], ['renard', 'requin'],
+  ['avion', 'abeille'], ['dragon', 'drapeau'], ['lit', 'lion'],
+];
+
+/** Niveau 6 : le mot qui rime, avec un piège qui commence pareil (« bateau » : ballon ou gâteau ?). */
+function rhymeWithStartTrap(rng) {
+  const [target, trap] = pick(rng, START_TRAPS);
+  const group = rhymeGroup(target);
+  const rhyme = pick(rng, group.filter((w) => w !== target));
+  const others = RHYMES.filter((g) => g !== group).flat()
+    .filter((w) => w !== trap && w.slice(0, 2) !== target.slice(0, 2) && w.slice(0, 2) !== rhyme.slice(0, 2));
+  const options = shuffle(rng, [rhyme, trap, ...sample(rng, others, 2)]);
+  const list = sayList(options);
+  return {
+    key: `rimes:piege:${target}`,
+    text: `Quel mot rime avec « ${target} » ?`,
+    instruction: ['Attention au piège : écoute bien la fin des mots.', `Quel mot rime avec : ${target} ?`, list],
+    short: { key: 'rimes', text: `Rime avec « ${target} » ?`, speak: [`${target} ?`, list] },
+    replay: [`${target} ?`, list],
+    stage: { type: 'picture', emoji: pictureOf(target) },
+    choices: options.map((w) => ({ value: w, label: pictureOf(w) })),
+    choiceStyle: 'pictures',
+    answer: rhyme,
+    success: { speak: `${target}, ${rhyme} : ça rime !` },
+  };
+}
+
+// Niveau 7 : finir la phrase avec un mot qui rime, alors qu'un autre mot irait mieux pour le sens.
+const SENSE_TRAPS = [
+  { text: 'Le petit chat attrape un…', anchor: 'chat', answer: 'rat', trap: 'poisson' },
+  { text: 'Le lapin mange du…', anchor: 'lapin', answer: 'raisin', trap: 'melon' },
+  { text: 'Dans la nuit, le loup voit un…', anchor: 'loup', answer: 'hibou', trap: 'renard' },
+  { text: 'Sur le bateau, je mange un…', anchor: 'bateau', answer: 'gâteau', trap: 'poisson' },
+  { text: 'Le bébé lance le…', anchor: 'bébé', answer: 'dé', trap: 'ballon' },
+  { text: 'Le canard a peur du…', anchor: 'canard', answer: 'renard', trap: 'loup' },
+  { text: 'Le dauphin saute près du…', anchor: 'dauphin', answer: 'requin', trap: 'bateau' },
+  { text: 'Avec mon crayon, je dessine un…', anchor: 'crayon', answer: 'mouton', trap: 'soleil' },
+  { text: 'Le robot conduit une…', anchor: 'robot', answer: 'moto', trap: 'voiture' },
+  { text: 'Le gros cochon mange du…', anchor: 'cochon', answer: 'melon', trap: 'raisin' },
+  { text: 'Le petit poisson a peur du…', anchor: 'poisson', answer: 'dragon', trap: 'requin' },
+  { text: 'Le hibou se pose sur le…', anchor: 'hibou', answer: 'loup', trap: 'sapin' },
+];
+
+/** Niveau 7 : le mot qui rime, et non le mot qui irait le mieux dans la phrase. */
+function rhymeOverSense(rng) {
+  const item = pick(rng, SENSE_TRAPS);
+  const group = rhymeGroup(item.anchor);
+  const other = pick(rng, RHYMES.filter((g) => g !== group).flat().filter((w) => w !== item.trap && pictureOf(w) !== pictureOf(item.trap)));
+  const options = shuffle(rng, [item.answer, item.trap, other]);
+  const sentence = { text: item.text, rate: 0.85 };
+  const list = sayList(options);
+  return {
+    key: `rimes:sens:${item.anchor}`,
+    text: 'Finis la phrase avec un mot qui rime, même si c’est rigolo !',
+    instruction: ['Attention au piège ! Finis la phrase avec un mot qui rime, même si c’est rigolo.', sentence, list],
+    short: { key: 'rimes:phrase', text: 'Quel mot rime ?', speak: [sentence, list] },
+    replay: [sentence, list],
+    stage: { type: 'picture', emoji: pictureOf(item.anchor) },
+    choices: options.map((w) => ({ value: w, label: pictureOf(w) })),
+    choiceStyle: 'pictures',
+    answer: item.answer,
+    success: { speak: `${item.text.slice(0, -1)} ${item.answer} ! ${item.anchor}, ${item.answer} : ça rime !` },
+  };
+}
+
+// Niveau 8 : le son de la fin, entendu seul. Un son par groupe de RHYMES (même ordre) ;
+// `say` est un mot qui se prononce comme ce son, pour guider la voix.
+const RHYME_SOUNDS = [
+  { sound: 'a', say: 'a' }, { sound: 'o', say: 'eau' }, { sound: 'on', say: 'on' }, { sound: 'in', say: 'hein' },
+  { sound: 'ou', say: 'ou' }, { sound: 'i', say: 'i' }, { sound: 'é', say: 'et' }, null, null, // « eur », « ar » : deux sons
+];
+
+/** Niveau 8 : l'image qui finit par le son entendu (« on » : ballon). */
+function endsWithSound(rng) {
+  const index = pick(rng, RHYME_SOUNDS.map((s, i) => (s ? i : null)).filter((i) => i !== null));
+  const { sound, say } = RHYME_SOUNDS[index];
+  const answer = pick(rng, RHYMES[index]);
+  const others = sample(rng, RHYMES.filter((_, i) => i !== index).flat(), 3);
+  const options = shuffle(rng, [answer, ...others]);
+  const heard = { text: say, rate: 0.7 };
+  const list = sayList(options);
+  return {
+    key: `rimes:son:${sound}:${answer}`,
+    text: `Quelle image finit par le son « ${sound} » ?`,
+    instruction: ['Quelle image finit par le son :', heard, list],
+    short: { key: 'rimes:son', text: `Finit par « ${sound} » ?`, speak: [heard, list] },
+    replay: [heard, list],
+    stage: { type: 'picture', emoji: '👂' },
+    choices: options.map((w) => ({ value: w, label: pictureOf(w) })),
+    choiceStyle: 'pictures',
+    answer,
+    success: { speak: [`${answer} !`, heard] },
+  };
+}
+
 export const rimes = {
   id: 'rimes',
   domain: 'francais',
   section: 'Écouter les sons',
   title: 'Les rimes',
   icon: '🎵',
-  skill: 'Repérer les mots qui riment (même son à la fin)',
-  levels: ['3 images', '4 images', 'L’intrus qui ne rime pas', 'Finis la phrase qui rime', 'La paire qui rime'],
+  skill: 'Repérer les mots qui riment (même son à la fin), sans se laisser piéger',
+  levels: [
+    '3 images', '4 images', 'L’intrus qui ne rime pas', 'Finis la phrase qui rime', 'La paire qui rime',
+    'Le piège du même début', 'Le piège du sens', 'Le son de la fin',
+  ],
   generate(level, rng) {
     if (level === 3) return oddRhyme(rng);
     if (level === 4) return rhymeSentence(rng);
     if (level === 5) return rhymingPair(rng);
+    if (level === 6) return rhymeWithStartTrap(rng);
+    if (level === 7) return rhymeOverSense(rng);
+    if (level === 8) return endsWithSound(rng);
     const group = pick(rng, RHYMES);
     const [target, rhyme] = sample(rng, group, 2);
     const others = RHYMES.filter((g) => g !== group).flat();
@@ -515,15 +686,138 @@ function sentenceStudy(rng, level) {
   };
 }
 
+// Niveau 6 : des mots à remettre dans l'ordre (la majuscule et le point aident).
+const WORD_ORDER = [
+  { emoji: '🐱', text: 'Le chat boit du lait.' }, { emoji: '🥚', text: 'La poule pond un œuf.' },
+  { emoji: '🦴', text: 'Le chien ronge un os.' }, { emoji: '📰', text: 'Papa lit le journal.' },
+  { emoji: '🚲', text: 'Lou fait du vélo.' }, { emoji: '🎂', text: 'Mamie fait un gâteau.' },
+  { emoji: '🐟', text: 'Le poisson nage vite.' }, { emoji: '🐦', text: 'Les oiseaux chantent fort.' },
+  { emoji: '🍦', text: 'Tom mange une glace.' }, { emoji: '🚂', text: 'Le train arrive en gare.' },
+  { emoji: '🚀', text: 'La fusée part très haut.' }, { emoji: '🌧️', text: 'Il pleut sur la ville.' },
+];
+
+/** Niveau 6 : remettre les mots d'une phrase dans l'ordre, sans l'entendre (il faut la lire). */
+function wordOrder(rng) {
+  const item = pick(rng, WORD_ORDER);
+  const words = item.text.split(' ');
+  let order = shuffle(rng, words.map((_, i) => i));
+  if (order.every((v, i) => v === i)) order = [...order.slice(1), order[0]]; // jamais déjà rangés
+  return {
+    key: `phrase:ordre:${item.text}`,
+    interaction: 'order',
+    byLabel: true,
+    text: 'Remets les mots dans l’ordre pour écrire la phrase.',
+    instruction: 'Regarde l’image, et remets les mots dans l’ordre. La majuscule va au début, le point à la fin.',
+    short: { key: 'phrase:ordre', text: 'Les mots dans l’ordre !' },
+    stage: { type: 'picture', emoji: item.emoji },
+    items: order.map((i) => ({ value: i, label: words[i] })),
+    order: 'asc',
+    sign: '',
+    choices: [],
+    answer: item.text,
+    success: { speak: item.text },
+  };
+}
+
+// Niveau 7 : une phrase, une question (qui ? quoi ? quand ? où ?). Les intrus sont les autres
+// morceaux de la même phrase : ils répondent à une autre question.
+const WH_SENTENCES = [
+  { text: 'Ce matin, Lou mange une pomme dans le jardin.', parts: {
+    qui: ['Qui mange une pomme ?', 'Lou'], quoi: ['Que mange Lou ?', 'une pomme'],
+    quand: ['Quand Lou mange-t-elle une pomme ?', 'ce matin'], où: ['Où Lou mange-t-elle une pomme ?', 'dans le jardin'] } },
+  { text: 'Samedi, Papa lave la voiture dans la rue.', parts: {
+    qui: ['Qui lave la voiture ?', 'Papa'], quoi: ['Que lave Papa ?', 'la voiture'],
+    quand: ['Quand Papa lave-t-il la voiture ?', 'samedi'], où: ['Où Papa lave-t-il la voiture ?', 'dans la rue'] } },
+  { text: 'Le soir, le chat boit du lait dans la cuisine.', parts: {
+    qui: ['Qui boit du lait ?', 'le chat'], quoi: ['Que boit le chat ?', 'du lait'],
+    quand: ['Quand le chat boit-il du lait ?', 'le soir'], où: ['Où le chat boit-il du lait ?', 'dans la cuisine'] } },
+  { text: 'À midi, Tom mange des frites à la cantine.', parts: {
+    qui: ['Qui mange des frites ?', 'Tom'], quoi: ['Que mange Tom ?', 'des frites'],
+    quand: ['Quand Tom mange-t-il des frites ?', 'à midi'], où: ['Où Tom mange-t-il des frites ?', 'à la cantine'] } },
+  { text: 'Dimanche, Mamie cueille des fleurs au jardin.', parts: {
+    qui: ['Qui cueille des fleurs ?', 'Mamie'], quoi: ['Que cueille Mamie ?', 'des fleurs'],
+    quand: ['Quand Mamie cueille-t-elle des fleurs ?', 'dimanche'], où: ['Où Mamie cueille-t-elle des fleurs ?', 'au jardin'] } },
+  { text: 'Mercredi, Léo joue au ballon dans le parc.', parts: {
+    qui: ['Qui joue au ballon ?', 'Léo'], quoi: ['À quoi joue Léo ?', 'au ballon'],
+    quand: ['Quand Léo joue-t-il au ballon ?', 'mercredi'], où: ['Où Léo joue-t-il au ballon ?', 'dans le parc'] } },
+  { text: 'Hier, Mila a lu un livre dans son lit.', parts: {
+    qui: ['Qui a lu un livre ?', 'Mila'], quoi: ['Qu’a lu Mila ?', 'un livre'],
+    quand: ['Quand Mila a-t-elle lu un livre ?', 'hier'], où: ['Où Mila a-t-elle lu un livre ?', 'dans son lit'] } },
+  { text: 'En hiver, les oiseaux mangent des graines sur le balcon.', parts: {
+    qui: ['Qui mange des graines ?', 'les oiseaux'], quoi: ['Que mangent les oiseaux ?', 'des graines'],
+    quand: ['Quand les oiseaux mangent-ils des graines ?', 'en hiver'], où: ['Où les oiseaux mangent-ils des graines ?', 'sur le balcon'] } },
+];
+
+/** Niveau 7 : répondre à une question sur une phrase (qui ? quoi ? quand ? où ?). */
+function whQuestion(rng) {
+  const item = pick(rng, WH_SENTENCES);
+  const kinds = Object.keys(item.parts);
+  const kind = pick(rng, kinds);
+  const [question, answer] = item.parts[kind];
+  const others = sample(rng, kinds.filter((k) => k !== kind), 2).map((k) => item.parts[k][1]);
+  return {
+    key: `phrase:question:${question}`,
+    text: question,
+    instruction: ['Lis la phrase, puis réponds à la question.', question],
+    short: { key: 'phrase:question', text: question, speak: [question] },
+    replay: [question],
+    stage: { type: 'sentence', text: item.text },
+    choices: shuffle(rng, [answer, ...others]).map((value) => ({ value, label: value })),
+    choiceStyle: 'answers',
+    answer,
+    success: { speak: [question, `${answer[0].toUpperCase()}${answer.slice(1)}.`] },
+  };
+}
+
+// Niveau 8 : la phrase négative (ne … pas, n’ devant une voyelle), puis trois phrases mal écrites
+// (deux sont proposées à chaque fois).
+const NEGATIONS = [
+  ['Il pleut.', 'Il ne pleut pas.', 'Il pleut pas.', 'Il ne pas pleut.'],
+  ['Le chat dort.', 'Le chat ne dort pas.', 'Le chat dort pas.', 'Le chat ne pas dort.'],
+  ['Tom joue au foot.', 'Tom ne joue pas au foot.', 'Tom joue pas au foot.', 'Tom ne pas joue au foot.'],
+  ['Elle aime la soupe.', 'Elle n’aime pas la soupe.', 'Elle ne aime pas la soupe.', 'Elle aime pas la soupe.'],
+  ['J’ai faim.', 'Je n’ai pas faim.', 'J’ai pas faim.', 'Je ne ai pas faim.'],
+  ['Le bébé crie.', 'Le bébé ne crie pas.', 'Le bébé crie pas.', 'Le bébé ne pas crie.'],
+  ['Nous partons.', 'Nous ne partons pas.', 'Nous partons pas.', 'Nous ne pas partons.'],
+  ['Il est content.', 'Il n’est pas content.', 'Il est pas content.', 'Il ne est pas content.'],
+  ['Le train arrive.', 'Le train n’arrive pas.', 'Le train arrive pas.', 'Le train ne arrive pas.'],
+  ['Je vois la mer.', 'Je ne vois pas la mer.', 'Je vois pas la mer.', 'Je ne pas vois la mer.'],
+  ['Papa chante.', 'Papa ne chante pas.', 'Papa chante pas.', 'Papa ne pas chante.'],
+  ['Les poules volent.', 'Les poules ne volent pas.', 'Les poules volent pas.', 'Les poules ne pas volent.'],
+  ['Lou a froid.', 'Lou n’a pas froid.', 'Lou a pas froid.', 'Lou ne a pas froid.'],
+];
+
+/** Niveau 8 : écrire la phrase à la forme négative. */
+function negativeSentence(rng) {
+  const [sentence, answer, ...wrong] = pick(rng, NEGATIONS);
+  return {
+    key: `phrase:negative:${sentence}`,
+    text: 'Quelle phrase dit le contraire, avec « ne… pas » ?',
+    instruction: 'Lis la phrase. Trouve la même phrase avec ne… pas, bien écrite.',
+    short: { key: 'phrase:negative', text: 'Avec « ne… pas » ?' },
+    stage: { type: 'sentence', text: sentence },
+    choices: shuffle(rng, [answer, ...sample(rng, wrong, 2)]).map((s) => ({ value: s, label: s })),
+    choiceStyle: 'sentences',
+    answer,
+    success: { speak: answer },
+  };
+}
+
 export const phrase = {
   id: 'phrase',
   domain: 'francais',
   section: 'Lire',
   title: 'Lis la phrase',
   icon: '📝',
-  skill: 'Lire et comprendre une phrase, la ponctuer',
-  levels: ['Phrases courtes', 'Phrases plus longues', 'Un seul mot change', 'La phrase absurde', 'Le bon point : . ? !'],
+  skill: 'Lire et comprendre une phrase, la construire, la ponctuer, la mettre à la forme négative',
+  levels: [
+    'Phrases courtes', 'Phrases plus longues', 'Un seul mot change', 'La phrase absurde', 'Le bon point : . ? !',
+    'Remets les mots en ordre', 'Qui ? Quoi ? Quand ? Où ?', 'La phrase négative',
+  ],
   generate(level, rng) {
+    if (level === 6) return wordOrder(rng);
+    if (level === 7) return whQuestion(rng);
+    if (level === 8) return negativeSentence(rng);
     if (level >= 3) return sentenceStudy(rng, level);
     const pool = SENTENCES.filter((s) => s.level === level);
     const [target, ...drawn] = sample(rng, pool, 3);
@@ -568,6 +862,19 @@ const HOMOPHONES = [
     ['Tu ___ un joli vélo.', 'as'], ['Il ___ un joli vélo.', 'a'], ['Nous allons ___ la piscine.', 'à'],
     ['Tu ___ faim ?', 'as'], ['Maman ___ un chapeau.', 'a'], ['Je pense ___ toi.', 'à'],
     ['Tu ___ perdu ta clé.', 'as'], ['Léa ___ six ans.', 'a'], ['Il va ___ Paris.', 'à']] },
+  // niveaux 6 à 8 : la / là, ce / se, c’est / s’est
+  { level: 6, pair: ['la', 'là'], items: [
+    ['Le chat est ___, sous la table.', 'là'], ['Je mange ___ pomme.', 'la'], ['Viens ___, près de moi !', 'là'],
+    ['Elle ferme ___ porte.', 'la'], ['Mon livre est ___, sur le lit.', 'là'], ['Il range ___ boîte.', 'la'],
+    ['Pose ton sac ___, dans le coin.', 'là'], ['Lou chante ___ chanson.', 'la']] },
+  { level: 7, pair: ['ce', 'se'], items: [
+    ['Il ___ lave les mains.', 'se'], ['Regarde ___ chien !', 'ce'], ['Elle ___ cache sous le lit.', 'se'],
+    ['J’aime ___ gâteau.', 'ce'], ['Le chat ___ couche au soleil.', 'se'], ['Je mets ___ pull.', 'ce'],
+    ['Ils ___ disent bonjour.', 'se'], ['Tu as vu ___ bateau ?', 'ce']] },
+  { level: 8, pair: ['c’est', 's’est'], items: [
+    ['Regarde, ___ mon chien !', 'c’est'], ['Le chat ___ caché.', 's’est'], ['Lou ___ coupée au doigt.', 's’est'],
+    ['Ce gâteau, ___ pour toi.', 'c’est'], ['Il ___ levé tôt.', 's’est'], ['Vite, ___ l’heure !', 'c’est'],
+    ['Mamie ___ assise.', 's’est'], ['Oh, ___ très beau !', 'c’est']] },
 ];
 // Niveau 5 : deux mots à trouver dans la même phrase (les deux homophones d'une paire).
 const DOUBLE_HOMOPHONES = [
@@ -610,11 +917,14 @@ export const homophones = {
   section: 'Grammaire',
   title: 'Le bon petit mot',
   icon: '🧐',
-  skill: 'Choisir le bon homophone : a/à/as, et/est, son/sont, on/ont, ou/où',
-  levels: ['a / à et et / est', 'Aussi son / sont et on / ont', 'Aussi ou / où', 'a, as ou à', 'Deux mots à trouver'],
+  skill: 'Choisir le bon homophone : a/à/as, et/est, son/sont, on/ont, ou/où, la/là, ce/se, c’est/s’est',
+  levels: [
+    'a / à et et / est', 'Aussi son / sont et on / ont', 'Aussi ou / où', 'a, as ou à', 'Deux mots à trouver',
+    'Aussi la / là', 'Aussi ce / se', 'Aussi c’est / s’est',
+  ],
   generate(level, rng) {
     if (level === 5) return doubleHomophone(rng);
-    // niveaux 3 et 4 : surtout la nouvelle paire, et parfois une révision des précédentes
+    // niveaux 3, 4 et 6 à 8 : surtout la nouvelle paire, et parfois une révision des précédentes
     const fresh = level <= 2 || rng() < 0.75;
     const sets = HOMOPHONES.filter((h) => (level <= 2 ? h.level <= level : fresh ? h.level === level : h.level < level));
     const set = pick(rng, sets);
@@ -699,17 +1009,76 @@ function adjectiveAgreement(rng) {
   };
 }
 
+// Niveau 7 : des noms en -eau, -al et -eu (pluriel en x), mêlés aux noms de NOUNS (pluriel en s).
+const X_NOUNS = [
+  { w: 'château', g: 'm', pl: 'châteaux' }, { w: 'chapeau', g: 'm', pl: 'chapeaux' },
+  { w: 'cadeau', g: 'm', pl: 'cadeaux' }, { w: 'cheval', g: 'm', pl: 'chevaux' },
+  { w: 'journal', g: 'm', pl: 'journaux' }, { w: 'feu', g: 'm', pl: 'feux' },
+];
+
+/** Les trois écritures proposées : le nom sans marque du pluriel, avec un s, avec un x (-al → -aux). */
+function pluralForms(w) {
+  return [w, `${w}s`, w.endsWith('al') ? `${w.slice(0, -2)}aux` : `${w}x`];
+}
+
+/** Niveau 7 : écrire le nom au pluriel (s ou x). */
+function nounPlural(rng) {
+  const noun = rng() < 0.4 ? pick(rng, X_NOUNS) : pick(rng, [...NOUNS, ...X_NOUNS]);
+  return {
+    key: `genre:7:${noun.pl}`,
+    text: 'Des… Comment s’écrit ce mot au pluriel ?',
+    instruction: `Comment écrit-on : des ${noun.pl} ? Avec un s, avec un x, ou sans rien ?`,
+    short: { key: 'genre:pluriel', text: 'Au pluriel ?', speak: `des ${noun.pl} ?` },
+    stage: { type: 'objects', emoji: PICTURES[noun.w], count: 3, perRow: 5 },
+    choices: textChoices(pluralForms(noun.w)),
+    choiceStyle: 'words',
+    answer: noun.pl,
+    success: { speak: `des ${noun.pl}` },
+  };
+}
+
+/** Niveau 8 : le déterminant, l'adjectif et le nom s'accordent ensemble (« les petites fleurs »). */
+function nounPhraseAgreement(rng) {
+  const noun = pick(rng, NOUNS);
+  const adj = pick(rng, ADJECTIVES);
+  const plural = rng() < 0.6;
+  const fem = noun.g === 'f';
+  const det = plural ? 'les' : fem ? 'la' : 'le';
+  const adjOf = (f, p) => `${adj}${f ? 'e' : ''}${p ? 's' : ''}`;
+  const group = (a, n) => `${det} ${a} ${n}`;
+  const answer = group(adjOf(fem, plural), plural ? noun.pl : noun.w);
+  // une erreur sur le nom, une erreur sur l'adjectif (le genre, ou le nombre)
+  const wrongNoun = group(adjOf(fem, plural), plural ? noun.w : noun.pl);
+  const wrongAdj = group(rng() < 0.5 ? adjOf(!fem, plural) : adjOf(fem, !plural), plural ? noun.pl : noun.w);
+  return {
+    key: `genre:8:${answer}`,
+    text: 'Quel groupe de mots est bien accordé ?',
+    instruction: 'Lis bien chaque mot : un seul groupe de mots est bien accordé. Lequel ?',
+    short: { key: 'genre:groupe', text: 'Bien accordé ?' },
+    stage: { type: 'objects', emoji: PICTURES[noun.w], count: plural ? 3 : 1, perRow: 5 },
+    choices: shuffle(rng, [answer, wrongNoun, wrongAdj]).map((v) => ({ value: v, label: v })),
+    choiceStyle: 'sentences',
+    answer,
+    success: { speak: answer },
+  };
+}
+
 export const determinants = {
   id: 'genre',
   domain: 'francais',
   section: 'Grammaire',
   title: 'Un, une, le, la',
   icon: '🏷️',
-  skill: 'Choisir le bon déterminant (genre et nombre), accorder l’adjectif',
-  levels: ['un ou une', "le, la ou l'", 'le, la ou les', 'mon, ma ou mes', 'ce, cet, cette ou ces', 'L’adjectif s’accorde'],
+  skill: 'Choisir le bon déterminant (genre et nombre), accorder l’adjectif et le nom',
+  levels: [
+    'un ou une', "le, la ou l'", 'le, la ou les', 'mon, ma ou mes', 'ce, cet, cette ou ces', 'L’adjectif s’accorde',
+    'Le nom au pluriel', 'Tout le groupe s’accorde',
+  ],
   generate(level, rng) {
     if (level === 5) return demonstrative(rng);
     if (level === 6) return adjectiveAgreement(rng);
+    if (level === 7) return nounPlural(rng);
+    if (level === 8) return nounPhraseAgreement(rng);
     const noun = pick(rng, level >= 3 ? NOUNS.filter((n) => !startsWithVowel(n.w)) : NOUNS);
     let pair;
     let answer;
@@ -747,4 +1116,9 @@ export const determinants = {
 export const FRANCAIS_EXTRA_GAMES = [syllabesRythme, rimes, lettres, phrase, homophones, determinants];
 
 /** Données de conscience phonologique (pour les tests). */
-export const SOUND_DATA = { SYLLABLE_WORDS, RHYMES, SAME_START, SAME_END };
+export const SOUND_DATA = {
+  SYLLABLE_WORDS, RHYMES, SAME_START, SAME_END, SPOKEN_SYLLABLES, START_TRAPS, SENSE_TRAPS, RHYME_SOUNDS,
+};
+
+/** Données des niveaux de grammaire (pour les tests). */
+export const GRAMMAR_DATA = { WORD_ORDER, WH_SENTENCES, NEGATIONS, HOMOPHONES, NOUNS, X_NOUNS };
