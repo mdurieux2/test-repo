@@ -21,7 +21,7 @@ import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 import { seasonOf } from '../app/js/themes.js';
-import { cle } from '../app/js/voix-cles.js';
+import { cle, planLecture } from '../app/js/voix-cles.js';
 
 const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
@@ -32,14 +32,19 @@ const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
 // (la mise en page sur un quart des appareils). Sans rien, tout est fait.
 const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : ['scenario', 'layout'];
 const SHARD = process.env.SHARD ? process.env.SHARD.split('/').map(Number) : null;
-// SPEECH_LOG=fichier.json : tout ce que l'application dit est noté (avec le nombre de fois),
-// pour choisir les phrases de la voix naturelle (scripts/voix/phrases.mjs)
+// SPEECH_LOG=fichier.json : tout ce que l'application dit est noté (avec le nombre de fois et les
+// écrans où c'est dit), pour choisir les phrases de la voix naturelle (scripts/voix/phrases.mjs) et
+// vérifier écran par écran comment elles sont dites (scripts/voix/rapport.mjs)
 const SPEECH_LOG = process.env.SPEECH_LOG;
 const spokenLog = new Map();
+const spokenScreens = new Map();
 if (SPEECH_LOG) {
   // écrit à la fin, même si un test échoue : rien de ce qui a été noté n'est perdu
   process.on('exit', () => {
-    const entries = [...spokenLog].map(([key, count]) => { const [text, lang, rate] = JSON.parse(key); return { text, lang, rate, count }; });
+    const entries = [...spokenLog].map(([key, count]) => {
+      const [text, lang, rate] = JSON.parse(key);
+      return { text, lang, rate, count, ecrans: [...spokenScreens.get(key)] };
+    });
     writeFileSync(SPEECH_LOG, `${JSON.stringify(entries.sort((a, b) => b.count - a.count), null, 1)}\n`);
     console.log(`✔ paroles notées : ${entries.length} phrases différentes → ${SPEECH_LOG}`);
   });
@@ -65,9 +70,11 @@ async function newContext(viewport) {
     viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'fr-FR', permissions: ['microphone'],
   });
   if (SPEECH_LOG) {
-    await context.exposeBinding('__parole', (_source, text, lang, rate) => {
+    await context.exposeBinding('__parole', (_source, text, lang, rate, screen) => {
       const key = JSON.stringify([text, lang, rate]);
       spokenLog.set(key, (spokenLog.get(key) || 0) + 1);
+      if (!spokenScreens.has(key)) spokenScreens.set(key, new Set());
+      spokenScreens.get(key).add(screen);
     });
   }
   await context.addInitScript(() => {
@@ -75,7 +82,10 @@ async function newContext(viewport) {
       speaking: false, pending: false,
       speak(u) {
         (window.__spoken = window.__spoken || []).push(u.text);
-        window.__parole?.(u.text, u.lang, u.rate);
+        // l'écran où c'est dit : « play compter », « welcome », « parents voices »…
+        const main = document.querySelector('main.screen');
+        const screen = main ? [...main.classList].filter((c) => c !== 'screen' && !c.startsWith('domain-theme') && !c.startsWith('play-')).join(' ') : '';
+        window.__parole?.(u.text, u.lang, u.rate, main?.dataset.game ? `${screen} ${main.dataset.game}` : screen);
         setTimeout(() => u.onend && u.onend(), 5);
       },
       cancel() {}, getVoices: () => [], addEventListener() {},
@@ -1157,7 +1167,7 @@ await page.evaluate(() => { window.__spoken = []; window.__clips = []; window.__
 await page.click('.natural-voice input'); // coupée : la voix de l'appareil dit la phrase d'essai
 await page.waitForFunction((text) => window.__spoken.includes(text), VOICE_TEST);
 await page.click('.natural-voice input'); // rallumée
-if (voiceManifest.clips[cle(VOICE_TEST)]) {
+if (planLecture(VOICE_TEST, (key) => Object.hasOwn(voiceManifest.clips, key))?.length) {
   await page.waitForFunction(() => (window.__clips || []).some((src) => src.startsWith('blob:')));
   await page.waitForTimeout(300);
   if ((await page.evaluate(() => window.__spoken)).filter((t) => t === VOICE_TEST).length !== 1) fail('voix naturelle : la phrase a aussi été dite par la voix de l’appareil');
@@ -1167,6 +1177,28 @@ if (voiceManifest.clips[cle(VOICE_TEST)]) {
   console.log('✔ voix naturelle : réglage ; sons pas encore générés, la voix de l’appareil prend le relais');
 }
 await page.evaluate(() => { window.__voixNaturelle = false; });
+// téléchargement des sons pour le mode avion : en paquets, avec une barre en haut de l'écran
+if (voiceManifest.paquets?.length) {
+  const started = Date.now();
+  await page.evaluate(() => { window.__telechargerVoix = true; window.dispatchEvent(new Event('online')); });
+  await page.waitForSelector('.voice-progress', { timeout: 15000 });
+  const during = await page.textContent('.voice-progress-text');
+  if (!/^Voix d’Estelle : \d+ %$/.test(during)) fail(`barre de téléchargement : « ${during} »`);
+  await page.waitForSelector('.voice-progress.done', { timeout: 180000 });
+  const after = await page.textContent('.voice-progress-text');
+  if (after !== 'Voix d’Estelle prête ✓') fail(`barre de téléchargement à la fin : « ${after} »`);
+  await page.waitForSelector('.voice-progress', { state: 'detached', timeout: 5000 });
+  const files = new Set(Object.values(voiceManifest.clips));
+  const cached = await page.evaluate(async () => (await (await caches.open('lire-et-compter-voix')).keys())
+    .map((r) => new URL(r.url).pathname.split('/voix/')[1]));
+  const missing = [...files].filter((f) => !cached.includes(f));
+  if (missing.length) fail(`téléchargement des sons : ${missing.length} manquants (${missing.slice(0, 3).join(', ')})`);
+  // un son gardé est bien un MP3 (redécoupé au bon endroit dans son paquet)
+  const head = await page.evaluate(async (file) => [...new Uint8Array(await (await fetch(`voix/${file}`)).arrayBuffer()).slice(0, 2)], [...files][5]);
+  if (head[0] !== 0xff || (head[1] & 0xe0) !== 0xe0) fail(`son mal découpé : ${head}`);
+  await page.evaluate(() => { window.__telechargerVoix = false; });
+  console.log(`✔ voix : ${files.size} sons téléchargés en ${voiceManifest.paquets.length} paquets (${(voiceManifest.octets / 1e6).toFixed(0)} Mo) en ${((Date.now() - started) / 1000).toFixed(0)} s, barre « ${during} » puis « ${after} »`);
+}
 await page.click('[data-tab="enfants"]');
 await page.click('[data-edit="eva-rose"]');
 await page.setInputFiles('[data-photo-input="eva-rose"]', 'app/icons/icon-512.png');
@@ -1213,7 +1245,11 @@ async function checkOffline(context, page) {
   for (const game of GAMES) {
     await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor(game.id)}';`);
     await page.evaluate(() => { window.__spoken = []; });
-    await openGame(page, game);
+    await openGame(page, game).catch(async (error) => {
+      // ce qu'affiche la page à ce moment-là, pour comprendre sans pouvoir rejouer
+      const seen = await page.evaluate(() => `${document.querySelector('main')?.className || '(aucun écran)'} : ${document.body.innerText.slice(0, 200)}`).catch(() => '?');
+      fail(`hors ligne : ${game.id} ne s'ouvre pas (${page.url()} ; ${seen.replace(/\s+/g, ' ')}) : ${error.message.split('\n')[0]}`);
+    });
     await page.waitForSelector('.choices');
     if (await page.locator('.choices').count() !== 1) fail(`hors ligne : ${game.id} ne s'affiche pas`);
     // la consigne est dite : par la voix naturelle si ses sons sont là, sinon par la voix de l'appareil

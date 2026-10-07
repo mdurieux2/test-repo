@@ -2120,3 +2120,39 @@ body[data-season="ete"] { background: #fffbea; }
 /* voix naturelle (Réglages) : l'état du téléchargement sous l'interrupteur */
 .natural-voice-state { margin: -2px 0 6px; line-height: 1.4; }
 .natural-voice .setting:first-of-type { border-top: 1px solid var(--line); }
+
+/* Barre de téléchargement de la voix (en haut, par-dessus l'écran, sans gêner les touchers) */
+.voice-progress {
+  position: fixed;
+  top: var(--safe-top);
+  left: 0;
+  right: 0;
+  height: 5px;
+  z-index: 60;
+  background: rgba(43, 45, 66, 0.12);
+  pointer-events: none;
+}
+.voice-progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--good);
+  border-radius: 0 3px 3px 0;
+  transition: width 0.3s ease;
+}
+.voice-progress-text {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #23365f;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+/* pendant un jeu : la fine barre seulement */
+body:has(main.play) .voice-progress-text { display: none; }
+.voice-progress.done { transition: opacity 0.6s ease 1.6s; opacity: 0; }

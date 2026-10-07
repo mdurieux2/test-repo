@@ -2,13 +2,16 @@
 // (en voiture, en vacances…). Changer VERSION à chaque mise à jour publiée.
 // Tout nouveau fichier de l'app doit être ajouté à PRECACHE (vérifié par les tests).
 
-const VERSION = 'v13';
+const VERSION = 'v14';
 const CACHE = `lire-et-compter-${VERSION}`;
 // Sons de la voix naturelle (voix/fr/…, voix/en/…) : leurs noms changent avec leur contenu, on les
 // garde donc d'une version à l'autre (seuls ceux qui ne sont plus dans voix/manifest.json sont retirés).
-// Ils ne sont pas dans PRECACHE : l'app les télécharge peu à peu (voir prefetchVoices dans main.js).
+// Ils ne sont pas dans PRECACHE. Sur le site, ils sont rangés dans des paquets (voix/paquet-….mp3) :
+// l'app télécharge les paquets et les redécoupe (voir prefetchVoices dans main.js) ; un son demandé
+// avant est pris directement dans son paquet (une partie du fichier seulement).
 const VOICE_CACHE = 'lire-et-compter-voix';
 const isVoiceClip = (url) => /\/voix\/(fr|en)\/[0-9a-f]+\.mp3$/.test(url.pathname);
+const isVoicePack = (url) => /\/voix\/paquet-[0-9a-f]+\.mp3$/.test(url.pathname);
 
 const PRECACHE = [
   './',
@@ -62,6 +65,8 @@ const PRECACHE = [
   './manifest.webmanifest',
   './voix/manifest.json',
   './voix/silence.mp3',
+  './voix/pause-phrase.mp3',
+  './voix/pause-virgule.mp3',
 ];
 
 self.addEventListener('install', (event) => {
@@ -80,6 +85,47 @@ async function pruneVoices() {
   }
 }
 
+let packIndex = null; // son → { nom du paquet, début, taille }
+
+async function voiceIndex() {
+  if (packIndex) return packIndex;
+  const response = (await caches.match('./voix/manifest.json')) || (await fetch('./voix/manifest.json'));
+  const index = new Map();
+  for (const pack of (await response.json()).paquets || []) {
+    let start = 0;
+    for (const [file, size] of pack.sons) {
+      index.set(file, { pack, start, size });
+      start += size;
+    }
+  }
+  packIndex = index;
+  return index;
+}
+
+/** Un son pas encore sur l'appareil : sa partie du paquet (ou tout le paquet, si le serveur ne sait pas). */
+async function voiceFromPack(request, cache) {
+  const file = new URL(request.url).pathname.split('/voix/')[1];
+  const where = (await voiceIndex()).get(file);
+  if (!where) return fetch(request);
+  const end = where.start + where.size - 1;
+  const response = await fetch(new URL(`voix/${where.pack.nom}`, self.registration.scope), { headers: { Range: `bytes=${where.start}-${end}` } });
+  if (!response.ok) return response;
+  const body = await response.arrayBuffer();
+  const clip = (bytes) => new Response(bytes, { headers: { 'Content-Type': 'audio/mpeg' } });
+  if (response.status === 206) {
+    await cache.put(request, clip(body));
+    return clip(body);
+  }
+  // le paquet entier est arrivé : tous ses sons sont gardés
+  let start = 0;
+  await Promise.all(where.pack.sons.map(([name, size]) => {
+    const part = body.slice(start, start + size);
+    start += size;
+    return cache.put(new URL(`voix/${name}`, self.registration.scope).href, clip(part));
+  }));
+  return clip(body.slice(where.start, end + 1));
+}
+
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
@@ -93,14 +139,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== location.origin) return;
-  // un son de la voix naturelle ne change jamais : le cache d'abord, le réseau s'il n'y est pas encore
+  // un paquet de sons : téléchargé par l'app, qui le redécoupe (jamais gardé en entier)
+  if (isVoicePack(url)) return;
+  // un son de la voix naturelle ne change jamais : le cache d'abord, son paquet s'il n'y est pas encore.
+  // Recherche par adresse exacte : avec ignoreSearch, le navigateur parcourt les 14 000 sons à chaque fois.
   if (isVoiceClip(url)) {
     event.respondWith(caches.open(VOICE_CACHE).then(async (cache) => {
-      const hit = await cache.match(event.request, { ignoreSearch: true });
-      if (hit) return hit;
-      const response = await fetch(event.request);
-      if (response.ok && response.status === 200) cache.put(event.request, response.clone());
-      return response;
+      const hit = await cache.match(event.request);
+      return hit || voiceFromPack(event.request, cache);
     }));
     return;
   }
@@ -113,6 +159,8 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request, { ignoreSearch: true })),
+      // hors ligne : seulement dans le cache de l'app (petit), jamais dans celui des voix, qui serait
+      // parcouru en entier pour chaque fichier (l'app mettait alors des dizaines de secondes à s'ouvrir)
+      .catch(() => caches.open(CACHE).then((cache) => cache.match(event.request, { ignoreSearch: true }))),
   );
 });

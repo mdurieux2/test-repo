@@ -170,7 +170,7 @@ function oddRhyme(rng) {
     choices: options.map((w) => ({ value: w, label: pictureOf(w) })),
     choiceStyle: 'pictures',
     answer: odd,
-    success: { speak: `${odd} ne rime pas avec ${rhyming[0]}, ${rhyming[1]} et ${rhyming[2]} !` },
+    success: { speak: [`${odd} ne rime pas avec les autres !`, `${rhyming[0]}, ${rhyming[1]}, ${rhyming[2]} : ça rime !`] },
   };
 }
 
@@ -298,7 +298,7 @@ function countLetters(rng) {
   return {
     key: `lettres:compte:${word}`,
     text: 'Combien de lettres y a-t-il dans ce mot ?',
-    instruction: ['Voici le mot', spoken, 'Combien a-t-il de lettres ?'],
+    instruction: ['Voici le mot :', spoken, 'Combien a-t-il de lettres ?'],
     short: { key: 'lettres:compte', text: 'Combien de lettres ?', speak: [spoken] },
     replay: [spoken],
     stage: { type: 'word', text: word.toUpperCase() },
@@ -386,7 +386,7 @@ export const lettres = {
       return {
         key: `lettres:${letter}`,
         text: 'Trouve la même lettre en minuscule.',
-        instruction: ['Voici la lettre', name, 'en majuscule. Trouve-la en minuscule !'],
+        instruction: ['Voici la lettre majuscule :', name, 'Trouve-la en minuscule !'],
         short: { text: 'En minuscule ?', speak: [name] },
         replay: [name],
         stage: { type: 'word', text: letter.toUpperCase() },

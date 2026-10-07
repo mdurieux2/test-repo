@@ -20,7 +20,7 @@ import {
   resetChild, saveStore,
 } from './storage.js';
 import {
-  isNaturalVoiceOn, listFrenchVoices, loadNaturalVoice, naturalVoiceFiles, setNaturalVoice, setSpeechEnabled, setSpeechNames,
+  isNaturalVoiceOn, listFrenchVoices, loadNaturalVoice, naturalVoiceFiles, naturalVoicePacks, setNaturalVoice, setSpeechEnabled, setSpeechNames,
   setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
 } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
@@ -920,7 +920,7 @@ function nextQuestion(session) {
   const badge = clock
     ? h('span', { class: 'level-badge chrono-badge' }, h('span', { class: 'chrono-level' }, levelText), clock)
     : h('span', { class: 'level-badge' }, levelText);
-  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}` },
+  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}`, 'data-game': game.id },
     session.duo
       ? topBar({ onBack: session.back, backLabel: 'Quitter', title: duoScoreboard(session, progress) })
       : topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
@@ -3562,39 +3562,145 @@ function kidGamesCard(id) {
 // ---- Voix naturelle : les sons sont téléchargés peu à peu, pour être joués hors connexion
 
 const VOICE_CACHE = 'lire-et-compter-voix'; // le même que dans sw.js
-const voiceDownload = { total: 0, done: 0, running: false, listeners: new Set() };
+// total, done : sons ; bytes, received : octets à télécharger cette fois-ci, et déjà reçus
+const voiceDownload = { total: 0, done: 0, bytes: 0, received: 0, running: false, listeners: new Set() };
 
+let voiceDownloadFrame = 0;
 function voiceDownloadChanged() {
-  voiceDownload.listeners.forEach((fn) => fn());
+  // au plus une mise à jour de l'écran par image, même si les morceaux arrivent très vite
+  if (voiceDownloadFrame) return;
+  voiceDownloadFrame = requestAnimationFrame(() => {
+    voiceDownloadFrame = 0;
+    voiceDownload.listeners.forEach((fn) => fn());
+  });
 }
 
-/** Télécharge les sons qui manquent (3 à la fois) ; le service worker les garde pour le mode avion. */
+/** Le contenu d'un fichier, en suivant les octets reçus (pour la barre de progression). */
+async function downloadBytes(url, size, onBytes) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`${url} : ${response.status}`);
+  if (!response.body?.getReader) {
+    const body = new Uint8Array(await response.arrayBuffer());
+    onBytes(body.length);
+    return body;
+  }
+  const reader = response.body.getReader();
+  const body = new Uint8Array(size);
+  let at = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (at + value.length > body.length) throw new Error(`${url} : taille inattendue`);
+    body.set(value, at);
+    at += value.length;
+    onBytes(value.length);
+  }
+  if (at !== size) throw new Error(`${url} : ${at} octets sur ${size}`);
+  return body;
+}
+
+/**
+ * Télécharge les sons qui manquent, pour jouer aussi hors connexion : ils sont rangés dans une
+ * quinzaine de paquets (les plus entendus d'abord), téléchargés deux à la fois puis redécoupés,
+ * bien plus vite que des milliers de petits fichiers. Un paquet dont il manque peu de sons n'est
+ * pas retéléchargé : ces sons sont demandés un par un (le service worker les prend dans le paquet).
+ */
 async function prefetchVoices() {
-  const files = naturalVoiceFiles();
-  // navigateur piloté par un test automatique : pas de téléchargement de 40 Mo en arrière-plan
-  if (voiceDownload.running || !files.length || !isNaturalVoiceOn() || !('caches' in window) || navigator.webdriver) return;
-  if (!navigator.serviceWorker?.controller || navigator.onLine === false) return;
+  const packs = naturalVoicePacks();
+  // navigateur piloté par un test automatique : pas de téléchargement en arrière-plan (sauf si le test le demande)
+  if (voiceDownload.running || !packs.length || !isNaturalVoiceOn() || !('caches' in window)) return;
+  if ((navigator.webdriver && !window.__telechargerVoix) || !navigator.serviceWorker?.controller || navigator.onLine === false) return;
   voiceDownload.running = true;
   try {
     const cache = await caches.open(VOICE_CACHE);
     const have = new Set((await cache.keys()).map((r) => new URL(r.url).pathname.split('/voix/')[1]));
-    const missing = files.filter((f) => !have.has(f));
-    Object.assign(voiceDownload, { total: files.length, done: files.length - missing.length });
+    const wanted = new Set(naturalVoiceFiles());
+    const plans = packs.map((pack) => {
+      const size = pack.sons.reduce((sum, [, n]) => sum + n, 0);
+      const missing = pack.sons.filter(([file]) => wanted.has(file) && !have.has(file));
+      const missingBytes = missing.reduce((sum, [, n]) => sum + n, 0);
+      return { pack, size, missing, whole: missingBytes > size * 0.3, bytes: missingBytes > size * 0.3 ? size : missingBytes };
+    }).filter((p) => p.missing.length);
+    Object.assign(voiceDownload, {
+      total: wanted.size,
+      done: [...wanted].filter((f) => have.has(f)).length,
+      bytes: plans.reduce((sum, p) => sum + p.bytes, 0),
+      received: 0,
+    });
     voiceDownloadChanged();
+    const keep = (file, bytes) => cache.put(new Request(`voix/${file}`), new Response(bytes, { headers: { 'Content-Type': 'audio/mpeg' } }));
     let next = 0;
     const worker = async () => {
-      while (next < missing.length && isNaturalVoiceOn() && navigator.onLine !== false) {
-        const file = missing[next++];
-        const response = await fetch(`voix/${file}`).catch(() => null);
-        if (response?.ok) voiceDownload.done++;
-        if (voiceDownload.done % 50 === 0 || voiceDownload.done === voiceDownload.total) voiceDownloadChanged();
+      while (next < plans.length && isNaturalVoiceOn() && navigator.onLine !== false) {
+        const { pack, size, missing, whole } = plans[next++];
+        if (whole) {
+          const body = await downloadBytes(`voix/${pack.nom}`, size, (n) => {
+            voiceDownload.received += n;
+            voiceDownloadChanged();
+          });
+          let start = 0;
+          const wantedHere = new Set(missing.map(([file]) => file));
+          await Promise.all(pack.sons.map(([file, n]) => {
+            const part = body.slice(start, start + n);
+            start += n;
+            return wantedHere.has(file) ? keep(file, part) : null;
+          }));
+        } else {
+          for (const [file, n] of missing) {
+            await fetch(`voix/${file}`);
+            voiceDownload.received += n;
+            voiceDownloadChanged();
+          }
+        }
+        voiceDownload.done += missing.length;
+        voiceDownloadChanged();
       }
     };
-    await Promise.all([worker(), worker(), worker()]);
+    await Promise.all([worker(), worker()]);
+  } catch {
+    // réseau coupé, place insuffisante… : on reprendra plus tard (au retour du réseau, au prochain lancement)
   } finally {
     voiceDownload.running = false;
     voiceDownloadChanged();
   }
+}
+
+/**
+ * Barre en haut de l'écran pendant le téléchargement des sons : « Voix d’Estelle : 45 % ».
+ * Pendant un jeu, seule la fine barre reste (le texte ne cache rien) ; à la fin, elle s'efface.
+ */
+function voiceProgressBar() {
+  let bar = null;
+  let fill = null;
+  let label = null;
+  let hide = 0;
+  voiceDownload.listeners.add(() => {
+    const { bytes, received, running } = voiceDownload;
+    if (running && bytes > 0 && received < bytes) {
+      clearTimeout(hide);
+      if (!bar) {
+        fill = h('div', { class: 'voice-progress-fill' });
+        label = h('span', { class: 'voice-progress-text' });
+        bar = h('div', { class: 'voice-progress', role: 'progressbar', 'aria-label': 'Téléchargement de la voix', 'aria-valuemin': '0', 'aria-valuemax': '100' }, fill, label);
+        document.body.append(bar);
+      }
+      const percent = Math.min(99, Math.floor((received / bytes) * 100));
+      fill.style.width = `${percent}%`;
+      label.textContent = `Voix d’Estelle : ${percent} %`;
+      bar.setAttribute('aria-valuenow', String(percent));
+    } else if (bar && !running && !hide) {
+      const complete = voiceDownload.done >= voiceDownload.total;
+      fill.style.width = complete ? '100%' : fill.style.width;
+      label.textContent = complete ? 'Voix d’Estelle prête ✓' : 'Voix d’Estelle : la suite plus tard';
+      bar.setAttribute('aria-valuenow', complete ? '100' : bar.getAttribute('aria-valuenow'));
+      bar.classList.add('done');
+      hide = setTimeout(() => {
+        bar.remove();
+        bar = null;
+        hide = 0;
+      }, 2500);
+    }
+  });
 }
 
 /** Réglages : « Voix naturelle » et l'état du téléchargement des sons. */
@@ -4004,18 +4110,20 @@ function settingsTab() {
         h('p', { class: 'contact' }, 'Une remarque, un bug, une idée ? Écrivez à ',
           h('a', { class: 'link-action', href: `mailto:${APP.contact}?subject=${encodeURIComponent(APP.name)}`, 'data-contact': '' }, APP.contact), '.'),
         h('p', { class: 'muted small' }, 'Police Andika © SIL International (licence OFL).'),
-        h('p', { class: 'muted small' }, 'Voix naturelle : Pocket TTS © Kyutai, voix « Estelle » (corpus CML-TTS) et « Alba » (licence CC-BY 4.0).'))));
+        h('p', { class: 'muted small' }, 'Voix naturelle : Pocket TTS © Kyutai, voix « Estelle » (corpus CML-TTS, licence CC-BY 4.0).'))));
 }
 
 // ---------------------------------------------------------------- Démarrage
 
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
 document.addEventListener('pointerdown', unlockNaturalVoice, { capture: true });
-// voix naturelle : la liste des sons, puis leur téléchargement en arrière-plan (pour le mode avion)
+// voix naturelle : la liste des sons, puis leur téléchargement en arrière-plan (pour le mode avion),
+// avec une barre en haut de l'écran
+voiceProgressBar();
 loadNaturalVoice().then((ok) => {
   if (!ok) return;
   voiceDownloadChanged();
-  setTimeout(prefetchVoices, 4000);
+  setTimeout(prefetchVoices, 1500);
 });
 window.addEventListener('online', () => prefetchVoices());
 document.addEventListener('pointerdown', unlockStoryAudio, { capture: true });

@@ -333,7 +333,7 @@ export const cheminLettres = {
       key: `chemin-lettres:${word}:${stage.path.join('-')}`,
       interaction: 'path',
       text: 'Écris le mot en suivant les lettres.',
-      instruction: ['Écris le mot', { text: word, rate: 0.8 }, 'en touchant les lettres une par une.'],
+      instruction: ['Écris le mot :', { text: word, rate: 0.8 }, 'Touche les lettres une par une.'],
       short: { key: 'chemin-mot', text: 'Écris le mot.', speak: [{ text: word, rate: 0.8 }] },
       replay: [{ text: word, rate: 0.8 }],
       stage: { ...stage, seq, spell: true, picture: PICTURES[word] },
