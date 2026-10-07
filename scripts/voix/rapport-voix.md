@@ -1,6 +1,6 @@
 # Voix naturelle : écran par écran
 
-14242 sons. Colonnes : entier, virgule, prenom, court, mot, absent (voir scripts/voix/rapport.mjs).
+14244 sons. Colonnes : entier, virgule, prenom, court, mot, absent (voir scripts/voix/rapport.mjs).
 
 ## Jeux (tirages au hasard, tous les niveaux)
 

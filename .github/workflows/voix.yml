@@ -34,11 +34,11 @@ jobs:
           python-version: '3.12'
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg espeak-ng
       - run: pip install pocket-tts faster-whisper transformers phonemizer --extra-index-url https://download.pytorch.org/whl/cpu
-      # a-refaire.json : sons douteux à refaire (l'ancien est gardé s'il reste le meilleur) ; les mots déjà
-      # faits sont réécoutés phonème par phonème, et refaits s'ils sont mal prononcés
+      # a-refaire.json : sons douteux à refaire (l'ancien est gardé s'il reste le meilleur). Pour réécouter
+      # tous les mots déjà faits et refaire les mal prononcés, ajouter --verifier-mots (fait pour la 1.9.1).
       - run: >-
           python scripts/voix/generer.py --shard ${{ matrix.morceau }}/16 --sortie voix-sortie --essais 4
-          --whisper large-v3-turbo --phonemes --verifier-mots
+          --whisper large-v3-turbo --phonemes
           $( [ -f scripts/voix/a-refaire.json ] && echo --refaire scripts/voix/a-refaire.json )
       - uses: actions/upload-artifact@v4
         if: always() # même si le temps est écoulé : les sons déjà fabriqués ne sont pas perdus

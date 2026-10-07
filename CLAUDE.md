@@ -27,7 +27,8 @@ Interface et commentaires en français.
   (un mot à écouter seul reste à part : `['Touche le mot :', mot]`).
   Les sons ne sont pas dans `PRECACHE` (cache des voix séparé, téléchargé en arrière-plan).
   Après avoir ajouté ou changé des phrases : `node scripts/voix/phrases.mjs`, pousser (le workflow « Voix
-  naturelle » fabrique et contrôle les sons sur GitHub : hauteur, débit, diction vérifiée par Whisper), puis
+  naturelle » fabrique et contrôle les sons sur GitHub : hauteur, débit, diction vérifiée par Whisper,
+  prononciation phonème par phonème par `phonemes.py`), puis
   `bash scripts/voix/recuperer.sh` et committer `app/voix/`. Vérifier écran par écran : `node scripts/voix/rapport.mjs`.
   Pour mettre à jour ce que dit l'app hors des jeux : `SPEECH_LOG=scripts/voix/parole-e2e.json PARTS=scenario npm run test:e2e`.
 

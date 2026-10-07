@@ -15,7 +15,7 @@ export const CHANGELOG = [
     version: '1.9.1',
     date: '2026-10-07',
     changes: [
-      'Mots dits seuls mieux prononcés : chaque mot est réécouté son par son, et refait s’il est mal dit (par exemple « souris » sans le « s » final, « chat » sans le « t », et « singe » plus jamais dit comme l’anglais « sing »).',
+      'Mots dits seuls mieux prononcés : chaque mot a été réécouté son par son, et refait s’il était mal dit (« souris » sans le « s » final, « chat » sans le « t », « singe » qui ne sonne plus comme l’anglais « sing »…) : près de 1 000 mots refaits.',
       'Seuls les sons corrigés sont téléchargés à nouveau : un petit paquet, pas toute la voix.',
     ],
   },
