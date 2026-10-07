@@ -32,6 +32,14 @@ if (report.length) {
   const doubtful = checked.filter((r) => r.ressemblance < 0.75).sort((a, b) => a.ressemblance - b.ressemblance);
   for (const r of doubtful.slice(0, 15)) console.log('  diction douteuse (' + r.ressemblance + ') : ' + r.essai + ' → « ' + r.entendu + ' »');
 }
+// mots réécoutés phonème par phonème (--verifier-mots) : fautes nettes trouvées
+const checked = read('verification-');
+if (checked.length) {
+  const faults = checked.filter((c) => c.fautes.length);
+  console.log(checked.length + ' mots réécoutés, ' + faults.length + ' fautes nettes : ' + faults.slice(0, 30).map((c) => c.key.split('|').pop() + ' (' + c.fautes.join(', ') + ')').join(' ; '));
+  const fixed = report.filter((r) => r.fautes && checked.some((c) => c.key === r.key && c.fautes.length) && !r.fautes.length && !r.garde);
+  console.log('  dont ' + fixed.length + ' corrigées par un nouveau son');
+}
 "
 rm -r "$tmp"
 node scripts/voix/manifeste.mjs

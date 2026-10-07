@@ -2,7 +2,8 @@ name: Voix naturelle
 
 # Fabrique les sons de la voix naturelle (Pocket TTS de Kyutai, voix « Estelle », en français et en
 # anglais) listés dans scripts/voix/a-generer.json, en 16 morceaux qui tournent en même temps. Chaque
-# son est contrôlé (hauteur de la voix, débit, diction vérifiée par Whisper) et refait s'il le faut.
+# son est contrôlé (hauteur de la voix, débit, diction vérifiée par Whisper, prononciation vérifiée
+# phonème par phonème) et refait s'il le faut.
 # Seuls les sons absents de app/voix/ sont fabriqués. Les MP3 et la liste des échecs sont
 # déposés sous l'étiquette git « voix-sons/<branche> » (aucune branche n'est modifiée, et deux
 # branches ne s'écrasent pas) ; on les ajoute ensuite à app/voix/ avec scripts/voix/recuperer.sh.
@@ -31,12 +32,14 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
-      - run: pip install pocket-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
-      # a-refaire.json : sons douteux à refaire (l'ancien est gardé s'il reste le meilleur)
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg espeak-ng
+      - run: pip install pocket-tts faster-whisper transformers phonemizer --extra-index-url https://download.pytorch.org/whl/cpu
+      # a-refaire.json : sons douteux à refaire (l'ancien est gardé s'il reste le meilleur) ; les mots déjà
+      # faits sont réécoutés phonème par phonème, et refaits s'ils sont mal prononcés
       - run: >-
           python scripts/voix/generer.py --shard ${{ matrix.morceau }}/16 --sortie voix-sortie --essais 4
-          --whisper large-v3-turbo $( [ -f scripts/voix/a-refaire.json ] && echo --refaire scripts/voix/a-refaire.json )
+          --whisper large-v3-turbo --phonemes --verifier-mots
+          $( [ -f scripts/voix/a-refaire.json ] && echo --refaire scripts/voix/a-refaire.json )
       - uses: actions/upload-artifact@v4
         if: always() # même si le temps est écoulé : les sons déjà fabriqués ne sont pas perdus
         with:

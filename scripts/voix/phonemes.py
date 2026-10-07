@@ -36,10 +36,49 @@ def heard(audio16k):
                   AutoModelForCTC.from_pretrained(MODEL).eval())
     features, tokenizer, model = _model
     x = np.asarray(audio16k, dtype=np.float32)
-    inputs = features(np.concatenate([np.zeros(1600, np.float32), x, np.zeros(1600, np.float32)]), sampling_rate=16000, return_tensors='pt')
+    pad = np.zeros(4800, np.float32)
+    inputs = features(np.concatenate([pad, x, pad]), sampling_rate=16000, return_tensors='pt')
     with torch.no_grad():
         ids = model(inputs.input_values).logits.argmax(-1)[0]
     return _plain(tokenizer.decode(ids))
+
+
+def _broad(p):
+    """Phonèmes rapprochés des confusions habituelles du modèle (ʁ roulé ou non, voyelles voisines) :
+    seuls les vrais écarts comptent."""
+    p = re.sub(r'\((en|fʁ|fr)\)|[0-9.,\']', '', p)
+    for a, b in [('ɑ̃', 'Õ'), ('ɔ̃', 'Õ'), ('õ', 'Õ'), ('ã', 'Õ'), ('ɛ̃', 'Ẽ'), ('œ̃', 'Ẽ'), ('tʃ', 'ʃ'), ('dʒ', 'ʒ')]:
+        p = p.replace(a, b)
+    p = re.sub('[aɑɔoʊuʌ](ŋ[gk]?|ng)', 'Õ', p)  # « on », « an » entendus « oŋ », « ong »
+    return p.translate(str.maketrans({'ɾ': 'ʁ', 'x': 'ʁ', 'χ': 'ʁ', 'ʀ': 'ʁ', 'ɹ': 'ʁ', 'ɡ': 'g', 'ɪ': 'i', 'ʊ': 'u',
+                                      'ɐ': 'a', 'ɑ': 'a', 'ɔ': 'o', 'ɛ': 'e', 'œ': 'ø', 'ə': 'ø', 'ɜ': 'ø', 'ð': 'd',
+                                      'ʌ': 'a', 'ɚ': 'ø', 'æ': 'e', 'ɨ': 'i'}))
+
+
+VOWELS = set('aeiouyøɛɔəɑœɪʊʌ') | {'̃'}
+# lettre finale muette (« souris », « chat », « doux ») → consonnes qu'on entendrait si elle était dite
+SILENT = {'s': 'sz', 't': 't', 'x': 'ksz', 'd': 'dt', 'z': 'zs', 'p': 'p'}
+
+
+def faults(text, lang, exp, got):
+    """Fautes nettes de prononciation : une lettre finale muette dite, un « in » dit à l'anglaise (« sing »)."""
+    out = []
+    if lang != 'fr' or not got:
+        return out
+    word = re.sub(r"[^\w'-]", '', (text.split() or [''])[-1].lower())
+    last = word[-1:]
+    if last in SILENT and exp and exp[-1] in VOWELS and got[-1] in SILENT[last]:
+        out.append(f'« {last} » final prononcé')
+    if 'ɛ̃' in exp and re.search('[iɪ]ŋ', got):
+        out.append('« in » dit à l’anglaise')
+    return out
+
+
+def judge(text, lang, audio16k):
+    """Écart de prononciation (0 = parfait ; une faute nette compte 1) et détails."""
+    exp, got = expected(text, lang), heard(audio16k)
+    found = faults(text, lang, exp, got)
+    return distance(_broad(exp), _broad(got)) + len(found), {'phonemes_attendus': exp, 'phonemes_entendus': got, 'fautes': found}
 
 
 def distance(a, b):
