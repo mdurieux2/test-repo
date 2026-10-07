@@ -4,13 +4,20 @@
 
 export const APP = {
   name: 'Lire & Compter',
-  version: '1.10.0',
+  version: '1.10.1',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.10.1',
+    date: '2026-10-07',
+    changes: [
+      'Préparation du déménagement de l’application vers sa nouvelle adresse : le mode hors ligne ne garde plus jamais une page de redirection à la place de l’application.',
+    ],
+  },
   {
     version: '1.10.0',
     date: '2026-10-07',
