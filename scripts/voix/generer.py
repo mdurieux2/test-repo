@@ -47,12 +47,13 @@ TARGET_DB = -20.0  # volume moyen des passages parlés (dBFS)
 MP3 = ['-ac', '1', '-ar', '24000', '-c:a', 'libmp3lame', '-b:a', '32k', '-write_xing', '0', '-id3v2_version', '0']
 
 items = json.loads(Path(args.liste).read_text(encoding='utf-8'))
-# sons déjà fabriqués : rangés dans les paquets (manifest.json), ou posés dans app/voix/fr|en
+# sons déjà fabriqués : rangés dans les paquets (manifest.json, par phrase : un son refait change de
+# nom), ou posés dans app/voix/fr|en
 manifest = EXISTING / 'manifest.json'
-packed = {f for p in json.loads(manifest.read_text(encoding='utf-8')).get('paquets', []) for f, _ in p['sons']} if manifest.exists() else set()
+made = json.loads(manifest.read_text(encoding='utf-8')).get('clips', {}) if manifest.exists() else {}
 redo = set(json.loads(Path(args.refaire).read_text(encoding='utf-8'))) if args.refaire else set()
 todo = [e for i, e in enumerate(items) if i % n == k - 1
-        and (e['key'] in redo or (e['file'] not in packed and not (EXISTING / e['file']).exists()))]
+        and (e['key'] in redo or (e['key'] not in made and not (EXISTING / e['file']).exists()))]
 print(f'morceau {k}/{n} : {len(todo)} sons à fabriquer', flush=True)
 
 
@@ -74,7 +75,7 @@ def existing_clip(e):
     for pack in json.loads(manifest.read_text(encoding='utf-8')).get('paquets', []):
         start = 0
         for file, size in pack['sons']:
-            if file == e['file']:
+            if file == made.get(e['key']):
                 with open(EXISTING / pack['nom'], 'rb') as f:
                     f.seek(start)
                     return f.read(size)
