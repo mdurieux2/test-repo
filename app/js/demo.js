@@ -101,34 +101,36 @@ const DEMOS = {
   dots: {
     label: (q, tapOnly) => (tapOnly ? 'Touche les points dans l’ordre des nombres.' : 'Glisse ton doigt d’un point au suivant, dans l’ordre des nombres.'),
     plan(q, { tapOnly }) {
-      const pts = q.stage.points.slice(0, 3).map(([x, y]) => ({ svg: '.dots-drawing', x, y }));
+      // seulement la première étape : du premier point au deuxième
+      const pts = q.stage.points.slice(0, 2).map(([x, y]) => ({ svg: '.dots-drawing', x, y }));
       return tapOnly ? pts.map(tap) : [drag(pts)];
     },
   },
   maze: {
     label: (q, tapOnly) => (tapOnly ? 'Touche les cases du chemin, une par une.' : 'Glisse ton doigt sur le chemin, case après case.'),
     plan(q, { tapOnly }) {
-      const cells = q.stage.solution.slice(0, 4).map((c) => el('.maze-cell', { data: { cell: c } }));
+      // seulement le premier pas sur le chemin
+      const cells = q.stage.solution.slice(0, 2).map((c) => el('.maze-cell', { data: { cell: c } }));
       return tapOnly ? cells.slice(1).map(tap) : [drag(cells)];
     },
   },
   roundmaze: {
     label: (q, tapOnly) => (tapOnly ? 'Touche les cases du chemin, une par une.' : 'Glisse ton doigt sur le chemin, case après case.'),
     plan(q, { tapOnly }) {
-      const cells = q.stage.solution.slice(0, 4).map((c) => el('.rmaze', roundCellPoint(q.stage.sectors, c)));
+      const cells = q.stage.solution.slice(0, 2).map((c) => el('.rmaze', roundCellPoint(q.stage.sectors, c)));
       return tapOnly ? cells.slice(1).map(tap) : [drag(cells)];
     },
   },
   path: {
     label: () => 'Touche les cases dans l’ordre, en partant de la case allumée.',
-    plan: (q) => q.stage.path.slice(1, 3).map((c) => tap(el('.path-cell', { data: { cell: c } }))),
+    plan: (q) => q.stage.path.slice(1, 2).map((c) => tap(el('.path-cell', { data: { cell: c } }))),
   },
   lasso: {
     label: (q, tapOnly) => (tapOnly ? 'Touche les objets un par un pour faire un paquet.' : 'Entoure des objets avec ton doigt pour faire un paquet.'),
     plan(q, { tapOnly }) {
       const group = lassoGroup(q.stage);
-      // des touchers : les trois premiers suffisent à montrer le geste
-      if (tapOnly) return group.slice(0, 3).map(({ i }) => tap(el('.lasso-object', { data: { i } })));
+      // des touchers : le premier objet seulement (la suite est à l'enfant)
+      if (tapOnly) return group.slice(0, 1).map(({ i }) => tap(el('.lasso-object', { data: { i } })));
       // une boucle autour du paquet (en % du cadre)
       const cx = group.reduce((s, g) => s + g.p[0], 0) / group.length;
       const cy = group.reduce((s, g) => s + g.p[1], 0) / group.length;
@@ -239,7 +241,7 @@ const DEMOS = {
       const goal = new Set(solution);
       const first = solution.find((c) => !given.includes(c)) ?? solution[0];
       const run = [first];
-      while (run.length < 3) {
+      while (run.length < 1) { // la première case seulement
         const next = run.at(-1) + 1;
         if (next % cols === 0 || !goal.has(next) || given.includes(next)) break;
         run.push(next);
