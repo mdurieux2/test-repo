@@ -19,6 +19,7 @@ import { formatChrono } from '../app/js/games/chrono.js';
 import { STORY_DATA } from '../app/js/games/histoires.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
+import { stickersUnlocked } from '../app/js/rewards.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 import { APP } from '../app/js/config.js';
 import { seasonOf } from '../app/js/themes.js';
@@ -947,10 +948,10 @@ if ((await page.textContent('.level-badge')) !== 'Niv. 4') fail('le niveau chois
 if ((await page.evaluate(() => globalThis.__lc.question.stage.count)) < 10) fail('compter niveau 4 : moins de 10 objets');
 console.log('✔ choix direct du niveau');
 
-// album : 2 étoiles par partie, un autocollant toutes les 5 étoiles
+// album : 2 étoiles par partie, un autocollant toutes les 5 étoiles (l'album en compte 30 au plus)
 await goProfile(page);
 await page.click('.domain-album');
-const expected = Math.floor((GAMES.length * 2 + extraStars) / 5);
+const expected = stickersUnlocked(GAMES.length * 2 + extraStars);
 const unlocked = await page.locator('.sticker:not(.locked)').count();
 if (unlocked !== expected) fail(`${unlocked} autocollants au lieu de ${expected}`);
 console.log(`✔ album : ${unlocked} autocollants`);
