@@ -33,6 +33,7 @@ import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
+import { applyA11y } from './a11y.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
 import { STORY_DATA } from './games/histoires.js';
@@ -83,6 +84,7 @@ function show(...children) {
     leave();
   }
   document.body.classList.toggle('easy-read', Boolean(child()?.easyRead));
+  applyA11y(child());
   document.body.dataset.season = store.settings.seasonal === false ? '' : currentSeason().id;
   app.replaceChildren(...children.filter(Boolean));
   window.scrollTo(0, 0);

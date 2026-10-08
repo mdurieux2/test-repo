@@ -38,8 +38,11 @@ export const PROGRAMS = {
       ['saisons', 1, 1],
     ],
     monde: [
-      ['animaux-monde', 1, 1], ['vivant', 1, 3],
+      ['animaux-monde', 1, 1],
       ['vivre-ensemble', 1, 4],
+    ],
+    sciences: [
+      ['vivant', 1, 3],
     ],
     anglais: [
       ['ecoute', 1, 2], ['compte-anglais', 1, 1], ['ou-est', 1, 1],
@@ -69,9 +72,12 @@ export const PROGRAMS = {
       ['saisons', 1, 2], ['mesures', 1, 1],
     ],
     monde: [
-      ['animaux-monde', 1, 2], ['vivant', 1, 6], ['matiere', 1, 5],
+      ['animaux-monde', 1, 2],
       ['drapeaux', 1, 1], ['carte-monde', 1, 3],
       ['vivre-ensemble', 1, 6], ['se-reperer', 1, 5],
+    ],
+    sciences: [
+      ['vivant', 1, 6], ['matiere', 1, 5],
     ],
     anglais: [
       ['ecoute', 1, 4], ['compte-anglais', 1, 2], ['ou-est', 1, 2], ['parle-anglais', 1, 1],
@@ -103,9 +109,12 @@ export const PROGRAMS = {
       ['heure', 1, 2], ['regle-horloge', 1, 4], ['calendrier', 1, 2], ['saisons', 1, 3], ['monnaie', 1, 3], ['mesures', 1, 4],
     ],
     monde: [
-      ['animaux-monde', 1, 3], ['vivant', 2, 9], ['matiere', 1, 8],
+      ['animaux-monde', 1, 3],
       ['pays', 1, 2], ['drapeaux', 1, 4], ['carte-monde', 1, 7],
       ['vivre-ensemble', 3, 9], ['se-reperer', 2, 8],
+    ],
+    sciences: [
+      ['vivant', 2, 9], ['matiere', 1, 8],
     ],
     anglais: [
       ['ecoute', 1, 6], ['lis-anglais', 1, 3], ['relie-anglais', 1, 3], ['compte-anglais', 1, 3],
@@ -140,9 +149,12 @@ export const PROGRAMS = {
       ['heure', 2, 7], ['regle-horloge', 1, 8], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
     ],
     monde: [
-      ['animaux-monde', 2, 7], ['vivant', 4, 10], ['matiere', 2, 10],
+      ['animaux-monde', 2, 7],
       ['pays', 1, 8], ['drapeaux', 1, 8], ['carte-monde', 2, 10],
       ['vivre-ensemble', 5, 10], ['se-reperer', 4, 10],
+    ],
+    sciences: [
+      ['vivant', 4, 10], ['matiere', 2, 10],
     ],
     anglais: [
       ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],

@@ -266,7 +266,7 @@ test('les identifiants de jeux sont uniques et rangés par matière', () => {
   const ids = GAMES.map((g) => g.id);
   assert.equal(new Set(ids).size, ids.length);
   for (const d of DOMAINS) for (const g of d.games) assert.equal(g.domain, d.id, g.id);
-  assert.deepEqual(DOMAINS.map((d) => d.id), ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'anglais']);
+  assert.deepEqual(DOMAINS.map((d) => d.id), ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'sciences', 'anglais']);
   assert.equal(findGame('calcul').title, 'Calcul');
 });
 

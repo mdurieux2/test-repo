@@ -23,6 +23,7 @@ const PRECACHE = [
   './icons/icon-512.png',
   './index.html',
   './js/characters.js',
+  './js/a11y.js',
   './js/config.js',
   './js/dashboard.js',
   './js/data/anglais-data.js',

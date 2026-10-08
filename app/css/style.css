@@ -1647,6 +1647,8 @@ body[data-season="ete"] { background: #fffbea; }
 .domain-jeux { background: #0d9488; box-shadow: 0 6px 0 #0a7068; }
 .domain-temps { background: #a16207; box-shadow: 0 6px 0 #7c4a05; }
 .domain-monde { background: #4d7c0f; box-shadow: 0 6px 0 #3a5e0b; }
+.domain-theme-sciences { --accent: #7e22ce; --accent-dark: #5b1690; --accent-soft: #f3e8ff; }
+.domain-sciences { background: #7e22ce; box-shadow: 0 6px 0 #5b1690; }
 .domain-dress { background: #e8f0ff; color: var(--ink); box-shadow: 0 6px 0 #c9d8f5; font-size: 1.3rem; min-height: 64px; }
 .home-menu { display: flex; flex-direction: column; gap: 12px; }
 .home-top { display: flex; gap: 10px; }

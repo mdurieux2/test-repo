@@ -219,7 +219,7 @@ test('duo : 10 questions en alternance A, B, A, B…, chacune du programme de l�
 
 test('duo : impossible si l’un des deux n’a plus aucun jeu affiché', () => {
   const store = family();
-  store.profiles.matteo.hiddenDomains = ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'anglais'];
+  store.profiles.matteo.hiddenDomains = ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'sciences', 'anglais'];
   assert.equal(duoPlan(store.profiles, ['eva-rose', 'matteo'], createRng(1)), null);
   assert.equal(duoPlan(store.profiles, ['eva-rose'], createRng(1)), null);
   // un seul jeu affiché : il revient à chaque tour

@@ -5,6 +5,7 @@
 
 import { createGameState } from './progress.js';
 import { isPhoto } from './photo.js';
+import { cleanA11y } from './a11y.js';
 
 export const STORAGE_KEY = 'lire-et-compter:v2';
 export const HISTORY_LIMIT = 300;
@@ -82,7 +83,7 @@ function idList(value) {
 
 /**
  * Réglages des parents qui suivent l'enfant partout (et survivent à « effacer la progression ») :
- * objectifs, personnage, rubriques et jeux masqués, jeux conseillés.
+ * objectifs, personnage, rubriques et jeux masqués, jeux conseillés, profil d'accessibilité.
  */
 function keptSettings(child = {}) {
   return {
@@ -91,6 +92,7 @@ function keptSettings(child = {}) {
     hiddenDomains: idList(child.hiddenDomains),
     hiddenGames: idList(child.hiddenGames),
     featured: idList(child.featured),
+    a11y: cleanA11y(child.a11y),
   };
 }
 

@@ -12,7 +12,7 @@ import {
 import { createRng } from '../app/js/random.js';
 
 const IDS = ['vivant', 'matiere'];
-const SECTION = 'Le vivant et la matière';
+const SECTIONS = { vivant: 'Le vivant', matiere: 'La matière et les objets' };
 
 /** 200 questions tirées à ce niveau, avec le prénom de l'enfant. */
 function draw(id, level, runs = 200, seed = 2468) {
@@ -31,21 +31,21 @@ function sentences(q) {
 
 const nameIn = (text, list) => list.find((it) => text.includes(it.name));
 
-test('sciences : rangés dans « Le monde », section « Le vivant et la matière », 7 à 10 niveaux', () => {
-  const monde = DOMAINS.find((d) => d.id === 'monde');
+test('sciences : rangés dans la rubrique « Sciences », sections « Le vivant » et « La matière et les objets », 7 à 10 niveaux', () => {
+  const sciences = DOMAINS.find((d) => d.id === 'sciences');
   for (const id of IDS) {
     const game = findGame(id);
     assert.ok(game, `${id} absent de index.js`);
-    assert.equal(game.domain, 'monde');
-    assert.equal(game.section, SECTION);
-    assert.ok(monde.games.includes(game));
+    assert.equal(game.domain, 'sciences');
+    assert.equal(game.section, SECTIONS[id]);
+    assert.ok(sciences.games.includes(game));
     assert.ok(game.levels.length >= 7 && game.levels.length <= 10, `${id} : ${game.levels.length} niveaux`);
     assert.equal(new Set(game.levels).size, game.levels.length, `${id} : libellé en double`);
     for (const label of game.levels) assert.ok([...label].length <= 26, `${id} : « ${label} » trop long`);
   }
   // les autres jeux de la rubrique sont rangés eux aussi (identifiants inchangés)
-  assert.equal(findGame('animaux-monde').section, SECTION);
-  for (const id of ['pays', 'drapeaux', 'carte-monde']) assert.equal(findGame(id).section, 'Pays, drapeaux et cartes', id);
+  assert.equal(findGame('animaux-monde').section, 'Animaux, pays et cartes');
+  for (const id of ['pays', 'drapeaux', 'carte-monde']) assert.equal(findGame(id).section, 'Animaux, pays et cartes', id);
   // les jeux d'une même section se suivent dans la rubrique
   const sections = monde.games.map((g) => g.section);
   assert.deepEqual(sections, [...sections].sort((a, b) => sections.indexOf(a) - sections.indexOf(b)));
