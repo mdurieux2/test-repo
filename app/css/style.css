@@ -2531,3 +2531,146 @@ body:has(main.play) .voice-progress-text { display: none; }
   .play[data-game="se-reperer"] .pattern-item { width: 56px; height: 56px; font-size: 2.1rem; }
   .choices-drawings.n2 .drawing-choice svg { height: min(110px, calc(100dvh - 170px)); }
 }
+
+/* =====================================================================
+   Le partage : le tas d'objets, les enfants et leurs assiettes, les paquets
+   (les tailles suivent la largeur du dessin : cqi, conteneur .share-scene)
+   ===================================================================== */
+.share-object, .share-item, .share-who, .share-ghost {
+  font-family: 'Andika', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+}
+.stage.stage-share { padding: 4px 0; min-height: 0; }
+.share-scene { container-type: inline-size; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.share-pile {
+  --obj: min(30px, 9cqi);
+  display: grid; grid-template-columns: repeat(5, calc(var(--obj) * 1.2)); justify-content: center; align-content: center; gap: 2px 3px;
+  min-height: calc(var(--rows, 1) * var(--obj) * 1.25 + 16px); padding: 8px 12px; max-width: 100%;
+  border-radius: 22px; background: var(--card); box-shadow: 0 4px 0 var(--line);
+}
+.share-pile.per-10 { --obj: min(26px, 6.2cqi); grid-template-columns: repeat(10, calc(var(--obj) * 1.2)); }
+.share-pile .share-object { font-size: var(--obj); line-height: 1.25; text-align: center; }
+button.share-object { touch-action: none; border-radius: 10px; }
+.share-object.selected { outline: 3px dashed var(--accent-dark); outline-offset: 0; background: var(--accent-soft); }
+.share-object.dragging { opacity: 0.3; }
+.share-ghost {
+  position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none;
+  display: grid; place-items: center; font-size: 34px; line-height: 1;
+}
+
+.share-plates {
+  --n: 2; --per-row: 6; --item: min(20px, 5.8cqi);
+  display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 8px; width: 100%;
+}
+.share-plates.n3 { --n: 3; --per-row: 5; --item: min(20px, 4.3cqi); }
+.share-plates.n4 { --n: 4; --per-row: 4; --item: min(20px, 3.7cqi); }
+.share-plates.n5 { --n: 5; --per-row: 3; --item: min(20px, 3.6cqi); gap: 6px; }
+.share-plate {
+  position: relative; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 4px 4px 6px; border-radius: 20px; background: var(--card);
+  box-shadow: 0 5px 0 var(--accent-soft), 0 0 0 3px var(--accent-soft) inset;
+}
+button.share-give {
+  width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; border-radius: 16px;
+}
+button.share-give:active { transform: translateY(3px); }
+.share-foot { display: flex; align-items: center; justify-content: center; gap: 2px; min-height: 30px; }
+.share-back {
+  width: 30px; height: 30px; flex: none; border-radius: 50%;
+  display: grid; place-items: center; font-size: 1.1rem; font-weight: 700; line-height: 1;
+  background: var(--card); color: var(--accent-dark); box-shadow: 0 2px 0 var(--line), 0 0 0 2px var(--accent) inset;
+}
+.share-back[hidden] { display: grid; visibility: hidden; }
+.share-plates.n4 .share-back, .share-plates.n5 .share-back { width: 24px; height: 24px; font-size: 0.9rem; }
+.share-plates.n5 .share-foot { gap: 1px; }
+.share-plates.n4 .share-count, .share-plates.n5 .share-count { min-width: 1.3em; padding: 0 3px; }
+.share-who { font-size: min(34px, calc(46cqi / var(--n))); line-height: 1.15; }
+.share-dish {
+  display: grid; grid-template-columns: repeat(var(--per-row), calc(var(--item) * 1.2)); justify-content: center; align-content: start;
+  width: 100%; min-height: calc(var(--rows, 1) * var(--item) * 1.25 + 10px); padding: 4px 0;
+  border-radius: 999px / 45%; background: #fff7e8; border: 3px solid var(--line);
+}
+.share-item { font-size: var(--item); line-height: 1.25; text-align: center; }
+.share-count {
+  min-width: 2em; padding: 0 6px; border-radius: 999px; font-size: 1rem; font-weight: 700; line-height: 1.5;
+  background: var(--accent-soft); color: var(--accent-dark);
+}
+.share-plate.hint { outline: 4px dashed var(--accent-dark); outline-offset: 2px; background: #fff6d6; }
+.share-plate.drop-target, .share-bag.drop-target { box-shadow: 0 0 0 4px var(--hint); background: #fff6d6; }
+.share-plates.done .share-plate { box-shadow: 0 5px 0 var(--good-dark), 0 0 0 3px var(--good) inset; }
+
+/* les paquets : pleins (trait plein), le paquet ouvert (pointillés, cases vides à remplir) */
+.share-bags {
+  --item: min(22px, 6.4cqi);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%;
+  min-height: calc(var(--rows, 1) * (var(--item) * 1.25 + 20px) + (var(--rows, 1) - 1) * 8px);
+}
+.share-bag {
+  display: grid; grid-template-columns: repeat(5, calc(var(--item) * 1.2)); justify-content: center; align-items: center;
+  min-width: 0; padding: 7px 2px; border-radius: 16px; background: var(--card); border: 3px solid var(--accent-dark);
+}
+.share-bag.open { border-style: dashed; background: var(--accent-soft); }
+.share-bag.open:active { transform: translateY(2px); }
+.share-bag .share-item { font-size: var(--item); line-height: 1.25; }
+.share-slot { justify-self: center; width: calc(var(--item) * 0.7); aspect-ratio: 1; border-radius: 50%; border: 2px dashed #b9a684; }
+
+.share-zone { display: flex; flex-direction: column; gap: 8px; }
+.share-help { margin: 0; text-align: center; font-size: 1.1rem; font-weight: 700; color: var(--muted); }
+.share-summary { margin: 0; text-align: center; font-size: 1.3rem; font-weight: 700; }
+
+/* « Combien chacun ? » : le même dessin, assiettes vides */
+.share-scene .share-plate:not(:has(.share-give)) .share-dish { min-height: calc(var(--item) * 1.25 + 10px); }
+
+/* =====================================================================
+   L'addition posée : les colonnes (u, d, c), les retenues, le résultat
+   ===================================================================== */
+.stage.stage-column { padding: 4px 0; min-height: 0; }
+.column-sum {
+  --cell: min(48px, 12vw, 7dvh);
+  display: grid; grid-template-columns: calc(var(--cell) * 0.7) repeat(var(--width), var(--cell));
+  justify-content: center; align-items: center; max-width: 100%;
+  padding: 6px 16px 12px; border-radius: 22px; background: var(--card); box-shadow: 0 5px 0 var(--line);
+  font-weight: 700; color: var(--ink);
+}
+.col-head { font-size: calc(var(--cell) * 0.36); line-height: 1.3; text-align: center; color: var(--muted); }
+.col-sign, .col-digit { font-size: calc(var(--cell) * 0.78); line-height: 1.15; text-align: center; }
+.col-sign { color: var(--accent-dark); }
+.col-line { grid-column: 1 / -1; height: 4px; margin: 4px 0 6px; border-radius: 2px; background: var(--ink); }
+.col-carry, .col-result {
+  justify-self: center; display: grid; place-items: center; padding: 0; line-height: 1;
+  border: 3px dashed #b9a684; background: #fffdf8; color: var(--ink);
+}
+.col-carry {
+  width: calc(var(--cell) * 0.56); height: calc(var(--cell) * 0.56); margin-bottom: 2px;
+  border-radius: 10px; font-size: calc(var(--cell) * 0.42);
+}
+.col-result { width: calc(var(--cell) * 0.9); height: calc(var(--cell) * 1.05); border-radius: 12px; font-size: calc(var(--cell) * 0.75); }
+/* la case à remplir : bordure pleine et épaisse, qui brille (pas seulement une couleur) */
+.col-carry.active, .col-result.active {
+  border: 4px solid var(--accent-dark); background: var(--accent-soft);
+  box-shadow: 0 0 0 4px var(--hint); animation: glow 1.2s ease-in-out infinite;
+}
+.col-carry.filled, .col-result.filled { border-style: solid; border-color: var(--good); background: #e6f7ef; animation: pop 0.3s ease-out; }
+.col-carry.filled { color: var(--accent-dark); }
+/* « Bien poser » : les trois dispositions l'une sous l'autre */
+.choices.choices-columns { grid-template-columns: minmax(0, 1fr); }
+.column-sum.mini { --cell: min(32px, 9vw, 5dvh); padding: 0 6px 2px; background: none; box-shadow: none; }
+.column-sum.mini .col-line { height: 3px; margin: 2px 0 0; }
+.choices-columns .choice { min-height: 0; padding: 6px 4px; }
+
+.column-zone { display: flex; flex-direction: column; gap: 6px; }
+.column-step { margin: 0; min-height: 1.5em; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--accent-dark); }
+.column-keys { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.column-keys .key { min-height: 56px; }
+.column-zone.answered .key { opacity: 0.5; }
+.key.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 5px 0 #e6b800, 0 0 0 4px var(--hint) inset; }
+.play-column .feedback, .play-share .feedback { min-height: 64px; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .column-sum { --cell: min(48px, 11dvh); padding: 4px 14px 8px; }
+  .column-sum.mini { --cell: min(26px, 6.4dvh); }
+  .choices-columns { gap: 8px; }
+  .column-keys .key { min-height: 46px; }
+  .column-step { font-size: 1.05rem; }
+  .share-scene { gap: 6px; }
+  .share-help { font-size: 1rem; }
+}

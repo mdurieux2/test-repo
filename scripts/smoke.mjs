@@ -694,6 +694,49 @@ async function answer(page, q, wrongFirst) {
       await page.click('.shade-zone .validate-btn');
       break;
     }
+    case 'share': {
+      // le partage : toucher les enfants (ou le paquet ouvert), puis dire combien il en reste / de paquets
+      const { total, groups, size } = q.stage;
+      const plate = (i) => `.share-plate[data-plate="${i}"]`;
+      const inPlate = (i) => page.locator(`${plate(i)} .share-item`).count();
+      if (size) {
+        for (let k = 0; k < Math.floor(total / size) * size; k++) await page.click('.share-bag.open');
+      } else {
+        const per = Math.floor(total / groups);
+        if (wrongFirst) {
+          // un de trop pour le premier enfant : les parts ne sont pas égales
+          for (let k = 0; k <= per; k++) await page.click(plate(0));
+          for (let i = 1; i < groups; i++) for (let k = 0; k < per && (await page.locator('.share-object').count()); k++) await page.click(plate(i));
+          await page.waitForSelector('.try-again');
+          await page.click(`${plate(0)} .share-back`); // on le reprend (la flèche)
+        }
+        for (let i = 0; i < groups; i++) while ((await inPlate(i)) < per) await page.click(plate(i));
+      }
+      if (q.ask) {
+        await page.waitForSelector('.share-zone .choice');
+        if (wrongFirst && size) {
+          await page.click(`.choice[data-value="${q.choices.find((c) => c.value !== q.answer).value}"]`);
+          await page.waitForSelector('.choice.wrong');
+        }
+        await page.click(`.choice[data-value="${q.answer}"]`);
+      }
+      break;
+    }
+    case 'column': {
+      // l'opération posée : chaque chiffre du résultat et chaque retenue, de droite à gauche
+      const key = (d) => page.click(`.column-zone .key[data-digit="${d}"]`);
+      if (wrongFirst) {
+        await key((q.stage.steps[0].digit + 1) % 10);
+        await page.waitForSelector('.try-again');
+      }
+      for (const step of q.stage.steps) {
+        if (!(await page.locator(`.column-sum [data-cell="${step.kind === 'carry' ? 'c' : 'r'}${step.col}"].active`).count())) {
+          fail(`opération posée : la case ${step.kind} ${step.col} n’est pas la case active`);
+        }
+        await key(step.digit);
+      }
+      break;
+    }
     default:
       if (wrongFirst) {
         const wrong = q.choices.find((c) => c.value !== q.answer);

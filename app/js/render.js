@@ -257,6 +257,10 @@ export function renderStage(stage, actions) {
     case 'equation':
       return h('div', { class: 'equation big' },
         stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
+    case 'share':
+      return shareScene(stage);
+    case 'column':
+      return columnGrid(stage);
     default:
       return h('div', { class: 'stage-empty' });
   }
@@ -623,6 +627,7 @@ function fractionLabel({ n, d, words }) {
 }
 
 export function renderChoiceContent(choice) {
+  if (choice.column) return columnGrid({ ...choice.column, mini: true });
   if (choice.drawing) return drawingElement(choice.drawing, `drawing-choice drawing-${choice.drawing.kind}`, choice.name);
   if (choice.fraction) {
     return h('span', { class: 'fraction-option' }, fractionElement(choice.fraction, 'fraction-choice'),
@@ -649,6 +654,53 @@ export function renderChoiceContent(choice) {
   }
   return choice.lang ? h('span', { lang: choice.lang }, choice.label) : choice.label;
 }
+// ---------------------------------------------------------------- Le partage et l'addition posée
+
+/** Le tas d'objets à partager, rangés par lignes de 5 (ou de 10). */
+export function sharePile(emoji, count, total, objectClass = 'share-object') {
+  return h('div', { class: `share-pile per-${total > 10 ? 10 : 5}`, role: 'img', 'aria-label': String(count) },
+    Array.from({ length: count }, () => h('span', { class: objectClass }, emoji)));
+}
+
+/** « Combien chacun ? » : les objets (qu'on peut toucher pour les compter) et les enfants, assiettes vides. */
+function shareScene({ emoji, total, who }) {
+  return h('div', { class: 'share-scene' },
+    sharePile(emoji, total, total, 'object share-object'),
+    h('div', { class: `share-plates n${who.length}` }, who.map((kid) => h('div', { class: 'share-plate' },
+      h('span', { class: 'share-who', 'aria-hidden': 'true' }, kid), h('span', { class: 'share-dish' })))));
+}
+
+const PLACE_LETTERS = ['u', 'd', 'c', 'm'];
+
+/**
+ * Une opération posée en colonnes : en haut les lettres u, d, c et les cases des retenues, puis les
+ * nombres (unités sous les unités), le trait, et les cases du résultat. Les cases à remplir portent
+ * data-cell (« r0 » : résultat des unités, « c1 » : retenue au-dessus des dizaines). En petit
+ * (`mini`, réponses du niveau « Bien poser ») : les nombres seuls, décalés de `offsets` colonnes.
+ */
+export function columnGrid({ op, rows, width, steps = [], offsets = [], mini = false }) {
+  const cols = Array.from({ length: width }, (_, i) => width - 1 - i); // de gauche à droite
+  const targets = new Set(steps.map((s) => `${s.kind === 'carry' ? 'c' : 'r'}${s.col}`));
+  const digit = (n, r, c) => {
+    const s = String(n);
+    const k = c - (offsets[r] || 0);
+    return k >= 0 && k < s.length ? s[s.length - 1 - k] : '';
+  };
+  const box = (id, cls) => (targets.has(id) ? h('span', { class: cls, 'data-cell': id }) : h('span', { class: 'col-space' }));
+  const cells = [];
+  const row = (sign, list) => cells.push(h('span', { class: 'col-sign' }, sign), ...list);
+  if (!mini) {
+    row('', cols.map((c) => h('span', { class: 'col-head' }, PLACE_LETTERS[c])));
+    row('', cols.map((c) => box(`c${c}`, 'col-carry')));
+  }
+  rows.forEach((n, r) => row(r === rows.length - 1 ? op : '', cols.map((c) => h('span', { class: 'col-digit' }, digit(n, r, c)))));
+  cells.push(h('span', { class: 'col-line' }));
+  if (!mini) row('', cols.map((c) => box(`r${c}`, 'col-result')));
+  return h('div', {
+    class: `column-sum${mini ? ' mini' : ''} rows-${rows.length}`, style: { '--width': width }, role: 'img', 'aria-label': rows.join(` ${op} `),
+  }, cells);
+}
+
 /** Un dessin en SVG (feu des piétons, panneau, main, quadrillage…), voir games/vivre.js. */
 function drawingElement(d, cls, label) {
   const el = h('span', { class: cls, role: 'img', 'aria-label': label });

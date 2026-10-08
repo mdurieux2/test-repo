@@ -232,6 +232,27 @@ function checkQuestion(q, ctx) {
       assert.deepEqual(q.choices, [], ctx);
       break;
     }
+    case 'share': {
+      // le partage (détails dans tests/operations.test.js) : des parts égales, et un reste plus petit
+      const { total, groups, size, who } = q.stage;
+      const unit = size || groups;
+      assert.ok(Number.isInteger(total) && total >= unit && total <= 30, ctx);
+      if (!size) assert.equal(new Set(who).size, groups, ctx);
+      if (q.ask) {
+        assert.equal(q.answer, size ? Math.floor(total / size) : total % groups, ctx);
+        assert.equal(q.choices.filter((c) => c.value === q.answer).length, 1, ctx);
+      } else {
+        assert.equal(total % groups, 0, ctx);
+        assert.equal(q.answer, total / groups, ctx);
+      }
+      break;
+    }
+    case 'column': {
+      const { steps } = q.stage;
+      assert.ok(steps.length >= 2 && steps.every((s) => Number.isInteger(s.digit) && s.digit >= 0 && s.digit <= 9 && s.label), ctx);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
     default: {
       const values = q.choices.map((c) => c.value);
       assert.ok(values.length >= 2, ctx);

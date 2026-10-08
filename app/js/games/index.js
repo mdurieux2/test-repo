@@ -27,12 +27,13 @@ import { SCIENCES_GAMES } from './sciences.js';
 import { NOMBRES_PLUS_GAMES } from './nombres-plus.js';
 import { GRAMMAIRE_GAMES } from './grammaire.js';
 import { VIVRE_GAMES } from './vivre.js';
+import { OPERATIONS_GAMES } from './operations.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES, ...GRAMMAIRE_GAMES,
-  ...VIVRE_GAMES,
+  ...VIVRE_GAMES, ...OPERATIONS_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -51,6 +52,8 @@ const RUBRIQUES = [
       'compter', 'vite-vu', 'panier', 'patates', 'dizaines', 'relier',
       'comparer', 'suite', 'calcul', 'trous', 'relie-calculs', 'faire-dix', 'tables', 'tables-chrono',
       'ranger', 'problemes', 'doubles', 'droite-numerique', 'fractions',
+      'ranger', 'problemes', 'doubles',
+      'partage', 'addition-posee',
     ],
   },
   {

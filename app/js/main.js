@@ -26,8 +26,8 @@ import {
 } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
 import {
-  avatar, clockSvg, flagElement, fractionElement, h, mapElement, moneyItem, numberLineElement, renderChoiceContent, renderStage, revealWord,
-  setProfiles,
+  avatar, clockSvg, columnGrid, flagElement, fractionElement, h, mapElement, moneyItem, numberLineElement, renderChoiceContent, renderStage,
+  revealWord, setProfiles,
 } from './render.js';
 import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
@@ -1010,6 +1010,9 @@ function nextQuestion(session) {
     swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
     picross: picrossZone,
     map: mapZone, numberline: numberLineZone, shade: shadeZone,
+    map: mapZone,
+    share: shareZone,
+    column: columnZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -3612,6 +3615,243 @@ function buildZone(ctx) {
       tens ? h('button', { class: 'add-btn bag', 'data-add': '10', onclick: () => add(0, 10) }, h('span', { class: 'add-emoji' }, '🛍️'), '+10') : null),
     h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
   return { stage: h('div', { class: 'stage stage-build' }, list, basket, counter), zone };
+}
+
+// ---- Le partage : donner les objets un par un aux enfants (ou les ranger par paquets)
+
+// Objets par ligne dans l'assiette d'un enfant, selon le nombre d'enfants (comme dans style.css).
+const SHARE_PER_ROW = { 2: 6, 3: 5, 4: 4, 5: 3 };
+
+function shareZone(ctx) {
+  const { q } = ctx;
+  const { emoji, total, groups, size, who } = q.stage;
+  const packets = Boolean(size);
+  const guide = ctx.session.guide;
+  let left = total;
+  let finished = false;
+  let selected = false; // un objet du tas est choisi : le prochain enfant touché le reçoit
+  // objets de chaque assiette ; en paquets, objets de chaque paquet (le dernier est ouvert)
+  const counts = packets ? [0] : who.map(() => 0);
+  // une assiette ne peut pas recevoir beaucoup plus que sa part : le dessin ne déborde jamais
+  const cap = packets ? size : Math.ceil(total / groups) + 2;
+  const perRow = total > 10 ? 10 : 5;
+  const pileEl = h('div', { class: `share-pile per-${perRow}`, style: { '--rows': Math.ceil(total / perRow) } });
+  const holders = packets
+    ? h('div', { class: 'share-bags', style: { '--rows': Math.ceil(Math.floor(total / size) / 2) } })
+    : h('div', { class: `share-plates n${groups}`, style: { '--rows': Math.ceil(cap / SHARE_PER_ROW[groups]) } });
+  const help = h('p', { class: 'share-help' }, packets ? `Touche le paquet pour y mettre 1 ${emoji}.` : `Touche un enfant pour lui donner 1 ${emoji}.`);
+  const zone = h('div', { class: 'choices share-zone' }, help);
+
+  const plates = packets ? [] : who.map((kid, i) => {
+    const dish = h('span', { class: 'share-dish' });
+    const count = h('span', { class: 'share-count', 'aria-hidden': 'true' });
+    // toucher l'enfant (ou son assiette) lui donne un objet ; la flèche en reprend un, remis sur le tas
+    const back = h('button', { class: 'share-back', 'aria-label': `Reprendre à l’enfant ${i + 1}`, hidden: true, onclick: () => takeBack(i) }, '↩');
+    const el = h('div', { class: 'share-plate', 'data-plate': i },
+      h('button', { class: 'share-give', 'aria-label': `Donner à l’enfant ${i + 1}`, onclick: () => give(i) },
+        h('span', { class: 'share-who', 'aria-hidden': 'true' }, kid), dish),
+      h('span', { class: 'share-foot' }, count, back));
+    return { el, dish, count, back };
+  });
+  if (!packets) holders.append(...plates.map((p) => p.el));
+
+  // glisser un objet du tas jusqu'à un enfant (ou jusqu'au paquet), ou le toucher
+  const targetAt = (ev) => {
+    const el = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.share-plate, .share-bag.open');
+    return el && holders.contains(el) ? el : null;
+  };
+  const dropOn = (el) => (packets ? fill() : give(Number(el.dataset.plate)));
+  const tapObject = () => {
+    if (packets) return fill();
+    selected = !selected;
+    return render();
+  };
+  const pileObject = (i) => {
+    const el = h('button', { class: `share-object${selected && i === left - 1 ? ' selected' : ''}`, 'aria-label': `Prendre 1 ${emoji}` }, emoji);
+    let fromPointer = false; // le toucher est déjà traité au lever du doigt
+    el.addEventListener('click', () => {
+      if (fromPointer) { fromPointer = false; return; }
+      if (!ctx.session.locked && !finished) tapObject(); // clavier, lecteur d'écran
+    });
+    el.addEventListener('pointerdown', (e) => {
+      if (ctx.session.locked || finished) return;
+      e.preventDefault();
+      const start = [e.clientX, e.clientY];
+      const rect = el.getBoundingClientRect();
+      let ghost = null;
+      let over = null;
+      const move = (ev) => {
+        if (!ghost && Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) > 8) {
+          ghost = h('div', { class: 'share-ghost', 'aria-hidden': 'true', style: { width: `${rect.width}px`, height: `${rect.height}px` } }, emoji);
+          document.body.append(ghost);
+          el.classList.add('dragging');
+        }
+        if (!ghost) return;
+        ghost.style.transform = `translate(${ev.clientX - rect.width / 2}px, ${ev.clientY - rect.height / 2}px)`;
+        ghost.hidden = true; // pour trouver l'enfant sous le doigt
+        const target = targetAt(ev);
+        ghost.hidden = false;
+        if (target !== over) {
+          over?.classList.remove('drop-target');
+          target?.classList.add('drop-target');
+          over = target;
+        }
+      };
+      const up = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        fromPointer = true;
+        setTimeout(() => { fromPointer = false; }, 400);
+        over?.classList.remove('drop-target');
+        if (!ghost) return tapObject();
+        ghost.remove();
+        el.classList.remove('dragging');
+        const target = ev.type === 'pointerup' ? targetAt(ev) : null;
+        return target ? dropOn(target) : undefined;
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    });
+    return el;
+  };
+
+  const items = (n) => Array.from({ length: n }, () => h('span', { class: 'share-item' }, emoji));
+  const render = () => {
+    pileEl.replaceChildren(...Array.from({ length: left }, (_, i) => pileObject(i)));
+    pileEl.setAttribute('aria-label', String(left));
+    if (packets) {
+      holders.replaceChildren(...counts.map((c, i) => (i === counts.length - 1 && c < size && !finished
+        ? h('button', { class: 'share-bag open', 'data-bag': i, 'aria-label': `Mettre 1 ${emoji} dans le paquet`, onclick: () => fill() },
+          items(c), Array.from({ length: size - c }, () => h('span', { class: 'share-slot' })))
+        : h('span', { class: 'share-bag full', role: 'img', 'aria-label': `Un paquet de ${size}` }, items(c)))));
+      return;
+    }
+    plates.forEach(({ el, dish, count, back }, i) => {
+      dish.replaceChildren(...items(counts[i]));
+      count.textContent = counts[i];
+      back.hidden = !counts[i] || finished;
+      el.classList.remove('hint');
+    });
+  };
+  const finish = () => {
+    finished = true;
+    render();
+    holders.classList.add('done');
+    if (!q.ask) {
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    // il reste à dire combien il en reste (ou combien de paquets) : les réponses apparaissent
+    const bubble = app.querySelector('.instruction .bubble');
+    if (bubble) bubble.textContent = frenchSpacing(q.ask.text);
+    ctx.feedback.replaceChildren();
+    zone.replaceChildren(...[q.ask.summary ? h('p', { class: 'share-summary' }, q.ask.summary) : null, choiceZone(ctx)].filter(Boolean));
+    say(guide, [q.ask.summary, q.ask.text].filter(Boolean));
+  };
+  // tout ce qui se partage est donné (il ne reste que le reste) : les parts sont-elles égales ?
+  const rest = packets ? 0 : total % groups;
+  const check = (gave) => {
+    if (left > rest) return;
+    if (counts.every((c) => c === counts[0])) return finish();
+    if (!gave) return;
+    if (ctx.session.attempts >= 1) {
+      const most = Math.max(...counts);
+      plates.forEach(({ el }, i) => el.classList.toggle('hint', counts[i] === most));
+    }
+    markWrong(ctx, { message: 'Ils n’en ont pas tous autant. Touche la flèche pour en reprendre.', given: counts.join(', ') });
+  };
+  const give = (i) => {
+    if (ctx.session.locked || finished || !left) return;
+    if (counts[i] >= cap) {
+      plates[i].el.classList.add('shake');
+      setTimeout(() => plates[i].el.classList.remove('shake'), 400);
+      return;
+    }
+    left--;
+    counts[i]++;
+    selected = false;
+    playSound('tap');
+    render();
+    check(true);
+  };
+  const takeBack = (i) => {
+    if (ctx.session.locked || finished || !counts[i]) return;
+    counts[i]--;
+    left++;
+    render();
+    check(false);
+  };
+  // en paquets : le paquet ouvert se ferme quand il est plein ; un autre s'ouvre s'il reste de quoi le remplir
+  const fill = () => {
+    if (ctx.session.locked || finished || !left) return;
+    counts[counts.length - 1]++;
+    left--;
+    playSound('tap');
+    if (counts.at(-1) === size) {
+      if (left < size) return finish();
+      counts.push(0);
+    }
+    render();
+  };
+  render();
+  return { stage: h('div', { class: 'stage stage-share' }, h('div', { class: 'share-scene' }, pileEl, holders)), zone };
+}
+
+// ---- L'addition posée : le résultat chiffre par chiffre, de droite à gauche, et la retenue
+
+function columnZone(ctx) {
+  const { q } = ctx;
+  const { steps } = q.stage;
+  const grid = columnGrid(q.stage);
+  const cellOf = (s) => grid.querySelector(`[data-cell="${s.kind === 'carry' ? 'c' : 'r'}${s.col}"]`);
+  let current = 0;
+  let misses = 0;
+  const caption = h('p', { class: 'column-step' });
+  const keys = Array.from({ length: 10 }, (_, d) => h('button', { class: 'key', 'data-digit': d, onclick: () => press(d) }, d));
+  const show = () => {
+    grid.querySelectorAll('.active').forEach((el) => el.classList.remove('active'));
+    const s = steps[current];
+    if (!s) return;
+    cellOf(s).classList.add('active');
+    caption.textContent = s.label;
+  };
+  const press = (d) => {
+    const s = steps[current];
+    if (ctx.session.locked || !s) return;
+    const el = cellOf(s);
+    if (d === s.digit) {
+      el.textContent = d;
+      el.classList.add('filled');
+      keys.forEach((k) => k.classList.remove('hint'));
+      misses = 0;
+      current++;
+      playSound('tap');
+      show();
+      if (current === steps.length) {
+        zone.classList.add('answered');
+        markCorrect(ctx);
+      }
+      return;
+    }
+    misses++;
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 400);
+    const hint = misses >= 2;
+    if (hint) keys[s.digit].classList.add('hint');
+    markWrong(ctx, {
+      message: hint ? `C’est ${s.digit} !` : 'Essaie encore !',
+      speech: hint ? `C’est ${s.digit}. Tape ${s.digit} !` : 'Essaie encore !',
+      given: `${s.label} : ${d}`,
+    });
+  };
+  // pavé de chiffres : 1 à 5, puis 6 à 9 et 0
+  const zone = h('div', { class: 'choices column-zone' }, caption,
+    h('div', { class: 'column-keys' }, [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => keys[d])));
+  show();
+  return { stage: h('div', { class: 'stage stage-column' }, grid), zone };
 }
 
 // ---- Fin de partie
