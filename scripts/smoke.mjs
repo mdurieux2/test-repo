@@ -1669,8 +1669,9 @@ async function checkDevice(device, repeat, deviceIndex) {
     for (let level = 1; level <= game.levels.length; level++) {
       const grade = gradeFor(game.id, level);
       await setStore(page, `store.profiles['eva-rose'].grade = '${grade}'; store.profiles['eva-rose'].games['${game.id}'] = { level: ${level} };`);
-      for (let k = 0; k < (repeat > 1 ? STRESS[game.id] || repeat : repeat); k++) {
-        await openGame(page, game);
+      // un jeu qui alterne deux formes de questions (game.formats) : chacune est vérifiée
+      for (let k = 0; k < (repeat > 1 ? STRESS[game.id] || repeat : repeat) * (game.formats || 1); k++) {
+        await openGame(page, game, { format: k % (game.formats || 1) });
         await page.waitForSelector('.choices');
         await checkLayout(page, tag(`${game.id} niveau ${level}`));
         checked++;

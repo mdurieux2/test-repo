@@ -6,6 +6,7 @@ import { FLAGS, flagMarkup } from './games/drapeaux.js';
 import { balanceSvg, describeBalance, describeFigure, figureSvg } from './games/logique-plus.js';
 import { fractionSvg, numberLineSvg } from './games/nombres-plus.js';
 import { drawingSvg } from './games/vivre.js';
+import { barModelMarkup, chartMarkup, describeChart, describeModel, schemaMarkup } from './games/donnees.js';
 import {
   CONTINENTS, COUNTRIES, EUROPE_DRAWN, EUROPE_TARGETS, OCEANS, SEAS, VIEWS, WORLD_TARGETS, atIn, dotFor, mapPaths, toXY,
 } from './data/carte-data.js';
@@ -254,6 +255,10 @@ export function renderStage(stage, actions) {
       return h('div', { class: 'stage-fraction' }, fractionElement(stage));
     case 'drawing':
       return drawingElement(stage.drawing, `stage-drawing drawing-${stage.drawing.kind}`, stage.label);
+    case 'chart':
+      return markupStage(`stage-chart chart-${stage.chart.kind}`, chartMarkup(stage.chart), describeChart(stage.chart));
+    case 'schema':
+      return markupStage(`stage-schema${stage.model ? ' with-model' : ''}`, schemaMarkup(stage), stage.model ? describeModel(stage.model) : null);
     case 'equation':
       return h('div', { class: 'equation big' },
         stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
@@ -274,6 +279,12 @@ function accordStage({ emoji, count = 1, from, to }) {
       from ? h('span', { class: 'accord-from' }, from) : null,
       from ? h('span', { class: 'accord-arrow', 'aria-hidden': 'true' }, '→') : null,
       h('span', { class: 'accord-to' }, to)));
+}
+/** Un dessin fabriqué en texte (HTML ou SVG) par le jeu : tableaux, graphiques, schémas en barres. */
+function markupStage(cls, markup, label) {
+  const el = h('div', { class: cls, 'aria-label': label || undefined });
+  el.innerHTML = markup;
+  return el;
 }
 
 /** Petit texte à lire ; le bouton 🔊 le lit à voix haute, en cas de besoin. */
@@ -641,6 +652,11 @@ export function renderChoiceContent(choice) {
   if (choice.piece) return pieceContent(choice.piece);
   if (choice.bar) {
     return h('span', { class: 'pencil-choice', role: 'img', 'aria-label': choice.name, style: { width: `${choice.bar.length * 10}%`, '--pencil': choice.bar.color } });
+  }
+  if (choice.model) {
+    const el = h('span', { class: 'bm-choice', role: 'img', 'aria-label': choice.name });
+    el.innerHTML = barModelMarkup(choice.model);
+    return el;
   }
   if (choice.objects) return objectsGrid(choice.objects.emoji, choice.objects.count, 5, 'small');
   if (choice.shape) return shapeSvg(choice.shape, choice.color);
