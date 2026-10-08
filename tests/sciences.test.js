@@ -47,7 +47,7 @@ test('sciences : rangés dans la rubrique « Sciences », sections « Le vivant 
   assert.equal(findGame('animaux-monde').section, 'Animaux, pays et cartes');
   for (const id of ['pays', 'drapeaux', 'carte-monde']) assert.equal(findGame(id).section, 'Animaux, pays et cartes', id);
   // les jeux d'une même section se suivent dans la rubrique
-  const sections = monde.games.map((g) => g.section);
+  const sections = DOMAINS.find((d) => d.id === 'monde').games.map((g) => g.section);
   assert.deepEqual(sections, [...sections].sort((a, b) => sections.indexOf(a) - sections.indexOf(b)));
 });
 
