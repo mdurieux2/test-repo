@@ -63,6 +63,19 @@ function checkQuestion(q, ctx) {
       assert.equal(solution.at(-1), goal, ctx);
       assert.notEqual(start, goal, ctx);
       for (let i = 1; i < solution.length; i++) assert.ok(canMove(open, cols, solution[i - 1], solution[i]), ctx);
+      // les clés à ramasser sont sur le trajet, avant l'arrivée
+      for (const item of q.stage.items || []) assert.ok(solution.includes(item) && item !== goal, ctx);
+      break;
+    }
+    case 'roundmaze': {
+      // détails dans tests/labyrinthes-ronds.test.js
+      const { sectors, links, start, goal, solution } = q.stage;
+      assert.equal(links.length, sectors.reduce((a, b) => a + b, 0), ctx);
+      assert.equal(solution[0], start, ctx);
+      assert.equal(solution.at(-1), goal, ctx);
+      assert.notEqual(start, goal, ctx);
+      for (let i = 1; i < solution.length; i++) assert.ok(links[solution[i - 1]].includes(solution[i]), ctx);
+      assert.equal(q.answer, goal, ctx);
       break;
     }
     case 'path': {
@@ -90,16 +103,19 @@ function checkQuestion(q, ctx) {
       const xs = model.map((c) => c % cols);
       const ys = model.map((c) => Math.floor(c / cols));
       const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
-      // ce qu'il faut colorier pour chaque case du modèle : reflet, copie, copie plus bas, demi-tour, agrandie
+      // ce qu'il faut colorier pour chaque case du modèle : reflet, copie, copie plus bas, demi-tour, agrandie,
+      // rétrécie (chaque carré de 2 × 2 cases du modèle donne une seule case)
       const image = (c) => {
         const [x, y] = [c % cols, Math.floor(c / cols)];
+        if (mode === 'shrink') return [Math.floor((y - y0) / 2) * cols + half + Math.floor((x - x0) / 2)];
         if (mode === 'copy') return [c + half];
         if (mode === 'shift') return [c + cols + half];
         if (mode === 'turn') return [(y0 + y1 - y) * cols + (x0 + x1 - x) + half];
         if (mode === 'zoom') return [0, 1, cols, cols + 1].map((d) => (2 * (y - y0)) * cols + half + 2 * (x - x0) + d);
         return [mirrorCell(c, cols, rows, axis)];
       };
-      const expected = model.flatMap(image).sort((a, b) => a - b);
+      const expected = [...new Set(model.flatMap(image))].sort((a, b) => a - b);
+      if (mode === 'shrink') assert.equal(model.length, 4 * expected.length, `le modèle est fait de carrés de 4 cases : ${ctx}`);
       assert.deepEqual(expected, solution, ctx);
       assert.equal(new Set(solution).size, solution.length, ctx);
       for (const c of solution) assert.ok(c >= 0 && c < cols * rows, `case hors du quadrillage : ${ctx}`);
@@ -172,6 +188,17 @@ function checkQuestion(q, ctx) {
       assert.equal(points.length, labels.length, ctx);
       assert.equal(new Set(labels).size, labels.length, ctx);
       for (const [x, y] of points) assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100, ctx);
+      break;
+    }
+    case 'picross': {
+      // le dessin caché : les nombres sont ceux du dessin, les cases données en font partie
+      const { cols, rows, rowClues, colClues, solution, given, colors } = q.stage;
+      assert.equal(rowClues.length, rows, ctx);
+      assert.equal(colClues.length, cols, ctx);
+      assert.equal(colors.length, cols * rows, ctx);
+      assert.ok(solution.length >= 2 && solution.every((i) => i >= 0 && i < cols * rows && colors[i]), ctx);
+      assert.ok(given.every((i) => solution.includes(i)), `case donnée hors du dessin : ${ctx}`);
+      assert.deepEqual(q.choices, [], ctx);
       break;
     }
     case 'setclock': {
@@ -288,19 +315,23 @@ test('calculs à trous : 3 à 5 calculs, deux étiquettes par calcul, résultats
 });
 
 test('sudoku : grille juste, une seule solution, nombre de cases à trouver du niveau', () => {
-  const holes = { 1: 4, 2: 7, 3: 6, 4: 10, 5: 12, 6: 18, 7: 20, 8: 22, 9: 24 };
-  for (let level = 1; level <= 9; level++) {
+  // niveaux 1 à 7 (4 × 4 et 6 × 6) ; le 9 × 9 (niveaux 8 à 10) : voir sudoku-difficile.test.js
+  const holes = { 1: 4, 2: 7, 3: 8, 4: 15, 5: 21, 6: 24, 7: 26 };
+  for (let level = 1; level <= 7; level++) {
     const rng = createRng(level);
     for (let i = 0; i < 40; i++) {
       const q = findGame('sudoku').generate(level, rng);
       const { size, puzzle, solution, symbols } = q.stage;
       assert.equal(symbols.length, size);
       assert.equal(new Set(symbols).size, size);
-      assert.ok(size <= 6, 'grille trop grande pour un téléphone');
-      if (level === 7) assert.ok(symbols.every((s) => !/^[A-Z0-9]$/.test(s)), 'des images au niveau 7');
-      if (level === 8) assert.deepEqual(symbols, ['A', 'B', 'C', 'D', 'E', 'F']);
-      // les grilles les plus dures se résolvent sans jamais deviner
-      if (level >= 7) assert.ok(solvesBySingles(puzzle, size), q.key);
+      assert.equal(size, level <= 3 ? 4 : 6);
+      if (level <= 2) assert.ok(symbols.every((s) => !/^[A-Z0-9]$/.test(s)), 'des images aux niveaux 1 et 2');
+      // niveau 5 : des images ou les lettres A à F
+      if (level === 5 && /^[A-F]$/.test(symbols[0])) assert.deepEqual(symbols, ['A', 'B', 'C', 'D', 'E', 'F']);
+      if (level === 5 && !/^[A-F]$/.test(symbols[0])) assert.ok(symbols.every((s) => !/^[A-Z0-9]$/.test(s)), 'des images');
+      if (level === 3 || level === 4 || level >= 6) assert.deepEqual(symbols, Array.from({ length: size }, (_, i) => String(i + 1)));
+      // les grilles les plus dures (niveau 5 et plus) se résolvent sans jamais deviner
+      if (level >= 5) assert.ok(solvesBySingles(puzzle, size), q.key);
       assert.equal(puzzle.filter((v) => v === null).length, holes[level]);
       puzzle.forEach((v, k) => { if (v !== null) assert.equal(v, solution[k]); });
       solution.forEach((v, k) => {
@@ -431,10 +462,12 @@ test('labyrinthe : le chemin solution existe, la taille augmente avec le niveau'
 });
 
 test('chemins : suites de nombres et mots épelés', () => {
-  const steps = { 1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 6: 5, 7: 10, 8: -1, 9: 3, 10: 1, 11: 100 };
+  // niveau 10 : de 1 en 1 (de 95 à 110) ou de 100 en 100
+  const steps = { 1: [1], 2: [1], 3: [1], 4: [1], 5: [2], 6: [5], 7: [10], 8: [-1], 9: [3], 10: [1, 100] };
   for (const { level, q } of questions(findGame('chemin-nombres'))) {
     const { seq } = q.stage;
-    for (let i = 1; i < seq.length; i++) assert.equal(seq[i] - seq[i - 1], steps[level]);
+    assert.ok(steps[level].includes(seq[1] - seq[0]), q.key);
+    for (let i = 1; i < seq.length; i++) assert.equal(seq[i] - seq[i - 1], seq[1] - seq[0]);
   }
   for (const { level, q } of questions(findGame('chemin-lettres'))) {
     if (level === 3 || level === 4) assert.equal(q.stage.seq.join(''), q.answer);
@@ -497,7 +530,7 @@ test('intrus et ombres : une seule bonne réponse, dans le bon sens', () => {
 test('petits textes : questions variées, réponses distinctes, textes courts', () => {
   for (const level of [1, 2, 3, 4, 5, 6]) assert.ok(TEXT_DATA.filter((t) => t.level === level).length >= 5);
   for (const t of TEXT_DATA) {
-    assert.ok(t.text.length <= [0, 80, 140, 220, 220, 220, 220][t.level], `${t.title} trop long (${t.text.length})`);
+    assert.ok(t.text.length <= [0, 80, 140, 220, 220, 220, 220, 220, 220][t.level], `${t.title} trop long (${t.text.length})`);
     for (const [question, ...answers] of t.questions) {
       assert.ok(question.endsWith('?') || question.endsWith('…'), question);
       assert.equal(new Set(answers).size, 3, question);
@@ -507,9 +540,11 @@ test('petits textes : questions variées, réponses distinctes, textes courts', 
 
 test('anglais : relie, compte, où est, épelle', () => {
   for (const { q } of questions(findGame('epelle-anglais'))) {
-    const word = [...q.items].sort((a, b) => a.value - b.value).map((i) => i.label).join('');
+    // les lettres pièges (value null, dernier niveau) ne font pas partie du mot
+    const letters = q.items.filter((i) => i.value !== null);
+    const word = [...letters].sort((a, b) => a.value - b.value).map((i) => i.label).join('');
     assert.equal(word, q.answer);
-    assert.notEqual(q.items.map((i) => i.label).join(''), q.answer, 'déjà dans l’ordre');
+    assert.notEqual(letters.map((i) => i.label).join(''), q.answer, 'déjà dans l’ordre');
   }
   for (const { level, q } of questions(findGame('compte-anglais'))) {
     if (level <= 2) assert.equal(q.choices.find((c) => c.value === q.answer).objects.count, q.answer);

@@ -94,6 +94,8 @@ const LEVELS = [
   { label: 'De 5 en 5 minutes', minutes: Array.from({ length: 12 }, (_, i) => i * 5) },
   { label: 'Dans 1 h… Il y a 30 min…', minutes: [0, 15, 30, 45] },
   { label: 'Heures de l’après-midi', minutes: [0, 0, 15, 30, 30, 45, 5, 10, 20, 25, 35, 40, 50, 55] },
+  { label: 'Durées de 5 en 5 minutes', minutes: Array.from({ length: 12 }, (_, i) => i * 5) },
+  { label: 'Moins dix, moins vingt…', minutes: [35, 40, 50, 55] },
 ];
 
 // « Dans 1 heure… », « Il y a 30 minutes… » : on calcule, puis on règle l'horloge.
@@ -106,6 +108,27 @@ const SHIFTS = [
   { minutes: -60, text: 'Il y a 1 heure', say: 'Il y a une heure' },
   { minutes: -15, text: 'Il y a 15 minutes', say: 'Il y a un quart d’heure' },
 ];
+
+// Niveau 7 : des durées en minutes, de 5 en 5 (on passe parfois l'heure).
+const SHIFTS_MINUTES = [
+  { minutes: 5, text: 'Dans 5 minutes', say: 'Dans 5 minutes' },
+  { minutes: 10, text: 'Dans 10 minutes', say: 'Dans 10 minutes' },
+  { minutes: 20, text: 'Dans 20 minutes', say: 'Dans 20 minutes' },
+  { minutes: 25, text: 'Dans 25 minutes', say: 'Dans 25 minutes' },
+  { minutes: 40, text: 'Dans 40 minutes', say: 'Dans 40 minutes' },
+  { minutes: -5, text: 'Il y a 5 minutes', say: 'Il y a 5 minutes' },
+  { minutes: -10, text: 'Il y a 10 minutes', say: 'Il y a 10 minutes' },
+  { minutes: -20, text: 'Il y a 20 minutes', say: 'Il y a 20 minutes' },
+];
+
+/** 3 h 50 → « 4 h moins 10 » (affiché) et « 4 heures moins 10 » (dit). */
+export function minusLabel(h, m) {
+  const next = (h % 12) + 1;
+  return {
+    text: `${next} h moins ${60 - m}`,
+    speech: `${next === 1 ? 'une' : next} heure${next > 1 ? 's' : ''} moins ${60 - m}`,
+  };
+}
 
 const capitalize = (text) => `${text[0].toUpperCase()}${text.slice(1)}`;
 /** « 15 heures 30 » (l'après-midi, on dit l'heure de 13 à 23). */
@@ -148,10 +171,10 @@ export const regleHorloge = {
   levels: LEVELS.map((l) => l.label),
   generate(level, rng) {
     const { minutes } = LEVELS[level - 1];
-    if (level === 5) {
+    if (level === 5 || level === 7) {
       // il est 3 h 15 (le cadran montre l'heure qu'il est) ; dans 1 heure, quelle heure sera-t-il ?
       const now = { h: randInt(rng, 1, 12), m: pick(rng, minutes) };
-      const shift = pick(rng, SHIFTS);
+      const shift = pick(rng, level === 5 ? SHIFTS : SHIFTS_MINUTES);
       const target = fromClockMinutes(shiftClock(toClockMinutes(now), shift.minutes));
       const future = shift.minutes > 0;
       const verb = future ? 'sera-t-il' : 'était-il';
@@ -178,6 +201,21 @@ export const regleHorloge = {
         target,
         success: `${hours24(target.h + 12, target.m)}, c’est ${clockSpeech(target.h, target.m)} de l’après-midi.`,
         extra: { hour24: target.h + 12 },
+      });
+    }
+    if (level === 8) {
+      // « 4 h moins 10 » : la grande aiguille est 10 minutes avant le 12, l'heure n'est pas encore 4 h
+      const target = { h: randInt(rng, 1, 12), m: pick(rng, minutes) };
+      const minus = minusLabel(target.h, target.m);
+      return question({
+        key: `regle-horloge:moins:${target.h}:${target.m}`,
+        text: `Règle l’horloge sur ${minus.text}.`,
+        instruction: `Mets l’horloge à ${minus.speech}. La grande aiguille s’arrête ${60 - target.m} minutes avant le 12.`,
+        short: { key: 'regle-horloge:moins', text: `Règle l’horloge sur ${minus.text}.`, speak: `${capitalize(minus.speech)}.` },
+        start: startTime(rng, level, target),
+        target,
+        success: `${capitalize(minus.speech)}, c’est ${clockSpeech(target.h, target.m)}.`,
+        extra: { minus: minus.text },
       });
     }
     const target = { h: randInt(rng, 1, 12), m: pick(rng, minutes) };

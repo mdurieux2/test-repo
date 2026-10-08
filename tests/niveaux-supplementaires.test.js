@@ -11,11 +11,15 @@ import { PROGRAMS } from '../app/js/programs.js';
 import { createRng } from '../app/js/random.js';
 
 // Nombre de niveaux avant l'ajout : les 3 derniers niveaux de chaque jeu sont les nouveaux.
+// (Le sudoku a depuis été réorganisé en 10 niveaux : voir sudoku-difficile.test.js.)
 const BEFORE = {
   relier: 3, tables: 6, ranger: 7, problemes: 7, doubles: 4, formes: 3, algorithmes: 4, intrus: 3, ombres: 3,
-  sudoku: 6, heure: 4, symetrie: 4, reproduire: 3, tangram: 2, cubes: 4, labyrinthe: 6, 'chemin-nombres': 8,
+  heure: 4, symetrie: 4, reproduire: 3, tangram: 2, cubes: 4, labyrinthe: 6, 'chemin-nombres': 8,
   'chemin-lettres': 4,
 };
+// Nombre de niveaux aujourd'hui, quand il a encore changé depuis (niveaux ajoutés ensuite, ou le chemin
+// des nombres ramené à 10 niveaux : ses anciens niveaux 10 et 11 sont réunis dans le niveau 10).
+const NOW = { reproduire: 8, tangram: 8, 'chemin-nombres': 10 };
 
 /** Des questions de chaque nouveau niveau (k = 1, 2 ou 3), avec le prénom de l'enfant. */
 function* newQuestions(id, runs = 150) {
@@ -33,13 +37,17 @@ function calc(text) {
   return op === '+' ? Number(a) + Number(b) : Number(a) - Number(b);
 }
 
+// Niveaux ajoutés ensuite, encore après (vérifiés ailleurs) : le labyrinthe et ses trois clés
+// (tests/labyrinthes-ronds.test.js).
+const LATER = { labyrinthe: 1 };
+
 test('3 niveaux de plus par jeu, à la fin, libellés courts, accessibles dans une classe', () => {
   for (const [id, before] of Object.entries(BEFORE)) {
     const game = findGame(id);
-    assert.equal(game.levels.length, before + 3, id);
+    assert.ok(game.levels.length >= (NOW[id] ?? before + 3), id); // d'autres niveaux ont pu s'ajouter ensuite
     for (const label of game.levels.slice(before)) assert.ok(label.length <= 26, `${id} : « ${label} » trop long`);
     const entries = Object.values(PROGRAMS).flatMap((domains) => Object.values(domains).flat()).filter(([gid]) => gid === id);
-    for (let level = before + 1; level <= before + 3; level++) {
+    for (let level = before + 1; level <= Math.min(before + 3, game.levels.length); level++) {
       assert.ok(entries.some(([, min, max]) => level >= min && level <= max), `${id} niveau ${level} : dans aucune classe`);
     }
   }
@@ -357,14 +365,21 @@ test('labyrinthe : des boucles, le trésor au centre, le plus long chemin', () =
   }
 });
 
-test('chemins : de 3 en 3, passer 100, de 100 en 100 ; de K à T, minuscules, à l’envers', () => {
+test('chemins : de 3 en 3, au-delà de 100 (passer 100, de 100 en 100) ; de K à T, minuscules, à l’envers', () => {
+  // k = 3 : l'ancien niveau 11, joué comme le niveau 10 (le dernier)
+  const seen = new Set();
   for (const { k, q } of newQuestions('chemin-nombres', 60)) {
     const { seq, cells, cols, rows } = q.stage;
     assert.ok(cols <= 5 && rows <= 5);
     for (const v of cells) assert.ok(String(v).length <= 3, `${v} : pas plus de chiffres que « 100 »`);
-    if (k === 2) assert.ok(seq.includes(99) && seq.includes(100) && seq.includes(101));
-    if (k === 3) assert.deepEqual(seq, [100, 200, 300, 400, 500, 600, 700, 800, 900]);
+    if (k === 1) assert.deepEqual(seq, [3, 6, 9, 12, 15, 18, 21, 24, 27, 30]);
+    if (k >= 2) {
+      const passe100 = seq.includes(99) && seq.includes(100) && seq.includes(101);
+      assert.ok(passe100 || seq.join() === '100,200,300,400,500,600,700,800,900', seq.join());
+      seen.add(passe100);
+    }
   }
+  assert.equal(seen.size, 2, 'les deux chemins au-delà de 100');
   const expected = { 1: 'KLMNOPQRST', 2: 'abcdefghij', 3: 'JIHGFEDCBA' };
   for (const { k, q } of newQuestions('chemin-lettres', 60)) {
     assert.equal(q.stage.seq.join(''), expected[k]);

@@ -8,9 +8,9 @@ import { createRng } from '../app/js/random.js';
 import { COLOUR_PHRASES } from '../app/js/data/anglais-data.js';
 
 const LEVEL_COUNTS = {
-  calendrier: 7, monnaie: 7, mesures: 8, saisons: 7, 'animaux-monde': 7, pays: 6,
-  ecoute: 13, 'lis-anglais': 13, 'mot-anglais': 13, 'relie-anglais': 13, 'compte-anglais': 7,
-  'ou-est': 6, 'epelle-anglais': 13, 'parle-anglais': 6,
+  calendrier: 7, monnaie: 7, mesures: 8, saisons: 7, 'animaux-monde': 7, pays: 8,
+  ecoute: 10, 'lis-anglais': 10, 'mot-anglais': 10, 'relie-anglais': 10, 'compte-anglais': 7,
+  'ou-est': 8, 'epelle-anglais': 10, 'parle-anglais': 8,
 };
 
 /** Les questions d'un niveau, tirées avec une graine fixe. */
@@ -154,28 +154,29 @@ test('anglais : petites phrases « a green book », tous les thèmes, mots proch
   assert.equal(new Set(COLOUR_PHRASES.map((p) => p.emoji)).size, COLOUR_PHRASES.length, 'une image par phrase');
   assert.ok(COLOUR_PHRASES.some((p) => p.en === 'an orange book'), 'an devant orange');
   assert.ok(COLOUR_PHRASES.some((p) => p.fr === 'la pomme verte'), 'accord en français');
+  // niveaux de 10 : 7 tous les thèmes mélangés, 8 mots proches, 9 petite phrase (anciens 11, 12, 13)
   for (const id of ['ecoute', 'lis-anglais', 'mot-anglais']) {
-    for (const q of draw(id, 13)) {
+    for (const q of draw(id, 9)) {
       const target = COLOUR_PHRASES.find((p) => p.en === q.answer);
       assert.ok(target, `${id} : ${q.answer}`);
       const others = q.choices.filter((c) => c.value !== q.answer).map((c) => COLOUR_PHRASES.find((p) => p.en === c.value));
       assert.ok(others.some((p) => p.thing === target.thing || p.colour === target.colour), `${id} : distracteurs trop faciles`);
     }
   }
-  for (const q of draw('ecoute', 12)) assert.equal(q.choices.length, 4, 'ecoute : 4 images au niveau 12');
-  for (const q of draw('lis-anglais', 12)) {
+  for (const q of draw('ecoute', 8)) assert.equal(q.choices.length, 4, 'ecoute : 4 images au niveau 8');
+  for (const q of draw('lis-anglais', 8)) {
     assert.ok(q.stage.text.length <= 8, `mot trop long pour l'écran : ${q.stage.text}`);
     const close = q.choices.filter((c) => c.value !== q.answer && (c.value[0] === q.answer[0] || Math.abs(c.value.length - q.answer.length) <= 1));
     assert.ok(close.length >= 2, `lis-anglais : mots pas assez proches de ${q.answer}`);
   }
-  for (const q of draw('relie-anglais', 12)) assert.ok(q.pairs.every((p) => !p.emoji && !p.swatch && p.left), 'sans image');
-  for (const q of draw('relie-anglais', 13)) {
+  for (const q of draw('relie-anglais', 8)) assert.ok(q.pairs.every((p) => !p.emoji && !p.swatch && p.left), 'sans image');
+  for (const q of draw('relie-anglais', 9)) {
     const phrases = q.pairs.map((p) => COLOUR_PHRASES.find((x) => x.en === p.right));
     assert.equal(new Set(phrases.map((p) => p.thing)).size, 2, '2 objets');
     assert.equal(new Set(phrases.map((p) => p.colour)).size, 2, '2 couleurs');
   }
-  for (const q of draw('epelle-anglais', 12)) assert.equal(q.stage.type, 'listen');
-  for (const q of draw('epelle-anglais', 13)) {
+  for (const q of draw('epelle-anglais', 8)) assert.equal(q.stage.type, 'listen');
+  for (const q of draw('epelle-anglais', 9)) {
     assert.equal(q.replay, undefined, 'pas de son : il faut se souvenir du mot');
     assert.ok(!JSON.stringify(q.instruction).includes(q.answer), q.answer);
     assert.ok(['picture', 'swatch'].includes(q.stage.type));

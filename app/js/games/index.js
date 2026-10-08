@@ -11,10 +11,12 @@ import { LABYRINTHE_GAMES } from './labyrinthes.js';
 import { petitsTextes } from './textes.js';
 import { histoires } from './histoires.js';
 import { LOGIQUE_GAMES } from './logique.js';
+import { LOGIQUE_PLUS_GAMES } from './logique-plus.js';
 import { MONDE_GAMES } from './monde.js';
 import { MESURES_GAMES } from './mesures.js';
 import { JEUX_GAMES } from './jeux.js';
 import { drapeaux } from './drapeaux.js';
+import { carteMonde } from './carte.js';
 import { dictee } from './dictee.js';
 import { ANGLAIS_PLUS_GAMES } from './anglais-plus.js';
 import { ecrire } from './ecriture.js';
@@ -23,7 +25,7 @@ import { tablesChrono } from './chrono.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
-  ...LOGIQUE_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, ...ANGLAIS_GAMES,
+  ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono,
 ];
 
@@ -51,12 +53,12 @@ const RUBRIQUES = [
     icon: '🧩',
     games: [
       'puzzle', 'memory', 'coloriage-magique', 'points',
-      'formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'symetrie', 'reproduire', 'tangram', 'cubes',
-      'labyrinthe', 'chemin-nombres', 'chemin-lettres',
+      'formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross', 'symetrie', 'reproduire', 'tangram', 'cubes',
+      'labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres',
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
-  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux'] },
+  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde'] },
   {
     id: 'anglais',
     title: 'Anglais',
@@ -75,9 +77,9 @@ const SECTION_GAMES = {
   'L’heure et le calendrier': ['heure', 'regle-horloge', 'calendrier', 'saisons'],
   'Monnaie et mesures': ['monnaie', 'mesures'],
   'Puzzles, memory et coloriages': ['puzzle', 'memory', 'coloriage-magique', 'points'],
-  'Logique': ['formes', 'algorithmes', 'intrus', 'ombres', 'sudoku'],
+  'Logique': ['formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross'],
   'Formes et espace': ['symetrie', 'reproduire', 'tangram', 'cubes'],
-  'Labyrinthes': ['labyrinthe', 'chemin-nombres', 'chemin-lettres'],
+  'Labyrinthes': ['labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres'],
   'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
   'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
   'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais'],

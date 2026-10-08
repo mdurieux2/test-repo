@@ -1083,10 +1083,51 @@ export const calcul = {
 };
 
 /**
- * Faire 10, niveaux 4 à 6 : compléments à 20 avec deux boîtes de 10, compléter à la
- * dizaine supérieure (37 + ? = 40), compléments à 100 (dizaines, puis multiples de 5).
+ * Faire 10, niveaux 4 à 8 : compléments à 20 avec deux boîtes de 10, compléter à la
+ * dizaine supérieure (37 + ? = 40), compléments à 100 (dizaines, puis multiples de 5),
+ * compléter à la centaine supérieure (370 + ? = 400), compléter n'importe quel nombre à 100.
  */
 function bigComplement(rng, level) {
+  if (level === 7) {
+    // 370 + ? = 400 : le complément des dizaines à 10 ; piège : le chiffre des dizaines (70)
+    let n;
+    do {
+      n = 10 * randInt(rng, 11, 99);
+    } while (n % 100 === 0);
+    const total = n + 100 - (n % 100);
+    const answer = total - n;
+    const values = withTrap(rng, numberChoices(rng, answer, 4, 10, 90, 10), answer, n % 100);
+    return {
+      key: `faire-dix:${total}:${n}`,
+      text: `${n} + ? = ${total}`,
+      instruction: `${n} plus combien égale ${total} ?`,
+      stage: { type: 'equation', parts: [n, '+', null, '=', total] },
+      choices: numberOptions(values),
+      choiceStyle: 'numbers',
+      answer,
+      success: { speak: `${n} plus ${answer}, égale ${total}` },
+    };
+  }
+  if (level === 8) {
+    // 47 + ? = 100 : 3 pour aller à 50, puis 50 ; piège : 63 (dizaines complétées à 10 au lieu de 9)
+    let n;
+    do {
+      n = randInt(rng, 11, 89);
+    } while (n % 5 === 0);
+    const answer = 100 - n;
+    let values = numberChoices(rng, answer, 4, 1, 99);
+    if (answer + 10 <= 99) values = withTrap(rng, values, answer, answer + 10);
+    return {
+      key: `faire-dix:100:${n}`,
+      text: `${n} + ? = 100`,
+      instruction: `${n} plus combien égale 100 ?`,
+      stage: { type: 'equation', parts: [n, '+', null, '=', 100] },
+      choices: numberOptions(values),
+      choiceStyle: 'numbers',
+      answer,
+      success: { speak: `${n} plus ${answer}, égale 100` },
+    };
+  }
   if (level === 4) {
     const filled = randInt(rng, 2, 18);
     const answer = 20 - filled;
@@ -1141,10 +1182,11 @@ export const faireDix = {
   section: CALCUL,
   title: 'Faire 10',
   icon: '🔟',
-  skill: 'Connaître les compléments à 5, à 10, à 20, à la dizaine et à 100',
+  skill: 'Connaître les compléments à 5, à 10, à 20, à la dizaine, à la centaine et à 100',
   levels: [
     'Compléments à 5', 'Compléments à 10 avec la boîte', 'Compléments à 10 sans la boîte',
     'Faire 20 avec deux boîtes', 'Compléter à la dizaine', 'Compléments à 100',
+    'Compléter à la centaine', 'Compléter à 100',
   ],
   generate(level, rng) {
     if (level >= 4) return bigComplement(rng, level);

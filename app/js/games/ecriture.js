@@ -1,11 +1,13 @@
 // « Écris au doigt » : apprendre le geste d'écriture. L'enfant suit le chemin gris avec son
 // doigt, en partant du point vert, trait après trait, dans l'ordre et le sens appris à l'école :
-// graphisme, chiffres, capitales, minuscules attachées, puis les lettres de son prénom.
+// graphisme, chiffres, capitales, minuscules attachées, les lettres de son prénom, puis des
+// nombres à deux chiffres, des syllabes et de petits mots attachés (d'un seul geste).
 
 import { pick } from '../random.js';
 import { LETTER_NAMES } from './francais-extra.js';
 import {
-  CAPITALES, CHIFFRES, CURSIVE, GRAPHISMES, WRITING_LINES, capitalName, nameLetters,
+  ATTACHE, CAPITALES, CHIFFRES, CURSIVE, GRAPHISMES, MOTS_ATTACHES, NOMBRES, SYLLABES_ATTACHEES, WRITING_LINES,
+  capitalName, nameLetters,
 } from '../data/ecriture-data.js';
 
 const FOLLOW = 'Suis le chemin avec ton doigt, en partant du point vert.';
@@ -13,14 +15,16 @@ const FOLLOW = 'Suis le chemin avec ton doigt, en partant du point vert.';
 /** Le nom d'une lettre, tel qu'on le dit (« bé », « ache »…) : il reste dans la phrase, pour une voix fluide. */
 const said = (letter) => LETTER_NAMES[letter.toLowerCase()] || letter;
 
-function traceQuestion({ key, set, glyph, strokes, text, instruction, short, success, word = null, position = null }) {
+function traceQuestion({
+  key, set, glyph, strokes, text, instruction, short, success, word = null, position = null, lines = null,
+}) {
   return {
     key,
     interaction: 'trace',
     text,
     instruction,
     short,
-    stage: { type: 'trace', set, glyph, strokes, lines: set === 'cursive' ? WRITING_LINES[glyph] : null, word, position },
+    stage: { type: 'trace', set, glyph, strokes, lines: set === 'cursive' ? WRITING_LINES[glyph] : lines, word, position },
     choices: [],
     answer: glyph,
     success,
@@ -73,6 +77,25 @@ function nameQuestion(rng, index, name) {
   });
 }
 
+/** Niveaux 7 et 8 : une syllabe ou un petit mot en lettres attachées, sans lever le doigt. */
+function joinedQuestion(rng, level) {
+  const syllable = level === 7;
+  const glyph = pick(rng, syllable ? SYLLABES_ATTACHEES : MOTS_ATTACHES);
+  const what = syllable ? 'la syllabe' : 'le mot';
+  const text = `Écris ${what} ${glyph} en attaché.`;
+  return traceQuestion({
+    key: `ecrire:${level}:${glyph}`,
+    set: 'attache',
+    glyph,
+    strokes: ATTACHE[glyph].strokes,
+    lines: ATTACHE[glyph].lines,
+    text,
+    instruction: `Écris ${what} ${glyph} en lettres attachées, sans lever le doigt. ${FOLLOW}`,
+    short: { key: `ecrire:${level}`, text },
+    success: { speak: `Bravo, tu as écrit ${what} ${glyph} !` },
+  });
+}
+
 export const ecrire = {
   id: 'ecrire',
   domain: 'francais',
@@ -80,7 +103,10 @@ export const ecrire = {
   title: 'Écris au doigt',
   icon: '✍️',
   skill: 'Apprendre le geste d’écriture : tracer traits, chiffres et lettres dans le bon ordre et le bon sens',
-  levels: ['Traits et boucles', 'Les chiffres', 'Les capitales', 'Les minuscules attachées', 'Ton prénom'],
+  levels: [
+    'Traits et boucles', 'Les chiffres', 'Les capitales', 'Les minuscules attachées', 'Ton prénom',
+    'Les nombres à 2 chiffres', 'Les syllabes attachées', 'Les petits mots attachés',
+  ],
   generate(level, rng, index = 0, context = {}) {
     if (level === 1) {
       const id = pick(rng, Object.keys(GRAPHISMES));
@@ -125,6 +151,21 @@ export const ecrire = {
       });
     }
     if (level === 5) return nameQuestion(rng, index, context?.name);
+    if (level === 6) {
+      const n = pick(rng, Object.keys(NOMBRES));
+      const text = `Écris le nombre ${n}.`;
+      return traceQuestion({
+        key: `ecrire:6:${n}`,
+        set: 'nombres',
+        glyph: n,
+        strokes: NOMBRES[n],
+        text,
+        instruction: `${text} D’abord le chiffre des dizaines, puis celui des unités. ${FOLLOW}`,
+        short: { key: 'ecrire:6', text },
+        success: { speak: `Voilà un beau ${n} !` },
+      });
+    }
+    if (level === 7 || level === 8) return joinedQuestion(rng, level);
     return capitalQuestion(rng, 3);
   },
 };

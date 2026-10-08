@@ -15,6 +15,9 @@ const LEVELS = [
   { label: 'Tables de 8 et 9', tables: [8, 9] },
   { label: 'Toutes les tables', tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
   { label: 'Multiplications à trou', tables: [2, 3, 4, 5, 6, 7, 8, 9] },
+  // les niveaux suivants s'ajoutent à la fin : le record de chaque niveau est gardé par son numéro
+  { label: 'Fois 10, fois 100', tables: [10, 100] },
+  { label: 'Fois des dizaines', tables: [2, 3, 4, 5] },
 ];
 
 /** Nombre de questions d'une partie : fixé par le jeu (défi chrono), sinon demandé, sinon le réglage. */
@@ -103,8 +106,8 @@ export const tablesChrono = {
         success: { speak: `${n} fois ${table}, égale ${product}` },
       };
     }
-    // l'ordre des facteurs change : 3 × 7 ou 7 × 3
-    const n = randInt(rng, 2, 10);
+    // l'ordre des facteurs change : 3 × 7 ou 7 × 3 ; niveau 7 : 6 × 10, 100 × 4 ; niveau 8 : 3 × 40 (3 × 4 dizaines)
+    const n = level === 7 ? randInt(rng, 2, 9) : level === 8 ? 10 * randInt(rng, 2, 9) : randInt(rng, 2, 10);
     const [a, b] = rng() < 0.5 ? [n, table] : [table, n];
     const answer = a * b;
     const ask = `${a} fois ${b} ?`;

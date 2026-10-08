@@ -159,6 +159,61 @@ function addLoops(rng, open, cols, rows, count) {
   return open;
 }
 
+/** Les cases voisines d'une case du labyrinthe carré (sans tenir compte des murs). */
+function gridNeighbours(cols, rows, cell) {
+  return [cell - cols, cell + 1, cell + cols, cell - 1]
+    .filter((n) => n >= 0 && n < cols * rows && areNeighbours(cols, cell, n));
+}
+
+/**
+ * Objets à ramasser (des clés) au bout des plus longues impasses : chaque objet est la case la
+ * plus éloignée du chemin déjà connu (le chemin départ → arrivée, puis les impasses déjà choisies).
+ * `linked(a, b)` dit si on passe de a à b ; l'arrivée est fermée tant qu'il reste des objets,
+ * on ne choisit donc que des cases qu'on atteint sans passer par elle.
+ */
+export function deadEndItems(count, cellCount, neighbours, linked, start, goal, path) {
+  const known = new Set(path);
+  const items = [];
+  for (let k = 0; k < count; k++) {
+    const dist = new Map([...known].map((c) => [c, 0]));
+    const previous = new Map();
+    const queue = [...known].filter((c) => c !== goal);
+    while (queue.length) {
+      const c = queue.shift();
+      for (const n of neighbours(c)) {
+        if (n === goal || dist.has(n) || !linked(c, n)) continue;
+        dist.set(n, dist.get(c) + 1);
+        previous.set(n, c);
+        queue.push(n);
+      }
+    }
+    let best = null;
+    for (let c = 0; c < cellCount; c++) if (dist.get(c) > (dist.get(best) ?? 0)) best = c;
+    if (best === null) break; // pas d'impasse (labyrinthe minuscule)
+    items.push(best);
+    for (let c = best; c !== undefined && !known.has(c); c = previous.get(c)) known.add(c);
+  }
+  return items;
+}
+
+/**
+ * Le trajet complet : du départ, ramasser chaque objet (le plus proche d'abord), puis aller à
+ * l'arrivée. `solve(a, b)` donne le chemin de a à b.
+ */
+export function routeThrough(solve, start, goal, items) {
+  const route = [start];
+  const left = [...items];
+  let pos = start;
+  while (left.length) {
+    const paths = left.map((c) => solve(pos, c));
+    const k = paths.reduce((best, p, i) => (p.length < paths[best].length ? i : best), 0);
+    route.push(...paths[k].slice(1));
+    pos = left.splice(k, 1)[0];
+  }
+  route.push(...solve(pos, goal).slice(1));
+  return route;
+}
+
 export const labyrinthe = {
   id: 'labyrinthe',
   domain: 'maths',
@@ -166,10 +221,12 @@ export const labyrinthe = {
   title: 'Le labyrinthe',
   icon: '🌀',
   skill: 'Se repérer dans l’espace, anticiper un trajet',
-  levels: [...MAZE_SIZES.map(([c, r]) => `${c} × ${r} cases`), ...MAZE_TWISTS.map((t) => t.label)],
+  levels: [...MAZE_SIZES.map(([c, r]) => `${c} × ${r} cases`), ...MAZE_TWISTS.map((t) => t.label), 'Les trois clés, 9 × 9'],
   generate(level, rng) {
     const [cols, rows] = MAZE_SIZES[Math.min(level, MAZE_SIZES.length) - 1];
-    const twist = MAZE_TWISTS[level - MAZE_SIZES.length - 1]?.twist;
+    // niveau 10 : trois clés au bout des plus longues impasses, avant d'atteindre l'arrivée
+    const keys = level === 10 ? 3 : 0;
+    const twist = keys ? 'cles' : MAZE_TWISTS[level - MAZE_SIZES.length - 1]?.twist;
     const open = makeMaze(rng, cols, rows);
     const pair = pick(rng, HEROES);
     const corners = [0, cols - 1, cols * (rows - 1), cols * rows - 1];
@@ -182,17 +239,230 @@ export const labyrinthe = {
       start = farthestCell(open, cols, start);
       goal = farthestCell(open, cols, start);
     }
-    const solution = solveMaze(open, cols, start, goal);
+    // les clés : l'arrivée, fermée tant qu'il en reste, est au bout d'une impasse (la case la plus
+    // éloignée du départ), pour ne jamais couper le labyrinthe en deux
+    if (keys) goal = farthestCell(open, cols, start);
+    const path = solveMaze(open, cols, start, goal);
+    const items = keys
+      ? deadEndItems(keys, cols * rows, (c) => gridNeighbours(cols, rows, c), (a, b) => canMove(open, cols, a, b), start, goal, path)
+      : [];
+    // le trajet à suivre : il passe par les clés (en revenant sur ses pas au bout de chaque impasse)
+    const solution = items.length ? routeThrough((a, b) => solveMaze(open, cols, a, b), start, goal, items) : path;
+    const locked = 'Il faut d’abord ramasser les trois clés.';
     return {
       key: twist ? `labyrinthe:${twist}:${start}:${open.join('')}` : `labyrinthe:${cols}:${open.join('')}`,
       interaction: 'maze',
-      text: `Aide ${pair.who} à trouver ${pair.what}.`,
-      instruction: `Glisse ton doigt, ou touche les cases, pour guider ${pair.who} ${untilGoal(pair.what)}.${twist === 'boucles' ? ' Il y a plusieurs chemins !' : ''}`,
-      short: { key: 'labyrinthe', text: `Aide ${pair.who} à trouver ${pair.what}.` },
-      stage: { type: 'maze', cols, rows, open, start, goal, hero: pair.hero, goalEmoji: pair.goal, solution },
+      text: keys ? `Ramasse les 3 clés, puis trouve ${pair.what}.` : `Aide ${pair.who} à trouver ${pair.what}.`,
+      instruction: keys
+        ? `Guide ${pair.who} ${untilGoal(pair.what)}. ${locked}`
+        : `Glisse ton doigt, ou touche les cases, pour guider ${pair.who} ${untilGoal(pair.what)}.${twist === 'boucles' ? ' Il y a plusieurs chemins !' : ''}`,
+      short: keys
+        ? { key: 'labyrinthe-cles', text: `Ramasse les 3 clés, puis trouve ${pair.what}.`, speak: `Ramasse les trois clés, puis trouve ${pair.what}.` }
+        : { key: 'labyrinthe', text: `Aide ${pair.who} à trouver ${pair.what}.` },
+      stage: {
+        type: 'maze', cols, rows, open, start, goal, hero: pair.hero, goalEmoji: pair.goal, solution,
+        ...(items.length ? { items, itemEmoji: '🔑', locked } : {}),
+      },
       choices: [],
       answer: goal,
       success: { speak: `Bravo, ${pair.who} a trouvé ${pair.what} !` },
+    };
+  },
+};
+
+// ---------------------------------------------------------------- Le labyrinthe rond
+
+// Un labyrinthe rond : une case ronde au centre (anneau 0), entourée d'anneaux découpés en
+// secteurs. `sectors[r]` est le nombre de cases de l'anneau r (sectors[0] = 1, le centre) ;
+// chaque anneau a un multiple du nombre de cases de l'anneau intérieur, et une case touche :
+// ses deux voisines de l'anneau, la case de l'anneau intérieur qui la borde, et les cases de
+// l'anneau extérieur qui la bordent. Les cases sont numérotées anneau par anneau, en partant
+// du centre, chaque anneau dans le sens des aiguilles d'une montre depuis midi.
+
+/** Le numéro de la première case de chaque anneau. */
+export function ringOffsets(sectors) {
+  const offsets = [];
+  let n = 0;
+  for (const s of sectors) {
+    offsets.push(n);
+    n += s;
+  }
+  return offsets;
+}
+
+/** Anneau et rang (dans l'anneau) d'une case. */
+export function polarCell(sectors, cell) {
+  const offsets = ringOffsets(sectors);
+  let ring = sectors.length - 1;
+  while (offsets[ring] > cell) ring--;
+  return { ring, index: cell - offsets[ring] };
+}
+
+/** Les cases qui touchent une case (sans tenir compte des murs). */
+export function polarNeighbours(sectors, cell) {
+  const offsets = ringOffsets(sectors);
+  const { ring, index } = polarCell(sectors, cell);
+  const s = sectors[ring];
+  const out = [];
+  if (ring > 0) {
+    if (s > 2) out.push(offsets[ring] + ((index + s - 1) % s), offsets[ring] + ((index + 1) % s));
+    out.push(offsets[ring - 1] + Math.floor((index * sectors[ring - 1]) / s));
+  }
+  if (ring < sectors.length - 1) {
+    const k = sectors[ring + 1] / s;
+    for (let j = 0; j < k; j++) out.push(offsets[ring + 1] + index * k + j);
+  }
+  return out;
+}
+
+/**
+ * Labyrinthe rond « parfait » (un seul chemin entre deux cases), par exploration aléatoire
+ * en profondeur, qui fait de longs couloirs et de longues impasses. Le centre n'a qu'une porte
+ * (c'est une impasse) : fermé tant qu'on n'a pas la clé, il ne coupe jamais le labyrinthe en deux.
+ * Renvoie, pour chaque case, la liste des cases où l'on peut passer.
+ */
+export function makePolarMaze(rng, sectors) {
+  const total = sectors.reduce((a, b) => a + b, 0);
+  const links = Array.from({ length: total }, () => []);
+  const link = (a, b) => {
+    links[a].push(b);
+    links[b].push(a);
+  };
+  // les anneaux d'abord (sans le centre), puis la porte du centre
+  const first = randInt(rng, 1, total - 1);
+  const visited = new Set([0, first]);
+  const stack = [first];
+  while (stack.length) {
+    const cell = stack.at(-1);
+    const next = shuffle(rng, polarNeighbours(sectors, cell)).find((n) => !visited.has(n));
+    if (next === undefined) {
+      stack.pop();
+      continue;
+    }
+    link(cell, next);
+    visited.add(next);
+    stack.push(next);
+  }
+  link(0, randInt(rng, 1, sectors[1]));
+  for (const l of links) l.sort((a, b) => a - b);
+  return links;
+}
+
+/** Le chemin (liste de cases) d'une case à une autre dans un labyrinthe donné par ses passages. */
+export function solveLinks(links, start, goal) {
+  const previous = new Map([[start, null]]);
+  const queue = [start];
+  while (queue.length) {
+    const cell = queue.shift();
+    if (cell === goal) break;
+    for (const next of links[cell]) {
+      if (!previous.has(next)) {
+        previous.set(next, cell);
+        queue.push(next);
+      }
+    }
+  }
+  if (!previous.has(goal)) return [];
+  const path = [];
+  for (let c = goal; c !== null; c = previous.get(c)) path.unshift(c);
+  return path;
+}
+
+/** Nombre de pas depuis une case, pour chaque case. */
+function linkDistances(links, start) {
+  const dist = new Map([[start, 0]]);
+  const queue = [start];
+  while (queue.length) {
+    const cell = queue.shift();
+    for (const next of links[cell]) {
+      if (!dist.has(next)) {
+        dist.set(next, dist.get(cell) + 1);
+        queue.push(next);
+      }
+    }
+  }
+  return dist;
+}
+
+// Les cases restent assez grandes pour le doigt : 6 anneaux au plus autour du centre (sur un
+// iPhone SE en portrait, un anneau fait alors 24 points d'épaisseur, 21 en paysage), et une case
+// n'est jamais beaucoup plus étroite que l'anneau n'est épais (le nombre de cases d'un anneau
+// double quand elles deviennent trop larges). Le « grand rond » a plus de cases par anneau.
+const SIX_RINGS = [1, 6, 12, 12, 24, 24, 24];
+const BIG_ROUND = [1, 8, 16, 16, 32, 32, 32];
+const ROUND_LEVELS = [
+  { label: '3 anneaux', sectors: [1, 4, 8, 8], mode: 'centre' },
+  { label: '4 anneaux', sectors: [1, 4, 8, 8, 16], mode: 'centre' },
+  { label: '5 anneaux', sectors: [1, 6, 12, 12, 24, 24], mode: 'centre' },
+  { label: '6 anneaux', sectors: SIX_RINGS, mode: 'centre' },
+  { label: 'Du centre à la sortie', sectors: SIX_RINGS, mode: 'sortie' },
+  { label: 'La clé, 6 anneaux', sectors: SIX_RINGS, mode: 'cle' },
+  { label: 'Le plus long chemin', sectors: SIX_RINGS, mode: 'long' },
+  { label: 'Le grand rond', sectors: BIG_ROUND, mode: 'long' },
+  { label: 'Le grand rond et la clé', sectors: BIG_ROUND, mode: 'cle' },
+];
+export const ROUND_MAZE_LEVELS = ROUND_LEVELS;
+
+const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+
+export const labyrintheRond = {
+  id: 'labyrinthe-rond',
+  domain: 'maths',
+  section: 'Labyrinthes',
+  title: 'Le labyrinthe rond',
+  icon: '🎯',
+  skill: 'Se repérer dans l’espace, anticiper un trajet sur un plan circulaire',
+  levels: ROUND_LEVELS.map((l) => l.label),
+  generate(level, rng) {
+    const { sectors, mode } = ROUND_LEVELS[level - 1];
+    const links = makePolarMaze(rng, sectors);
+    const pair = pick(rng, HEROES);
+    const offsets = ringOffsets(sectors);
+    const rings = sectors.length - 1;
+    const outer = Array.from({ length: sectors[rings] }, (_, i) => offsets[rings] + i);
+    const fromCentre = linkDistances(links, 0);
+    // une entrée (ou une sortie) au bord : au hasard parmi les cases du bord les plus éloignées
+    // du centre (la moitié), ou la plus éloignée de toutes pour « le plus long chemin »
+    const byDistance = [...outer].sort((a, b) => fromCentre.get(b) - fromCentre.get(a) || a - b);
+    const door = mode === 'long' ? byDistance[0] : pick(rng, byDistance.slice(0, Math.ceil(outer.length / 2)));
+    const [start, goal] = mode === 'sortie' ? [0, door] : [door, 0];
+    const path = solveLinks(links, start, goal);
+    const items = mode === 'cle'
+      ? deadEndItems(1, links.length, (c) => links[c], () => true, start, goal, path)
+      : [];
+    const solution = items.length ? routeThrough((a, b) => solveLinks(links, a, b), start, goal, items) : path;
+    const { who, what } = pair;
+    const locked = 'Il faut d’abord ramasser la clé.';
+    const texts = {
+      centre: {
+        text: `Aide ${who} à trouver ${what}, au centre.`,
+        instruction: `${capitalize(what)} est au centre du labyrinthe. Glisse ton doigt le long du chemin pour guider ${who}.`,
+      },
+      long: {
+        text: `Aide ${who} à trouver ${what}, au centre.`,
+        instruction: `${capitalize(what)} est au centre du labyrinthe. Glisse ton doigt le long du chemin pour guider ${who}.`,
+      },
+      sortie: {
+        text: `Aide ${who} à sortir du labyrinthe.`,
+        instruction: `${capitalize(who)} est au centre du labyrinthe. Glisse ton doigt pour l’aider à sortir et à trouver ${what}.`,
+      },
+      cle: {
+        text: `Ramasse la clé, puis trouve ${what}.`,
+        instruction: `Guide ${who} ${untilGoal(what)}, au centre. ${locked}`,
+      },
+    }[mode];
+    return {
+      key: `labyrinthe-rond:${level}:${start}:${goal}:${links.map((l) => l.join('.')).join('-')}`,
+      interaction: 'roundmaze',
+      ...texts,
+      short: { key: `labyrinthe-rond:${mode}`, text: texts.text },
+      stage: {
+        type: 'roundmaze', sectors, links, start, goal, door, hero: pair.hero, goalEmoji: pair.goal, solution,
+        ...(items.length ? { items, itemEmoji: '🔑', locked } : {}),
+      },
+      choices: [],
+      answer: goal,
+      success: { speak: `Bravo, ${who} a trouvé ${what} !` },
     };
   },
 };
@@ -209,10 +479,16 @@ const NUMBER_PATHS = [
   { label: 'De 10 en 10 jusqu’à 100', cols: 4, rows: 4, seq: range(10, 100, 10) },
   { label: 'À rebours, de 20 à 1', cols: 5, rows: 5, seq: range(1, 20, 1).reverse() },
   { label: 'De 3 en 3 jusqu’à 30', cols: 4, rows: 4, seq: range(3, 30, 3) },
-  // passer la centaine ; les intrus sont des nombres proches (87, 112…)
-  { label: 'De 95 à 110', cols: 5, rows: 4, seq: range(95, 110, 1), pool: range(80, 125, 1) },
-  // les intrus (150, 250…) ressemblent aux nombres du chemin ; 3 chiffres au plus, comme « 100 »
-  { label: 'De 100 en 100 jusqu’à 900', cols: 4, rows: 4, seq: range(100, 900, 100), pool: range(50, 950, 100) },
+  // Au-delà de 100 (les anciens niveaux 10 et 11, réunis) : un chemin sur deux passe la centaine
+  // (de 95 à 110, les intrus sont des nombres proches : 87, 112…), l'autre va de 100 en 100
+  // (les intrus, 150, 250…, ressemblent aux nombres du chemin ; 3 chiffres au plus, comme « 100 »).
+  {
+    label: 'Au-delà de 100',
+    paths: [
+      { cols: 5, rows: 4, seq: range(95, 110, 1), pool: range(80, 125, 1) },
+      { cols: 4, rows: 4, seq: range(100, 900, 100), pool: range(50, 950, 100) },
+    ],
+  },
 ];
 
 function range(from, to, step) {
@@ -239,7 +515,9 @@ export const cheminNombres = {
   skill: 'Réciter et lire la suite des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours)',
   levels: NUMBER_PATHS.map((p) => p.label),
   generate(level, rng) {
-    const { cols, rows, seq, pool: near } = NUMBER_PATHS[level - 1];
+    // un niveau enregistré au-delà du dernier (il y en avait 11) joue le dernier niveau
+    const path = NUMBER_PATHS[Math.min(level, NUMBER_PATHS.length) - 1];
+    const { cols, rows, seq, pool: near } = path.paths ? pick(rng, path.paths) : path;
     const max = Math.max(...seq);
     const pool = (near || range(1, max + 10, 1)).filter((n) => !seq.includes(n));
     const stage = pathStage(rng, cols, rows, seq, pool);
@@ -344,4 +622,4 @@ export const cheminLettres = {
   },
 };
 
-export const LABYRINTHE_GAMES = [labyrinthe, cheminNombres, cheminLettres];
+export const LABYRINTHE_GAMES = [labyrinthe, labyrintheRond, cheminNombres, cheminLettres];

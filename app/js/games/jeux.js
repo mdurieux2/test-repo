@@ -22,6 +22,9 @@ const PUZZLE_LEVELS = [
   { label: '12 pièces (4 × 3)', cols: 4, rows: 3 },
   { label: '16 pièces (4 × 4)', cols: 4, rows: 4 },
   { label: '25 pièces (5 × 5)', cols: 5, rows: 5 },
+  // 6 colonnes au plus : sur un iPhone SE, une pièce fait encore environ 50 points de côté
+  { label: '30 pièces (6 × 5)', cols: 6, rows: 5 },
+  { label: '36 pièces (6 × 6)', cols: 6, rows: 6 },
 ];
 
 export const puzzle = {

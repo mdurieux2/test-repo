@@ -3,6 +3,10 @@
 import { ACCESSORIES, avatarSvg } from './characters.js';
 import { PIECES } from './games/logique.js';
 import { FLAGS, flagMarkup } from './games/drapeaux.js';
+import { balanceSvg, describeBalance, describeFigure, figureSvg } from './games/logique-plus.js';
+import {
+  CONTINENTS, COUNTRIES, EUROPE_DRAWN, EUROPE_TARGETS, OCEANS, SEAS, VIEWS, WORLD_TARGETS, atIn, dotFor, mapPaths, toXY,
+} from './data/carte-data.js';
 
 /** h('div', {class: 'x', onclick}, enfant1, enfant2…) */
 export function h(tag, attrs = {}, ...children) {
@@ -236,6 +240,10 @@ export function renderStage(stage, actions) {
       return frameStage(stage);
     case 'flag':
       return flagStage(stage);
+    case 'matrix':
+      return matrixStage(stage);
+    case 'scales':
+      return scalesStage(stage);
     case 'equation':
       return h('div', { class: 'equation big' },
         stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
@@ -399,7 +407,174 @@ function flagStage({ code, hole, caption }) {
   return h('div', { class: 'stage-flag' }, flagElement(code, hole), caption ? h('span', { class: 'flag-caption' }, caption) : null);
 }
 
+// Le tableau logique : chaque dessin a ses propres motifs (rayures, pois), d'où un numéro unique.
+let figureCount = 0;
+export function figureElement(fig, extraClass = '') {
+  const el = h('span', { class: `figure ${extraClass}`.trim(), role: 'img', 'aria-label': describeFigure(fig) });
+  el.innerHTML = figureSvg(fig, `fig${++figureCount}`);
+  return el;
+}
+
+/** La grille 3 × 3 du tableau logique ; la case vide porte un « ? ». */
+function matrixStage({ cells }) {
+  return h('div', { class: 'matrix', role: 'group', 'aria-label': 'Tableau de 3 lignes et 3 colonnes' },
+    cells.map((fig) => (fig ? h('span', { class: 'matrix-cell' }, figureElement(fig)) : h('span', { class: 'matrix-cell gap', 'aria-label': 'Case vide' }, '?'))));
+}
+
+/** Les balances en équilibre, et l'animal dont on cherche le poids. */
+function scalesStage({ balances, animals, ask }) {
+  return h('div', { class: `stage-scales n${balances.length}`, style: { '--n': balances.length } },
+    balances.map((b) => {
+      const el = h('span', { class: 'scale', role: 'img', 'aria-label': describeBalance(b, animals) });
+      el.innerHTML = balanceSvg(b, animals);
+      return el;
+    }),
+    h('div', { class: 'scales-ask' }, h('span', { class: 'scales-animal', 'aria-label': animals[ask].name }, animals[ask].emoji), ' = ', h('span', { class: 'gap' }, '?'), ' kg'));
+}
+
+// ---------------------------------------------------------------- La carte du monde
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+/** svg('path', {d: …}, enfants…) : comme h(), pour les éléments SVG. */
+function svg(tag, attrs = {}, ...children) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const [key, value] of Object.entries(attrs)) if (value !== undefined && value !== null) el.setAttribute(key, value);
+  el.append(...children.flat().filter(Boolean));
+  return el;
+}
+
+// Couleurs de la carte : décoratives seulement (chaque zone a son contour, et son nom s'affiche
+// quand on la touche). Deux pays voisins n'ont jamais la même couleur.
+const CONTINENT_FILL = {
+  europe: '#f4b6c2', asie: '#f9d27a', afrique: '#f6a96b', 'amerique-nord': '#8fd3c7', 'amerique-sud': '#b8e08c', oceanie: '#c9a7e8',
+  antarctique: '#f4f8fb',
+};
+const PASTELS = { A: '#f7c59f', B: '#a8dadc', C: '#f6e27f', D: '#c3b1e1', E: '#b5e48c', F: '#f4a6a6' };
+const COUNTRY_FILL = {
+  fr: 'A', es: 'C', pt: 'B', it: 'C', de: 'D', ch: 'B', at: 'E', cz: 'F', pl: 'B', be: 'C', nl: 'A', lu: 'E', dk: 'A', gb: 'D', ie: 'E',
+  no: 'B', se: 'F', fi: 'C', ru: 'A', gr: 'F', ma: 'B', us: 'D', ca: 'B', mx: 'E', br: 'A', ar: 'F', cn: 'C', in: 'E', au: 'E', jp: 'F',
+  eg: 'C', za: 'D',
+};
+
+/** Une étoile à 5 branches de rayon r, en (x, y). */
+function starAt(x, y, r) {
+  return Array.from({ length: 10 }, (_, i) => {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rr = i % 2 ? r * 0.45 : r;
+    return `${(x + rr * Math.cos(a)).toFixed(2)},${(y + rr * Math.sin(a)).toFixed(2)}`;
+  }).join(' ');
+}
+
+/**
+ * La carte d'une question du jeu « La carte du monde » : un SVG dont les zones touchables portent
+ * data-zone (continent, océan, mer, pays, capitale) ; la mer porte data-kind="sea" et les terres
+ * sans nom data-kind="land". Les noms (.map-label) sont cachés jusqu'à ce qu'on touche la zone.
+ */
+export function mapElement({ view, layer, zones = [], start = null, radius = 1, compass = false }) {
+  const paths = mapPaths(view);
+  const [bx, by, bw, bh] = paths.box;
+  const L = VIEWS[view].label; // taille des noms, en unités de la carte
+  const touch = new Set(zones);
+  const zone = (id) => (touch.has(id) ? id : undefined);
+  const root = svg('svg', {
+    viewBox: paths.box.map((v) => v.toFixed(2)).join(' '),
+    class: `world-map map-${view} layer-${layer}`,
+    role: 'img',
+    'aria-label': view === 'europe' ? 'Carte de l’Europe' : 'Carte du monde',
+    style: `--ratio: ${(bw / bh).toFixed(4)}`,
+  });
+  root.append(
+    svg('defs', {}, svg('pattern', { id: 'map-hatch', width: L * 0.7, height: L * 0.7, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' },
+      svg('rect', { width: L * 0.3, height: L * 0.7, class: 'map-hatch-line' }))),
+    svg('rect', { x: bx, y: by, width: bw, height: bh, class: 'map-sea', 'data-kind': 'sea' }),
+  );
+  // les océans et les mers, sous les terres (leurs bords passent sur les continents)
+  const waters = layer === 'oceans' ? [...Object.keys(OCEANS).map((id) => [id, paths.oceans[id]]), ['mediterranee', paths.seas.mediterranee]]
+    : layer === 'seas' ? ['atlantique', 'mer-du-nord', 'baltique', 'mediterranee'].map((id) => [id, paths.seas[id]]) : [];
+  for (const [id, d] of waters) root.append(svg('path', { d, class: 'map-water map-zone', 'data-zone': zone(id) }));
+  // les terres : chaque continent (sans les frontières entre ses morceaux), ou toutes les terres sans nom
+  const landGroup = (d, attrs) => svg('g', attrs, svg('path', { d, class: 'map-outline' }), svg('path', { d, class: 'map-fill' }));
+  if (layer === 'continents') {
+    for (const id of Object.keys(CONTINENTS)) {
+      root.append(landGroup(paths.continents[id], { class: 'map-continent map-zone', 'data-zone': zone(id), style: `--fill: ${CONTINENT_FILL[id]}` }));
+    }
+  } else {
+    root.append(landGroup(Object.values(paths.continents).join(''), { class: 'map-land', 'data-kind': 'land' }));
+  }
+  // les pays (dessinés sur les cartes de pays et de capitales)
+  const drawn = view === 'europe' ? EUROPE_DRAWN : WORLD_TARGETS;
+  if (layer === 'countries' || layer === 'capitals') {
+    for (const id of drawn) {
+      root.append(svg('path', {
+        d: paths.countries[id],
+        class: `map-country${zone(id) || id === start ? ' map-zone' : ''}${id === start ? ' map-start' : ''}`,
+        'data-zone': zone(id) || (id === start ? id : undefined),
+        style: `--fill: ${PASTELS[COUNTRY_FILL[id]]}`,
+      }));
+    }
+    if (start) root.append(svg('path', { d: paths.countries[start], class: 'map-start-hatch' }));
+    // les petits pays qu'on peut demander : un point touchable, assez grand pour un doigt
+    for (const id of view === 'europe' ? EUROPE_TARGETS : WORLD_TARGETS) {
+      const dot = layer === 'countries' && touch.has(id) && dotFor(view, id);
+      if (!dot) continue;
+      const [x, y, r] = dot;
+      root.append(svg('g', { class: 'map-dot map-zone', 'data-zone': id, style: `--fill: ${PASTELS[COUNTRY_FILL[id]]}` },
+        svg('circle', { cx: x, cy: y, r, class: 'map-dot-hit' }), svg('circle', { cx: x, cy: y, r: r * 0.45, class: 'map-dot-mark' })));
+    }
+  }
+  // les capitales : des étoiles
+  const cityAt = (id) => toXY(COUNTRIES[id.slice(4)].capital[1], COUNTRIES[id.slice(4)].capital[2]);
+  if (layer === 'capitals') {
+    for (const id of zones) {
+      const [x, y] = cityAt(id);
+      root.append(svg('g', { class: 'map-city map-zone', 'data-zone': id },
+        svg('circle', { cx: x, cy: y, r: radius, class: 'map-dot-hit' }), svg('polygon', { points: starAt(x, y, radius * 0.75), class: 'map-star' })));
+    }
+  }
+  // les noms, cachés tant qu'on n'a pas touché la zone
+  const labels = svg('g', { class: 'map-labels' });
+  const addLabel = (id, [lon, lat], { text = zoneLabel(id), size = L, cls = '' } = {}) => {
+    const [x, y] = id.startsWith('cap-') ? cityAt(id) : toXY(lon, lat);
+    const dy = id.startsWith('cap-') ? -radius * 1.1 : size * 0.35;
+    // le nom reste entier dans la carte, même pour un pays au bord
+    const half = text.length * size * 0.28;
+    const cx = Math.min(Math.max(x, bx + half + size * 0.2), bx + bw - half - size * 0.2);
+    labels.append(svg('text', { x: cx, y: Math.max(y + dy, by + size), class: `map-label ${cls}`.trim(), 'data-for': id, 'font-size': size }, text));
+  };
+  for (const id of touch) {
+    if (id.startsWith('cap-')) addLabel(id, [0, 0]);
+    else if (COUNTRIES[id]) addLabel(id, atIn(view, id));
+    else {
+      const z = CONTINENTS[id] || OCEANS[id] || SEAS[id];
+      addLabel(id, view === 'europe' && SEAS[id] ? SEAS[id].at : z.at);
+      if (layer === 'oceans' && z.at2) addLabel(id, z.at2);
+    }
+  }
+  // le pays de départ : hachuré, avec un drapeau (son nom est écrit sous la carte)
+  if (start) addLabel(start, atIn(view, start), { text: '🚩', size: L * 1.4, cls: 'map-start-label show' });
+  root.append(labels);
+  // la rose des vents (voyages) : N en haut, E à droite, S en bas, O à gauche
+  if (compass) {
+    const r = L * 1.6;
+    const [cx, cy] = [bx + bw - r * 1.7, by + r * 1.7];
+    const letter = (t, x, y) => svg('text', { x, y: y + L * 0.32, class: 'map-compass-letter', 'font-size': L * 0.85 }, t);
+    root.append(svg('g', { class: 'map-compass', 'aria-hidden': 'true' },
+      svg('circle', { cx, cy, r: r * 1.05, class: 'map-compass-disc' }),
+      svg('polygon', { points: `${cx},${cy - r * 0.55} ${cx + r * 0.22},${cy + r * 0.2} ${cx - r * 0.22},${cy + r * 0.2}`, class: 'map-compass-needle' }),
+      letter('N', cx, cy - r * 0.78), letter('S', cx, cy + r * 0.78), letter('E', cx + r * 0.75, cy), letter('O', cx - r * 0.75, cy)));
+  }
+  return root;
+}
+
+/** Le nom court d'une zone, tel qu'écrit sur la carte. */
+function zoneLabel(id) {
+  if (id.startsWith('cap-')) return COUNTRIES[id.slice(4)].capital[0];
+  const z = COUNTRIES[id] || CONTINENTS[id] || OCEANS[id] || SEAS[id];
+  return z.label;
+}
+
 export function renderChoiceContent(choice) {
+  if (choice.figure) return figureElement(choice.figure, 'figure-choice');
   if (choice.flag) return flagElement(choice.flag, null, 'flag-choice');
   if (choice.scene) return sceneContent(choice.scene, choice.name);
   if (choice.shadow) return shadowContent(choice.shadow, choice.name, choice.transform);

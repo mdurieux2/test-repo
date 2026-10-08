@@ -34,11 +34,11 @@ function evaluate(label) {
 test('trois niveaux de plus par jeu, libellés courts, chacun au programme d’une classe', () => {
   for (const [id, count] of Object.entries(LEVELS)) {
     const game = findGame(id);
-    assert.equal(game.levels.length, count, id);
-    for (const label of game.levels.slice(-3)) assert.ok(label.length <= 26, `${id} : « ${label} » trop long`);
+    assert.ok(game.levels.length >= count, id); // d'autres niveaux ont pu s'ajouter ensuite
+    for (const label of game.levels.slice(count - 3, count)) assert.ok(label.length <= 26, `${id} : « ${label} » trop long`);
     const maxReached = Math.max(...Object.values(PROGRAMS).flatMap((domains) => Object.values(domains).flat())
       .filter(([gameId]) => gameId === id).map(([, , max]) => max));
-    assert.equal(maxReached, count, `${id} : le dernier niveau n’est au programme d’aucune classe`);
+    assert.ok(maxReached >= count, `${id} : le dernier niveau n’est au programme d’aucune classe`);
   }
 });
 

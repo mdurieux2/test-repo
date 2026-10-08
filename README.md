@@ -80,9 +80,9 @@ officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/program
 | Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E, **écrire au doigt** (traits, chiffres, capitales) | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes, **puzzle**, **memory**, **coloriage magique**, **points à relier** | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons |
 | Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet, écrire au doigt (jusqu'aux lettres attachées et son prénom), **première dictée** | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes, puzzle, memory | Écouter et toucher, compter, in/on/under, les nombres, mélanger les couleurs, l'intrus, les contraires | Les bébés des animaux, les moments de la journée, **les drapeaux** |
 | CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler, **dictée de mots**, écrire au doigt | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, **régler l'horloge**, la monnaie, sudoku, symétrie, cubes, coloriage magique avec des calculs | Écouter (10 thèmes), lire, relier, compter, les nombres jusqu'à 20, calculer en anglais, colorier, memory, petites phrases | Ce que mangent les animaux, les jours, les pays, les drapeaux |
-| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants, dictée (sons complexes, lettres pièges) | Nombres jusqu'à 1000, tables, **défi chrono des tables**, problèmes en deux étapes, l'heure, régler l'horloge, moitiés, sudoku 6 × 6, labyrinthes 9 × 9, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau |
+| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants, dictée (sons complexes, lettres pièges) | Nombres jusqu'à 1000, tables, **défi chrono des tables**, problèmes en deux étapes, l'heure, régler l'horloge, moitiés, **sudoku 9 × 9**, labyrinthes 9 × 9 et **ronds**, **tableau logique**, **balances**, **dessin caché**, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau, **la carte du monde** (pays, voisins, capitales) |
 
-Chaque jeu a plusieurs niveaux de difficulté croissante (de 3 à 13) ; le niveau s'adapte à
+Chaque jeu a de 7 à 10 niveaux de difficulté croissante (le calcul en a 36 paliers) ; le niveau s'adapte à
 l'enfant, et on peut aussi le choisir directement.
 
 ### Les jeux
@@ -111,15 +111,19 @@ l'enfant, et on peut aussi le choisir directement.
   (tracer un trait jusqu'au résultat), faire 10, ranger dans l'ordre, petits problèmes
   racontés avec le prénom de l'enfant, doubles et moitiés, les tables.
 - *Formes et logique* : les formes, les suites de motifs, l'intrus, les ombres, le **sudoku**
-  (4 × 4 en images, puis en chiffres, jusqu'au 6 × 6), la **symétrie** sur quadrillage,
+  (4 × 4 en images, puis en chiffres, 6 × 6, jusqu'au **9 × 9** avec de moins en moins d'indices), la **symétrie** sur quadrillage,
   **compte les cubes** (empilements en 3D, avec des cubes cachés).
+- *Logique pour aller plus loin* : **le tableau logique** (la case vide d'un tableau de formes,
+  couleurs et motifs), **les balances** (trouver le poids d'un animal, d'une à trois balances), **le dessin
+  caché** (colorier les cases d'après les nombres des lignes et des colonnes, de 4 × 4 à 8 × 8).
 - *Heure et mesures* : lire l'heure (heures pile, et demie, et quart, de 5 en 5 minutes) et
   **règle l'horloge** (tourner les aiguilles au doigt ou avec les boutons, « dans 1 heure… »,
   les heures de l'après-midi).
 - **Défi chrono des tables** : 10 multiplications le plus vite possible (une erreur ne fait pas
   perdre, le temps continue) ; le record de chaque niveau est gardé.
 - *Labyrinthes* : de 4 × 4 à 9 × 9 cases (doigt, flèches, ou toucher une case ; 💡 pour un
-  indice) et le chemin des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours).
+  indice), avec des boucles ou des clés à ramasser ; **le labyrinthe rond** (de 3 anneaux au grand
+  rond, aller au centre ou en sortir, avec une clé) ; et le chemin des nombres (de 1 en 1, de 2 en 2, de 5 en 5, de 10 en 10, à rebours).
 
 **Jeux et logique**
 - *Puzzles, memory et coloriages* : **le puzzle** (de 4 à 25 pièces, toucher deux pièces pour les
@@ -144,6 +148,8 @@ météo, émotions, famille)
 - *Les pays du monde* : des pays d'Europe et du monde, les continents.
 - **Les drapeaux** : 46 drapeaux dessinés ; reconnaître un pays, trouver le drapeau, les
   drapeaux qui se ressemblent, le continent, la couleur qui manque.
+- **La carte du monde** : toucher sur la carte les continents, les océans, la France et ses voisins,
+  les pays, le pays d'un drapeau ou d'un animal, les capitales, et voyager d'un pays à son voisin.
 
 **Défi du jour** : chaque jour, 5 questions tirées des jeux de l'enfant, à son niveau. Une étoile
 bonus et un jour de plus dans la série 🔥.

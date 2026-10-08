@@ -901,6 +901,37 @@ input { -webkit-user-select: text; user-select: text; }
 .maze-arrow:active { transform: translateY(3px); }
 .maze-hint { background: #fff6d6; }
 .maze-controls.answered .maze-arrow { opacity: 0.4; }
+/* clés à ramasser : la clé dans sa case, le cadenas sur l'arrivée tant qu'il en reste */
+.maze-item { position: absolute; line-height: 1; font-size: 20px; font-size: calc(55cqi / var(--cols)); }
+.maze-lock { position: absolute; right: -2px; bottom: -2px; line-height: 1; font-size: 12px; font-size: calc(32cqi / var(--cols)); z-index: 1; }
+
+/* labyrinthe rond : le dessin en SVG, les émojis posés par-dessus (--cell : épaisseur d'un anneau, en % de la largeur) */
+.stage-rmaze { display: flex; justify-content: center; }
+.rmaze {
+  position: relative; flex: none;
+  width: min(100%, 480px, calc(100vh / var(--zoom, 1) - 300px));
+  width: min(100%, 480px, calc(100dvh / var(--zoom, 1) - 300px));
+  aspect-ratio: 1;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  container-type: inline-size;
+}
+.rmaze-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.rmaze-floor { fill: var(--card); filter: drop-shadow(0 4px 0 var(--line)); }
+.rmaze-centre { fill: var(--accent-soft); }
+.rmaze-walls { fill: none; stroke: var(--ink); stroke-width: 2.5px; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.rmaze-trail circle { fill: var(--accent); opacity: 0.5; }
+.rmaze-hints text { text-anchor: middle; dominant-baseline: central; }
+.rmaze-token {
+  position: absolute; translate: -50% -50%; line-height: 1; pointer-events: none;
+  font-size: 18px; font-size: calc(var(--cell) * 0.8cqi);
+}
+.rmaze-item { font-size: calc(var(--cell) * 0.6cqi); }
+.rmaze-lock { translate: 0 -95%; font-size: calc(var(--cell) * 0.45cqi); z-index: 1; }
+.rmaze-hero { z-index: 2; }
+.rmaze-hero.bump { animation: shake 0.3s; }
+.rmaze.solved .rmaze-hero { animation: pop 0.4s ease-out; }
+.rmaze-controls { display: flex; justify-content: center; }
+.rmaze-controls.answered .maze-arrow { opacity: 0.4; }
 
 /* chemins de nombres et de lettres */
 .path-zone { flex: 1; display: flex; align-items: center; justify-content: center; }
@@ -1089,6 +1120,16 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .sudoku-symbol:active { transform: translateY(3px); }
 .sudoku-symbol.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 5px 0 #e6b800, 0 0 0 4px var(--hint) inset; }
+/* 9 × 9 : la grille la plus grande possible (cases d'au moins 32 px sur un iPhone SE ou un Android
+   de 360 px), un pavé de chiffres plus bas et plus serré, une place plus petite pour les messages */
+.sudoku.size-9 {
+  width: min(100%, 440px, calc(100vh / var(--zoom, 1) - 356px));
+  width: min(100%, 440px, calc(100dvh / var(--zoom, 1) - 356px));
+}
+.sudoku.size-9 .sudoku-cell.peer:not(.given) { background: #fff6d8; }
+.sudoku-palette.size-9 { gap: 4px; }
+.sudoku-palette.size-9 .sudoku-symbol { min-height: 52px; border-radius: 14px; font-size: min(1.8rem, 7vw); }
+.play-sudoku:has(.sudoku-palette.size-9) .feedback { min-height: 64px; }
 
 
 /* =====================================================================
@@ -1232,6 +1273,7 @@ input { -webkit-user-select: text; user-select: text; }
   .objects.per-10 .object { font-size: min(26px, 6.4dvh); }
   .scatter { width: min(100%, calc((100dvh - 80px) * 1.25)); }
   .maze, .sudoku { width: min(100%, calc(100dvh - 80px)); }
+  .rmaze { width: min(100%, calc(100dvh - 68px)); }
   .lasso-field, .path-grid, .path-grid.spell { width: min(100%, calc((100dvh - 80px) * var(--cols) / var(--rows))); }
   .stage-clock { width: min(220px, calc(100dvh - 90px)); }
   .equation { font-size: 2.4rem; }
@@ -1258,6 +1300,9 @@ input { -webkit-user-select: text; user-select: text; }
   .maze-controls .maze-arrow:nth-child(4) { grid-area: right; }
   .maze-controls .maze-arrow:nth-child(5) { grid-area: hint; }
   .sudoku-palette { grid-template-columns: repeat(min(var(--n), 3), minmax(0, 1fr)); }
+  .sudoku.size-9 { width: min(100%, calc(100dvh - 62px)); }
+  .sudoku-palette.size-9 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .sudoku-palette.size-9 .sudoku-symbol { min-height: 56px; }
 
   /* relier : les étiquettes sur deux lignes, les traits vont de haut en bas */
   .match { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; row-gap: 64px; width: 100%; }
@@ -1760,6 +1805,59 @@ body[data-season="ete"] { background: #fffbea; }
 .choices-flags .choice { min-width: 0; padding: 10px; min-height: 0; }
 .flag-choice { width: 100%; }
 
+/* la carte du monde : on touche une zone de la carte (les couleurs sont décoratives, chaque zone a
+   son contour et son nom s'écrit quand on la touche) */
+.stage-map { padding: 4px 0; min-height: 0; }
+.world-map {
+  display: block; height: auto; aspect-ratio: var(--ratio);
+  width: min(100%, calc((100vh / var(--zoom, 1) - 300px) * var(--ratio)));
+  width: min(100%, calc((100dvh / var(--zoom, 1) - 300px) * var(--ratio)));
+  border-radius: 16px; box-shadow: 0 5px 0 var(--line), 0 0 0 2px var(--line); background: #cfe6f5;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.map-sea { fill: #cfe6f5; }
+.map-water { fill: #cfe6f5; stroke: #4a7ba6; stroke-width: 1.5px; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; cursor: pointer; }
+.map-outline { fill: none; stroke: var(--ink); stroke-width: 2.4px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.map-fill { fill: #ece4d0; stroke: none; }
+.map-continent .map-fill { fill: var(--fill); }
+.map-continent { cursor: pointer; }
+.map-country { fill: var(--fill); stroke: var(--ink); stroke-width: 1px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.map-zone.map-country { cursor: pointer; }
+.map-dot-hit { fill: rgba(255, 255, 255, 0.45); stroke: var(--ink); stroke-width: 1px; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; pointer-events: all; }
+.map-dot-mark { fill: var(--fill); stroke: var(--ink); stroke-width: 1.5px; vector-effect: non-scaling-stroke; pointer-events: none; }
+.map-dot, .map-city { cursor: pointer; }
+.map-city .map-dot-hit { fill: rgba(255, 255, 255, 0.35); }
+.map-star { fill: #fff; stroke: var(--ink); stroke-width: 1.5px; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
+.map-start-hatch { fill: url(#map-hatch); stroke: var(--ink); stroke-width: 2.5px; vector-effect: non-scaling-stroke; pointer-events: none; }
+.map-hatch-line { fill: rgba(43, 45, 66, 0.3); }
+.map-labels { pointer-events: none; }
+.map-label {
+  font-weight: 700; fill: var(--ink); text-anchor: middle; opacity: 0; transition: opacity 0.2s;
+  paint-order: stroke; stroke: #fff; stroke-width: 0.22em; stroke-linejoin: round;
+}
+.map-label.show { opacity: 1; }
+.map-compass { pointer-events: none; }
+.map-compass-disc { fill: rgba(255, 255, 255, 0.85); stroke: var(--ink); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.map-compass-needle { fill: #d62828; }
+.map-compass-letter { font-weight: 700; fill: var(--ink); text-anchor: middle; }
+/* bonne réponse : la zone se remplit de vert, plus épaisse ; erreur : elle clignote ; aide : elle brille */
+.map-zone.found .map-fill, .map-country.found, .map-water.found, .map-dot.found .map-dot-mark, .map-city.found .map-star { fill: #6fd39b; }
+.map-zone.found .map-outline, .map-country.found, .map-water.found { stroke-width: 3.5px; }
+.map-water.found { stroke-dasharray: none; }
+.map-zone.missed { animation: map-blink 0.5s 2; }
+.map-zone.hint .map-fill, .map-country.hint, .map-water.hint, .map-dot.hint .map-dot-mark, .map-city.hint .map-star { animation: map-glow 1s ease-in-out infinite; }
+@keyframes map-blink { 50% { opacity: 0.35; } }
+@keyframes map-glow { 50% { fill: var(--hint); } }
+.map-clue {
+  display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+  min-height: 52px; padding: 6px 14px; border-radius: 18px; background: var(--card); box-shadow: 0 4px 0 var(--line);
+  font-size: 1.35rem; font-weight: 700; text-align: center;
+}
+.map-clue-emoji { font-size: 2.1rem; line-height: 1; }
+.map-clue-text small { display: block; font-size: 0.9rem; font-weight: 400; color: var(--muted); }
+.map-clue-arrow { font-size: 2rem; line-height: 1; color: var(--accent-dark); }
+.map-clue .map-clue-flag { width: 66px; filter: drop-shadow(0 3px 0 var(--line)); }
+
 @media (orientation: landscape) and (max-height: 520px) {
   .pz-board { width: min(100%, calc((100dvh - 90px) * var(--cols) / var(--rows))); }
   .pz-model { height: 48px; }
@@ -1768,6 +1866,11 @@ body[data-season="ete"] { background: #fffbea; }
   .magic-color { min-height: 52px; }
   .dots-drawing { width: min(100%, calc(100dvh - 76px)); }
   .stage-flag .flag { width: min(100%, 240px, calc((100dvh - 130px) * 1.5)); }
+  /* la carte prend plus de place que la consigne */
+  .screen.play.play-map:has(> .stage) { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
+  .world-map { width: min(100%, calc((100dvh - 76px) * var(--ratio))); }
+  .map-clue { font-size: 1.15rem; min-height: 46px; }
+  .map-clue-emoji { font-size: 1.8rem; }
 }
 
 /* inviter à installer l'icône (sous « Qui joue ? ») */
@@ -2202,3 +2305,94 @@ body[data-season="ete"] { background: #fffbea; }
 /* pendant un jeu : la fine barre seulement */
 body:has(main.play) .voice-progress-text { display: none; }
 .voice-progress.done { transition: opacity 0.6s ease 1.6s; opacity: 0; }
+
+/* =====================================================================
+   Logique pour aller plus loin : le tableau logique, les balances,
+   le dessin caché (picross)
+   ===================================================================== */
+/* le tableau logique : une grille 3 × 3, la case vide en pointillés */
+.matrix {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 6px;
+  width: min(100%, 300px, calc(100vh / var(--zoom, 1) - 410px));
+  width: min(100%, 300px, calc(100dvh / var(--zoom, 1) - 410px));
+  aspect-ratio: 1; padding: 6px; border-radius: 16px; background: var(--line); box-shadow: 0 4px 0 #d9cdb4;
+}
+.play:has(.choices-figures.n4) .matrix { width: min(100%, 300px, calc(100dvh / var(--zoom, 1) - 350px)); }
+.matrix-cell { display: grid; place-items: center; min-width: 0; min-height: 0; background: #fff; border-radius: 10px; }
+.matrix-cell .figure { display: block; width: 90%; height: 90%; }
+.matrix-cell.gap { padding: 0; border-radius: 10px; font-size: 2.2rem; font-weight: 700; color: var(--accent-dark); }
+.figure svg { display: block; width: 100%; height: 100%; }
+.choices-figures.n5, .choices-figures.n6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.choices-figures .choice { min-height: 0; padding: 6px; }
+.figure-choice { display: block; width: min(64px, 15vw); aspect-ratio: 1; }
+
+/* les balances : en équilibre, le signe = sur le pied */
+.stage-scales { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; }
+.scale { display: block; max-width: 100%; }
+.scale svg {
+  display: block; width: auto; max-width: 100%;
+  height: min(110px, calc((100vh / var(--zoom, 1) - 420px) / var(--n)));
+  height: min(110px, calc((100dvh / var(--zoom, 1) - 420px) / var(--n)));
+}
+.scale-base { fill: #6b3d10; }
+.scale-post { fill: #8a5426; }
+.scale-beam { fill: #b5753a; }
+.scale-pivot { fill: var(--ink); }
+.scale-equal { fill: #fff; font-size: 13px; font-weight: 700; text-anchor: middle; }
+.scale-animal { font-size: 22px; text-anchor: middle; font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
+.scale-weight path { fill: #4a4e69; }
+.scale-weight text { fill: #fff; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+.scale-weight .scale-kg { font-size: 6.5px; }
+.scales-ask { display: flex; align-items: center; gap: 6px; font-size: 1.5rem; font-weight: 700; }
+.scales-animal { font-size: 1.9rem; font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
+.scales-ask .gap { min-width: 1.6em; border-radius: 12px; }
+
+/* le dessin caché : les nombres à gauche et en haut, les cases à colorier */
+.stage-picross { padding: 4px 0; min-height: 0; }
+.picross {
+  --k: 0.62; /* place d'un nombre, en cases */
+  --cell: min(46px,
+    calc((min(100vw / var(--zoom, 1), 600px) - 36px) / (var(--cols) + var(--rw) * var(--k))),
+    calc((100dvh / var(--zoom, 1) - 290px) / (var(--rows) + var(--ch) * var(--k))));
+  display: grid;
+  grid-template-columns: calc(var(--cell) * var(--rw) * var(--k)) repeat(var(--cols), var(--cell));
+  grid-template-rows: calc(var(--cell) * var(--ch) * var(--k)) repeat(var(--rows), var(--cell));
+  font-size: calc(var(--cell) * 0.5); touch-action: none;
+}
+.pc-clue { display: flex; align-items: center; justify-content: flex-end; gap: calc(var(--cell) * 0.14); font-weight: 700; line-height: 1; min-width: 0; }
+.pc-row { padding-right: calc(var(--cell) * 0.16); }
+.pc-col { flex-direction: column; padding-bottom: 4px; }
+.pc-clue b { min-width: 0.65em; text-align: center; }
+.pc-clue.done { opacity: 0.4; }
+.pc-clue.done b { text-decoration: line-through; text-decoration-thickness: 2px; }
+.pc-cell {
+  position: relative; display: grid; place-items: center; min-width: 0; min-height: 0; margin: 1px;
+  border-radius: 4px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfbd;
+}
+.pc-cell.on { background: var(--ink); box-shadow: none; }
+.pc-cell.given::after { content: ''; width: 28%; aspect-ratio: 1; border-radius: 50%; background: #fff; opacity: 0.75; }
+.pc-cell.crossed::after { content: '✕'; color: var(--muted); font-weight: 700; font-size: calc(var(--cell) * 0.55); }
+.pc-cell.wrong { background: var(--bad); }
+.pc-cell.wrong::after { content: '✕'; color: #fff; font-weight: 700; font-size: calc(var(--cell) * 0.55); }
+.pc-cell.hint { outline: 3px dashed var(--accent-dark); outline-offset: -4px; }
+.picross.finished .pc-cell { margin: 0; border-radius: 0; box-shadow: none; animation: pop 0.4s ease-out; }
+.picross.finished .pc-cell::after { content: none; }
+.picross-zone { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+.pc-tools { display: flex; gap: 4px; padding: 4px; border-radius: 16px; background: var(--card); box-shadow: 0 3px 0 var(--line), 0 0 0 2px var(--line) inset; }
+.pc-tool { min-height: 48px; padding: 0 10px; border-radius: 12px; font-size: 1rem; font-weight: 700; }
+.pc-tool.on { background: var(--accent-soft); color: var(--accent-dark); box-shadow: inset 0 0 0 3px var(--accent); }
+.picross-zone .validate-btn { min-height: 56px; padding: 0 14px; font-size: 1.2rem; }
+.play-picross .feedback { min-height: 56px; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .matrix, .play:has(.choices-figures.n4) .matrix { width: min(100%, calc(100dvh - 70px)); }
+  .figure-choice { width: 52px; }
+  .scale svg { height: min(110px, calc((100dvh - 120px) / var(--n))); }
+  .scales-ask { font-size: 1.3rem; }
+  .picross {
+    --cell: min(40px,
+      calc((50vw - 44px) / (var(--cols) + var(--rw) * var(--k))),
+      calc((100dvh - 64px) / (var(--rows) + var(--ch) * var(--k))));
+  }
+  .picross-zone { flex-direction: column; }
+}

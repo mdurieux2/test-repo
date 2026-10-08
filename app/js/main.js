@@ -2,7 +2,7 @@
 
 import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
-import { canMove, solveMaze } from './games/labyrinthes.js';
+import { canMove, polarCell, ringOffsets, solveLinks, solveMaze } from './games/labyrinthes.js';
 import { clockLabel } from './games/maths-extra.js';
 import {
   clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
@@ -24,7 +24,10 @@ import {
   setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
 } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
-import { avatar, clockSvg, h, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
+import {
+  avatar, clockSvg, flagElement, h, mapElement, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles,
+} from './render.js';
+import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
@@ -1001,8 +1004,10 @@ function nextQuestion(session) {
   let stage = null;
   let zone;
   const custom = {
-    build: buildZone, maze: mazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
+    build: buildZone, maze: mazeZone, roundmaze: roundMazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
     swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
+    picross: picrossZone,
+    map: mapZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -1739,8 +1744,14 @@ function sudokuZone(ctx) {
     });
     return el;
   });
+  // la ligne, la colonne et le carré de la case choisie sont teintés (repère pour le 9 × 9)
+  const sameBox = (a, b) => Math.floor(Math.floor(a / size) / br) === Math.floor(Math.floor(b / size) / br)
+    && Math.floor((a % size) / bc) === Math.floor((b % size) / bc);
+  const isPeer = (i) => selected >= 0 && i !== selected
+    && (Math.floor(i / size) === Math.floor(selected / size) || i % size === selected % size || sameBox(i, selected));
   const refresh = () => cells.forEach((el, i) => {
     el.classList.toggle('selected', i === selected);
+    el.classList.toggle('peer', isPeer(i));
     el.setAttribute('aria-label', label(i));
   });
   // pourquoi c'est faux : la même image est déjà dans la ligne, la colonne ou le carré
@@ -1749,7 +1760,7 @@ function sudokuZone(ctx) {
     const c = cell % size;
     if (grid.some((x, i) => x === v && Math.floor(i / size) === r)) return 'cette ligne';
     if (grid.some((x, i) => x === v && i % size === c)) return 'cette colonne';
-    if (grid.some((x, i) => x === v && Math.floor(Math.floor(i / size) / br) === Math.floor(r / br) && Math.floor((i % size) / bc) === Math.floor(c / bc))) return 'ce carré';
+    if (grid.some((x, i) => x === v && sameBox(i, cell))) return 'ce carré';
     return null;
   };
   const choose = (v) => {
@@ -1780,7 +1791,7 @@ function sudokuZone(ctx) {
   };
   const palette = symbols.map((sym, v) => h('button', { class: 'sudoku-symbol', 'data-symbol': v, onclick: () => choose(v) }, sym));
   const board = h('div', { class: `sudoku size-${size}`, style: { '--size': size } }, cells);
-  const zone = h('div', { class: 'choices sudoku-palette', style: { '--n': size } }, palette);
+  const zone = h('div', { class: `choices sudoku-palette size-${size}`, style: { '--n': size } }, palette);
   refresh();
   return { stage: h('div', { class: 'stage stage-sudoku' }, board), zone };
 }
@@ -1833,6 +1844,133 @@ function symmetryZone(ctx) {
   const grid = h('div', { class: `sym-grid axis-${axis}`, style: { '--cols': cols, '--rows': rows } }, cells);
   const zone = h('div', { class: 'choices sym-zone' }, h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
   return { stage: h('div', { class: 'stage stage-sym' }, grid), zone };
+}
+
+// ---- Le dessin caché (picross) : colorier les cases d'après les nombres ; un dessin apparaît
+
+function picrossZone(ctx) {
+  const { q } = ctx;
+  const { cols, rows, rowClues, colClues, solution, given, colors, name } = q.stage;
+  const goal = new Set(solution);
+  const filled = new Set(given); // les cases données sont déjà coloriées (et ne s'effacent pas)
+  const crossed = new Set(); // les croix : des cases que l'enfant sait vides
+  let tool = 'fill';
+  let painting = null; // glisser le doigt colorie (ou efface) plusieurs cases d'un coup
+  const lineOf = (r) => Array.from({ length: cols }, (_, c) => (filled.has(r * cols + c) ? 1 : 0));
+  const colOf = (c) => Array.from({ length: rows }, (_, r) => (filled.has(r * cols + c) ? 1 : 0));
+  const runs = (line) => line.join('').split('0').filter(Boolean).map((s) => s.length).join(',');
+  const clueEl = (clue, cls, label) => h('span', { class: `pc-clue ${cls}`, 'aria-label': `${label} : ${clue.length ? clue.join(', ') : 'aucune case'}` },
+    (clue.length ? clue : [0]).map((n) => h('b', {}, n)));
+  const rowEls = rowClues.map((clue, r) => clueEl(clue, 'pc-row', `Ligne ${r + 1}`));
+  const colEls = colClues.map((clue, c) => clueEl(clue, 'pc-col', `Colonne ${c + 1}`));
+  const cellLabel = (i) => `Ligne ${Math.floor(i / cols) + 1}, colonne ${(i % cols) + 1}${filled.has(i) ? ', coloriée' : crossed.has(i) ? ', croix' : ''}`;
+  const cells = Array.from({ length: cols * rows }, (_, i) => h('button', { class: `pc-cell${given.includes(i) ? ' given' : ''}`, 'data-cell': i }));
+  const draw = (i) => {
+    cells[i].classList.toggle('on', filled.has(i));
+    cells[i].classList.toggle('crossed', crossed.has(i));
+    cells[i].setAttribute('aria-label', cellLabel(i));
+  };
+  // une ligne (ou une colonne) qui a ses bons nombres est barrée
+  const refreshClues = () => {
+    rowEls.forEach((el, r) => el.classList.toggle('done', runs(lineOf(r)) === rowClues[r].join(',')));
+    colEls.forEach((el, c) => el.classList.toggle('done', runs(colOf(c)) === colClues[c].join(',')));
+  };
+  const finished = () => filled.size === goal.size && [...goal].every((i) => filled.has(i));
+  const win = () => {
+    crossed.clear();
+    cells.forEach((el, i) => {
+      draw(i);
+      el.classList.remove('hint', 'wrong');
+      if (goal.has(i)) el.style.background = colors[i];
+    });
+    board.classList.add('finished');
+    zone.replaceChildren(h('span', { class: 'dots-name' }, `C’est ${name} !`));
+    zone.classList.add('answered');
+    markCorrect(ctx);
+  };
+  const apply = (i) => {
+    if (given.includes(i)) return;
+    const { mode } = painting;
+    if (mode === 'fill') { filled.add(i); crossed.delete(i); }
+    else if (mode === 'erase') filled.delete(i);
+    else if (mode === 'cross') { if (!filled.has(i)) crossed.add(i); }
+    else crossed.delete(i);
+    cells[i].classList.remove('wrong', 'hint');
+    draw(i);
+    refreshClues();
+  };
+  const start = (i) => {
+    if (ctx.session.locked || given.includes(i)) return;
+    painting = { mode: tool === 'fill' ? (filled.has(i) ? 'erase' : 'fill') : (crossed.has(i) ? 'uncross' : 'cross'), last: i };
+    apply(i);
+    playSound('tap');
+  };
+  const end = () => {
+    if (!painting) return;
+    painting = null;
+    if (finished()) win();
+  };
+  const board = h('div', {
+    class: 'picross',
+    role: 'group',
+    'aria-label': 'Grille du dessin caché',
+    style: {
+      '--cols': cols, '--rows': rows,
+      '--rw': Math.max(1, ...rowClues.map((c) => c.length)), '--ch': Math.max(1, ...colClues.map((c) => c.length)),
+    },
+  }, h('span', { class: 'pc-corner' }), colEls, rowEls.flatMap((el, r) => [el, ...cells.slice(r * cols, (r + 1) * cols)]));
+  board.addEventListener('pointerdown', (e) => {
+    const cell = e.target.closest('.pc-cell');
+    if (!cell) return;
+    e.preventDefault();
+    try { board.setPointerCapture(e.pointerId); } catch { /* le doigt peut sortir de la grille et revenir */ }
+    start(Number(cell.dataset.cell));
+  });
+  board.addEventListener('pointermove', (e) => {
+    if (!painting) return;
+    const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('.pc-cell');
+    const i = cell && board.contains(cell) ? Number(cell.dataset.cell) : -1;
+    if (i < 0 || i === painting.last) return;
+    painting.last = i;
+    apply(i);
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => board.addEventListener(type, end));
+  // au clavier (Entrée ou Espace sur une case), un appui = une case
+  board.addEventListener('click', (e) => {
+    const cell = e.target.closest('.pc-cell');
+    if (!cell || e.detail !== 0) return;
+    start(Number(cell.dataset.cell));
+    end();
+  });
+  const validate = () => {
+    if (ctx.session.locked) return;
+    if (finished()) return win();
+    const wrong = [...filled].filter((i) => !goal.has(i));
+    const missing = solution.filter((i) => !filled.has(i));
+    wrong.forEach((i) => cells[i].classList.add('wrong'));
+    setTimeout(() => wrong.forEach((i) => cells[i].classList.remove('wrong')), 1600);
+    if (ctx.session.attempts >= 1) missing.forEach((i) => cells[i].classList.add('hint'));
+    markWrong(ctx, {
+      message: wrong.length ? 'Regarde bien les nombres : une case est en trop !' : `Il manque ${missing.length} case${missing.length > 1 ? 's' : ''} !`,
+      given: `${filled.size} cases`,
+    });
+  };
+  const tools = [['fill', '✏️ Colorier'], ['cross', '✕ Croix']].map(([id, text]) => h('button', {
+    class: `pc-tool${id === tool ? ' on' : ''}`, 'data-tool': id, 'aria-pressed': String(id === tool),
+    onclick: () => {
+      tool = id;
+      tools.forEach((b) => {
+        b.classList.toggle('on', b.dataset.tool === id);
+        b.setAttribute('aria-pressed', String(b.dataset.tool === id));
+      });
+    },
+  }, text));
+  const zone = h('div', { class: 'choices picross-zone' },
+    h('div', { class: 'pc-tools', role: 'group', 'aria-label': 'Outil' }, tools),
+    h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ Vérifier'));
+  cells.forEach((_, i) => draw(i));
+  refreshClues();
+  return { stage: h('div', { class: 'stage stage-picross' }, board), zone };
 }
 
 // ---- Le puzzle : toucher deux pièces pour les échanger
@@ -2053,6 +2191,71 @@ function colorbyZone(ctx) {
   return { stage: h('div', { class: 'stage stage-magic' }, svg), zone };
 }
 
+// ---- La carte du monde : toucher un continent, un océan, un pays, une capitale
+
+/** Ce que montre la carte sous la consigne : le nom à trouver, le drapeau, l'animal, le voyage. */
+function mapClue(clue) {
+  if (clue.flag) return [flagElement(clue.flag, null, 'map-clue-flag'), h('span', { class: 'map-clue-text' }, '?')];
+  if (clue.trip) {
+    return [h('span', { class: 'map-clue-text' }, `🚩 ${clue.trip.from}`), h('span', { class: 'map-clue-arrow', 'aria-hidden': 'true' }, clue.trip.arrow),
+      h('span', { class: 'map-clue-text' }, clue.trip.dir)];
+  }
+  return [h('span', { class: 'map-clue-emoji', 'aria-hidden': 'true' }, clue.emoji || clue.icon),
+    h('span', { class: 'map-clue-text' }, clue.text, clue.sub ? h('small', {}, clue.sub) : null)];
+}
+
+function mapZone(ctx) {
+  const { q } = ctx;
+  const st = q.stage;
+  const map = mapElement(st);
+  const named = new Set(q.choices.map((c) => c.value));
+  const parts = (id) => [...map.querySelectorAll(`[data-zone="${CSS.escape(id)}"]`)];
+  const labels = (id) => [...map.querySelectorAll(`.map-label[data-for="${CSS.escape(id)}"]`)];
+  const water = st.layer === 'oceans' || st.layer === 'seas';
+  const zone = h('div', { class: 'choices map-clue' }, mapClue(q.clue));
+  map.addEventListener('click', (e) => {
+    if (ctx.session.locked) return;
+    const target = e.target.closest('[data-zone], [data-kind]');
+    const id = target?.dataset.zone;
+    if (id === q.answer) {
+      parts(id).forEach((el) => { el.classList.remove('hint'); el.classList.add('found'); });
+      labels(id).forEach((el) => el.classList.add('show'));
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    if (id && id === st.start) {
+      nudge(ctx, 'C’est le pays de départ. Touche son voisin !');
+      return;
+    }
+    if (id && named.has(id)) {
+      // une autre zone : son nom s'affiche un instant
+      parts(id).forEach((el) => {
+        el.classList.remove('missed');
+        el.getBoundingClientRect(); // relance l'animation
+        el.classList.add('missed');
+      });
+      labels(id).forEach((el) => el.classList.add('show'));
+      setTimeout(() => labels(id).forEach((el) => el.classList.remove('show')), 1800);
+      const name = zoneName(id);
+      if (ctx.session.attempts >= 1) {
+        parts(q.answer).forEach((el) => el.classList.add('hint'));
+        markWrong(ctx, { message: `Ça, c’est ${name}. Touche celle qui brille !`, given: id });
+      } else {
+        markWrong(ctx, { message: `Ça, c’est ${name}. Essaie encore !`, given: id });
+      }
+      return;
+    }
+    // ailleurs : la mer, ou une terre sans nom sur cette carte
+    const kind = target?.dataset.kind;
+    if (st.layer === 'capitals') nudge(ctx, 'Touche une étoile sur la carte !');
+    else if (water) nudge(ctx, kind === 'land' ? 'Là, c’est la terre. Touche la mer !' : 'Essaie encore !');
+    else if (kind === 'sea') nudge(ctx, st.layer === 'continents' ? 'Là, c’est la mer. Touche un continent !' : 'Là, c’est la mer. Touche un pays !');
+    else markWrong(ctx, { message: 'Ce n’est pas ce pays. Essaie encore !', given: 'autre pays' });
+  });
+  return { stage: h('div', { class: 'stage stage-map' }, map), zone };
+}
+
 /** Message court sous l'exercice, sans compter d'erreur. */
 function nudge(ctx, message) {
   ctx.feedback.replaceChildren(h('p', { class: 'try-again' }, message));
@@ -2226,7 +2429,10 @@ function traceZone(ctx) {
     for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
     return node;
   };
-  const what = { graphisme: 'Chemin', chiffres: `Chiffre ${glyph}`, capitales: `Lettre ${glyph}`, cursive: `Lettre ${glyph} attachée` }[set];
+  const what = {
+    graphisme: 'Chemin', chiffres: `Chiffre ${glyph}`, capitales: `Lettre ${glyph}`, cursive: `Lettre ${glyph} attachée`,
+    nombres: `Nombre ${glyph}`, attache: `« ${glyph} » en attaché`,
+  }[set];
   const svg = el('svg', {
     viewBox: `${TRACE_VIEW.x} ${TRACE_VIEW.x} ${TRACE_VIEW.size} ${TRACE_VIEW.size}`,
     class: `trace-drawing trace-${set}`, role: 'img', 'aria-label': `${what} à tracer`,
@@ -2689,21 +2895,60 @@ function orderZone(ctx) {
 
 // ---- Labyrinthe : glisser le doigt, toucher une case, ou les flèches
 
+/**
+ * Les objets à ramasser (des clés) avant d'atteindre l'arrivée d'un labyrinthe : l'arrivée est
+ * fermée (🔒) tant qu'il en reste. `solve(a, b)` donne le chemin de a à b.
+ */
+function mazeKeys(ctx, { items = [], goal, locked }, solve) {
+  const left = new Set(items);
+  let saidAt = 0;
+  return {
+    left,
+    /** L'arrivée est-elle encore fermée ? (on le dit, mais pas à chaque mouvement du doigt) */
+    blocked(target) {
+      if (target !== goal || !left.size) return false;
+      if (Date.now() - saidAt > 3000) {
+        saidAt = Date.now();
+        ctx.feedback.replaceChildren(h('p', { class: 'try-again' }, locked));
+        say(ctx.session.guide, locked);
+      }
+      return true;
+    },
+    /** La case atteinte a-t-elle une clé ? Renvoie vrai si on vient de la ramasser. */
+    collect(cell) {
+      if (!left.delete(cell)) return false;
+      playSound('tap');
+      if (!left.size) ctx.feedback.replaceChildren();
+      return true;
+    },
+    /** La prochaine étape : la clé la plus proche, ou l'arrivée quand on les a toutes. */
+    pathFrom(pos) {
+      const paths = [...left].map((c) => solve(pos, c));
+      return paths.length ? paths.reduce((a, b) => (b.length < a.length ? b : a)) : solve(pos, goal);
+    },
+  };
+}
+
 function mazeZone(ctx) {
   const { q } = ctx;
-  const { cols, rows, open, start, goal, hero, goalEmoji } = q.stage;
+  const { cols, rows, open, start, goal, hero, goalEmoji, items = [], itemEmoji } = q.stage;
   let pos = start;
+  const keys = mazeKeys(ctx, q.stage, (a, b) => solveMaze(open, cols, a, b));
   const cells = open.map((bits, i) => h('div', {
     class: ['maze-cell', ...['n', 'e', 's', 'w'].filter((_, k) => !(bits & (1 << k))).map((d) => `wall-${d}`)].join(' '),
     'data-cell': i,
   }));
   cells[goal].append(h('span', { class: 'maze-goal', 'aria-hidden': 'true' }, goalEmoji));
+  const lock = items.length ? h('span', { class: 'maze-lock', 'aria-hidden': 'true' }, '🔒') : null;
+  if (lock) cells[goal].append(lock);
+  const itemEls = new Map(items.map((c) => [c, h('span', { class: 'maze-item', 'aria-hidden': 'true' }, itemEmoji)]));
+  for (const [c, el] of itemEls) cells[c].append(el);
   cells[start].classList.add('maze-start');
   const heroEl = h('span', { class: 'maze-hero', 'aria-hidden': 'true' }, hero);
   const grid = h('div', {
     class: 'maze',
     role: 'img',
-    'aria-label': `Labyrinthe de ${cols} cases sur ${rows}`,
+    'aria-label': `Labyrinthe de ${cols} cases sur ${rows}${items.length ? `, avec ${items.length} clés à ramasser` : ''}`,
     style: { '--cols': cols, '--rows': rows },
   }, cells);
   const place = () => {
@@ -2717,10 +2962,18 @@ function mazeZone(ctx) {
   };
   const moveTo = (target) => {
     if (ctx.session.locked || !canMove(open, cols, pos, target)) return false;
+    if (keys.blocked(target)) {
+      bump();
+      return false;
+    }
     cells[pos].classList.add('trail');
     pos = target;
     place();
     cells[pos].classList.remove('hint');
+    if (keys.collect(pos)) {
+      itemEls.get(pos).remove();
+      if (!keys.left.size) lock?.remove();
+    }
     if (pos === goal) {
       grid.classList.add('solved');
       zone.classList.add('answered');
@@ -2762,17 +3015,210 @@ function mazeZone(ctx) {
     'aria-label': label,
     onclick: () => { if (!moveTo(pos + delta)) bump(); },
   }, symbol);
-  // L'indice montre les 3 prochaines cases ; il compte comme une aide (pas d'étoile « du premier coup »).
+  // L'indice montre les 3 prochaines cases (vers la clé la plus proche, s'il en reste) ;
+  // il compte comme une aide (pas d'étoile « du premier coup »).
   const hint = () => {
     if (ctx.session.locked) return;
     ctx.session.attempts++;
-    solveMaze(open, cols, pos, goal).slice(1, 4).forEach((c) => cells[c].classList.add('hint'));
+    keys.pathFrom(pos).slice(1, 4).forEach((c) => cells[c].classList.add('hint'));
     say(ctx.session.guide, 'Suis les étoiles !');
   };
   const zone = h('div', { class: 'choices maze-controls' },
     arrow('Gauche', '←', -1), arrow('Haut', '↑', -cols), arrow('Bas', '↓', cols), arrow('Droite', '→', 1),
     h('button', { class: 'maze-arrow maze-hint', 'aria-label': 'Indice', onclick: hint }, '💡'));
   return { stage: h('div', { class: 'stage stage-maze' }, grid), zone };
+}
+
+// ---- Labyrinthe rond : des anneaux découpés en cases ; glisser le doigt ou toucher une case
+
+function roundMazeZone(ctx) {
+  const { q } = ctx;
+  const { sectors, links, start, goal, door, hero, goalEmoji, items = [], itemEmoji } = q.stage;
+  const rings = sectors.length - 1;
+  const offsets = ringOffsets(sectors);
+  const T = 10; // épaisseur d'un anneau (et rayon de la case du centre), en unités du dessin
+  const R = (rings + 1) * T;
+  const V = R + 2; // marge pour le trait du bord
+  const linked = (a, b) => links[a].includes(b);
+  const solve = (a, b) => solveLinks(links, a, b);
+  const keys = mazeKeys(ctx, q.stage, solve);
+  let pos = start;
+
+  // géométrie : angle en fraction de tour, depuis midi, dans le sens des aiguilles d'une montre
+  const point = (rho, a) => [rho * Math.sin(2 * Math.PI * a), -rho * Math.cos(2 * Math.PI * a)];
+  const f = (n) => n.toFixed(2);
+  const arc = (rho, a0, a1) => {
+    const [x0, y0] = point(rho, a0);
+    const [x1, y1] = point(rho, a1);
+    return `M${f(x0)} ${f(y0)}A${rho} ${rho} 0 ${a1 - a0 > 0.5 ? 1 : 0} 1 ${f(x1)} ${f(y1)}`;
+  };
+  const radial = (rho0, rho1, a) => {
+    const [x0, y0] = point(rho0, a);
+    const [x1, y1] = point(rho1, a);
+    return `M${f(x0)} ${f(y0)}L${f(x1)} ${f(y1)}`;
+  };
+  const ringOf = (cell) => polarCell(sectors, cell);
+  const centreOf = (cell) => {
+    const { ring, index } = ringOf(cell);
+    return ring ? point((ring + 0.5) * T, (index + 0.5) / sectors[ring]) : [0, 0];
+  };
+
+  // les murs : pour chaque case, le mur côté centre et le mur suivant dans le sens des aiguilles
+  let walls = '';
+  for (let r = 1; r <= rings; r++) {
+    const s = sectors[r];
+    for (let i = 0; i < s; i++) {
+      const cell = offsets[r] + i;
+      const inner = offsets[r - 1] + Math.floor((i * sectors[r - 1]) / s);
+      if (!linked(cell, inner)) walls += arc(r * T, i / s, (i + 1) / s);
+      if (!linked(cell, offsets[r] + ((i + 1) % s))) walls += radial(r * T, (r + 1) * T, (i + 1) / s);
+      // le bord, ouvert devant l'entrée (ou la sortie)
+      if (r === rings && cell !== door) walls += arc(R, i / s, (i + 1) / s);
+    }
+  }
+  const svgEl = (tag, attrs) => {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  };
+  const svg = svgEl('svg', { class: 'rmaze-svg', viewBox: `${-V} ${-V} ${2 * V} ${2 * V}`, 'aria-hidden': 'true' });
+  const trail = svgEl('g', { class: 'rmaze-trail' });
+  const hints = svgEl('g', { class: 'rmaze-hints' });
+  svg.append(
+    svgEl('circle', { class: 'rmaze-floor', r: R }),
+    svgEl('circle', { class: 'rmaze-centre', r: T }),
+    trail, hints,
+    svgEl('path', { class: 'rmaze-walls', d: walls }),
+  );
+  // le personnage, l'arrivée et les clés : des émojis posés par-dessus le dessin
+  const at = (el, cell) => {
+    const [x, y] = centreOf(cell);
+    el.style.left = `${((x + V) / (2 * V)) * 100}%`;
+    el.style.top = `${((y + V) / (2 * V)) * 100}%`;
+    return el;
+  };
+  const token = (cls, emoji, cell) => at(h('span', { class: `rmaze-token ${cls}`, 'aria-hidden': 'true' }, emoji), cell);
+  const heroEl = token('rmaze-hero', hero, start);
+  const lock = items.length ? token('rmaze-lock', '🔒', goal) : null;
+  const itemEls = new Map(items.map((c) => [c, token('rmaze-item', itemEmoji, c)]));
+  const board = h('div', {
+    class: 'rmaze',
+    role: 'img',
+    'aria-label': `Labyrinthe rond de ${rings} anneaux${items.length ? ', avec une clé à ramasser' : ''}`,
+    style: { '--cell': (100 * T) / (2 * V) },
+  }, svg, token('rmaze-goal', goalEmoji, goal), lock, [...itemEls.values()], heroEl);
+
+  const bump = () => {
+    heroEl.classList.remove('bump');
+    void heroEl.offsetWidth; // relance l'animation
+    heroEl.classList.add('bump');
+  };
+  const clearHint = (cell) => hints.querySelectorAll(`[data-cell="${cell}"]`).forEach((n) => n.remove());
+  const moveTo = (target) => {
+    if (ctx.session.locked || !linked(pos, target)) return false;
+    if (keys.blocked(target)) {
+      bump();
+      return false;
+    }
+    const [x, y] = centreOf(pos);
+    trail.append(svgEl('circle', { cx: f(x), cy: f(y), r: T * 0.16 }));
+    pos = target;
+    at(heroEl, pos);
+    clearHint(pos);
+    if (keys.collect(pos)) {
+      itemEls.get(pos).remove();
+      if (!keys.left.size) lock?.remove();
+    }
+    if (pos === goal) {
+      board.classList.add('solved');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+    }
+    return true;
+  };
+  // Les cases entre deux cases « en ligne droite » : le long d'un anneau (dans un sens ou dans
+  // l'autre), ou le long d'un rayon. null si elles ne sont pas alignées.
+  const straightLine = (from, to) => {
+    const a = ringOf(from);
+    const b = ringOf(to);
+    if (a.ring === b.ring) {
+      const s = sectors[a.ring];
+      const lines = [1, -1].map((dir) => {
+        const cells = [from];
+        for (let i = a.index; i !== b.index;) {
+          i = (i + dir + s) % s;
+          cells.push(offsets[a.ring] + i);
+        }
+        return cells;
+      }).filter((cells) => cells.every((c, k) => !k || linked(cells[k - 1], c)));
+      return lines.sort((x, y) => x.length - y.length)[0] || null;
+    }
+    // le long d'un rayon : l'angle de la case la plus éloignée du centre
+    const outer = a.ring > b.ring ? a : b;
+    const angle = (outer.index + 0.5) / sectors[outer.ring];
+    const step = b.ring > a.ring ? 1 : -1;
+    const cells = [];
+    for (let r = a.ring; r !== b.ring + step; r += step) cells.push(offsets[r] + Math.floor(angle * sectors[r]));
+    return cells[0] === from && cells.at(-1) === to ? cells : null;
+  };
+  // Toucher une case : on y va si elle est en ligne droite sans mur ; en glissant le doigt, on suit
+  // aussi le chemin s'il fait un coude (3 pas au plus), pour ne pas rester bloqué si le doigt va vite.
+  const slideTo = (target, quiet = false) => {
+    if (target === pos) return;
+    let cells = straightLine(pos, target);
+    if (cells && !cells.every((c, k) => !k || linked(cells[k - 1], c))) cells = null;
+    if (!cells && quiet) {
+      const path = solve(pos, target);
+      if (path.length && path.length <= 4) cells = path;
+    }
+    if (!cells) return quiet ? null : bump();
+    for (const c of cells.slice(1)) if (!moveTo(c)) break;
+  };
+  const cellAt = (e) => {
+    const rect = svg.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 * V - V;
+    const y = ((e.clientY - rect.top) / rect.height) * 2 * V - V;
+    const rho = Math.hypot(x, y);
+    let ring = Math.floor(rho / T);
+    if (ring > rings) {
+      if (rho > R + T / 2) return null;
+      ring = rings; // juste au bord : la case du bord
+    }
+    if (ring === 0) return 0;
+    const angle = ((Math.atan2(x, -y) / (2 * Math.PI)) + 1) % 1;
+    return offsets[ring] + (Math.floor(angle * sectors[ring]) % sectors[ring]);
+  };
+  let dragging = false;
+  board.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    dragging = true;
+    board.setPointerCapture?.(e.pointerId);
+    const cell = cellAt(e);
+    if (cell !== null) slideTo(cell);
+  });
+  board.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const cell = cellAt(e);
+    if (cell !== null) slideTo(cell, true);
+  });
+  for (const type of ['pointerup', 'pointercancel']) board.addEventListener(type, () => { dragging = false; });
+
+  // L'indice montre les 3 prochaines cases ; il compte comme une aide (pas d'étoile « du premier coup »).
+  const hint = () => {
+    if (ctx.session.locked) return;
+    ctx.session.attempts++;
+    for (const c of keys.pathFrom(pos).slice(1, 4)) {
+      clearHint(c);
+      const [x, y] = centreOf(c);
+      const star = svgEl('text', { x: f(x), y: f(y), 'data-cell': c, 'font-size': T * 0.55 });
+      star.textContent = '⭐';
+      hints.append(star);
+    }
+    say(ctx.session.guide, 'Suis les étoiles !');
+  };
+  const zone = h('div', { class: 'choices rmaze-controls' },
+    h('button', { class: 'maze-arrow maze-hint', 'aria-label': 'Indice', onclick: hint }, '💡'));
+  return { stage: h('div', { class: 'stage stage-maze stage-rmaze' }, board), zone };
 }
 
 // ---- Chemin des nombres ou des lettres : toucher les cases dans l'ordre

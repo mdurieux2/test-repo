@@ -1,7 +1,7 @@
 // Jeux de lecture. Chaque `generate(level, rng)` renvoie une question décrite
 // uniquement par des données ; l'affichage est fait par js/render.js.
 
-import { pick, sample, shuffle } from '../random.js';
+import { pick, randInt, sample, shuffle } from '../random.js';
 import { pickForLevel, similarWords, textChoices } from './helpers.js';
 import {
   CLUSTER_SOUNDS, FINAL_SOUNDS, FIRST_SOUNDS, PICTURES, READING_WORDS, SIGHT_WORDS, SYLLABLE_LEVELS, SYLLABLE_SPEECH,
@@ -63,20 +63,90 @@ function soundChoice(rng, level) {
   };
 }
 
+// Niveau 7 : des consonnes qui se ressemblent à l'oreille (la gorge vibre, ou non).
+const CLOSE_SOUNDS = [['p', 'b'], ['t', 'd'], ['f', 'v'], ['ch', 'j'], ['s', 'z'], ['c', 'g']];
+
+/** Niveau 7 : le premier son, avec toujours son « jumeau » parmi les choix (vache : f ou v ?). */
+function closeSound(rng) {
+  const pair = pick(rng, CLOSE_SOUNDS);
+  const grapheme = pick(rng, pair);
+  const twin = pair.find((g) => g !== grapheme);
+  const word = pick(rng, FIRST_SOUNDS.find((s) => s.grapheme === grapheme).words);
+  const others = CLOSE_SOUNDS.flat().filter((g) => !pair.includes(g) && !word.startsWith(g));
+  const choices = shuffle(rng, [grapheme, twin, ...sample(rng, others, 2)]);
+  const sound = { text: word, rate: SLOW };
+  return {
+    key: `premier-son:proche:${word}`,
+    text: 'Quel son entends-tu au début du mot ?',
+    instruction: ['Attention, des sons se ressemblent ! Quel son entends-tu au début du mot…', sound],
+    short: { key: 'premier-son:proche', text: 'Le premier son ?', speak: [sound] },
+    replay: [sound],
+    stage: { type: 'picture', emoji: PICTURES[word] },
+    choices: textChoices(choices),
+    choiceStyle: 'letters',
+    answer: grapheme,
+    success: { speak: word, reveal: word, highlight: grapheme.length },
+  };
+}
+
+// Niveau 8 : où entend-on le son ? Chaque mot contient ce son une seule fois.
+const PLACES = ['au début', 'au milieu', 'à la fin'];
+const SOUND_PLACES = [
+  { sound: 'a', words: [
+    ['avion', 'abeille', 'arbre'],
+    ['lapin', 'sapin', 'cadeau', 'radio', 'cactus', 'tracteur', 'girafe', 'tomate', 'glace', 'piano', 'cheval'],
+    ['chat', 'rat'],
+  ] },
+  { sound: 'o', words: [
+    ['os', 'orange', 'olive', 'ordinateur'],
+    ['tomate', 'cochon', 'koala', 'pomme', 'gorille'],
+    ['vélo', 'piano', 'judo', 'radio', 'bateau', 'gâteau', 'cadeau', 'chapeau', 'château', 'escargot'],
+  ] },
+  { sound: 'ou', words: [
+    ['ours'],
+    ['mouton', 'poule', 'mouche', 'souris', 'fourmi'],
+    ['loup', 'hibou'],
+  ] },
+];
+const SOUND_PICTURES = { ours: '🐻' };
+
+/** Niveau 8 : entend-on le son au début, au milieu ou à la fin du mot ? */
+function soundPlace(rng) {
+  const { sound, words } = pick(rng, SOUND_PLACES);
+  const place = randInt(rng, 0, 2);
+  const word = pick(rng, words[place]);
+  const said = { text: word, rate: SLOW };
+  return {
+    key: `premier-son:place:${sound}:${word}`,
+    text: `Où entends-tu « ${sound} » dans ce mot ?`,
+    instruction: [`Où entends-tu le son « ${sound} » dans le mot…`, said],
+    short: { key: `premier-son:place:${sound}`, text: `Où est « ${sound} » ?`, speak: [said] },
+    replay: [said],
+    stage: { type: 'picture', emoji: PICTURES[word] || SOUND_PICTURES[word] },
+    choices: textChoices(PLACES),
+    choiceStyle: 'words',
+    answer: PLACES[place],
+    success: { speak: `${word} : on entend « ${sound} » ${PLACES[place]} !` },
+  };
+}
+
 export const premierSon = {
   id: 'premier-son',
   domain: 'francais',
   section: 'Lettres et sons',
   title: 'Le premier son',
   icon: '👂',
-  skill: "Entendre le premier son d'un mot (et le dernier) et l'associer à sa lettre",
+  skill: "Entendre le premier son d'un mot (et le dernier), l'associer à sa lettre, le situer dans le mot",
   levels: [
     'Voyelles et l, m, r, s', 'Ajout de v, f, p, t, n, b, d', 'Ajout de ch, c, g, j, z',
     'De la lettre à l’image', 'Le son de la fin', 'Deux consonnes : tr, fl…',
+    'Sons proches : p/b, f/v…', 'Début, milieu ou fin ?',
   ],
   generate(level, rng) {
     if (level === 4) return letterToPicture(rng);
-    if (level >= 5) return soundChoice(rng, level);
+    if (level === 5 || level === 6) return soundChoice(rng, level);
+    if (level === 7) return closeSound(rng);
+    if (level === 8) return soundPlace(rng);
     const target = pickForLevel(rng, FIRST_SOUNDS, level);
     const word = pick(rng, target.words);
     const choiceCount = level >= 3 ? 4 : 3;
@@ -183,21 +253,87 @@ function writeSyllable(rng) {
   };
 }
 
+// Niveau 7 : des mots de deux syllabes écrites, sans lettre muette ni « eau » (lire la syllabe, pas l'orthographe).
+const TWO_SYLLABLE_WORDS = [
+  ['mo', 'to'], ['vé', 'lo'], ['ju', 'do'], ['ca', 'fé'], ['la', 'ma'], ['pan', 'da'], ['la', 'pin'], ['sa', 'pin'],
+  ['ro', 'bot'], ['me', 'lon'], ['bal', 'lon'], ['mou', 'ton'], ['co', 'chon'], ['ca', 'nard'], ['re', 'nard'],
+  ['hi', 'bou'], ['dra', 'gon'], ['ci', 'tron'], ['rai', 'sin'], ['re', 'quin'], ['dau', 'phin'], ['mai', 'son'],
+];
+// Des mots (ou presque) qu'on écrirait avec un intrus : jamais proposés (« sa… » + « lon » = salon).
+const NOT_A_TRAP = new Set(['salon', 'sabot', 'salo', 'colon', 'copin', 'raison', 'véto']);
+
+/** Niveau 7 : le mot est dit, son début est écrit (« la… ») : quelle syllabe manque à la fin ? */
+function finalSyllable(rng) {
+  const [stem, end] = pick(rng, TWO_SYLLABLE_WORDS);
+  const word = stem + end;
+  const words = new Set([...TWO_SYLLABLE_WORDS.map((w) => w.join('')), ...NOT_A_TRAP]);
+  const pool = [...new Set(TWO_SYLLABLE_WORDS.map((w) => w[1]))].filter((s) => s !== end && !words.has(stem + s));
+  const choices = shuffle(rng, [end, ...similarWords(rng, end, pool, 3)]);
+  const sound = { text: word, rate: SLOW };
+  return {
+    key: `syllabes:fin:${word}`,
+    text: 'Quelle syllabe manque à la fin du mot ?',
+    instruction: ['Écoute le mot :', sound, 'Quelle syllabe manque à la fin ?'],
+    short: { key: 'syllabes:fin', text: 'La syllabe de la fin ?', speak: [sound] },
+    replay: [sound],
+    stage: { type: 'word', text: `${stem}…` },
+    choices: textChoices(choices),
+    choiceStyle: 'words', // jusqu'à 4 lettres par syllabe : 2 × 2 cases, sinon ça déborde sur 360 px
+    answer: end,
+    success: { speak: sound, reveal: word },
+  };
+}
+
+// Niveau 8 : des mots de trois syllabes écrites, toutes différentes.
+const THREE_SYLLABLE_WORDS = [
+  ['pa', 'pil', 'lon'], ['pan', 'ta', 'lon'], ['es', 'car', 'got'], ['é', 'lé', 'phant'], ['ba', 'na', 'ne'],
+  ['sa', 'la', 'de'], ['to', 'ma', 'te'], ['ca', 'na', 'pé'], ['do', 'mi', 'no'], ['ma', 'ga', 'sin'],
+  ['pi', 'ja', 'ma'], ['ca', 'ra', 'mel'], ['é', 'co', 'le'], ['ro', 'bi', 'net'], ['cho', 'co', 'lat'],
+  ['a', 'na', 'nas'],
+];
+
+/** Niveau 8 : écrire un mot de trois syllabes en touchant ses syllabes dans l'ordre. */
+function writeWord(rng) {
+  const parts = pick(rng, THREE_SYLLABLE_WORDS);
+  const word = parts.join('');
+  let order = shuffle(rng, parts.map((_, i) => i));
+  if (order.every((v, i) => v === i)) order = [...order.slice(1), order[0]]; // jamais déjà dans l'ordre
+  const sound = { text: word, rate: SLOW };
+  return {
+    key: `syllabes:mot:${word}`,
+    interaction: 'order',
+    text: 'Écris le mot : touche les syllabes dans l’ordre.',
+    instruction: ['Écris le mot :', sound, 'Touche les syllabes dans l’ordre.'],
+    short: { key: 'syllabes:mot', text: 'Écris le mot.', speak: [sound] },
+    replay: [sound],
+    stage: PICTURES[word] ? { type: 'picture', emoji: PICTURES[word] } : { type: 'listen' },
+    items: order.map((i) => ({ value: i, label: parts[i] })),
+    order: 'asc',
+    sign: '',
+    choices: [],
+    answer: word,
+    success: { speak: sound, reveal: word },
+  };
+}
+
 export const syllabes = {
   id: 'syllabes',
   domain: 'francais',
   section: 'Lettres et sons',
   title: 'Les syllabes',
   icon: '🧩',
-  skill: 'Associer une syllabe entendue à son écriture (l + a = la), puis l’écrire',
+  skill: 'Associer une syllabe entendue à son écriture (l + a = la), puis écrire syllabes et mots',
   levels: [
     'l, m, r, s avec a, i, o, u', 'Plus de consonnes, et le é', 'Avec ou, on, an, in, oi',
     'Syllabes inversées (al)', 'Avec tr, pl, cr, fl…', 'Écris la syllabe',
+    'La syllabe de la fin', 'Écris le mot en syllabes',
   ],
   generate(level, rng) {
     if (level === 4) return reversedSyllable(rng);
     if (level === 5) return clusterSyllable(rng);
     if (level === 6) return writeSyllable(rng);
+    if (level === 7) return finalSyllable(rng);
+    if (level === 8) return writeWord(rng);
     const { consonants, vowels } = SYLLABLE_LEVELS[level];
     const c = pick(rng, consonants);
     const v = pick(rng, vowels);
@@ -292,18 +428,94 @@ function wordStudy(rng, level) {
   };
 }
 
+// Niveau 7 : la lettre muette de la fin, qu'on entend dans un mot de la même famille (chat → chaton).
+const SILENT_LETTERS = [
+  { word: 'chat', wrongs: ['cha', 'chas'], family: 'chaton' },
+  { word: 'rat', wrongs: ['ra', 'rad'], family: 'raton' },
+  { word: 'dent', wrongs: ['den', 'dend'], family: 'dentiste' },
+  { word: 'renard', wrongs: ['renar', 'renart'], family: 'renarde' },
+  { word: 'bras', wrongs: ['bra', 'brat'], family: 'brassard' },
+  { word: 'lait', emoji: '🥛', wrongs: ['lai', 'lais'], family: 'laitier' },
+  { word: 'riz', emoji: '🍚', wrongs: ['ri', 'rid'], family: 'rizière' },
+  { word: 'chocolat', emoji: '🍫', wrongs: ['chocola', 'chocolas'], family: 'chocolatier' },
+  { word: 'éléphant', wrongs: ['éléphan', 'éléphand'], family: 'éléphanteau' },
+  { word: 'tricot', emoji: '🧶', wrongs: ['trico', 'tricod'], family: 'tricoter' },
+  { word: 'rond', emoji: '⭕', wrongs: ['ron', 'ront'], family: 'ronde' },
+  { word: 'serpent', wrongs: ['serpen', 'serpend'], family: 'serpentin' },
+  { word: 'galop', emoji: '🐎', wrongs: ['galo', 'galot'], family: 'galoper' },
+];
+
+/** Niveau 7 : le mot bien écrit, avec sa lettre muette à la fin. */
+function silentLetter(rng) {
+  const item = pick(rng, SILENT_LETTERS);
+  const sound = { text: item.word, rate: 0.8 };
+  return {
+    key: `bon-mot:muette:${item.word}`,
+    text: 'Quel mot est bien écrit ? Attention à la lettre muette !',
+    instruction: ['Comment s’écrit le mot :', sound, 'Attention à la lettre qu’on n’entend pas, à la fin !'],
+    short: { key: 'bon-mot:muette', text: 'La lettre muette ?', speak: [sound] },
+    replay: [sound],
+    stage: { type: 'picture', emoji: item.emoji || PICTURES[item.word] },
+    choices: textChoices(shuffle(rng, [item.word, ...item.wrongs])),
+    choiceStyle: 'words',
+    answer: item.word,
+    success: { speak: `${item.word}, ${item.family} : on entend la lettre muette dans ${item.family} !`, reveal: item.word },
+  };
+}
+
+// Niveau 8 : le mot qui regroupe les autres (mot générique). Aucun mot n'est dans deux catégories
+// (pas de « orange » ni de « rose », qui sont aussi des couleurs), ni de catégorie dans une autre.
+const CATEGORIES = [
+  { name: 'fruits', words: ['pomme', 'poire', 'banane', 'cerise', 'fraise', 'raisin', 'citron', 'abricot', 'prune'] },
+  { name: 'légumes', words: ['carotte', 'poireau', 'haricot', 'radis', 'courgette', 'chou', 'navet'] },
+  { name: 'animaux', words: ['chat', 'lion', 'vache', 'cheval', 'lapin', 'tigre', 'loup', 'renard', 'singe'] },
+  { name: 'vêtements', words: ['pantalon', 'robe', 'pull', 'jupe', 'chemise', 'manteau', 'chaussette'] },
+  { name: 'meubles', words: ['table', 'chaise', 'lit', 'armoire', 'canapé', 'buffet'] },
+  { name: 'instruments', words: ['piano', 'guitare', 'flûte', 'violon', 'tambour', 'trompette'] },
+  { name: 'couleurs', words: ['rouge', 'bleu', 'vert', 'jaune', 'violet', 'noir', 'blanc'] },
+  { name: 'véhicules', words: ['voiture', 'camion', 'vélo', 'bus', 'train', 'avion', 'bateau', 'moto'] },
+  { name: 'jours', words: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'] },
+  { name: 'saisons', words: ['été', 'hiver', 'automne', 'printemps'] },
+  { name: 'métiers', words: ['boulanger', 'pompier', 'docteur', 'facteur', 'maçon', 'coiffeur'] },
+  { name: 'outils', words: ['marteau', 'scie', 'pince', 'tournevis', 'pelle', 'râteau'] },
+  { name: 'boissons', words: ['eau', 'lait', 'jus', 'sirop', 'limonade'] },
+  { name: 'fleurs', words: ['rose', 'tulipe', 'marguerite', 'muguet', 'coquelicot'] },
+];
+
+/** Niveau 8 : « pomme, cerise, prune : ce sont des… » fruits. */
+function categoryWord(rng) {
+  const category = pick(rng, CATEGORIES);
+  const words = sample(rng, category.words, 3);
+  const others = sample(rng, CATEGORIES.filter((c) => c !== category), 2).map((c) => c.name);
+  const list = words.join(', ');
+  return {
+    key: `bon-mot:categorie:${category.name}:${words.join(',')}`,
+    text: 'Quel mot les regroupe tous ?',
+    instruction: 'Lis les trois mots. Quel mot les regroupe tous ?',
+    short: { key: 'bon-mot:categorie', text: 'Ce sont des… ?' },
+    stage: { type: 'sentence', text: `${list} : ce sont des…` },
+    choices: textChoices(shuffle(rng, [category.name, ...others])),
+    choiceStyle: 'words',
+    answer: category.name,
+    success: { speak: `${list} : ce sont des ${category.name} !` },
+  };
+}
+
 export const bonMot = {
   id: 'bon-mot',
   domain: 'francais',
   section: 'Lire',
   title: 'Le bon mot',
   icon: '📖',
-  skill: "Lire un mot et l'associer à son image ; orthographe et familles de mots",
+  skill: "Lire un mot et l'associer à son image ; orthographe, familles de mots et mots qui regroupent",
   levels: [
     'Mots simples (moto, lune…)', 'Mots avec ch, ou, on, an, in', 'Mots avec oi, ai, eau, eu…',
     'Des mots presque pareils', 'Le mot bien écrit', 'Mots de la même famille',
+    'La lettre muette', 'Le mot qui les regroupe',
   ],
   generate(level, rng) {
+    if (level === 7) return silentLetter(rng);
+    if (level === 8) return categoryWord(rng);
     if (level >= 4) return wordStudy(rng, level);
     const word = pick(rng, READING_WORDS[level]);
     const pool = [];
@@ -396,6 +608,63 @@ function opposite(rng) {
   };
 }
 
+// Niveau 7 : le mot interrogatif, trouvé grâce à la réponse : [question sans son premier mot, réponse, mot].
+const QUESTION_WORDS = ['Où', 'Quand', 'Qui', 'Pourquoi', 'Comment'];
+const QUESTIONS = [
+  ['vas-tu ?', 'À la piscine.', 'Où'], ['vas-tu ?', 'Très bien, merci !', 'Comment'],
+  ['pars-tu ?', 'Demain matin.', 'Quand'], ['a mangé le gâteau ?', 'C’est le chat.', 'Qui'],
+  ['pleures-tu ?', 'Parce que je suis tombé.', 'Pourquoi'], ['vas-tu à l’école ?', 'À vélo.', 'Comment'],
+  ['est ton cartable ?', 'Sous la table.', 'Où'], ['arrive le train ?', 'À midi.', 'Quand'],
+  ['chante si fort ?', 'C’est l’oiseau.', 'Qui'], ['ris-tu ?', 'Parce que c’est drôle.', 'Pourquoi'],
+  ['s’appelle ton chien ?', 'Il s’appelle Rex.', 'Comment'], ['habite ta mamie ?', 'À la campagne.', 'Où'],
+  ['commence l’école ?', 'En septembre.', 'Quand'], ['es-tu en retard ?', 'Parce que le bus est en panne.', 'Pourquoi'],
+];
+
+/** Niveau 7 : quel mot pour poser la question ? La réponse le dit (« À midi. » : quand ?). */
+function questionWord(rng) {
+  const [rest, reply, answer] = pick(rng, QUESTIONS);
+  const others = sample(rng, QUESTION_WORDS.filter((w) => w !== answer), 2);
+  return {
+    key: `petits-mots:question:${rest}:${reply}`,
+    text: 'Quel mot faut-il pour poser la question ?',
+    instruction: 'Lis la question et sa réponse. Quel mot faut-il pour poser la question ?',
+    short: { key: 'petits-mots:question', text: 'Quel mot pour la question ?' },
+    stage: { type: 'sentence', text: `… ${rest} — ${reply}` },
+    choices: textChoices(shuffle(rng, [answer, ...others])),
+    choiceStyle: 'words',
+    answer,
+    success: { speak: [`${answer} ${rest}`, reply] },
+  };
+}
+
+// Niveau 8 : le pronom qui remplace le sujet (genre et nombre) : [phrase, pronom].
+const PRONOUNS = ['il', 'elle', 'ils', 'elles'];
+const PRONOUN_SENTENCES = [
+  ['Le chat dort, car ___ est fatigué.', 'il'], ['La poule picore, car ___ a faim.', 'elle'],
+  ['Les garçons courent, car ___ sont en retard.', 'ils'], ['Les filles chantent, puis ___ dansent.', 'elles'],
+  ['Mamie sourit, car ___ est contente.', 'elle'], ['Papa et Léo jouent, puis ___ rangent.', 'ils'],
+  ['Lou et Mila rient, car ___ sont contentes.', 'elles'], ['Les vaches mangent, puis ___ dorment.', 'elles'],
+  ['Le bébé pleure, car ___ a faim.', 'il'], ['La maîtresse lit, et ___ sourit.', 'elle'],
+  ['Les oiseaux chantent, car ___ sont contents.', 'ils'], ['Tom et Lou jouent, car ___ sont amis.', 'ils'],
+  ['Le loup court, car ___ a peur.', 'il'], ['Les fleurs poussent, car ___ ont de l’eau.', 'elles'],
+];
+
+/** Niveau 8 : il, elle, ils ou elles ? (« Tom et Lou » : ils.) */
+function pronoun(rng) {
+  const [sentence, answer] = pick(rng, PRONOUN_SENTENCES);
+  return {
+    key: `petits-mots:pronom:${sentence}`,
+    text: 'Il, elle, ils ou elles : quel mot manque ?',
+    instruction: 'Lis la phrase. Quel petit mot faut-il : il, elle, ils, ou elles ?',
+    short: { key: 'petits-mots:pronom', text: 'il, elle, ils ou elles ?' },
+    stage: { type: 'sentence', text: sentence.replace('___', '…') },
+    choices: textChoices(PRONOUNS),
+    choiceStyle: 'words',
+    answer,
+    success: { speak: sentence.replace('___', answer) },
+  };
+}
+
 export const petitsMots = {
   id: 'petits-mots',
   domain: 'francais',
@@ -406,10 +675,13 @@ export const petitsMots = {
   levels: [
     'le, la, un, et, il…', 'dans, sur, avec, pour…', 'beaucoup, toujours, quand…',
     'Le petit mot qui manque', 'Les contraires', 'mais, car, donc, puis',
+    'Qui, où, quand, pourquoi ?', 'il, elle, ils ou elles ?',
   ],
   generate(level, rng) {
     if (level === 4 || level === 6) return missingSmallWord(rng, level);
     if (level === 5) return opposite(rng);
+    if (level === 7) return questionWord(rng);
+    if (level === 8) return pronoun(rng);
     const target = pickForLevel(rng, SIGHT_WORDS, level);
     const pool = SIGHT_WORDS.filter((w) => w.level <= level).map((w) => w.word);
     const distractors = similarWords(rng, target.word, pool, level >= 2 ? 3 : 2);
@@ -430,3 +702,9 @@ export const petitsMots = {
 };
 
 export const LECTURE_GAMES = [premierSon, syllabes, bonMot, petitsMots];
+
+/** Données des niveaux 7 et 8 (pour les tests). */
+export const LECTURE_LEVEL_DATA = {
+  CLOSE_SOUNDS, SOUND_PLACES, TWO_SYLLABLE_WORDS, THREE_SYLLABLE_WORDS, SILENT_LETTERS, CATEGORIES, QUESTIONS,
+  PRONOUN_SENTENCES,
+};

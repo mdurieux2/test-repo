@@ -28,8 +28,11 @@ const LEGACY = {
   matteo: { name: 'Matteo', spoken: 'Mattéo', look: 'garcon', grade: 'MS' },
 };
 
+// Numérotation des niveaux des jeux (voir remapLevels).
+export const LEVELS_VERSION = 2;
+
 export function defaultChild(grade = 'CP', { name = '', look = 'fille' } = {}) {
-  return { name, look, grade, stars: 0, games: {}, paliers: {}, records: {}, history: [], mistakes: [], photo: null };
+  return { name, look, grade, stars: 0, games: {}, paliers: {}, records: {}, history: [], mistakes: [], photo: null, levelsVersion: LEVELS_VERSION };
 }
 
 export function defaultStore() {
@@ -133,6 +136,28 @@ function mergeChild(id, saved) {
   };
 }
 
+// Niveaux renumérotés dans la version 1.12 : les 13 niveaux des jeux d'anglais par thèmes deviennent
+// 10 (thèmes regroupés deux par deux), le chemin des nombres passe de 11 à 10 niveaux, et les niveaux
+// faciles du sudoku sont regroupés deux par deux (place pour le 9 × 9).
+const THEMES_13_TO_10 = [1, 1, 2, 3, 4, 4, 5, 5, 6, 6, 7, 8, 9];
+const LEVEL_REMAPS = {
+  ecoute: THEMES_13_TO_10, 'lis-anglais': THEMES_13_TO_10, 'mot-anglais': THEMES_13_TO_10,
+  'relie-anglais': THEMES_13_TO_10, 'epelle-anglais': THEMES_13_TO_10,
+  'chemin-nombres': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10],
+  sudoku: [1, 2, 3, 3, 4, 4, 5, 5, 6],
+};
+
+/** Convertit les niveaux enregistrés avant la renumérotation (une seule fois par profil). */
+export function remapLevels(child, savedVersion = 1) {
+  if (savedVersion >= LEVELS_VERSION) return child;
+  const games = { ...child.games };
+  for (const [id, map] of Object.entries(LEVEL_REMAPS)) {
+    const level = games[id]?.level;
+    if (Number.isInteger(level) && level >= 1) games[id] = { ...games[id], level: map[Math.min(level, map.length) - 1] };
+  }
+  return { ...child, games, levelsVersion: LEVELS_VERSION };
+}
+
 /** Lit les données ; renvoie des valeurs par défaut si rien n'est stocké ou si les données sont abîmées. */
 export function loadStore(storage = globalThis.localStorage) {
   const base = defaultStore();
@@ -143,7 +168,7 @@ export function loadStore(storage = globalThis.localStorage) {
     if (!saved || typeof saved !== 'object') return base;
     const profiles = {};
     for (const [id, child] of Object.entries(saved.profiles && typeof saved.profiles === 'object' ? saved.profiles : {})) {
-      const merged = mergeChild(id, child);
+      const merged = mergeChild(id, child) && remapLevels(mergeChild(id, child), child.levelsVersion);
       if (merged) profiles[id] = merged;
     }
     const known = Array.isArray(saved.order) ? saved.order.filter((id) => profiles[id]) : [];

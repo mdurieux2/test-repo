@@ -90,8 +90,8 @@ function* clockQuestions(level, runs = 300) {
   for (let i = 0; i < runs; i++) yield regleHorloge.generate(level, rng, i);
 }
 
-test('règle l’horloge : 6 niveaux aux libellés courts, minutes de chaque niveau', () => {
-  assert.equal(regleHorloge.levels.length, 6);
+test('règle l’horloge : 8 niveaux aux libellés courts, minutes de chaque niveau', () => {
+  assert.equal(regleHorloge.levels.length, 8);
   for (const label of regleHorloge.levels) assert.ok([...label].length <= 26, label);
   assert.equal(findGame('regle-horloge').domain, 'temps');
   assert.equal(findGame('regle-horloge').section, 'L’heure et le calendrier');
@@ -137,7 +137,7 @@ test('défi chrono : une partie fait toujours 10 questions, quel que soit le ré
   assert.equal(questionsPerSession(findGame('tables'), undefined, 15), 15, 'les autres jeux suivent le réglage');
   assert.equal(questionsPerSession(findGame('tables'), 5, 15), 5, 'défi du jour et révisions : 5 questions');
   assert.equal(findGame('tables-chrono').domain, 'maths');
-  assert.deepEqual(levelRange('CE1', 'tables-chrono'), { min: 1, max: 6 });
+  assert.deepEqual(levelRange('CE1', 'tables-chrono'), { min: 1, max: 8 });
 });
 
 test('défi chrono : multiplications justes, au pavé, et le nombre qui manque', () => {
@@ -147,7 +147,7 @@ test('défi chrono : multiplications justes, au pavé, et le nombre qui manque',
       const q = tablesChrono.generate(level, rng, i);
       assert.equal(q.interaction, 'keypad');
       assert.ok(String(q.answer).length <= q.maxDigits, q.key);
-      if (level < 6) {
+      if (level !== 6) {
         assert.equal(q.stage.a * q.stage.b, q.answer, q.key);
       } else {
         const [x, , y, , product] = q.stage.parts;

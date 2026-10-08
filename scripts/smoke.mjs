@@ -19,6 +19,7 @@ import { formatChrono } from '../app/js/games/chrono.js';
 import { STORY_DATA } from '../app/js/games/histoires.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
+import { stickersUnlocked } from '../app/js/rewards.js';
 import { STORAGE_KEY } from '../app/js/storage.js';
 import { APP } from '../app/js/config.js';
 import { seasonOf } from '../app/js/themes.js';
@@ -425,6 +426,26 @@ async function answer(page, q, wrongFirst) {
       if (wrongFirst) await page.click('.maze-hint');
       for (const cell of q.stage.solution.slice(1)) await page.click(`.maze-cell[data-cell="${cell}"]`);
       break;
+    case 'roundmaze': {
+      // labyrinthe rond : on glisse le doigt de case en case (centre de chaque case, d'après le dessin)
+      if (wrongFirst) await page.click('.maze-hint');
+      const { sectors, solution } = q.stage;
+      const box = await page.locator('.rmaze-svg').boundingBox();
+      const V = sectors.length * 10 + 2; // comme dans main.js : centre et anneaux de 10, marge de 2
+      const centre = (cell) => {
+        let ring = 0;
+        let first = 0;
+        while (first + sectors[ring] <= cell) first += sectors[ring++];
+        const a = 2 * Math.PI * ((cell - first + 0.5) / sectors[ring]);
+        const rho = ring ? (ring + 0.5) * 10 : 0;
+        return [box.x + ((rho * Math.sin(a) + V) / (2 * V)) * box.width, box.y + ((V - rho * Math.cos(a)) / (2 * V)) * box.height];
+      };
+      await page.mouse.move(...centre(solution[0]));
+      await page.mouse.down();
+      for (const cell of solution.slice(1)) await page.mouse.move(...centre(cell), { steps: 2 });
+      await page.mouse.up();
+      break;
+    }
     case 'path': {
       const { path, cells } = q.stage;
       if (wrongFirst) {
@@ -472,6 +493,33 @@ async function answer(page, q, wrongFirst) {
       }
       for (const cell of q.stage.solution) await page.click(`.sym-cell[data-cell="${cell}"]`);
       await page.click('.sym-zone .validate-btn');
+      break;
+    }
+    case 'picross': {
+      const { solution, given, cols } = q.stage;
+      if (wrongFirst) {
+        await page.click('.picross-zone .validate-btn'); // rien de colorié : il manque des cases
+        await page.waitForSelector('.try-again');
+      }
+      // une ligne d'un seul geste (le doigt glisse sur les cases), le reste case par case
+      const todo = solution.filter((c) => !given.includes(c));
+      const run = todo.filter((c) => Math.floor(c / cols) === Math.floor(todo[0] / cols));
+      const contiguous = run.every((c, k) => !k || c === run[k - 1] + 1);
+      if (!wrongFirst && run.length >= 2 && contiguous) {
+        const box = async (c) => {
+          const r = await page.locator(`.pc-cell[data-cell="${c}"]`).boundingBox();
+          return [r.x + r.width / 2, r.y + r.height / 2];
+        };
+        await page.mouse.move(...await box(run[0]));
+        await page.mouse.down();
+        await page.mouse.move(...await box(run.at(-1)), { steps: 3 * run.length });
+        await page.mouse.up();
+        const painted = await page.locator('.pc-cell.on').count();
+        if (painted !== given.length + run.length) fail(`dessin caché : ${painted - given.length} cases coloriées d’un geste au lieu de ${run.length}`);
+      }
+      for (const cell of todo) {
+        if (!(await page.locator(`.pc-cell[data-cell="${cell}"].on`).count())) await page.click(`.pc-cell[data-cell="${cell}"]`);
+      }
       break;
     }
     case 'sudoku': {
@@ -547,6 +595,16 @@ async function answer(page, q, wrongFirst) {
         await page.click(`.magic-color[data-color="${z.c}"]`);
         await page.locator(`.magic-zone[data-zone="${i}"]`).dispatchEvent('click');
       }
+      break;
+    }
+    case 'map': {
+      // la carte du monde : une autre zone d'abord (son nom s'affiche), puis la bonne
+      const zone = (id) => page.locator(`.world-map [data-zone="${id}"] >> nth=0`);
+      if (wrongFirst) {
+        await zone(q.choices.find((c) => c.value !== q.answer).value).dispatchEvent('click');
+        await page.waitForSelector('.try-again');
+      }
+      await zone(q.answer).dispatchEvent('click');
       break;
     }
     case 'dots': {
@@ -890,10 +948,10 @@ if ((await page.textContent('.level-badge')) !== 'Niv. 4') fail('le niveau chois
 if ((await page.evaluate(() => globalThis.__lc.question.stage.count)) < 10) fail('compter niveau 4 : moins de 10 objets');
 console.log('✔ choix direct du niveau');
 
-// album : 2 étoiles par partie, un autocollant toutes les 5 étoiles
+// album : 2 étoiles par partie, un autocollant toutes les 5 étoiles (l'album en compte 30 au plus)
 await goProfile(page);
 await page.click('.domain-album');
-const expected = Math.floor((GAMES.length * 2 + extraStars) / 5);
+const expected = stickersUnlocked(GAMES.length * 2 + extraStars);
 const unlocked = await page.locator('.sticker:not(.locked)').count();
 if (unlocked !== expected) fail(`${unlocked} autocollants au lieu de ${expected}`);
 console.log(`✔ album : ${unlocked} autocollants`);

@@ -1,6 +1,7 @@
 // Histoires lues à voix haute en karaoké : le mot lu s'allume. Puis une question.
 // Niveau 1 : écouter (réponses en images) ; niveaux 2 et 3 : lire en suivant ; niveau 4 :
-// deviner ce qui n'est pas dit ; niveau 5 : 6 phrases ; niveau 6 : remettre les images dans l'ordre.
+// deviner ce qui n'est pas dit ; niveau 5 : 6 phrases ; niveau 6 : remettre les images dans l'ordre ;
+// niveau 7 : le sens d'un mot ; niveau 8 : vrai, faux, ou l'histoire ne le dit pas.
 // Chaque histoire a un identifiant stable (`id`) : un parent peut l'enregistrer de sa voix
 // (recordings.js), et l'enregistrement remplace alors la voix de synthèse.
 
@@ -121,7 +122,39 @@ const STORIES = [
     question: 'Qui regarde Maya ?', answer: '🐿️', others: ['🐻', '🦉'] },
   { id: 'pomme-papi', season: 'automne', level: 6, title: 'La pomme de papi', emoji: '🍎', sentences: ['Le pommier de papi est en fleurs.', 'Une petite pomme verte pousse.', 'Elle grandit tout l’été.', 'En automne, elle est toute rouge !'],
     steps: [['🌸', 'les fleurs'], ['🍏', 'la pomme verte'], ['🍎', 'la pomme rouge']] },
+
+  // ---- Niveau 7 : le sens d'un mot nouveau, deviné grâce à l'histoire (vocabulaire)
+  { id: 'bonnet-perdu', level: 7, title: 'Le bonnet perdu', emoji: '🧣', sentences: ['Il neige et Paul a perdu son bonnet.', 'Dans la cour, il grelotte.', 'Son amie Inès lui prête son écharpe.', 'Paul se sent tout de suite mieux.'],
+    question: 'Que veut dire « il grelotte » ?', answer: 'il tremble de froid', others: ['il chante fort', 'il court vite'] },
+  { id: 'gros-orage', level: 7, title: 'Le gros orage', emoji: '⛈️', sentences: ['Le ciel devient tout noir.', 'Un éclair traverse le ciel, puis le tonnerre gronde.', 'Le petit chat est terrifié.', 'Il file se cacher sous le lit.'],
+    question: 'Que veut dire « terrifié » ?', answer: 'il a très peur', others: ['il est très content', 'il a très faim'] },
+  { id: 'soupe-mamie', level: 7, title: 'La soupe de mamie', emoji: '🥣', sentences: ['Mamie sert une soupe de légumes.', 'Attention, elle est brûlante !', 'Léo souffle doucement sur sa cuillère.', 'Puis il la boit à petites gorgées.'],
+    question: 'Que veut dire « brûlante » ?', answer: 'très chaude', others: ['très froide', 'très sucrée'] },
+  { id: 'grand-menage', level: 7, title: 'Le grand ménage', emoji: '🧹', sentences: ['Samedi, toute la famille range la maison.', 'Lou passe le balai et papa lave les vitres.', 'Le soir, tout le monde est épuisé.', 'Ils s’endorment très vite !'],
+    question: 'Que veut dire « épuisé » ?', answer: 'très fatigué', others: ['très sale', 'très joyeux'] },
+  { id: 'provisions-ecureuil', level: 7, title: 'Les provisions', emoji: '🐿️', sentences: ['En automne, l’écureuil ramasse des noisettes.', 'Il les cache dans le creux d’un arbre.', 'Ce sont ses provisions pour l’hiver.', 'Quand il fera froid, il aura de quoi manger.'],
+    question: 'Que sont des « provisions » ?', answer: 'de la nourriture', others: ['des jouets', 'des vêtements'] },
+  { id: 'secret-zoe', level: 7, title: 'Le secret', emoji: '🤫', sentences: ['Zoé a un secret pour son amie Léna.', 'Elle se penche vers elle et lui chuchote quelque chose.', 'Personne d’autre ne peut entendre.', 'Léna sourit.'],
+    question: 'Que veut dire « chuchoter » ?', answer: 'parler tout bas', others: ['crier très fort', 'chanter'] },
+
+  // ---- Niveau 8 : vrai, faux, ou l'histoire ne le dit pas ? (la question est une phrase à juger)
+  { id: 'rex-balle', level: 8, title: 'Rex et la balle', emoji: '🐕', sentences: ['Rex est le chien de Malik.', 'Chaque soir, ils jouent à la balle dans le jardin.', 'Ce soir, la balle passe par-dessus la haie.', 'Rex va la chercher chez la voisine.'],
+    question: 'Rex et Malik jouent le matin.', answer: 'faux', others: ['vrai', 'on ne sait pas'] },
+  { id: 'piscine-jade', level: 8, title: 'À la piscine', emoji: '🏊', sentences: ['Mercredi, Jade va à la piscine avec son père.', 'Elle met ses lunettes et saute dans l’eau.', 'Elle nage jusqu’au bout du bassin.', 'Son père l’applaudit.'],
+    question: 'Jade sait nager.', answer: 'vrai', others: ['faux', 'on ne sait pas'] },
+  { id: 'gouter-lea', level: 8, title: 'Le goûter de Léa', emoji: '🍪', sentences: ['À quatre heures, Léa ouvre son sac.', 'Elle a des biscuits et une pomme.', 'Elle partage ses biscuits avec Sami.', 'Sami lui dit merci.'],
+    question: 'Sami aime les pommes.', answer: 'on ne sait pas', others: ['vrai', 'faux'] },
+  { id: 'train-papi', level: 8, title: 'Le train de papi', emoji: '🚂', sentences: ['Papi offre un petit train à Hugo.', 'Le train a trois wagons rouges.', 'Hugo construit un grand circuit dans sa chambre.', 'Le train fait le tour du lit !'],
+    question: 'Le train a trois wagons.', answer: 'vrai', others: ['faux', 'on ne sait pas'] },
+  { id: 'dessin-nina', level: 8, title: 'Le dessin de Nina', emoji: '🎨', sentences: ['En classe, Nina dessine une maison.', 'Elle peint le toit en rouge et la porte en bleu.', 'La maîtresse accroche le dessin au mur.'],
+    question: 'La porte de la maison est rouge.', answer: 'faux', others: ['vrai', 'on ne sait pas'] },
+  { id: 'sans-roulettes', level: 8, title: 'Sans les roulettes', emoji: '🚲', sentences: ['Aujourd’hui, Adam enlève les roulettes de son vélo.', 'Maman tient la selle, puis elle la lâche.', 'Adam roule tout seul jusqu’au portail !'],
+    question: 'Le vélo d’Adam est bleu.', answer: 'on ne sait pas', others: ['vrai', 'faux'] },
 ];
+
+/** Niveau 8 : les trois réponses, toujours dans le même ordre. */
+const TRUE_FALSE = ['vrai', 'faux', 'on ne sait pas'];
+const TRUE_FALSE_QUESTION = 'Vrai, faux, ou on ne sait pas ?';
 
 /** Le décor d'une histoire : titre, image, phrases, et son identifiant (voix enregistrée). */
 function storyStage(story) {
@@ -149,6 +182,23 @@ function orderStory(rng, story) {
   };
 }
 
+/** Niveau 8 : la phrase est-elle vraie, fausse, ou l'histoire ne le dit-elle pas ? */
+function trueFalseStory(story) {
+  const { answer } = story;
+  return {
+    key: `histoires:${story.title}`,
+    karaoke: true,
+    text: `${story.question} ${TRUE_FALSE_QUESTION}`,
+    instruction: [story.question, TRUE_FALSE_QUESTION],
+    replay: [story.question, TRUE_FALSE_QUESTION],
+    stage: storyStage(story),
+    choices: TRUE_FALSE.map((o) => ({ value: o, label: o })),
+    choiceStyle: 'answers',
+    answer,
+    success: { speak: answer === 'on ne sait pas' ? 'Bravo, l’histoire ne le dit pas !' : `C’est ${answer}, bravo !` },
+  };
+}
+
 export const histoires = {
   id: 'histoires',
   domain: 'francais',
@@ -156,11 +206,15 @@ export const histoires = {
   title: 'Histoires lues',
   icon: '📖',
   skill: 'Écouter et suivre une histoire lue (karaoké), la comprendre et la raconter dans l’ordre',
-  levels: ['Écoute une histoire', 'Lis en suivant', 'Histoires plus longues', 'Pourquoi ? (inférence)', 'Histoires en 6 phrases', 'Remets dans l’ordre'],
+  levels: [
+    'Écoute une histoire', 'Lis en suivant', 'Histoires plus longues', 'Pourquoi ? (inférence)', 'Histoires en 6 phrases',
+    'Remets dans l’ordre', 'Le sens des mots', 'Vrai, faux, on ne sait pas',
+  ],
   // context.season : la saison du moment (seasonOf), pour les histoires de saison
   generate(level, rng, _index, context = {}) {
     const story = pickSeasonal(rng, STORIES.filter((s) => s.level === level), context.season);
     if (level === 6) return orderStory(rng, story);
+    if (level === 8) return trueFalseStory(story);
     const pictures = level === 1;
     const options = shuffle(rng, [story.answer, ...story.others]);
     return {

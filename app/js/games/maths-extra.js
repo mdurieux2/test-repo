@@ -92,6 +92,68 @@ function shapeCount(rng) {
   };
 }
 
+// Niveau 7 : des objets de tous les jours qui ont la forme d'un rond, d'un carré, d'un triangle, d'un rectangle.
+export const SHAPE_OBJECTS = {
+  rond: [
+    { emoji: '⚽', name: 'le ballon' }, { emoji: '🍪', name: 'le biscuit' }, { emoji: '🍩', name: 'le beignet' },
+    { emoji: '🎯', name: 'la cible' }, { emoji: '🌕', name: 'la pleine lune' },
+  ],
+  carré: [{ emoji: '🧇', name: 'la gaufre' }, { emoji: '🎁', name: 'le cadeau' }, { emoji: '🧊', name: 'le glaçon' }],
+  triangle: [{ emoji: '🍕', name: 'la part de pizza' }, { emoji: '⛺', name: 'la tente' }, { emoji: '📐', name: 'l’équerre' }],
+  rectangle: [
+    { emoji: '🚪', name: 'la porte' }, { emoji: '📱', name: 'le téléphone' }, { emoji: '🍫', name: 'la tablette de chocolat' },
+    { emoji: '💵', name: 'le billet' },
+  ],
+};
+// Formes qu'on pourrait confondre sur un objet (une gaufre presque carrée…) : jamais proposées ensemble.
+const SHAPE_LOOKALIKE = { carré: 'rectangle', rectangle: 'carré' };
+const SHAPE_A = { rond: 'un rond', carré: 'un carré', triangle: 'un triangle', rectangle: 'un rectangle' };
+
+/** Niveau 7 : à quelle forme ressemble cet objet ? */
+function shapeObject(rng) {
+  const shape = pick(rng, Object.keys(SHAPE_OBJECTS));
+  const object = pick(rng, SHAPE_OBJECTS[shape]);
+  const others = ['rond', 'carré', 'triangle', 'rectangle', 'étoile'].filter((s) => s !== shape && s !== SHAPE_LOOKALIKE[shape]);
+  const options = shuffle(rng, [shape, ...sample(rng, others, 3)]);
+  return {
+    key: `formes:objet:${object.emoji}:${options.join('')}`,
+    text: 'À quelle forme ressemble cet objet ?',
+    instruction: 'Regarde bien l’objet. À quelle forme ressemble-t-il ? Touche la forme.',
+    short: { key: 'formes:objet', text: 'À quelle forme ressemble-t-il ?' },
+    stage: { type: 'picture', emoji: object.emoji },
+    choices: options.map((s) => ({ value: s, shape: s, color: pick(rng, COLORS) })),
+    choiceStyle: 'pictures',
+    answer: shape,
+    success: { speak: `Oui ! ${object.name[0].toUpperCase()}${object.name.slice(1)} ressemble à ${SHAPE_A[shape]}.` },
+  };
+}
+
+// Niveau 8 : devinettes à deux indices ; la forme « presque juste » (qui ne respecte qu'un indice)
+// est toujours parmi les choix.
+export const SHAPE_RIDDLES_2 = [
+  { text: 'la forme qui a 4 côtés, mais pas tous pareils', answer: 'rectangle', near: 'carré', others: ['rond', 'triangle', 'étoile'] },
+  { text: 'la forme qui a des côtés, mais moins de 4', answer: 'triangle', near: 'rond', others: ['carré', 'rectangle', 'étoile'] },
+  { text: 'la forme toute arrondie, avec une pointe', answer: 'cœur', near: 'rond', others: ['triangle', 'carré', 'étoile'] },
+  { text: 'la forme toute arrondie, sans pointe', answer: 'rond', near: 'cœur', others: ['triangle', 'carré', 'étoile'] },
+  { text: 'la forme qui a plus de 4 pointes', answer: 'étoile', near: 'carré', others: ['rond', 'triangle', 'cœur'] },
+];
+
+/** Niveau 8 : trouver la forme qui respecte deux indices. */
+function shapeRiddle2(rng) {
+  const riddle = pick(rng, SHAPE_RIDDLES_2);
+  const options = shuffle(rng, [riddle.answer, riddle.near, ...sample(rng, riddle.others, 2)]);
+  return {
+    key: `formes:indices:${riddle.answer}:${options.join('')}`,
+    text: `Touche ${riddle.text}.`,
+    instruction: `Écoute bien les deux indices. Touche ${riddle.text}.`,
+    stage: { type: 'none' },
+    choices: options.map((s) => ({ value: s, shape: s, color: pick(rng, COLORS) })),
+    choiceStyle: 'pictures',
+    answer: riddle.answer,
+    success: { speak: `Oui, c’est ${SHAPE_ARTICLE[riddle.answer]} !` },
+  };
+}
+
 export const formes = {
   id: 'formes',
   domain: 'maths',
@@ -99,11 +161,16 @@ export const formes = {
   title: 'Les formes',
   icon: '🔺',
   skill: 'Reconnaître et nommer les formes',
-  levels: ['Rond, carré, triangle', 'Avec le rectangle', 'Formes et couleurs mélangées', 'Combien de côtés ?', 'Côtés et pointes', 'Compte les formes'],
+  levels: [
+    'Rond, carré, triangle', 'Avec le rectangle', 'Formes et couleurs mélangées', 'Combien de côtés ?', 'Côtés et pointes',
+    'Compte les formes', 'Les formes autour de moi', 'Devinettes à deux indices',
+  ],
   generate(level, rng) {
     if (level === 4) return shapeSides(rng);
     if (level === 5) return shapeRiddle(rng);
     if (level === 6) return shapeCount(rng);
+    if (level === 7) return shapeObject(rng);
+    if (level === 8) return shapeRiddle2(rng);
     const pool = SHAPES_BY_LEVEL[level];
     const target = pick(rng, pool);
     const options = shuffle(rng, [target, ...sample(rng, pool.filter((s) => s !== target), level === 1 ? 2 : 3)]);
@@ -340,7 +407,8 @@ export const tables = {
 
 const COUNT_EMOJI = ['🍎', '⭐', '🐟', '🌸', '🍓', '🐞', '⚽', '🐥'];
 
-// Niveaux 4 à 6 : on compte, puis on relie au nombre qui a un de plus, au double, au complément à 10.
+// Niveaux 4 à 8 : on compte, puis on relie au nombre qui a un de plus, au double, au complément
+// à 10, au nombre qui a un de moins, à la moitié (des collections paires, de 2 à 10).
 export const RELIER_RULES = {
   4: {
     from: [1, 9], to: (n) => n + 1, key: 'plus',
@@ -354,6 +422,14 @@ export const RELIER_RULES = {
     from: [1, 9], to: (n) => 10 - n, key: 'dix',
     text: 'Relie chaque groupe au nombre qui manque pour faire 10.', short: 'Pour faire 10 !',
   },
+  7: {
+    from: [2, 10], to: (n) => n - 1, key: 'moins',
+    text: 'Relie chaque groupe au nombre qui a un de moins.', short: 'Un de moins !',
+  },
+  8: {
+    from: [2, 10], step: 2, to: (n) => n / 2, key: 'moitie',
+    text: 'Relie chaque groupe à sa moitié.', short: 'La moitié !',
+  },
 };
 
 export const relier = {
@@ -363,12 +439,13 @@ export const relier = {
   title: 'Relie les quantités',
   icon: '🔗',
   skill: 'Associer une quantité et son chiffre',
-  levels: ['De 1 à 4', 'De 1 à 6', 'De 1 à 10', 'Un de plus', 'Le double', 'Pour faire 10'],
+  levels: ['De 1 à 4', 'De 1 à 6', 'De 1 à 10', 'Un de plus', 'Le double', 'Pour faire 10', 'Un de moins', 'La moitié'],
   generate(level, rng) {
     const rule = RELIER_RULES[level];
     if (rule) {
       const [lo, hi] = rule.from;
-      const numbers = sample(rng, Array.from({ length: hi - lo + 1 }, (_, i) => lo + i), 4);
+      const step = rule.step || 1;
+      const numbers = sample(rng, Array.from({ length: Math.floor((hi - lo) / step) + 1 }, (_, i) => lo + i * step), 4);
       const emoji = pick(rng, COUNT_EMOJI);
       return {
         key: `relier:${rule.key}:${numbers.join('-')}`,
@@ -969,6 +1046,69 @@ function calcIntrus(rng) {
   };
 }
 
+/** Un calcul de dizaines (« 30 + 40 », « 90 − 20 ») qui donne `result` (de 20 à 100). */
+function tensCalcFor(rng, result) {
+  const r = result / 10;
+  if (r === 10 || rng() < 0.5) {
+    const a = randInt(rng, 1, r - 1);
+    return `${10 * a} + ${10 * (r - a)}`;
+  }
+  const b = randInt(rng, 1, 10 - r);
+  return `${10 * (r + b)} − ${10 * b}`;
+}
+
+/** Niveau 7 : trois calculs de dizaines ont le même résultat ; l'intrus fait 10 de plus ou de moins. */
+function tensIntrus(rng) {
+  const result = 10 * randInt(rng, 4, 10);
+  const group = new Set();
+  while (group.size < 3) group.add(tensCalcFor(rng, result));
+  const odd = tensCalcFor(rng, result === 100 ? 90 : result + pick(rng, [-10, 10]));
+  return {
+    key: `intrus:dizaines:${[...group].join(',')}:${odd}`,
+    text: 'Trouve le calcul intrus.',
+    instruction: 'Trois calculs donnent le même résultat. Trouve le calcul intrus. Pense aux dizaines !',
+    short: { key: 'intrus:calculs', text: 'Trouve le calcul intrus.' },
+    stage: { type: 'none' },
+    choices: shuffle(rng, [...group, odd]).map((c) => ({ value: c, label: c })),
+    choiceStyle: 'words',
+    answer: odd,
+    success: { speak: `Oui ! Les autres font ${result}.` },
+  };
+}
+
+/** Les écritures d'un produit des tables : « 3 × 4 », « 4 × 3 », « 4 + 4 + 4 » (3 nombres au plus, pour tenir). */
+export function productWritings(result) {
+  const out = [];
+  for (let a = 2; a <= 10; a++) {
+    if (result % a || result / a < 2 || result / a > 10) continue;
+    const b = result / a;
+    out.push(`${a} × ${b}`);
+    if (a <= 3) out.push(Array(a).fill(b).join(' + '));
+  }
+  return out;
+}
+
+/** Niveau 8 : trois écritures (fois, ou additions répétées) font le même nombre, pas la quatrième. */
+function productIntrus(rng) {
+  const result = pick(rng, [6, 8, 10, 12, 15, 16, 18, 20]);
+  const group = sample(rng, productWritings(result), 3);
+  // l'intrus : un nombre voisin qui s'écrit aussi en « fois » (12 → 10, 14, 15…)
+  const near = [-3, -2, -1, 1, 2, 3].map((d) => result + d).filter((n) => productWritings(n).length);
+  const other = pick(rng, near);
+  const odd = pick(rng, productWritings(other));
+  return {
+    key: `intrus:fois:${group.join(',')}:${odd}`,
+    text: 'Trouve le calcul intrus.',
+    instruction: 'Trois calculs donnent le même nombre. Trouve le calcul intrus.',
+    short: { key: 'intrus:calculs', text: 'Trouve le calcul intrus.' },
+    stage: { type: 'none' },
+    choices: shuffle(rng, [...group, odd]).map((c) => ({ value: c, label: c })),
+    choiceStyle: 'words',
+    answer: odd,
+    success: { speak: `Oui ! Les autres font ${result}.` },
+  };
+}
+
 export const intrus = {
   id: 'intrus',
   domain: 'maths',
@@ -976,8 +1116,13 @@ export const intrus = {
   title: 'L’intrus',
   icon: '🕵️',
   skill: 'Trouver l’intrus : classer, comparer, raisonner',
-  levels: ['Familles très différentes', 'Familles proches', 'Formes de toutes les couleurs', 'L’intrus des mots', 'L’intrus des nombres', 'L’intrus des calculs'],
+  levels: [
+    'Familles très différentes', 'Familles proches', 'Formes de toutes les couleurs', 'L’intrus des mots', 'L’intrus des nombres',
+    'L’intrus des calculs', 'Calculs avec des dizaines', 'Plus et fois mélangés',
+  ],
   generate(level, rng) {
+    if (level === 7) return tensIntrus(rng);
+    if (level === 8) return productIntrus(rng);
     if (level === 4) {
       const [fam, other] = sample(rng, WORD_FAMILIES, 2);
       const group = sample(rng, fam.words, 3);
@@ -1054,8 +1199,58 @@ const ORIENTATION_ASK = {
   couche: { text: 'Quelle ombre est couchée sur le côté ?', speak: 'Oui, elle est couchée sur le côté !' },
 };
 
-/** Niveaux 4 à 6 : ombres qui se ressemblent, positions à nommer, l'ombre qui n'est pas tournée comme les autres. */
+// Niveau 8 : des images tournées d'un côté (un miroir les change), par paires qui se ressemblent.
+export const SHADOW_LOOKALIKES = [
+  ['🐄', '🐖', '🐑', '🐐', '🐎', '🐕', '🐈'],
+  ['🦕', '🦖', '🦒', '🐘'],
+  ['🐌', '🐢', '🦔', '🐿️'],
+  ['🐓', '🦆', '🦜', '🐦'],
+];
+
+/**
+ * Niveaux 4 à 8 : ombres qui se ressemblent, positions à nommer, l'ombre qui n'est pas tournée
+ * comme les autres, ombres toutes tournées (il faut reconnaître l'image), même image et même sens.
+ */
 function ombresBeyond(level, rng) {
+  if (level === 7) {
+    // les quatre ombres sont tournées pareil (miroir, tête en bas, couchée) : laquelle est l'image ?
+    const options = sample(rng, pick(rng, SHADOW_FAMILIES), 4);
+    const target = options[0];
+    const turn = pick(rng, ORIENTATIONS.slice(1));
+    return {
+      key: `ombres:tournees:${target}:${turn.value}:${options.join('')}`,
+      text: 'Quelle est son ombre ?',
+      instruction: 'Attention, les ombres sont tournées ! Touche l’ombre de l’image.',
+      short: { key: 'ombres:tournees', text: 'Quelle est son ombre ?' },
+      stage: { type: 'picture', emoji: target },
+      choices: shuffle(rng, options).map((e) => ({ value: e, shadow: e, transform: turn.transform, name: 'ombre' })),
+      choiceStyle: 'pictures',
+      answer: target,
+      success: { speak: 'Bravo, tu l’as reconnue même tournée !' },
+    };
+  }
+  if (level === 8) {
+    // la bonne image dans le bon sens, la bonne image tournée, une image voisine dans les deux sens
+    const [target, lookalike] = sample(rng, pick(rng, SHADOW_LOOKALIKES), 2);
+    const turn = pick(rng, ORIENTATIONS.slice(1));
+    const options = [
+      { value: 'juste', shadow: target, transform: 'none' },
+      { value: 'tournee', shadow: target, transform: turn.transform },
+      { value: 'voisine', shadow: lookalike, transform: 'none' },
+      { value: 'voisine-tournee', shadow: lookalike, transform: turn.transform },
+    ];
+    return {
+      key: `ombres:exacte:${target}:${lookalike}:${turn.value}`,
+      text: 'Quelle ombre est la même, dans le même sens ?',
+      instruction: 'Regarde bien l’image. Touche son ombre : la même image, tournée dans le même sens.',
+      short: { key: 'ombres:exacte', text: 'Même image, même sens ?' },
+      stage: { type: 'picture', emoji: target },
+      choices: shuffle(rng, options).map((o) => ({ ...o, name: 'ombre' })),
+      choiceStyle: 'pictures',
+      answer: 'juste',
+      success: { speak: 'Oui, c’est la même image, dans le même sens !' },
+    };
+  }
   if (level === 4) {
     const options = sample(rng, pick(rng, SHADOW_FAMILIES), 4);
     const target = options[0];
@@ -1108,7 +1303,10 @@ export const ombres = {
   title: 'Les ombres',
   icon: '👤',
   skill: 'Reconnaître une forme, repérer l’orientation (droite, gauche, à l’envers)',
-  levels: ['Trouve l’ombre (3 ombres)', 'Trouve l’ombre (4 animaux)', 'Dans le bon sens', 'Ombres qui se ressemblent', 'Miroir, couché, à l’envers', 'L’intrus des ombres'],
+  levels: [
+    'Trouve l’ombre (3 ombres)', 'Trouve l’ombre (4 animaux)', 'Dans le bon sens', 'Ombres qui se ressemblent',
+    'Miroir, couché, à l’envers', 'L’intrus des ombres', 'Ombres tournées', 'Même image, même sens',
+  ],
   generate(level, rng) {
     if (level >= 4) return ombresBeyond(level, rng);
     if (level === 3) {
@@ -1144,16 +1342,22 @@ export const ombres = {
 
 // ---------------------------------------------------------------- Sudoku
 
+// Niveaux 1 à 7 : les anciens niveaux 1 à 9 regroupés (3 et 4 → 3, 5 et 6 → 4, 7 et 8 → 5, 9 → 6).
+// Puis des grilles plus dures : 6 × 6 avec 10 indices seulement, et le vrai 9 × 9 (carrés de 3 × 3)
+// avec de moins en moins d'indices : 41, 33, puis 25.
+// « logic » : la grille se résout sans jamais deviner (case à un seul symbole possible, ou seul
+// endroit possible d'un symbole dans une ligne, une colonne ou un carré).
 const SUDOKU_LEVELS = [
-  { label: '4 × 4 avec des images, 4 cases', size: 4, holes: 4, pictures: true },
-  { label: '4 × 4 avec des images, 7 cases', size: 4, holes: 7, pictures: true },
-  { label: '4 × 4 avec des chiffres, 6 cases', size: 4, holes: 6 },
-  { label: '4 × 4 avec des chiffres, 10 cases', size: 4, holes: 10 },
-  { label: '6 × 6 avec des chiffres, 12 cases', size: 6, holes: 12 },
-  { label: '6 × 6 avec des chiffres, 18 cases', size: 6, holes: 18 },
-  { label: '6 × 6 avec des images', size: 6, holes: 20, pictures: true },
-  { label: '6 × 6 avec des lettres', size: 6, holes: 22, letters: true },
-  { label: '6 × 6 expert, 24 cases', size: 6, holes: 24 },
+  { label: '4 × 4 en images, 4 cases', size: 4, holes: 4, pictures: true },
+  { label: '4 × 4 en images, 7 cases', size: 4, holes: 7, pictures: true },
+  { label: '4 × 4 chiffres, 8 cases', size: 4, holes: 8 },
+  { label: '6 × 6 chiffres, 15 cases', size: 6, holes: 15 },
+  { label: '6 × 6 images ou lettres', size: 6, holes: 21, logic: true, mixed: true },
+  { label: '6 × 6 expert, 24 cases', size: 6, holes: 24, logic: true },
+  { label: '6 × 6 très dur, 26 cases', size: 6, holes: 26, logic: true },
+  { label: '9 × 9, 40 cases', size: 9, holes: 40, logic: true },
+  { label: '9 × 9, 48 cases', size: 9, holes: 48, logic: true },
+  { label: '9 × 9 expert, 56 cases', size: 9, holes: 56, logic: true },
 ];
 const SUDOKU_PICTURES = [['🍎', '🍌', '🍇', '🍓'], ['🐶', '🐱', '🐰', '🐻'], ['🚗', '🚲', '🚂', '✈️'], ['⭐', '🌙', '☀️', '☁️']];
 const SUDOKU_PICTURES_6 = [
@@ -1162,57 +1366,120 @@ const SUDOKU_PICTURES_6 = [
 ];
 const range = (n) => Array.from({ length: n }, (_, i) => i);
 
+/** Taille des carrés : 2 × 2 (grille de 4), 2 lignes × 3 colonnes (grille de 6), 3 × 3 (grille de 9). */
+export function sudokuBox(size) {
+  if (size === 4) return [2, 2];
+  if (size === 9) return [3, 3];
+  return [2, 3];
+}
+
+// Les symboles sont des bits (symbole v → 1 << v) : « ce qui est déjà pris » dans une ligne,
+// une colonne ou un carré tient dans un seul nombre. C'est ce qui rend le 9 × 9 rapide.
+const ONES = Array.from({ length: 512 }, (_, m) => {
+  let n = 0;
+  for (let x = m; x; x &= x - 1) n++;
+  return n;
+});
+const bitIndex = (bit) => 31 - Math.clz32(bit);
+
+/** Pour chaque taille (calculé une fois) : ligne, colonne et carré de chaque case, et les unités. */
+const GEOMETRY = new Map();
+function geometry(size) {
+  if (!GEOMETRY.has(size)) {
+    const [br, bc] = sudokuBox(size);
+    const cells = range(size * size);
+    const row = cells.map((i) => Math.floor(i / size));
+    const col = cells.map((i) => i % size);
+    const box = cells.map((i) => Math.floor(row[i] / br) * (size / bc) + Math.floor(col[i] / bc));
+    const units = [
+      ...range(size).map((r) => cells.filter((i) => row[i] === r)),
+      ...range(size).map((c) => cells.filter((i) => col[i] === c)),
+      ...range(size).map((b) => cells.filter((i) => box[i] === b)),
+    ];
+    GEOMETRY.set(size, { row, col, box, units, full: (1 << size) - 1 });
+  }
+  return GEOMETRY.get(size);
+}
+
+/** Ce qui est pris dans chaque ligne, colonne et carré ; null si un symbole est en double. */
+function takenMasks(grid, size) {
+  const g = geometry(size);
+  const rows = new Array(size).fill(0);
+  const cols = new Array(size).fill(0);
+  const boxes = new Array(size).fill(0);
+  for (let i = 0; i < grid.length; i++) {
+    if (grid[i] === null) continue;
+    const bit = 1 << grid[i];
+    if ((rows[g.row[i]] | cols[g.col[i]] | boxes[g.box[i]]) & bit) return null;
+    rows[g.row[i]] |= bit;
+    cols[g.col[i]] |= bit;
+    boxes[g.box[i]] |= bit;
+  }
+  return { g, rows, cols, boxes };
+}
+
 /**
- * La grille se résout-elle sans essayer au hasard ? On remplit seulement les cases où un
- * seul symbole est possible, ou le seul endroit possible d'un symbole dans une ligne,
- * une colonne ou un carré. (Pour les grilles les plus dures : on ne doit jamais deviner.)
+ * Résout la grille sans essayer au hasard : on remplit seulement les cases où un seul symbole
+ * est possible, ou le seul endroit possible d'un symbole dans une ligne, une colonne ou un carré.
+ * Renvoie la grille remplie, ou null si on reste bloqué. Chaque déduction est forcée : si la
+ * grille se remplit ainsi, sa solution est forcément unique.
  */
-export function solvesBySingles(puzzle, size) {
+function fillBySingles(puzzle, size) {
   const grid = [...puzzle];
-  const [br, bc] = sudokuBox(size);
-  const units = [
-    ...range(size).map((r) => range(size).map((c) => r * size + c)),
-    ...range(size).map((c) => range(size).map((r) => r * size + c)),
-    ...range(size / br).flatMap((by) => range(size / bc).map((bx) =>
-      range(br).flatMap((y) => range(bc).map((x) => (by * br + y) * size + bx * bc + x)))),
-  ];
-  for (let progress = true; progress;) {
+  const taken = takenMasks(grid, size);
+  if (!taken) return null;
+  const { g, rows, cols, boxes } = taken;
+  const candidates = (i) => g.full & ~(rows[g.row[i]] | cols[g.col[i]] | boxes[g.box[i]]);
+  const place = (i, bit) => {
+    grid[i] = bitIndex(bit);
+    rows[g.row[i]] |= bit;
+    cols[g.col[i]] |= bit;
+    boxes[g.box[i]] |= bit;
+  };
+  let empty = grid.filter((v) => v === null).length;
+  for (let progress = true; progress && empty > 0;) {
     progress = false;
-    grid.forEach((v, cell) => {
-      if (v !== null) return;
-      const options = range(size).filter((s) => sudokuAllows(grid, size, cell, s));
-      if (options.length === 1) {
-        grid[cell] = options[0];
+    for (let i = 0; i < grid.length; i++) {
+      if (grid[i] !== null) continue;
+      const c = candidates(i);
+      if (c === 0) return null;
+      if ((c & (c - 1)) === 0) {
+        place(i, c);
+        empty--;
         progress = true;
       }
-    });
-    for (const unit of units) {
-      for (let s = 0; s < size; s++) {
-        if (unit.some((cell) => grid[cell] === s)) continue;
-        const spots = unit.filter((cell) => grid[cell] === null && sudokuAllows(grid, size, cell, s));
-        if (spots.length === 1) {
-          grid[spots[0]] = s;
-          progress = true;
+    }
+    for (const unit of g.units) {
+      // once : symboles possibles dans au moins une case vide ; twice : dans au moins deux
+      let once = 0;
+      let twice = 0;
+      let placed = 0;
+      for (const i of unit) {
+        if (grid[i] !== null) {
+          placed |= 1 << grid[i];
+          continue;
         }
+        const c = candidates(i);
+        twice |= once & c;
+        once |= c;
+      }
+      if ((once | placed) !== g.full) return null; // un symbole n'a plus aucune place
+      for (let only = once & ~twice & ~placed; only; only &= only - 1) {
+        const bit = only & -only;
+        const i = unit.find((k) => grid[k] === null && candidates(k) & bit);
+        if (i === undefined) return null;
+        place(i, bit);
+        empty--;
+        progress = true;
       }
     }
   }
-  return !grid.includes(null);
+  return empty === 0 ? grid : null;
 }
 
-/** Taille des carrés : 2 × 2 pour une grille de 4, 2 lignes × 3 colonnes pour une grille de 6. */
-export function sudokuBox(size) {
-  return size === 4 ? [2, 2] : [2, 3];
-}
-
-/** Une grille pleine et juste (valeurs 0…size-1), mélangée à partir d'un motif de base. */
-export function sudokuGrid(rng, size) {
-  const [br, bc] = sudokuBox(size);
-  const base = (r, c) => (bc * (r % br) + Math.floor(r / br) + c) % size;
-  const rows = shuffle(rng, range(size / br)).flatMap((band) => shuffle(rng, range(br)).map((i) => band * br + i));
-  const cols = shuffle(rng, range(size / bc)).flatMap((stack) => shuffle(rng, range(bc)).map((i) => stack * bc + i));
-  const symbols = shuffle(rng, range(size));
-  return rows.flatMap((r) => cols.map((c) => symbols[base(r, c)]));
+/** La grille se résout-elle sans jamais deviner ? (Pour les grilles les plus dures.) */
+export function solvesBySingles(puzzle, size) {
+  return fillBySingles(puzzle, size) !== null;
 }
 
 /** Peut-on poser cette valeur dans cette case (ligne, colonne, carré) ? */
@@ -1229,40 +1496,117 @@ export function sudokuAllows(grid, size, cell, value) {
   return true;
 }
 
-/** Nombre de solutions (on s'arrête à 2) : une grille d'enfant doit n'en avoir qu'une. */
+/**
+ * Nombre de solutions (on s'arrête à `limit`) : une grille d'enfant doit n'en avoir qu'une.
+ * Essais et retours en arrière, en commençant toujours par la case qui a le moins de possibilités.
+ */
 export function countSolutions(puzzle, size, limit = 2) {
   const grid = [...puzzle];
+  const taken = takenMasks(grid, size);
+  if (!taken) return 0;
+  const { g, rows, cols, boxes } = taken;
   let count = 0;
   const solve = () => {
-    const cell = grid.indexOf(null);
-    if (cell === -1) {
+    let best = -1;
+    let bestCandidates = 0;
+    let bestCount = size + 1;
+    for (let i = 0; i < grid.length; i++) {
+      if (grid[i] !== null) continue;
+      const c = g.full & ~(rows[g.row[i]] | cols[g.col[i]] | boxes[g.box[i]]);
+      if (ONES[c] < bestCount) {
+        best = i;
+        bestCandidates = c;
+        bestCount = ONES[c];
+        if (bestCount <= 1) break;
+      }
+    }
+    if (best === -1) {
       count++;
       return;
     }
-    for (let v = 0; v < size && count < limit; v++) {
-      if (!sudokuAllows(grid, size, cell, v)) continue;
-      grid[cell] = v;
+    const [r, c, b] = [g.row[best], g.col[best], g.box[best]];
+    for (let m = bestCandidates; m && count < limit; m &= m - 1) {
+      const bit = m & -m;
+      grid[best] = bitIndex(bit);
+      rows[r] |= bit;
+      cols[c] |= bit;
+      boxes[b] |= bit;
       solve();
-      grid[cell] = null;
+      rows[r] &= ~bit;
+      cols[c] &= ~bit;
+      boxes[b] &= ~bit;
+      grid[best] = null;
     }
   };
   solve();
   return count;
 }
 
-export function makeSudoku(rng, size, holes) {
-  for (;;) {
+/**
+ * Une grille pleine et juste (valeurs 0…size-1). 4 × 4 et 6 × 6 : mélangée à partir d'un motif
+ * de base. 9 × 9 : remplie case par case dans un ordre de symboles tiré au hasard (plus variée).
+ */
+export function sudokuGrid(rng, size) {
+  if (size === 9) return randomFullGrid(rng, size);
+  const [br, bc] = sudokuBox(size);
+  const base = (r, c) => (bc * (r % br) + Math.floor(r / br) + c) % size;
+  const rows = shuffle(rng, range(size / br)).flatMap((band) => shuffle(rng, range(br)).map((i) => band * br + i));
+  const cols = shuffle(rng, range(size / bc)).flatMap((stack) => shuffle(rng, range(bc)).map((i) => stack * bc + i));
+  const symbols = shuffle(rng, range(size));
+  return rows.flatMap((r) => cols.map((c) => symbols[base(r, c)]));
+}
+
+function randomFullGrid(rng, size) {
+  const grid = new Array(size * size).fill(null);
+  const { g, rows, cols, boxes } = takenMasks(grid, size);
+  const fill = (i) => {
+    if (i === grid.length) return true;
+    const [r, c, b] = [g.row[i], g.col[i], g.box[i]];
+    const free = g.full & ~(rows[r] | cols[c] | boxes[b]);
+    for (const v of shuffle(rng, range(size))) {
+      const bit = 1 << v;
+      if (!(free & bit)) continue;
+      grid[i] = v;
+      rows[r] |= bit;
+      cols[c] |= bit;
+      boxes[b] |= bit;
+      if (fill(i + 1)) return true;
+      rows[r] &= ~bit;
+      cols[c] &= ~bit;
+      boxes[b] &= ~bit;
+    }
+    grid[i] = null;
+    return false;
+  };
+  fill(0);
+  return grid;
+}
+
+/**
+ * Vide `holes` cases d'une grille pleine, une à une dans un ordre tiré au hasard, en gardant une
+ * solution unique (avec `logic` : en gardant une grille qui se résout sans deviner, ce qui
+ * garantit aussi l'unicité). Si on n'y arrive pas, on recommence avec une autre grille
+ * (au pire, après 200 essais, on garde la grille la plus vide trouvée : jamais de boucle sans fin).
+ */
+export function makeSudoku(rng, size, holes, logic = false) {
+  let best = null;
+  for (let attempt = 0; attempt < 200; attempt++) {
     const solution = sudokuGrid(rng, size);
     const puzzle = [...solution];
     let removed = 0;
     for (const cell of shuffle(rng, range(size * size))) {
       if (removed === holes) break;
       puzzle[cell] = null;
-      if (countSolutions(puzzle, size) === 1) removed++;
+      const ok = logic ? fillBySingles(puzzle, size) !== null : countSolutions(puzzle, size) === 1;
+      if (ok) removed++;
       else puzzle[cell] = solution[cell];
     }
+    // dernière vérification par le solveur complet : une seule solution, toujours
+    if (countSolutions(puzzle, size) !== 1) continue;
     if (removed === holes) return { solution, puzzle };
+    if (!best || removed > best.removed) best = { solution, puzzle, removed };
   }
+  return { solution: best.solution, puzzle: best.puzzle };
 }
 
 export const sudoku = {
@@ -1274,11 +1618,13 @@ export const sudoku = {
   skill: 'Raisonner : chaque image (ou chiffre) une seule fois par ligne, par colonne et par carré',
   levels: SUDOKU_LEVELS.map((l) => l.label),
   generate(level, rng) {
-    const { size, holes, pictures, letters } = SUDOKU_LEVELS[level - 1];
-    let grid = makeSudoku(rng, size, holes);
-    // les nouvelles grilles (niveau 7 et plus) doivent se résoudre sans deviner
-    while (level >= 7 && !solvesBySingles(grid.puzzle, size)) grid = makeSudoku(rng, size, holes);
-    const { solution, puzzle } = grid;
+    const { size, holes, logic, mixed } = SUDOKU_LEVELS[level - 1];
+    let { pictures, letters } = SUDOKU_LEVELS[level - 1];
+    if (mixed) {
+      pictures = rng() < 0.5;
+      letters = !pictures;
+    }
+    const { solution, puzzle } = makeSudoku(rng, size, holes, logic);
     let symbols = range(size).map((i) => String(i + 1));
     if (pictures) symbols = pick(rng, size === 6 ? SUDOKU_PICTURES_6 : SUDOKU_PICTURES);
     if (letters) symbols = 'ABCDEF'.slice(0, size).split('');
@@ -1297,5 +1643,6 @@ export const sudoku = {
     };
   },
 };
+
 
 export const MATHS_EXTRA_GAMES = [formes, algorithmes, intrus, ombres, sudoku, tables, relier, ranger, problemes, doubles, heure];
