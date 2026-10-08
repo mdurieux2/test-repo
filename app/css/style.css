@@ -2245,6 +2245,37 @@ body[data-season="ete"] { background: #fffbea; }
 .kid-toggle:disabled { opacity: 0.45; cursor: default; }
 .kid-games-full { margin-top: 8px; }
 
+/* espace parents : « Sons vus en classe » (textes déchiffrables ; un son coché porte un ✓, pas seulement une couleur) */
+.sons-card { display: flex; flex-direction: column; gap: 8px; }
+.sons-card h2, .sons-card p { margin: 0; }
+.sons-status { font-weight: 700; }
+.sons-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.sons-panel { border-top: 1px solid var(--line); }
+.sons-panel summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; font-weight: 700; color: var(--lecture-dark); }
+.sons-group h3 { margin: 8px 0 6px; font-size: 1rem; }
+.sons-grid { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 6px; }
+.son-chip {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; max-width: 100%; padding: 4px 12px 4px 8px;
+  border-radius: 14px; background: var(--card); color: var(--ink); text-align: left; box-shadow: inset 0 0 0 2px var(--field-line);
+}
+.son-chip.on { background: #d8f5e6; box-shadow: inset 0 0 0 3px var(--good); }
+.son-check {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+  border-radius: 6px; font-weight: 700; box-shadow: inset 0 0 0 2px var(--field-line);
+}
+.son-chip.on .son-check { background: var(--good); color: #fff; box-shadow: none; }
+.son-label { font-weight: 700; font-size: 1.05rem; overflow-wrap: anywhere; }
+.son-ex { font-size: 0.85rem; color: var(--muted); }
+.son-chip:focus-visible, .sons-outils-input:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; }
+.sons-outils-label { display: block; margin-top: 4px; font-weight: 700; }
+.sons-outils-input {
+  width: 100%; margin: 6px 0; padding: 10px 12px; border: 2px solid var(--field-line); border-radius: 12px;
+  background: var(--card); color: var(--ink); font: inherit; font-size: 1rem; resize: vertical;
+}
+.a11y-contrast .son-chip { background: #fff; box-shadow: inset 0 0 0 2px #000; }
+.a11y-contrast .son-chip.on { box-shadow: inset 0 0 0 4px #000; }
+.a11y-contrast .son-chip.on .son-check { background: #000; }
+
 /* téléphone en paysage */
 @media (orientation: landscape) and (max-height: 520px) {
   /* accueil avec des jeux conseillés : le bonjour monte dans la barre du haut, les conseils sur une ligne */

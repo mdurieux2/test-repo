@@ -3,6 +3,7 @@
 
 import { pick, randInt, sample, shuffle } from '../random.js';
 import { pickForLevel, similarWords, textChoices } from './helpers.js';
+import { estDechiffrable, garderDechiffrables as garder, sonsActifs, syllabeDechiffrable } from '../graphemes.js';
 import {
   CLUSTER_SOUNDS, FINAL_SOUNDS, FIRST_SOUNDS, PICTURES, READING_WORDS, SIGHT_WORDS, SYLLABLE_LEVELS, SYLLABLE_SPEECH,
 } from '../data/lecture-data.js';
@@ -185,6 +186,17 @@ function syllableSpeech(syllable) {
   return SYLLABLE_SPEECH[syllable] || EXTRA_SPEECH[syllable] || syllable;
 }
 
+/**
+ * Textes déchiffrables (ctx.sons) : les consonnes et les voyelles que l'enfant sait lire, s'il en reste
+ * au moins `min` de chaque ; sinon les listes entières (filtered : false).
+ */
+function syllableParts(consonants, vowels, sons, min) {
+  if (!sonsActifs(sons)) return { consonants, vowels, filtered: false };
+  const c = garder(consonants, sons, (x) => x, { min, syllabe: true });
+  const v = garder(vowels, sons, (x) => x, { min, syllabe: true });
+  return c !== consonants && v !== vowels ? { consonants: c, vowels: v, filtered: true } : { consonants, vowels, filtered: false };
+}
+
 /** Une syllabe entendue, à retrouver parmi 4 qui lui ressemblent. */
 function syllableQuestion(rng, target, distractors) {
   const choices = shuffle(rng, [target, ...distractors]);
@@ -205,8 +217,8 @@ function syllableQuestion(rng, target, distractors) {
 }
 
 /** Niveau 4 : « al », « or »… et ses pièges : la syllabe dans l'autre sens (« la »), une voisine. */
-function reversedSyllable(rng) {
-  const { consonants, vowels } = VC_SYLLABLES;
+function reversedSyllable(rng, sons) {
+  const { consonants, vowels } = syllableParts(VC_SYLLABLES.consonants, VC_SYLLABLES.vowels, sons, 2);
   const c = pick(rng, consonants);
   const v = pick(rng, vowels);
   const sameVowel = v + pick(rng, consonants.filter((x) => x !== c));
@@ -215,23 +227,30 @@ function reversedSyllable(rng) {
 }
 
 /** Niveau 5 : « tra », « pli »… ; pièges : sans la 2e consonne (« ta »), autre voyelle, autre groupe. */
-function clusterSyllable(rng) {
-  const { clusters, vowels } = CCV_SYLLABLES;
+function clusterSyllable(rng, sons) {
+  const { consonants: clusters, vowels } = syllableParts(CCV_SYLLABLES.clusters, CCV_SYLLABLES.vowels, sons, 2);
   const cc = pick(rng, clusters);
   const v = pick(rng, vowels);
   const otherVowel = cc + pick(rng, vowels.filter((x) => x !== v));
   const otherCluster = pick(rng, clusters.filter((x) => x !== cc)) + v;
-  return syllableQuestion(rng, cc + v, [cc[0] + v, otherVowel, otherCluster]);
+  // textes déchiffrables : « gi », « ci » se lisent autrement (g = j, c = s) ; on enlève alors la 1re consonne (« ri »)
+  const short = syllabeDechiffrable(cc[0] + v, sons) ? cc[0] + v : cc.slice(1) + v;
+  return syllableQuestion(rng, cc + v, [short, otherVowel, otherCluster]);
 }
 
 /** Niveau 6 : écrire la syllabe entendue en touchant ses lettres dans l'ordre. */
-function writeSyllable(rng) {
+function writeSyllable(rng, sons) {
   let target;
-  if (rng() < 0.5) {
-    const { consonants, vowels } = SYLLABLE_LEVELS[3];
+  // textes déchiffrables : les syllabes que l'enfant sait lire (l'autre forme si l'une n'en a aucune)
+  const simple = syllableParts(SYLLABLE_LEVELS[3].consonants, SYLLABLE_LEVELS[3].vowels, sons, 1);
+  const cluster = syllableParts(CCV_SYLLABLES.clusters, CCV_SYLLABLES.vowels, sons, 1);
+  const first = rng() < 0.5;
+  const useSimple = sonsActifs(sons) && simple.filtered !== cluster.filtered ? simple.filtered : first;
+  if (useSimple) {
+    const { consonants, vowels } = simple;
     target = pick(rng, consonants) + pick(rng, vowels);
   } else {
-    target = pick(rng, CCV_SYLLABLES.clusters) + pick(rng, CCV_SYLLABLES.vowels);
+    target = pick(rng, cluster.consonants) + pick(rng, cluster.vowels);
   }
   const letters = target.split('');
   let order = shuffle(rng, letters.map((_, i) => i));
@@ -265,11 +284,21 @@ const TWO_SYLLABLE_WORDS = [
 const NOT_A_TRAP = new Set(['salon', 'sabot', 'salo', 'colon', 'copin', 'raison', 'véto']);
 
 /** Niveau 7 : le mot est dit, son début est écrit (« la… ») : quelle syllabe manque à la fin ? */
-function finalSyllable(rng) {
-  const [stem, end] = pick(rng, TWO_SYLLABLE_WORDS);
+function finalSyllable(rng, sons) {
+  // textes déchiffrables : des mots et des syllabes que l'enfant sait lire (s'il y en a assez)
+  let list = garder(TWO_SYLLABLE_WORDS, sons, (w) => w.join(''), { min: 4 });
+  let endings = [...new Set(list.map((w) => w[1]))];
+  if (list !== TWO_SYLLABLE_WORDS) {
+    const known = garder(endings, sons, (x) => x, { min: 5, syllabe: true });
+    if (known === endings) {
+      list = TWO_SYLLABLE_WORDS; // trop peu de syllabes à lire : comme d'habitude
+      endings = [...new Set(list.map((w) => w[1]))];
+    } else endings = known;
+  }
+  const [stem, end] = pick(rng, list);
   const word = stem + end;
   const words = new Set([...TWO_SYLLABLE_WORDS.map((w) => w.join('')), ...NOT_A_TRAP]);
-  const pool = [...new Set(TWO_SYLLABLE_WORDS.map((w) => w[1]))].filter((s) => s !== end && !words.has(stem + s));
+  const pool = endings.filter((s) => s !== end && !words.has(stem + s));
   const choices = shuffle(rng, [end, ...similarWords(rng, end, pool, 3)]);
   const sound = { text: word, rate: SLOW };
   return {
@@ -295,8 +324,8 @@ const THREE_SYLLABLE_WORDS = [
 ];
 
 /** Niveau 8 : écrire un mot de trois syllabes en touchant ses syllabes dans l'ordre. */
-function writeWord(rng) {
-  const parts = pick(rng, THREE_SYLLABLE_WORDS);
+function writeWord(rng, sons) {
+  const parts = pick(rng, garder(THREE_SYLLABLE_WORDS, sons, (w) => w.join(''), { min: 3 }));
   const word = parts.join('');
   let order = shuffle(rng, parts.map((_, i) => i));
   if (order.every((v, i) => v === i)) order = [...order.slice(1), order[0]]; // jamais déjà dans l'ordre
@@ -331,13 +360,16 @@ export const syllabes = {
     'Syllabes inversées (al)', 'Avec tr, pl, cr, fl…', 'Écris la syllabe',
     'La syllabe de la fin', 'Écris le mot en syllabes',
   ],
-  generate(level, rng) {
-    if (level === 4) return reversedSyllable(rng);
-    if (level === 5) return clusterSyllable(rng);
-    if (level === 6) return writeSyllable(rng);
-    if (level === 7) return finalSyllable(rng);
-    if (level === 8) return writeWord(rng);
-    const { consonants, vowels } = SYLLABLE_LEVELS[level];
+  // ctx.sons : les sons vus en classe (textes déchiffrables, voir graphemes.js)
+  generate(level, rng, _index, { sons } = {}) {
+    if (level === 4) return reversedSyllable(rng, sons);
+    if (level === 5) return clusterSyllable(rng, sons);
+    if (level === 6) return writeSyllable(rng, sons);
+    if (level === 7) return finalSyllable(rng, sons);
+    if (level === 8) return writeWord(rng, sons);
+    let { consonants, vowels } = SYLLABLE_LEVELS[level];
+    const known = syllableParts(consonants, vowels, sons, 2);
+    if (known.filtered && known.consonants.length + known.vowels.length - 2 >= (level >= 2 ? 3 : 2)) ({ consonants, vowels } = known);
     const c = pick(rng, consonants);
     const v = pick(rng, vowels);
     const target = c + v;
@@ -346,7 +378,8 @@ export const syllabes = {
     vowels.filter((x) => x !== v).forEach((x) => pool.add(c + x));
     consonants.filter((x) => x !== c).forEach((x) => pool.add(x + v));
     const distractors = sample(rng, [...pool], level >= 2 ? 3 : 2);
-    if (level >= 2 && v.length === 1 && c.length === 1) distractors[0] = v + c;
+    // la syllabe à l'envers (« al » pour « la ») ; pas « in », « am » pour un enfant qui ne connaît pas ces sons
+    if (level >= 2 && v.length === 1 && c.length === 1 && syllabeDechiffrable(v + c, sons)) distractors[0] = v + c;
     return syllableQuestion(rng, target, distractors);
   },
 };
@@ -398,9 +431,9 @@ const FAMILIES = [
 ];
 
 /** « Le bon mot », niveaux 4 à 6 : l'image, et trois mots écrits à départager. */
-function wordStudy(rng, level) {
+function wordStudy(rng, level, sons) {
   if (level === 6) {
-    const family = pick(rng, FAMILIES);
+    const family = pick(rng, garder(FAMILIES, sons, (f) => [f.base, ...f.words], { min: 3 }));
     const [answer, ...others] = family.words;
     return {
       key: `bon-mot:famille:${family.base}`,
@@ -415,7 +448,7 @@ function wordStudy(rng, level) {
       success: { speak: `${family.base}, ${answer} : ce sont des mots de la même famille !` },
     };
   }
-  const [word, ...others] = pick(rng, level === 4 ? LOOK_ALIKE_WORDS : SPELLINGS);
+  const [word, ...others] = pick(rng, garder(level === 4 ? LOOK_ALIKE_WORDS : SPELLINGS, sons, (words) => words, { min: 3 }));
   return {
     key: `bon-mot:${level}:${word}`,
     text: level === 4 ? 'Lis bien chaque lettre ! Quel mot va avec l’image ?' : 'Quel mot est bien écrit ?',
@@ -449,8 +482,8 @@ const SILENT_LETTERS = [
 ];
 
 /** Niveau 7 : le mot bien écrit, avec sa lettre muette à la fin. */
-function silentLetter(rng) {
-  const item = pick(rng, SILENT_LETTERS);
+function silentLetter(rng, sons) {
+  const item = pick(rng, garder(SILENT_LETTERS, sons, (it) => [it.word, ...it.wrongs], { min: 3 }));
   const sound = { text: item.word, rate: 0.8 };
   return {
     key: `bon-mot:muette:${item.word}`,
@@ -486,10 +519,18 @@ const CATEGORIES = [
 ];
 
 /** Niveau 8 : « pomme, cerise, prune : ce sont des… » fruits. */
-function categoryWord(rng) {
-  const category = pick(rng, CATEGORIES);
+function categoryWord(rng, sons) {
+  // textes déchiffrables : les catégories et les mots que l'enfant sait lire (au moins 3 catégories de 3 mots)
+  let categories = CATEGORIES;
+  if (sonsActifs(sons)) {
+    const known = CATEGORIES.filter((c) => estDechiffrable(c.name, sons))
+      .map((c) => ({ ...c, words: c.words.filter((w) => estDechiffrable(w, sons)) }))
+      .filter((c) => c.words.length >= 3);
+    if (known.length >= 3) categories = known;
+  }
+  const category = pick(rng, categories);
   const words = sample(rng, category.words, 3);
-  const others = sample(rng, CATEGORIES.filter((c) => c !== category), 2).map((c) => c.name);
+  const others = sample(rng, categories.filter((c) => c !== category), 2).map((c) => c.name);
   const list = words.join(', ');
   return {
     key: `bon-mot:categorie:${category.name}:${words.join(',')}`,
@@ -516,14 +557,26 @@ export const bonMot = {
     'Des mots presque pareils', 'Le mot bien écrit', 'Mots de la même famille',
     'La lettre muette', 'Le mot qui les regroupe',
   ],
-  generate(level, rng) {
-    if (level === 7) return silentLetter(rng);
-    if (level === 8) return categoryWord(rng);
-    if (level >= 4) return wordStudy(rng, level);
-    const word = pick(rng, READING_WORDS[level]);
-    const pool = [];
+  // ctx.sons : les sons vus en classe (textes déchiffrables, voir graphemes.js)
+  generate(level, rng, _index, { sons } = {}) {
+    if (level === 7) return silentLetter(rng, sons);
+    if (level === 8) return categoryWord(rng, sons);
+    if (level >= 4) return wordStudy(rng, level, sons);
+    const count = level >= 2 ? 3 : 2;
+    let words = READING_WORDS[level];
+    let pool = [];
     for (let l = Math.max(1, level - 1); l <= level; l++) pool.push(...READING_WORDS[l]);
-    const distractors = similarWords(rng, word, pool, level >= 2 ? 3 : 2);
+    // textes déchiffrables : le mot et ses voisins (pris à tous les niveaux s'il le faut)
+    const known = garder(words, sons, (w) => w, { min: 3 });
+    if (known !== words) {
+      const all = Object.values(READING_WORDS).flat();
+      const nearPool = garder(pool, sons, (w) => w, { min: count + 1 });
+      const nearAll = garder(all, sons, (w) => w, { min: count + 1 });
+      if (nearPool !== pool) [words, pool] = [known, nearPool];
+      else if (nearAll !== all) [words, pool] = [known, nearAll];
+    }
+    const word = pick(rng, words);
+    const distractors = similarWords(rng, word, pool, count);
     return {
       key: `bon-mot:${word}`,
       text: "Lis les mots. Lequel va avec l'image ?",
@@ -576,8 +629,10 @@ const OPPOSITES = [
 ];
 
 /** Un petit mot à remettre dans la phrase (niveau 4 : sens de la phrase ; niveau 6 : mots de liaison). */
-function missingSmallWord(rng, level) {
-  const [sentence, answer, ...others] = pick(rng, level === 4 ? MISSING_SMALL_WORDS : LINK_WORDS);
+function missingSmallWord(rng, level, sons) {
+  // textes déchiffrables : la phrase (les petits mots proposés sont appris par cœur)
+  const list = garder(level === 4 ? MISSING_SMALL_WORDS : LINK_WORDS, sons, ([s]) => s.replace('___', ''), { min: 3 });
+  const [sentence, answer, ...others] = pick(rng, list);
   const full = sentence.replace('___', answer);
   return {
     key: `petits-mots:${level}:${sentence}`,
@@ -624,8 +679,8 @@ const QUESTIONS = [
 ];
 
 /** Niveau 7 : quel mot pour poser la question ? La réponse le dit (« À midi. » : quand ?). */
-function questionWord(rng) {
-  const [rest, reply, answer] = pick(rng, QUESTIONS);
+function questionWord(rng, sons) {
+  const [rest, reply, answer] = pick(rng, garder(QUESTIONS, sons, ([r, rep]) => [r, rep], { min: 3 }));
   const others = sample(rng, QUESTION_WORDS.filter((w) => w !== answer), 2);
   return {
     key: `petits-mots:question:${rest}:${reply}`,
@@ -653,8 +708,8 @@ const PRONOUN_SENTENCES = [
 ];
 
 /** Niveau 8 : il, elle, ils ou elles ? (« Tom et Lou » : ils.) */
-function pronoun(rng) {
-  const [sentence, answer] = pick(rng, PRONOUN_SENTENCES);
+function pronoun(rng, sons) {
+  const [sentence, answer] = pick(rng, garder(PRONOUN_SENTENCES, sons, ([s]) => s.replace('___', ''), { min: 3 }));
   return {
     key: `petits-mots:pronom:${sentence}`,
     text: 'Il, elle, ils ou elles : quel mot manque ?',
@@ -680,11 +735,12 @@ export const petitsMots = {
     'Le petit mot qui manque', 'Les contraires', 'mais, car, donc, puis',
     'Qui, où, quand, pourquoi ?', 'il, elle, ils ou elles ?',
   ],
-  generate(level, rng) {
-    if (level === 4 || level === 6) return missingSmallWord(rng, level);
+  // ctx.sons : les sons vus en classe ; les mots-outils (niveaux 1 à 3, contraires) restent tous proposés
+  generate(level, rng, _index, { sons } = {}) {
+    if (level === 4 || level === 6) return missingSmallWord(rng, level, sons);
     if (level === 5) return opposite(rng);
-    if (level === 7) return questionWord(rng);
-    if (level === 8) return pronoun(rng);
+    if (level === 7) return questionWord(rng, sons);
+    if (level === 8) return pronoun(rng, sons);
     const target = pickForLevel(rng, SIGHT_WORDS, level);
     const pool = SIGHT_WORDS.filter((w) => w.level <= level).map((w) => w.word);
     const distractors = similarWords(rng, target.word, pool, level >= 2 ? 3 : 2);

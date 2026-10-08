@@ -1775,6 +1775,9 @@ async function a11yPart() {
   await audit('espace parents, enfants');
   await page.click('[data-edit="eva-rose"]');
   await page.click('[data-domain-games="maths"] summary');
+  await page.click('[data-sons-panel="sons"] summary'); // « Sons vus en classe » : les sons et les mots-outils dépliés
+  await page.click('[data-son="ou"]');
+  await page.click('[data-sons-panel="outils"] summary');
   await audit('espace parents, modifier un enfant');
   await page.click('.top-bar .icon-btn');
   await page.click('[data-tab="reglages"]');
@@ -2082,7 +2085,7 @@ const STRESS = {
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
-    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game')) {
+    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game, .son-chip')) {
       if (el.clientWidth <= 1) continue; // caché à l'écran, gardé pour le clavier (flèches du labyrinthe rond)
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
@@ -2260,6 +2263,8 @@ async function checkDevice(device, repeat, deviceIndex) {
   await checkLayout(page, tag('enfants'), { reachable: false });
   await page.click('[data-edit="eva-rose"]');
   await page.click('[data-domain-games="maths"] summary'); // « Ses jeux » : une rubrique dépliée
+  await page.click('[data-sons-panel="sons"] summary'); // « Sons vus en classe » : les sons et les mots-outils dépliés
+  await page.click('[data-sons-panel="outils"] summary');
   await checkLayout(page, tag('modifier un enfant'), { reachable: false });
   await page.click('.top-bar .icon-btn');
   await page.click('[data-tab="reglages"]');

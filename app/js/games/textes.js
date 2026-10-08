@@ -5,6 +5,7 @@
 
 import { pick, shuffle } from '../random.js';
 import { pickSeasonal } from './helpers.js';
+import { sonsActifs, texteDechiffrable } from '../graphemes.js';
 
 // [question, bonne réponse, autre réponse, autre réponse]
 const TEXTS = [
@@ -304,6 +305,20 @@ const TEXTS = [
     ['Mamie savait-elle qu’il y aurait une fête ?', 'non', 'oui', 'un peu']] },
 ];
 
+/**
+ * Textes déchiffrables (ctx.sons) : les textes qui se lisent avec les sons vus, avec seulement leurs
+ * questions déchiffrables (question et réponses). Il en faut au moins deux hors saison ; sinon, tous.
+ */
+function readableTexts(texts, sons) {
+  if (!sonsActifs(sons)) return texts;
+  const ok = (t) => texteDechiffrable(t, sons);
+  const known = texts
+    .filter((t) => ok(t.title) && ok(t.text))
+    .map((t) => ({ ...t, questions: t.questions.filter((q) => q.every(ok)) }))
+    .filter((t) => t.questions.length);
+  return known.filter((t) => !t.season).length >= 2 ? known : texts;
+}
+
 export const petitsTextes = {
   id: 'petits-textes',
   domain: 'francais',
@@ -316,9 +331,10 @@ export const petitsTextes = {
     'Titre et ordre des faits', 'Textes documentaires', 'Consignes et recettes', 'Pourquoi ?',
     'Ce que pense le personnage',
   ],
-  // context.season : la saison du moment (seasonOf), pour les textes de saison
+  // context.season : la saison du moment (seasonOf), pour les textes de saison ;
+  // context.sons : les sons vus en classe (textes déchiffrables, voir graphemes.js)
   generate(level, rng, _index, context = {}) {
-    const story = pickSeasonal(rng, TEXTS.filter((t) => t.level === level), context.season);
+    const story = pickSeasonal(rng, readableTexts(TEXTS.filter((t) => t.level === level), context.sons), context.season);
     const [question, answer, ...others] = pick(rng, story.questions);
     return {
       key: `petits-textes:${story.title}`,

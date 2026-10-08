@@ -5,6 +5,7 @@ import { CALC_PALIERS } from './games/maths.js';
 import { programFor } from './programs.js';
 import { gameStats } from './storage.js';
 import { h } from './render.js';
+import { resumeSons } from './graphemes.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -162,6 +163,7 @@ export function dashboard({ kid, grade, onChange }) {
     }
   }
   const mistakes = frequentMistakes(kid.mistakes);
+  const sons = resumeSons(kid); // textes déchiffrables : les sons cochés par les parents
 
   return [
     h('section', { class: 'card' },
@@ -183,6 +185,7 @@ export function dashboard({ kid, grade, onChange }) {
         : h('p', { class: 'muted' }, 'Aucune erreur répétée.')),
     ...domains.map((d) => h('section', { class: 'card' },
       h('h2', {}, `${d.icon} ${d.title} : compétences`),
+      d.id === 'francais' && sons ? h('p', { class: 'muted small sons-vus-line', 'data-sons-vus': '' }, h('b', {}, 'Sons vus en classe : '), sons) : null,
       d.games.map((entry) => gameRow(kid, entry, onChange)))),
   ];
 }

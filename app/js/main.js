@@ -36,6 +36,8 @@ import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
 import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
+import { contexteSons } from './graphemes.js';
+import { sonsCard } from './sons-vus.js';
 import { CAPTION_HIDDEN, captionPart, gameListenOnly, playableQuestion, tapQuestion, withoutListenOnly } from './a11y-jeux.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
@@ -1130,8 +1132,8 @@ function startSession(game, { level, back, total, duo } = {}) {
 function newQuestion(session) {
   let q;
   const { skipListening, tapOnly } = access();
-  // contexte : le prénom de l'enfant et la saison (histoires et textes de saison)
-  const generate = (level, index) => session.game.generate(level, rng, index, { name: me().name, season: currentSeason().id });
+  // contexte : le prénom de l'enfant, la saison (histoires et textes de saison) et les sons vus en classe (textes déchiffrables)
+  const generate = (level, index) => session.game.generate(level, rng, index, { name: me().name, season: currentSeason().id, sons: contexteSons(child()) });
   for (let i = 0; i < 10; i++) {
     const index = session.index + session.formatOffset;
     if (skipListening) {
@@ -4776,6 +4778,7 @@ function childEditScreen(id, message = '', { section } = {}) {
         (v) => { kid.goals = { ...(kid.goals || {}), limit: v }; save(); }),
       h('p', { class: 'muted small' }, 'Quand le temps est écoulé, la partie en cours se termine, puis une pause est proposée. Vous pouvez accorder 10 minutes de plus.')),
     a11yCard(id),
+    sonsCard(kid, save),
     kidGamesCard(id),
     h('section', { class: 'card danger-zone' },
       h('h2', {}, 'Données'),

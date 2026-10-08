@@ -4,6 +4,7 @@
 import { pick, randInt, sample, shuffle } from '../random.js';
 import { numberChoices, textChoices } from './helpers.js';
 import { PICTURES } from '../data/lecture-data.js';
+import { garderDechiffrables as garder } from '../graphemes.js';
 
 // ---------------------------------------------------------------- Frappe les syllabes
 
@@ -644,9 +645,9 @@ const PUNCTUATION = [
   ['Mamie fait un gâteau', '.'], ['Le train part à midi', '.'], ['Lou range son cartable', '.'],
 ];
 
-function sentenceStudy(rng, level) {
+function sentenceStudy(rng, level, sons) {
   if (level === 3) {
-    const item = pick(rng, ONE_WORD_CHANGES);
+    const item = pick(rng, garder(ONE_WORD_CHANGES, sons, (it) => [it.text, ...it.others], { min: 3 }));
     return {
       key: `phrase:mot:${item.emoji}`,
       text: 'Un seul mot change : quelle phrase va avec l’image ?',
@@ -660,8 +661,11 @@ function sentenceStudy(rng, level) {
     };
   }
   if (level === 4) {
-    const absurd = pick(rng, ABSURD_SENTENCES);
-    const options = shuffle(rng, [absurd, ...sample(rng, SENSIBLE_SENTENCES, 2)]);
+    // textes déchiffrables : seulement si assez de phrases des deux sortes se lisent avec les sons vus
+    let [absurdList, sensibleList] = [garder(ABSURD_SENTENCES, sons, (t) => t, { min: 3 }), garder(SENSIBLE_SENTENCES, sons, (t) => t, { min: 3 })];
+    if (absurdList === ABSURD_SENTENCES || sensibleList === SENSIBLE_SENTENCES) [absurdList, sensibleList] = [ABSURD_SENTENCES, SENSIBLE_SENTENCES];
+    const absurd = pick(rng, absurdList);
+    const options = shuffle(rng, [absurd, ...sample(rng, sensibleList, 2)]);
     return {
       key: `phrase:absurde:${absurd}`,
       text: 'Quelle phrase n’a pas de sens ?',
@@ -674,7 +678,7 @@ function sentenceStudy(rng, level) {
       success: { speak: `${absurd} Ça n’a pas de sens !` },
     };
   }
-  const [text, mark] = pick(rng, PUNCTUATION);
+  const [text, mark] = pick(rng, garder(PUNCTUATION, sons, ([t]) => t, { min: 3 }));
   return {
     key: `phrase:point:${text}`,
     text: 'Quel point faut-il mettre à la fin de la phrase ?',
@@ -699,8 +703,8 @@ const WORD_ORDER = [
 ];
 
 /** Niveau 6 : remettre les mots d'une phrase dans l'ordre, sans l'entendre (il faut la lire). */
-function wordOrder(rng) {
-  const item = pick(rng, WORD_ORDER);
+function wordOrder(rng, sons) {
+  const item = pick(rng, garder(WORD_ORDER, sons, (it) => it.text, { min: 3 }));
   const words = item.text.split(' ');
   let order = shuffle(rng, words.map((_, i) => i));
   if (order.every((v, i) => v === i)) order = [...order.slice(1), order[0]]; // jamais déjà rangés
@@ -751,8 +755,8 @@ const WH_SENTENCES = [
 ];
 
 /** Niveau 7 : répondre à une question sur une phrase (qui ? quoi ? quand ? où ?). */
-function whQuestion(rng) {
-  const item = pick(rng, WH_SENTENCES);
+function whQuestion(rng, sons) {
+  const item = pick(rng, garder(WH_SENTENCES, sons, (it) => [it.text, ...Object.values(it.parts).flat()], { min: 3 }));
   const kinds = Object.keys(item.parts);
   const kind = pick(rng, kinds);
   const [question, answer] = item.parts[kind];
@@ -790,8 +794,8 @@ const NEGATIONS = [
 ];
 
 /** Niveau 8 : écrire la phrase à la forme négative. */
-function negativeSentence(rng) {
-  const [sentence, answer, ...wrong] = pick(rng, NEGATIONS);
+function negativeSentence(rng, sons) {
+  const [sentence, answer, ...wrong] = pick(rng, garder(NEGATIONS, sons, (phrases) => phrases, { min: 3 }));
   return {
     key: `phrase:negative:${sentence}`,
     text: 'Quelle phrase dit le contraire, avec « ne… pas » ?',
@@ -816,15 +820,18 @@ export const phrase = {
     'Phrases courtes', 'Phrases plus longues', 'Un seul mot change', 'La phrase absurde', 'Le bon point : . ? !',
     'Remets les mots en ordre', 'Qui ? Quoi ? Quand ? Où ?', 'La phrase négative',
   ],
-  generate(level, rng) {
-    if (level === 6) return wordOrder(rng);
-    if (level === 7) return whQuestion(rng);
-    if (level === 8) return negativeSentence(rng);
-    if (level >= 3) return sentenceStudy(rng, level);
-    const pool = SENTENCES.filter((s) => s.level === level);
-    const [target, ...drawn] = sample(rng, pool, 3);
+  // ctx.sons : les sons vus en classe (textes déchiffrables, voir graphemes.js)
+  generate(level, rng, _index, { sons } = {}) {
+    if (level === 6) return wordOrder(rng, sons);
+    if (level === 7) return whQuestion(rng, sons);
+    if (level === 8) return negativeSentence(rng, sons);
+    if (level >= 3) return sentenceStudy(rng, level, sons);
     // téléphone en paysage : trois phrases longues (chacune sur deux lignes) dépasseraient de l'écran
     const isLong = (s) => s.text.length > LONG_SENTENCE;
+    const all = SENTENCES.filter((s) => s.level === level);
+    let pool = garder(all, sons, (s) => s.text, { min: 3 });
+    if (pool.every(isLong)) pool = all; // textes déchiffrables : jamais sans phrase courte
+    const [target, ...drawn] = sample(rng, pool, 3);
     const others = isLong(target) && drawn.every(isLong) ? [drawn[0], pick(rng, pool.filter((s) => !isLong(s)))] : drawn;
     return {
       key: `phrase:${target.emoji}`,

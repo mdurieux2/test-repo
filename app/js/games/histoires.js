@@ -7,6 +7,7 @@
 
 import { shuffle } from '../random.js';
 import { pickSeasonal } from './helpers.js';
+import { sonsActifs, texteDechiffrable } from '../graphemes.js';
 
 const STORIES = [
   // ---- Niveau 1 : écouter une histoire (maternelle), réponses en images
@@ -156,6 +157,18 @@ const STORIES = [
 const TRUE_FALSE = ['vrai', 'faux', 'on ne sait pas'];
 const TRUE_FALSE_QUESTION = 'Vrai, faux, ou on ne sait pas ?';
 
+/**
+ * Textes déchiffrables (ctx.sons) : les histoires dont le titre, les phrases, la question et les réponses
+ * écrites se lisent avec les sons vus (vrai, faux, on ne sait pas : toujours les mêmes, non comptés).
+ * Il en faut au moins deux hors saison ; sinon, toutes.
+ */
+function readableStories(stories, sons) {
+  if (!sonsActifs(sons)) return stories;
+  const known = stories.filter((s) => [s.title, ...s.sentences, s.question, s.answer, ...(s.others || []), ...(s.steps || []).map(([, label]) => label)]
+    .every((t) => !t || texteDechiffrable(t, sons)));
+  return known.filter((s) => !s.season).length >= 2 ? known : stories;
+}
+
 /** Le décor d'une histoire : titre, image, phrases, et son identifiant (voix enregistrée). */
 function storyStage(story) {
   return { type: 'karaoke', storyId: story.id, title: story.title, emoji: story.emoji, sentences: story.sentences };
@@ -210,9 +223,10 @@ export const histoires = {
     'Écoute une histoire', 'Lis en suivant', 'Histoires plus longues', 'Pourquoi ? (inférence)', 'Histoires en 6 phrases',
     'Remets dans l’ordre', 'Le sens des mots', 'Vrai, faux, on ne sait pas',
   ],
-  // context.season : la saison du moment (seasonOf), pour les histoires de saison
+  // context.season : la saison du moment (seasonOf), pour les histoires de saison ;
+  // context.sons : les sons vus en classe (textes déchiffrables, voir graphemes.js)
   generate(level, rng, _index, context = {}) {
-    const story = pickSeasonal(rng, STORIES.filter((s) => s.level === level), context.season);
+    const story = pickSeasonal(rng, readableStories(STORIES.filter((s) => s.level === level), context.sons), context.season);
     if (level === 6) return orderStory(rng, story);
     if (level === 8) return trueFalseStory(story);
     const pictures = level === 1;
