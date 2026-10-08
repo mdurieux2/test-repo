@@ -146,6 +146,7 @@ function listenMark(rng, level) {
     instruction: ['Écoute bien la phrase.', said, 'Quel signe faut-il mettre à la fin ?'],
     short: { key: `ponctuation:ecoute:${level}`, text: 'Quel signe à la fin ?', speak: [said] },
     replay: [said],
+    listenOnly: true, // seule l'intonation dit le signe
     stage: { type: 'sentence', text: `${text} □` },
     choices: textChoices([...marks]),
     choiceStyle: 'letters',

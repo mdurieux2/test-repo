@@ -23,7 +23,7 @@ import {
 } from './storage.js';
 import {
   isNaturalVoiceOn, listFrenchVoices, loadNaturalVoice, naturalVoiceFiles, naturalVoicePacks, setNaturalVoice, setSpeechEnabled, setSpeechNames,
-  setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
+  onCaption, setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
 } from './speech.js';
 import { playSound, setSoundsEnabled, setSoundsSoft, startMusic, stopMusic, unlockAudio } from './sounds.js';
 import {
@@ -36,6 +36,7 @@ import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
 import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
+import { gameListenOnly, playableQuestion, tapQuestion, withoutListenOnly } from './a11y-jeux.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
 import { STORY_DATA } from './games/histoires.js';
@@ -90,6 +91,7 @@ function show(...children) {
   // réglage du système « augmenter le contraste » : le fort contraste, même sans réglage du profil
   if (globalThis.matchMedia?.('(prefers-contrast: more)').matches) document.body.classList.add('a11y-contrast');
   setSoundsSoft(a11y(child()).calm); // mode calme : petits sons plus doux
+  clearCaption();
   document.body.dataset.season = seasonsShown() ? currentSeason().id : '';
   app.replaceChildren(...children.filter(Boolean));
   screenAccess();
@@ -149,6 +151,119 @@ function say(who, parts) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// ---------------------------------------------------------------- Accessibilité de l'enfant qui joue
+
+/** Le profil d'accessibilité de l'enfant qui joue (réglé par les parents). */
+function access() {
+  return a11y(child());
+}
+
+/**
+ * Au clavier (Tab, Entrée, Espace) : un élément qui n'est pas un bouton (un morceau de dessin,
+ * un objet) se comporte comme un bouton. `label` dit ce qu'il est (et son état).
+ */
+function keyButton(el, label) {
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('role', 'button');
+  if (label) el.setAttribute('aria-label', label);
+  el.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+  });
+  return el;
+}
+
+/** Les flèches du clavier, tant que `el` est à l'écran (labyrinthes). `move(dx, dy)`. */
+function arrowKeys(el, move) {
+  const DIRS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+  const onKey = (e) => {
+    if (!el.isConnected) {
+      window.removeEventListener('keydown', onKey);
+      return;
+    }
+    const dir = DIRS[e.key];
+    if (!dir || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.('input, select, textarea')) return;
+    e.preventDefault();
+    move(...dir);
+  };
+  window.addEventListener('keydown', onKey);
+}
+
+// ---- Sous-titres : tout ce que dit Estelle est aussi écrit, dans un bandeau en bas de l'écran
+// (réduit sur un téléphone en paysage). Le bandeau garde sa place : il ne cache jamais les réponses.
+
+const CAPTION_LONG = 140; // au-delà (une histoire lue), le bandeau suit la lecture morceau par morceau
+const captionText = h('p', { class: 'caption-band-text' });
+const captionBand = h('div', { class: 'caption-band', 'aria-hidden': 'true', hidden: true },
+  h('span', { class: 'caption-band-icon' }, '🔊'), captionText);
+document.body.append(captionBand);
+let caption = { id: 0, parts: [], long: false };
+
+function captionLine(parts) {
+  return parts.map(({ text, lang }) => (lang && !lang.startsWith('fr') ? h('span', { lang: lang.slice(0, 2) }, text) : text))
+    .flatMap((part, i) => (i ? [' ', part] : [part]));
+}
+
+/** Un nouvel écran : le bandeau est vide jusqu'à la prochaine parole. */
+function clearCaption() {
+  const on = Boolean(child()) && access().captions;
+  captionBand.hidden = !on;
+  captionText.replaceChildren();
+  captionBand.classList.remove('said');
+  caption = { id: caption.id, parts: [], long: false };
+  fitCaptions();
+}
+
+/** L'écran est réduit (zoom) de la hauteur du bandeau : la mise en page reste la même, en plus petit. */
+function fitCaptions() {
+  const height = captionBand.hidden ? 0 : captionBand.getBoundingClientRect().height;
+  const fit = height ? Math.max(0.6, (window.innerHeight - height) / window.innerHeight) : 1;
+  document.documentElement.style.setProperty('--captions-fit', fit.toFixed(4));
+}
+window.addEventListener('resize', fitCaptions);
+
+/** Le texte du bandeau, en entier : écrit plus petit s'il est long. */
+function showCaption(nodes) {
+  captionText.style.fontSize = '';
+  captionText.replaceChildren(...nodes.map(frenchNode));
+  const base = parseFloat(getComputedStyle(captionText).fontSize) || 18;
+  for (let size = base; captionText.scrollHeight > captionText.clientHeight + 1 && size > 11; size -= 1) {
+    captionText.style.fontSize = `${size - 1}px`;
+  }
+}
+
+onCaption((event) => {
+  if (!child() || !access().captions) {
+    captionBand.hidden = true;
+    return;
+  }
+  if (captionBand.hidden) {
+    captionBand.hidden = false;
+    fitCaptions();
+  }
+  if (event.type === 'start') {
+    const all = event.parts.map((p) => p.text).join(' ');
+    caption = { id: event.id, parts: event.parts, long: all.length > CAPTION_LONG };
+    showCaption(captionLine(caption.long ? event.parts.slice(0, 1) : event.parts));
+    captionBand.classList.remove('said');
+    captionBand.classList.toggle('long', caption.long);
+    return;
+  }
+  if (event.id !== caption.id) return; // une parole déjà remplacée par une autre
+  if (event.type === 'part' && caption.long) {
+    showCaption(captionLine(caption.parts.slice(event.index, event.index + 1)));
+  }
+  // fini : le texte reste écrit (un peu plus pâle) jusqu'à la prochaine parole ou au prochain écran
+  if (event.type === 'end') captionBand.classList.add('said');
+});
+
+function frenchNode(node) {
+  if (typeof node === 'string') return frenchSpacing(node);
+  node.textContent = frenchSpacing(node.textContent);
+  return node;
 }
 
 function starCounter() {
@@ -288,7 +403,7 @@ function clearSessionFlag(key) {
 
 /** Une rubrique de l'enfant qui joue (absente si les parents l'ont masquée). */
 function domainById(id) {
-  return programForChild(child()).find((d) => d.id === id);
+  return childProgram().find((d) => d.id === id);
 }
 
 // ---------------------------------------------------------------- Qui joue ?
@@ -667,7 +782,7 @@ function profileChip() {
 
 function homeScreen() {
   const c = me();
-  const domains = programForChild(child());
+  const domains = childProgram();
   const featured = featuredBlock();
   show(h('main', { class: `screen home${featured ? ' has-featured' : ''}` },
     homeBar(),
@@ -695,7 +810,8 @@ function homeScreen() {
 
 /** « ⭐ Conseillé pour toi » : les jeux choisis par les parents, en haut de l'accueil. */
 function featuredBlock() {
-  const list = featuredGames(child()).slice(0, MAX_FEATURED);
+  const list = featuredGames(child())
+    .filter(({ game, min, max }) => !access().skipListening || !gameListenOnly(game, min, max)).slice(0, MAX_FEATURED);
   if (!list.length) return null;
   return h('section', { class: 'home-featured', 'aria-labelledby': 'featured-label' },
     h('h2', { class: 'featured-label', id: 'featured-label' }, '⭐ Conseillé pour toi'),
@@ -1004,13 +1120,31 @@ function startSession(game, { level, back, total, duo } = {}) {
 
 function newQuestion(session) {
   let q;
+  const { skipListening, tapOnly } = access();
+  // contexte : le prénom de l'enfant et la saison (histoires et textes de saison)
+  const generate = (level, index) => session.game.generate(level, rng, index, { name: me().name, season: currentSeason().id });
   for (let i = 0; i < 10; i++) {
-    // contexte : le prénom de l'enfant et la saison (histoires et textes de saison)
-    q = session.game.generate(session.levelState.level, rng, session.index + session.formatOffset, { name: me().name, season: currentSeason().id });
+    const index = session.index + session.formatOffset;
+    if (skipListening) {
+      // niveaux d'écoute facultatifs : une autre question du même niveau, ou le niveau jouable le plus proche
+      const found = playableQuestion(generate, { level: session.levelState.level, min: session.min, max: session.max, index: index + i * PLAYABLE_STEP });
+      q = found.q;
+      if (found.level !== session.levelState.level) session.levelState = { ...session.levelState, level: found.level };
+    } else {
+      q = generate(session.levelState.level, index);
+    }
     if (!session.recentKeys.includes(q.key)) break;
   }
   session.recentKeys = [...session.recentKeys, q.key].slice(-4);
-  return q;
+  return tapOnly ? tapQuestion(q) : q;
+}
+
+const PLAYABLE_STEP = 13; // essais suivants : d'autres index (les jeux qui alternent leurs formes de questions)
+
+/** Les rubriques de l'enfant qui joue (sans les jeux qui ne se jouent qu'à l'oreille, si les parents l'ont choisi). */
+function childProgram() {
+  const domains = programForChild(child());
+  return access().skipListening ? withoutListenOnly(domains) : domains;
 }
 
 function nextQuestion(session) {
@@ -1565,7 +1699,9 @@ function matchZone(ctx) {
       e.preventDefault();
       const points = [local(e.clientX, e.clientY)];
       let trace = null;
+      const tapOnly = access().tapOnly; // toucher plutôt que glisser : un doigt qui bouge un peu reste un toucher
       const move = (ev) => {
+        if (tapOnly) return;
         const p = local(ev.clientX, ev.clientY);
         const last = points.at(-1);
         if (Math.hypot(p[0] - last[0], p[1] - last[1]) < 3) return;
@@ -1731,6 +1867,7 @@ function fillZone(ctx) {
         return box && zone.contains(box) && !box.disabled ? box : null;
       };
       const move = (ev) => {
+        if (access().tapOnly) return; // toucher plutôt que glisser : pas de glisser-déposer
         if (!ghost && Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) > 8) {
           ghost = h('div', { class: 'tile tile-ghost', 'aria-hidden': 'true', style: { width: `${rect.width}px`, height: `${rect.height}px` } }, q.tiles[t]);
           document.body.append(ghost);
@@ -1979,7 +2116,7 @@ function picrossZone(ctx) {
     start(Number(cell.dataset.cell));
   });
   board.addEventListener('pointermove', (e) => {
-    if (!painting) return;
+    if (!painting || access().tapOnly) return; // toucher plutôt que glisser : une case par toucher
     const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('.pc-cell');
     const i = cell && board.contains(cell) ? Number(cell.dataset.cell) : -1;
     if (i < 0 || i === painting.last) return;
@@ -2051,12 +2188,14 @@ function swapZone(ctx) {
   let selected = null;
   const board = h('div', { class: 'pz-board', style: { '--cols': cols, '--rows': rows } });
   const draw = () => {
+    // au clavier, la pièce qui avait le focus le garde après l'échange
+    const focused = board.contains(document.activeElement) ? document.activeElement.dataset.pos : null;
     board.replaceChildren(...order.map((piece, pos) => {
       const tile = h('button', {
         class: `pz-tile${selected === pos ? ' selected' : ''}${piece === pos ? ' placed' : ''}`,
         'data-pos': pos,
         'data-piece': piece,
-        'aria-label': `Pièce ${pos + 1}${piece === pos ? ', bien placée' : ''}`,
+        'aria-label': `Pièce ${pos + 1}${piece === pos ? ', bien placée' : ''}${selected === pos ? ', choisie' : ''}`,
       }, puzzlePiece(q.stage, piece));
       tile.addEventListener('click', () => {
         if (ctx.session.locked) return;
@@ -2072,6 +2211,7 @@ function swapZone(ctx) {
       });
       return tile;
     }));
+    if (focused !== null) board.querySelector(`[data-pos="${focused}"]`)?.focus();
   };
   const checkSolved = () => {
     if (!order.every((v, i) => v === i)) return;
@@ -2170,8 +2310,9 @@ function colorbyZone(ctx) {
   const svg = document.createElementNS(ns, 'svg');
   svg.setAttribute('viewBox', '0 0 120 120');
   svg.setAttribute('class', 'magic-drawing');
-  svg.setAttribute('role', 'img');
+  svg.setAttribute('role', 'group');
   svg.setAttribute('aria-label', 'Dessin à colorier');
+  const zoneLabel = (i) => `Zone ${i + 1} : ${zones[i].label}${done.has(i) ? ', coloriée' : ''}`;
   const shapes = zones.map((z, i) => {
     const path = document.createElementNS(ns, 'path');
     path.setAttribute('d', z.d);
@@ -2180,9 +2321,11 @@ function colorbyZone(ctx) {
     path.setAttribute('class', 'magic-zone');
     path.dataset.zone = i;
     path.addEventListener('click', () => paint(i));
+    keyButton(path); // au clavier : Tab jusqu'à la zone, puis Entrée
     svg.append(path);
     return path;
   });
+  shapes.forEach((path, i) => path.setAttribute('aria-label', zoneLabel(i)));
   // les nombres par-dessus (ils ne captent pas le doigt)
   zones.forEach((z) => {
     const t = document.createElementNS(ns, 'text');
@@ -2201,6 +2344,7 @@ function colorbyZone(ctx) {
     }
     if (zones[i].c === color) {
       done.add(i);
+      shapes[i].setAttribute('aria-label', zoneLabel(i));
       shapes[i].setAttribute('fill', legend[color].hex);
       shapes[i].classList.add('painted');
       playSound('tap');
@@ -2266,6 +2410,12 @@ function mapZone(ctx) {
   const labels = (id) => [...map.querySelectorAll(`.map-label[data-for="${CSS.escape(id)}"]`)];
   const water = st.layer === 'oceans' || st.layer === 'seas';
   const zone = h('div', { class: 'choices map-clue' }, mapClue(q.clue));
+  // au clavier : Tab de zone en zone (sans dire son nom : c'est lui qu'on cherche), puis Entrée
+  map.setAttribute('role', 'group');
+  [...named].forEach((id, k) => {
+    const first = parts(id)[0];
+    if (first) keyButton(first, `Zone ${k + 1} de la carte`);
+  });
   map.addEventListener('click', (e) => {
     if (ctx.session.locked) return;
     const target = e.target.closest('[data-zone], [data-kind]');
@@ -2408,12 +2558,18 @@ function dotsZone(ctx) {
   let next = 0;
   let drawing = false;
   const linked = [];
+  const { tapOnly } = access();
+  // au clavier : le dessin est un bouton ; Entrée (ou Espace) relie le point suivant
+  keyButton(svg);
   const refresh = () => {
     line.setAttribute('points', linked.map((i) => points[i].join(',')).join(' '));
     dots.forEach((g, i) => {
       g.classList.toggle('next', i === next);
       g.classList.toggle('done', linked.includes(i));
     });
+    svg.setAttribute('aria-label', next < points.length
+      ? `Points à relier : ${linked.length} sur ${points.length}. Le prochain point est le ${labels[next]}.`
+      : `Points reliés : c’est ${q.stage.name}.`);
   };
   const toSvg = (e) => {
     const pt = svg.createSVGPoint();
@@ -2421,7 +2577,8 @@ function dotsZone(ctx) {
     pt.y = e.clientY;
     return pt.matrixTransform(svg.getScreenCTM().inverse());
   };
-  const near = (p, i) => Math.hypot(p.x - points[i][0], p.y - points[i][1]) < 8;
+  // toucher plutôt que glisser : on touche les points un par un (une cible un peu plus grande)
+  const near = (p, i) => Math.hypot(p.x - points[i][0], p.y - points[i][1]) < (tapOnly ? 11 : 8);
   const link = (i) => {
     linked.push(i);
     next++;
@@ -2454,8 +2611,9 @@ function dotsZone(ctx) {
     if (ctx.session.locked) return;
     e.preventDefault();
     const p = toSvg(e);
-    if (near(p, next)) {
-      drawing = true;
+    // toucher plutôt que glisser : le nombre écrit à côté du point compte aussi
+    if (near(p, next) || (tapOnly && Number(e.target.closest?.('.dot')?.dataset.dot) === next)) {
+      drawing = !tapOnly;
       link(next);
       return;
     }
@@ -2480,9 +2638,14 @@ function dotsZone(ctx) {
   svg.addEventListener('pointerup', stop);
   svg.addEventListener('pointercancel', stop);
   svg.addEventListener('pointerleave', stop);
+  svg.addEventListener('click', (e) => {
+    if (e.detail === 0 && !ctx.session.locked && next < points.length) link(next); // clavier
+  });
   refresh();
   const zone = h('div', { class: 'choices dots-zone' },
-    h('span', { class: 'dots-help' }, `Commence au ${labels[0]}, puis glisse ton doigt jusqu’au ${labels[1]}…`));
+    h('span', { class: 'dots-help' }, tapOnly
+      ? `Touche le ${labels[0]}, puis le ${labels[1]}, puis le ${labels[2] ?? labels[1]}…`
+      : `Commence au ${labels[0]}, puis glisse ton doigt jusqu’au ${labels[1]}…`));
   return { stage: h('div', { class: 'stage stage-dots' }, svg), zone };
 }
 
@@ -2520,6 +2683,27 @@ function traceCheckpoints(points) {
   return out;
 }
 
+const TRACE_STOP = 18; // toucher plutôt que glisser : un point de passage environ tous les 18 unités du trait
+const TRACE_TAP = 16; // distance à laquelle un toucher atteint le point de passage
+
+/**
+ * Les points de passage d'un trait, à toucher dans l'ordre (réglage « toucher plutôt que glisser »,
+ * et clavier) : le nombre de points de contrôle atteints à chaque arrêt (le départ, puis environ
+ * tous les TRACE_STOP, et toujours la fin).
+ */
+function traceStops(stroke, cps) {
+  const out = [1];
+  let run = 0;
+  for (let k = 1; k < cps.length; k++) {
+    for (let i = cps[k - 1] + 1; i <= cps[k]; i++) run += Math.hypot(stroke[i][0] - stroke[i - 1][0], stroke[i][1] - stroke[i - 1][1]);
+    if (run >= TRACE_STOP || k === cps.length - 1) {
+      out.push(k + 1);
+      run = 0;
+    }
+  }
+  return [...new Set(out)];
+}
+
 /** Distance d'un point à une ligne brisée. */
 function distanceToLine([px, py], points) {
   let best = Infinity;
@@ -2547,8 +2731,11 @@ function traceZone(ctx) {
   }[set];
   const svg = el('svg', {
     viewBox: `${TRACE_VIEW.x} ${TRACE_VIEW.x} ${TRACE_VIEW.size} ${TRACE_VIEW.size}`,
-    class: `trace-drawing trace-${set}`, role: 'img', 'aria-label': `${what} à tracer`,
+    class: `trace-drawing trace-${set}`, 'aria-label': `${what} à tracer`,
   });
+  // au clavier : le dessin est un bouton ; Entrée (ou Espace) trace jusqu'au point de passage suivant
+  keyButton(svg);
+  const { tapOnly } = access();
   // lignes d'écriture de la cursive : ligne de base (pleine) et hauteur des minuscules (pointillés)
   if (lines) {
     svg.append(
@@ -2565,9 +2752,12 @@ function traceZone(ctx) {
   const arrow = el('path', { class: 'trace-arrow', d: 'M-2.6 -3.4 L3.6 0 L-2.6 3.4 Z' });
   const here = el('circle', { class: 'trace-here', r: 3.4, visibility: 'hidden' });
   const hintDot = el('circle', { class: 'trace-hint-dot', r: 4.4, visibility: 'hidden' });
-  svg.append(...guides, ...done, inkLayer, arrow, start, here, hintDot);
+  // toucher plutôt que glisser : les points de passage du trait en cours, le suivant brille
+  const stopLayer = el('g', { class: 'trace-stops' });
+  svg.append(...guides, ...done, inkLayer, arrow, start, stopLayer, here, hintDot);
 
   const checkpoints = strokes.map(traceCheckpoints);
+  const stops = strokes.map((st, i) => traceStops(st, checkpoints[i]));
   let current = 0; // trait en cours
   let reached = 0; // points de contrôle déjà atteints sur ce trait
   let finished = false;
@@ -2609,7 +2799,7 @@ function traceZone(ctx) {
         arrow.setAttribute('visibility', 'visible');
       }
       // doigt levé au milieu d'un trait : on montre où reprendre
-      if (reached > 0 && !drawing) {
+      if (reached > 0 && !drawing && !tapOnly) {
         const p = st[checkpoints[current][reached - 1]];
         here.setAttribute('cx', p[0]);
         here.setAttribute('cy', p[1]);
@@ -2622,6 +2812,15 @@ function traceZone(ctx) {
       s.textContent = i < current ? '✓' : String(i + 1);
     });
     stepsLabel.textContent = finished ? 'Terminé' : `Trait ${current + 1} sur ${strokes.length}`;
+    svg.setAttribute('aria-label', finished ? `${what} : terminé` : `${what} à tracer : trait ${current + 1} sur ${strokes.length}`);
+    stopLayer.replaceChildren();
+    if (tapOnly && show) {
+      const next = stops[current].find((k) => k > reached);
+      for (const k of stops[current].filter((x) => x > reached)) {
+        const [x, y] = strokes[current][checkpoints[current][k - 1]];
+        stopLayer.append(el('circle', { class: k === next ? 'trace-stop next' : 'trace-stop', cx: x, cy: y, r: k === next ? 4.8 : 2.6 }));
+      }
+    }
   };
 
   const finish = () => {
@@ -2691,9 +2890,42 @@ function traceZone(ctx) {
     inkPoints.push(p);
     ink.setAttribute('points', inkPoints.map((pt) => `${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' '));
   };
+  // Toucher plutôt que glisser, et clavier : le trait avance jusqu'au point de passage suivant.
+  let tapNudged = 0;
+  const advance = () => {
+    if (session.locked || finished) return;
+    waitLift = false;
+    reached = stops[current].find((k) => k > reached) ?? checkpoints[current].length;
+    if (reached >= checkpoints[current].length) strokeDone();
+    else {
+      playSound('tap');
+      refresh();
+    }
+  };
+  const tapAt = (p) => {
+    const k = stops[current].find((x) => x > reached) ?? checkpoints[current].length;
+    const [x, y] = strokes[current][checkpoints[current][k - 1]];
+    if (Math.hypot(p[0] - x, p[1] - y) <= TRACE_TAP) {
+      if (lostMessage?.isConnected) ctx.feedback.replaceChildren();
+      advance();
+      return;
+    }
+    if (Date.now() - tapNudged > 2500) {
+      tapNudged = Date.now();
+      nudge(ctx, 'Touche le point qui brille !');
+      lostMessage = ctx.feedback.firstChild;
+    }
+  };
+  svg.addEventListener('click', (e) => {
+    if (e.detail === 0) advance(); // clavier
+  });
   svg.addEventListener('pointerdown', (e) => {
     if (session.locked || finished) return;
     e.preventDefault();
+    if (tapOnly) {
+      tapAt(toSvg(e));
+      return;
+    }
     try { svg.setPointerCapture(e.pointerId); } catch { /* pointeur déjà relâché */ }
     drawing = true;
     waitLift = false;
@@ -2756,7 +2988,7 @@ function traceZone(ctx) {
       else setTimeout(() => { if (run === hintRun) hintDot.setAttribute('visibility', 'hidden'); }, 500);
     };
     hintFrame = requestAnimationFrame(step);
-    say(session.guide, 'Regarde le point jaune, puis fais pareil avec ton doigt !');
+    say(session.guide, tapOnly ? 'Regarde le point jaune, puis touche les points un par un !' : 'Regarde le point jaune, puis fais pareil avec ton doigt !');
   };
   // ↺ : on efface et on recommence le glyphe
   const restart = () => {
@@ -2863,7 +3095,7 @@ function setClockZone(ctx) {
     follow(p);
   });
   svg.addEventListener('pointermove', (e) => {
-    if (grabbed) follow(pointer(e));
+    if (grabbed && !access().tapOnly) follow(pointer(e)); // toucher plutôt que glisser : l'aiguille va là où l'on touche
   });
   const release = () => {
     grabbed = null;
@@ -2947,7 +3179,7 @@ function numberLineZone(ctx) {
     setValue(pointerValue(e));
   });
   svg.addEventListener('pointermove', (e) => {
-    if (dragging) setValue(pointerValue(e));
+    if (dragging && !access().tapOnly) setValue(pointerValue(e));
   });
   const release = () => { dragging = false; };
   svg.addEventListener('pointerup', release);
@@ -2991,6 +3223,11 @@ function shadeZone(ctx) {
   const pic = fractionElement(q.stage, 'fraction-shade');
   const svg = pic.querySelector('svg');
   const on = new Set();
+  // au clavier : chaque part est un bouton (Entrée ou Espace la colorie)
+  pic.setAttribute('role', 'group');
+  svg.removeAttribute('aria-hidden');
+  const partLabel = (i) => `Part ${i + 1} sur ${parts}${on.has(i) ? ', coloriée' : ''}`;
+  svg.querySelectorAll('[data-part]').forEach((part) => keyButton(part, partLabel(Number(part.dataset.part))));
   svg.addEventListener('click', (e) => {
     const part = e.target.closest('[data-part]');
     if (!part || ctx.session.locked) return;
@@ -2999,6 +3236,8 @@ function shadeZone(ctx) {
     else on.add(i);
     // la part coloriée est rayée (le motif, pas seulement la couleur)
     part.classList.toggle('on', on.has(i));
+    part.setAttribute('aria-label', partLabel(i));
+    part.setAttribute('aria-pressed', String(on.has(i)));
     part.setAttribute('fill', on.has(i) ? `url(#${svg.dataset.pattern})` : svg.dataset.base);
     pic.dataset.count = on.size;
     playSound('tap');
@@ -3183,9 +3422,11 @@ function mazeZone(ctx) {
     'aria-label': `Labyrinthe de ${cols} cases sur ${rows}${items.length ? `, avec ${items.length} clés à ramasser` : ''}`,
     style: { '--cols': cols, '--rows': rows },
   }, cells);
+  const mazeLabel = grid.getAttribute('aria-label');
   const place = () => {
     cells[pos].append(heroEl);
     cells.forEach((c, i) => c.classList.toggle('here', i === pos));
+    grid.setAttribute('aria-label', `${mazeLabel}. ${hero} est ligne ${Math.floor(pos / cols) + 1}, colonne ${(pos % cols) + 1}.`);
   };
   const bump = () => {
     heroEl.classList.remove('bump');
@@ -3235,12 +3476,14 @@ function mazeZone(ctx) {
     if (cell !== null) slideTo(cell);
   });
   grid.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
+    if (!dragging || access().tapOnly) return; // toucher plutôt que glisser : une case touchée à la fois
     const cell = cellAt(e);
     if (cell !== null) slideTo(cell, true);
   });
   for (const type of ['pointerup', 'pointercancel']) grid.addEventListener(type, () => { dragging = false; });
   place();
+  // les flèches du clavier (ordinateur)
+  arrowKeys(grid, (dx, dy) => { if (!moveTo(pos + dx + dy * cols)) bump(); });
 
   const arrow = (label, symbol, delta) => h('button', {
     class: 'maze-arrow',
@@ -3429,12 +3672,26 @@ function roundMazeZone(ctx) {
     if (cell !== null) slideTo(cell);
   });
   board.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
+    if (!dragging || access().tapOnly) return; // toucher plutôt que glisser : une case touchée à la fois
     const cell = cellAt(e);
     if (cell !== null) slideTo(cell, true);
   });
   for (const type of ['pointerup', 'pointercancel']) board.addEventListener(type, () => { dragging = false; });
 
+  // Les flèches (clavier, ou boutons) : la case voisine, sans mur, dans cette direction à l'écran.
+  const step = (dx, dy) => {
+    if (ctx.session.locked) return;
+    const [x0, y0] = centreOf(pos);
+    let best = null;
+    let score = 0.4;
+    for (const c of links[pos]) {
+      const [x, y] = centreOf(c);
+      const s = ((x - x0) * dx + (y - y0) * dy) / (Math.hypot(x - x0, y - y0) || 1);
+      if (s > score) [best, score] = [c, s];
+    }
+    if (best === null || !moveTo(best)) bump();
+  };
+  arrowKeys(board, step);
   // L'indice montre les 3 prochaines cases ; il compte comme une aide (pas d'étoile « du premier coup »).
   const hint = () => {
     if (ctx.session.locked) return;
@@ -3448,7 +3705,11 @@ function roundMazeZone(ctx) {
     }
     say(ctx.session.guide, 'Suis les étoiles !');
   };
+  // les boutons-flèches : affichés avec « toucher plutôt que glisser », ou dès qu'on y arrive au clavier
+  const arrowButton = (label, symbol, dx, dy) => h('button', { class: 'maze-arrow', 'aria-label': label, onclick: () => step(dx, dy) }, symbol);
   const zone = h('div', { class: 'choices rmaze-controls' },
+    h('div', { class: 'rmaze-arrows' },
+      arrowButton('Gauche', '←', -1, 0), arrowButton('Haut', '↑', 0, -1), arrowButton('Bas', '↓', 0, 1), arrowButton('Droite', '→', 1, 0)),
     h('button', { class: 'maze-arrow maze-hint', 'aria-label': 'Indice', onclick: hint }, '💡'));
   return { stage: h('div', { class: 'stage stage-maze stage-rmaze' }, board), zone };
 }
@@ -3534,9 +3795,15 @@ function lassoZone(ctx) {
   svg.setAttribute('aria-hidden', 'true');
   // une marge de 5 % tout autour : aucun objet ne touche le bord du cadre
   const spot = positions.map((p) => [5 + p.x * 0.9, 5 + p.y * 0.9]);
-  const objects = spot.map(([x, y], i) => h('span', { class: 'lasso-object', 'data-i': i, style: { left: `${x}%`, top: `${y}%` } }, emoji));
-  const field = h('div', { class: 'lasso-field', role: 'img', 'aria-label': `${count} ${many}`, style: { '--cols': cols, '--rows': rows } }, svg, objects);
-  const help = h('p', { class: 'lasso-help' }, `Entoure ${group} ${emoji} avec ton doigt, ou touche-les un par un.`);
+  const { tapOnly } = access();
+  // au clavier : chaque objet est un bouton (Tab, puis Entrée pour le choisir)
+  const objects = spot.map(([x, y], i) => keyButton(h('span', {
+    class: 'lasso-object', 'data-i': i, style: { left: `${x}%`, top: `${y}%` }, 'aria-pressed': 'false',
+  }, emoji), `${q.stage.one || emoji} ${i + 1}`));
+  const field = h('div', { class: 'lasso-field', role: 'group', 'aria-label': `${count} ${many}`, style: { '--cols': cols, '--rows': rows } }, svg, objects);
+  const help = h('p', { class: 'lasso-help' }, tapOnly
+    ? `Touche ${group} ${emoji}, un par un, pour faire un paquet.`
+    : `Entoure ${group} ${emoji} avec ton doigt, ou touche-les un par un.`);
   const zone = h('div', { class: 'choices lasso-zone' }, help);
 
   const newPath = (cls) => {
@@ -3568,6 +3835,8 @@ function lassoZone(ctx) {
       grouped.add(i);
       objects[i].classList.remove('picked');
       objects[i].classList.add('grouped');
+      objects[i].setAttribute('aria-pressed', 'true');
+      objects[i].setAttribute('aria-label', `${q.stage.one || emoji} ${i + 1}, dans le paquet ${groups}`);
       objects[i].style.setProperty('--pair', color);
       objects[i].dataset.group = groups;
       delete objects[i].dataset.n;
@@ -3593,6 +3862,7 @@ function lassoZone(ctx) {
       picked.push(i);
       objects[i].classList.add('picked');
     }
+    objects[i].setAttribute('aria-pressed', String(picked.includes(i)));
     picked.forEach((x, n) => { objects[x].dataset.n = n + 1; });
     if (picked.length === group) closeGroup(picked, null);
   };
@@ -3603,8 +3873,14 @@ function lassoZone(ctx) {
     const r = field.getBoundingClientRect();
     return [((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100];
   };
+  // toucher un objet (toucher plutôt que glisser, ou Entrée au clavier) : il est choisi
+  field.addEventListener('click', (e) => {
+    if ((!tapOnly && e.detail !== 0) || ctx.session.locked || groups === needed) return;
+    const target = e.target.closest('.lasso-object');
+    if (target && field.contains(target)) togglePick(Number(target.dataset.i));
+  });
   field.addEventListener('pointerdown', (e) => {
-    if (ctx.session.locked || groups === needed) return;
+    if (ctx.session.locked || groups === needed || tapOnly) return;
     e.preventDefault();
     field.setPointerCapture?.(e.pointerId);
     points = [norm(e)];
@@ -3788,6 +4064,7 @@ function shareZone(ctx) {
       let ghost = null;
       let over = null;
       const move = (ev) => {
+        if (access().tapOnly) return; // toucher plutôt que glisser : pas de glisser-déposer
         if (!ghost && Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) > 8) {
           ghost = h('div', { class: 'share-ghost', 'aria-hidden': 'true', style: { width: `${rect.width}px`, height: `${rect.height}px` } }, emoji);
           document.body.append(ghost);
@@ -4158,14 +4435,16 @@ function bubblesGame(back) {
       'aria-label': 'Bulle',
       style: { left: `${5 + Math.random() * 80}%`, animationDuration: `${4 + Math.random() * 3}s`, '--hue': Math.floor(Math.random() * 360) },
     }, pick(rng, ['⭐', '🐟', '🍎', '🌸', '🦋', '']));
-    b.addEventListener('pointerdown', () => {
+    const pop = () => {
       if (b.classList.contains('popped')) return;
       b.classList.add('popped');
       popped++;
       score.textContent = String(popped);
       playSound('tap');
       setTimeout(() => b.remove(), 250);
-    });
+    };
+    b.addEventListener('pointerdown', pop);
+    b.addEventListener('click', (e) => { if (e.detail === 0) pop(); }); // clavier
     b.addEventListener('animationend', () => b.remove());
     field.append(b);
   };
@@ -4249,9 +4528,10 @@ function coloringGame(back) {
   let color = PALETTE[0];
   const drawing = h('div', { class: 'coloring' });
   drawing.innerHTML = `<svg viewBox="0 0 120 120">${COLORING[name]}</svg>`;
-  drawing.querySelectorAll('[data-zone]').forEach((zone) => {
+  drawing.querySelectorAll('[data-zone]').forEach((zone, i) => {
     zone.setAttribute('fill', '#ffffff');
     zone.addEventListener('click', () => { zone.setAttribute('fill', color); playSound('tap'); });
+    keyButton(zone, `Zone ${i + 1}`); // au clavier : Tab jusqu'à la zone, puis Entrée
   });
   const palette = h('div', { class: 'palette' }, PALETTE.map((c, i) => {
     const btn = h('button', { class: i === 0 ? 'paint on' : 'paint', style: { background: c }, 'aria-label': `Couleur ${i + 1}`, 'data-color': c });

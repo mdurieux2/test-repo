@@ -119,6 +119,8 @@ function orderQuestion(rng, story, { captions = false, told = false } = {}) {
     instruction,
     replay: instruction,
     stage: told ? { type: 'listen' } : { type: 'none' },
+    // même sans entendre l'histoire, les images se rangent comme aux niveaux sans histoire
+    listenOnly: false,
     items: order.map((i) => {
       const step = story.steps[i];
       // une scène de 2 emoji est un peu plus petite, pour tenir dans la case

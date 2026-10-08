@@ -135,6 +135,7 @@ function blendSyllables(rng) {
     short: { key: 'syllabes-rythme:recolle', text: 'Quel mot ?', speak: said },
     replay: said,
     stage: { type: 'picture', emoji: '🧩' },
+    listenOnly: true, // les syllabes ne sont qu'entendues
     choices: options.map((w) => ({ value: w, label: pictureOf(w) })),
     choiceStyle: 'pictures',
     answer: word,
@@ -574,6 +575,7 @@ export const lettres = {
       short: { text: 'Quelle lettre ?', speak: [name] },
       replay: [name],
       stage: { type: 'listen' },
+      listenOnly: true,
       choices: choices.map((l) => ({ value: l, label: show(l) })),
       choiceStyle: 'letters',
       answer: letter,
