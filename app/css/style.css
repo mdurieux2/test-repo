@@ -2795,3 +2795,33 @@ button.share-give:active { transform: translateY(3px); }
   .bm-choice .bm-seg { height: 1.6em; }
   .play[data-game="schemas"] .key { min-height: 46px; }
 }
+
+/* =====================================================================
+   Le corps humain : on touche un os, une articulation ou un organe sur le dessin (games/corps.js).
+   Une partie trouvée se remplit de vert ET reçoit une coche ou son numéro ; l'aide : pointillés qui brillent.
+   ===================================================================== */
+.stage-body { padding: 4px 0; min-height: 0; }
+.body-drawing { line-height: 0; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.body-svg {
+  display: block; width: auto; max-width: 100%; aspect-ratio: 120 / 250;
+  height: min(380px, calc(100vh / var(--zoom, 1) - 300px)); height: min(380px, calc(100dvh / var(--zoom, 1) - 300px));
+}
+.body-zone { cursor: pointer; outline: none; }
+.body-hit { pointer-events: all; }
+.body-zone:focus-visible .bz, .body-zone:focus-visible .body-hit { stroke: var(--accent-dark); stroke-width: 2px; }
+.body-zone.found .bz { fill: #6fd39b; stroke-width: 2px; }
+.body-zone.found .bz-line { stroke: #6fd39b; }
+.body-zone.missed { animation: map-blink 0.5s 2; }
+.body-zone.hint .bz { animation: body-glow 1s ease-in-out infinite; stroke-width: 2.4px; stroke-dasharray: 3 2; }
+.body-zone.hint .bz-line { animation: body-glow-line 1s ease-in-out infinite; }
+@keyframes body-glow { 50% { fill: var(--hint); } }
+@keyframes body-glow-line { 50% { stroke: var(--hint); } }
+.body-badge { opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.body-badge.show { opacity: 1; }
+.body-badge circle { fill: #fff; stroke: #1b6b3a; stroke-width: 1.6px; }
+.body-badge text { fill: #1b6b3a; font-size: 9px; font-weight: 700; text-anchor: middle; }
+.body-clue .body-clue-text { overflow-wrap: anywhere; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .body-svg { height: min(380px, calc(100dvh - 76px)); }
+}

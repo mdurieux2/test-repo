@@ -609,6 +609,17 @@ async function answer(page, q, wrongFirst) {
       await zone(q.answer).dispatchEvent('click');
       break;
     }
+    case 'body': {
+      // le corps humain : une autre partie d'abord (son nom est dit), puis la bonne, ou les bonnes dans l'ordre
+      const part = (id) => page.locator(`.body-drawing [data-zone="${id}"] >> nth=0`).dispatchEvent('click');
+      const steps = q.sequence || [q.answer];
+      if (wrongFirst) {
+        await part(q.choices.find((c) => c.value !== steps[0]).value);
+        await page.waitForSelector('.try-again');
+      }
+      for (const id of steps) await part(id);
+      break;
+    }
     case 'dots': {
       const centers = await page.$$eval('.dot .dot-point', (els) => els.map((el) => {
         const r = el.getBoundingClientRect();

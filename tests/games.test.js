@@ -253,6 +253,15 @@ function checkQuestion(q, ctx) {
       assert.deepEqual(q.choices, [], ctx);
       break;
     }
+    case 'body': {
+      // le corps humain : toucher une partie du dessin, ou plusieurs dans l'ordre (détails dans tests/corps.test.js)
+      const values = q.choices.map((c) => c.value);
+      assert.equal(new Set(values).size, values.length, ctx);
+      assert.ok(q.choices.every((c) => c.name), ctx);
+      const steps = q.sequence || [q.answer];
+      assert.ok(steps.length >= 1 && steps.every((s) => values.includes(s)), ctx);
+      break;
+    }
     default: {
       const values = q.choices.map((c) => c.value);
       assert.ok(values.length >= 2, ctx);

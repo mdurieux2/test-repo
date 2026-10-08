@@ -5,6 +5,7 @@ import { CALC_PALIERS, equationHolds } from './games/maths.js';
 import { canMove, polarCell, ringOffsets, solveLinks, solveMaze } from './games/labyrinthes.js';
 import { clockLabel } from './games/maths-extra.js';
 import { lineValueAt, lineX } from './games/nombres-plus.js';
+import { bodySvg } from './games/corps.js';
 import {
   clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
 } from './games/horloge.js';
@@ -1015,6 +1016,7 @@ function nextQuestion(session) {
     map: mapZone,
     share: shareZone,
     column: columnZone,
+    body: bodyZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -2261,6 +2263,65 @@ function mapZone(ctx) {
     else markWrong(ctx, { message: 'Ce n’est pas ce pays. Essaie encore !', given: 'autre pays' });
   });
   return { stage: h('div', { class: 'stage stage-map' }, map), zone };
+}
+
+// ---- Le corps humain : toucher une partie du dessin (un os, une articulation, un organe), ou
+// plusieurs dans l'ordre (le trajet des aliments). Une partie trouvée se remplit et reçoit une
+// coche ou son numéro (pas seulement une couleur) ; après une erreur, la bonne partie brille.
+
+function bodyZone(ctx) {
+  const { q } = ctx;
+  const pic = h('div', { class: `body-drawing body-${q.stage.view}`, role: 'group', 'aria-label': q.stage.label });
+  pic.innerHTML = bodySvg(q.stage.view);
+  const names = Object.fromEntries(q.choices.map((c) => [c.value, c.name]));
+  const steps = q.sequence || [q.answer];
+  let next = 0;
+  const parts = (id) => [...pic.querySelectorAll(`[data-zone="${CSS.escape(id)}"]`)];
+  const progress = h('span', { class: 'body-clue-text' }, q.sequence ? `0 / ${steps.length}` : names[q.answer]);
+  const zone = h('div', { class: 'choices map-clue body-clue' }, h('span', { class: 'map-clue-emoji', 'aria-hidden': 'true' }, '👆'), progress);
+  const touch = (id) => {
+    if (ctx.session.locked) return;
+    if (!names[id]) {
+      nudge(ctx, 'Essaie encore !');
+      return;
+    }
+    if (id === steps[next]) {
+      parts(id).forEach((el) => { el.classList.remove('hint'); el.classList.add('found'); });
+      const badge = pic.querySelector(`[data-badge="${CSS.escape(id)}"]`);
+      if (badge) {
+        badge.querySelector('text').textContent = q.sequence ? String(next + 1) : '✔';
+        badge.classList.add('show');
+      }
+      next++;
+      if (q.sequence) progress.textContent = `${next} / ${steps.length}`;
+      if (next === steps.length) {
+        zone.classList.add('answered');
+        markCorrect(ctx);
+      } else {
+        playSound('tap');
+      }
+      return;
+    }
+    if (parts(id)[0].classList.contains('found')) return; // déjà touchée
+    parts(id).forEach((el) => {
+      el.classList.remove('missed');
+      el.getBoundingClientRect(); // relance l'animation
+      el.classList.add('missed');
+    });
+    const hint = ctx.session.attempts >= 1;
+    if (hint) parts(steps[next]).forEach((el) => el.classList.add('hint'));
+    const said = `Ça, c’est ${names[id]}.`;
+    const then = hint ? 'Touche la partie qui brille !' : 'Essaie encore !';
+    markWrong(ctx, { message: `${said} ${then}`, speech: [said, then], given: names[id] });
+  };
+  pic.addEventListener('click', (e) => touch(e.target.closest('[data-zone]')?.dataset.zone));
+  pic.addEventListener('keydown', (e) => {
+    const target = e.target.closest('[data-zone]');
+    if (!target || (e.key !== 'Enter' && e.key !== ' ')) return;
+    e.preventDefault();
+    touch(target.dataset.zone);
+  });
+  return { stage: h('div', { class: 'stage stage-body' }, pic), zone };
 }
 
 /** Message court sous l'exercice, sans compter d'erreur. */
