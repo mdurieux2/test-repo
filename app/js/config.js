@@ -4,13 +4,26 @@
 
 export const APP = {
   name: 'Lire, compter et s’amuser\u00a0!',
-  version: '1.13.0',
+  version: '1.14.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.14.0',
+    date: '2026-10-08',
+    changes: [
+      'Deux nouvelles classes : la petite section (des jeux sans lecture, aux niveaux les plus faciles) et le CE2, avec cinq nouveaux jeux : les grands nombres jusqu’à 10 000, la multiplication (de tête puis posée), la division, périmètres et longueurs, l’imparfait.',
+      'Textes déchiffrables (CP) : dans la fiche de l’enfant, les parents cochent les sons déjà vus en classe ; les jeux de lecture n’utilisent alors que des mots lisibles avec ces sons (et les mots-outils choisis).',
+      'Nouveau jeu « Lire à voix haute » (CP, CE1, CE2) : l’enfant lit le plus de mots possible en une minute, un adulte touche les mots ratés ; le score (mots lus par minute) et son évolution semaine par semaine sont dans le Suivi.',
+      'Corriger en expliquant : après une première erreur en calcul, tables, doubles, comparer, dizaines, monnaie, homophones, accords ou conjugaison, une courte explication dessinée et dite aide à comprendre avant de réessayer.',
+      'Démonstration : la première fois qu’un enfant ouvre un jeu au geste pas évident (tracer, relier, entourer, glisser…), une main montre le geste ; le bouton « ? » la remontre.',
+      'Fiches à imprimer : depuis l’espace parents, une feuille A4 d’exercices au niveau de l’enfant, avec son corrigé, pour les jours sans écran.',
+      'Sous-titres : ce qu’il faut trouver à l’oreille (le mot de la dictée, le mot anglais entendu…) n’est plus écrit dans le bandeau.',
+    ],
+  },
   {
     version: '1.13.0',
     date: '2026-10-08',

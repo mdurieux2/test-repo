@@ -1186,6 +1186,8 @@ input { -webkit-user-select: text; user-select: text; }
 .look-option.on span:last-child::before { content: '✓ '; }
 .grade-picker { justify-content: space-between; }
 .grade-picker .seg { flex: 1; min-height: 44px; }
+/* six classes (PS à CE2) sur la largeur d'un téléphone de 360 points */
+.grade-picker .seg { min-width: 0; padding: 6px 2px; white-space: nowrap; }
 .form-error { margin: 0; min-height: 1.2em; color: #c43d3d; font-weight: 700; }
 
 /* espace parents : trois onglets */
@@ -2245,6 +2247,37 @@ body[data-season="ete"] { background: #fffbea; }
 .kid-toggle:disabled { opacity: 0.45; cursor: default; }
 .kid-games-full { margin-top: 8px; }
 
+/* espace parents : « Sons vus en classe » (textes déchiffrables ; un son coché porte un ✓, pas seulement une couleur) */
+.sons-card { display: flex; flex-direction: column; gap: 8px; }
+.sons-card h2, .sons-card p { margin: 0; }
+.sons-status { font-weight: 700; }
+.sons-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.sons-panel { border-top: 1px solid var(--line); }
+.sons-panel summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; font-weight: 700; color: var(--lecture-dark); }
+.sons-group h3 { margin: 8px 0 6px; font-size: 1rem; }
+.sons-grid { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 6px; }
+.son-chip {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; max-width: 100%; padding: 4px 12px 4px 8px;
+  border-radius: 14px; background: var(--card); color: var(--ink); text-align: left; box-shadow: inset 0 0 0 2px var(--field-line);
+}
+.son-chip.on { background: #d8f5e6; box-shadow: inset 0 0 0 3px var(--good); }
+.son-check {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+  border-radius: 6px; font-weight: 700; box-shadow: inset 0 0 0 2px var(--field-line);
+}
+.son-chip.on .son-check { background: var(--good); color: #fff; box-shadow: none; }
+.son-label { font-weight: 700; font-size: 1.05rem; overflow-wrap: anywhere; }
+.son-ex { font-size: 0.85rem; color: var(--muted); }
+.son-chip:focus-visible, .sons-outils-input:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; }
+.sons-outils-label { display: block; margin-top: 4px; font-weight: 700; }
+.sons-outils-input {
+  width: 100%; margin: 6px 0; padding: 10px 12px; border: 2px solid var(--field-line); border-radius: 12px;
+  background: var(--card); color: var(--ink); font: inherit; font-size: 1rem; resize: vertical;
+}
+.a11y-contrast .son-chip { background: #fff; box-shadow: inset 0 0 0 2px #000; }
+.a11y-contrast .son-chip.on { box-shadow: inset 0 0 0 4px #000; }
+.a11y-contrast .son-chip.on .son-check { background: #000; }
+
 /* téléphone en paysage */
 @media (orientation: landscape) and (max-height: 520px) {
   /* accueil avec des jeux conseillés : le bonjour monte dans la barre du haut, les conseils sur une ligne */
@@ -3154,3 +3187,114 @@ body.a11y-contrast { background: #fff !important; color: #000; }
 .a11y-shortcut-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .a11y-shortcut { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px 0 6px; max-width: 100%; }
 .a11y-shortcut > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* =====================================================================
+   Lire à voix haute (fluence) : la consigne pour l'adulte, puis la feuille de lecture
+   (mots ou texte, qui défile dans son cadre), le chronomètre et les boutons de l'adulte.
+   ===================================================================== */
+.screen.play.play-fluence { height: calc(100vh / var(--zoom, 1)); height: calc(100dvh / var(--zoom, 1)); min-height: 0; }
+.play-fluence > .feedback { display: none; }
+.play-fluence .instruction { margin-bottom: 6px; }
+.stage-fluence {
+  flex: 1 1 0; min-height: 0; display: block; padding: 4px 2px 8px;
+  overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+}
+.fl-brief, .fl-sheet { background: var(--card); border-radius: 20px; box-shadow: 0 4px 0 var(--line); }
+.fl-brief { padding: 12px 16px; }
+.fl-brief h2 { margin: 0 0 6px; font-size: 1.2rem; color: var(--accent-dark); }
+.fl-brief p { margin: 0; }
+.fl-brief p, .fl-brief li { font-size: 1.05rem; line-height: 1.35; }
+.fl-brief ul { margin: 6px 0 0; padding-left: 20px; }
+.fl-brief li + li { margin-top: 4px; }
+.fl-sheet { padding: 8px 10px; }
+.fl-title { margin: 0 0 4px; font-size: 1.3rem; text-align: center; color: var(--accent-dark); }
+/* une liste en colonnes : chaque colonne est assez large pour le mot le plus long (--fl-chars), jamais coupé */
+.fl-list {
+  display: grid; gap: 2px 6px; font-size: 1.45rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--fl-chars, 6) * 0.62em + 12px)), 1fr));
+}
+.fl-syllabes .fl-list { font-size: 1.6rem; }
+.fl-word {
+  min-width: 0; min-height: 44px; padding: 4px; border-radius: 10px;
+  font-size: 1em; font-weight: 700; color: var(--ink); text-align: center; white-space: nowrap;
+}
+.fl-para { margin: 0; font-size: 1.35rem; line-height: 1.75; text-align: left; }
+.fl-para .fl-word { min-height: 0; padding: 0 3px; font-weight: 400; text-align: left; }
+/* un mot raté : barré ET rouge, sur fond rosé (pas seulement une couleur) */
+.fl-word.missed {
+  color: #b3261e; background: #ffe3e3;
+  text-decoration: line-through; text-decoration-thickness: 3px; text-decoration-color: currentColor;
+}
+.fl-word.missed .syl, .fl-word.missed .muet, .fl-word.unread .syl, .fl-word.unread .muet { color: inherit !important; }
+/* le dernier mot lu : encadré ; les suivants, non lus, en gris (lisible) et plus fins */
+.fl-word.last { box-shadow: 0 0 0 3px var(--ink) inset; background: var(--hint); }
+.fl-word.unread { color: var(--muted); font-weight: 400; }
+
+.fluence-zone { display: flex; flex-direction: column; align-items: stretch; gap: 6px; margin-top: 6px; }
+.fluence-zone .big-btn { min-height: 56px; font-size: 1.25rem; padding: 0 12px; }
+.fluence-zone .fl-start { min-height: 64px; font-size: 1.4rem; }
+.fl-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fl-clock {
+  align-self: center; padding: 2px 18px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-dark);
+  font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2;
+}
+.fl-clock.ending { background: var(--ink); color: #fff; }
+.fl-hint { margin: 0; text-align: center; font-size: 1rem; font-weight: 700; color: var(--muted); }
+.fl-ok:disabled { opacity: 0.55; cursor: default; }
+
+/* résultats : mots bien lus par minute, détail et repère de la classe */
+.fluence-result { background: var(--card); border-radius: 18px; padding: 6px 18px; box-shadow: 0 4px 0 var(--line); margin-top: 4px; max-width: 520px; }
+.fluence-result p { margin: 2px 0; }
+.fluence-mclm { font-size: 1.25rem; font-weight: 700; }
+.fluence-mclm b { font-size: 1.8rem; color: var(--accent-dark); font-variant-numeric: tabular-nums; }
+.fluence-detail { font-size: 1.05rem; color: var(--ink); }
+.fluence-benchmark { font-size: 0.9rem; color: var(--muted); line-height: 1.3; }
+.fluence-next { font-size: 1rem; font-weight: 700; color: var(--accent-dark); }
+/* sur un téléphone peu haut, les résultats d'une lecture restent compacts (les boutons visibles) */
+@media (max-height: 760px) {
+  .results:has(.fluence-result) { gap: 4px; }
+  .results:has(.fluence-result) .avatar-md { width: 64px; height: 64px; }
+  .results:has(.fluence-result) .big-star { font-size: 52px; }
+  .results:has(.fluence-result) h1 { font-size: 1.9rem; margin-top: 2px; }
+  .results:has(.fluence-result) .result-actions { margin-top: 8px; gap: 10px; }
+  .results:has(.fluence-result) .result-actions .big-btn { min-height: 54px; }
+  .a11y-text-large .results:has(.fluence-result) .big-star { font-size: 44px; }
+  .a11y-text-large .results:has(.fluence-result) h1 { font-size: 1.6rem; }
+  .a11y-text-large .fluence-result { padding: 4px 12px; }
+  .a11y-text-large .fluence-mclm { font-size: 1.1rem; }
+  .a11y-text-large .fluence-benchmark { font-size: 0.8rem; }
+}
+
+/* suivi des parents : le meilleur score de chaque semaine */
+.fl-weeks {
+  list-style: none; margin: 0; padding: 0; height: 150px;
+  display: grid; grid-template-columns: repeat(var(--n, 8), minmax(0, 1fr)); gap: 6px; align-items: stretch;
+}
+.fl-week { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; min-width: 0; }
+.fl-week-value { font-size: 0.9rem; font-weight: 700; color: var(--ink); }
+.fl-week-bar { flex: none; width: min(28px, 70%); max-height: calc(100% - 44px); background: var(--lecture); border-radius: 4px 4px 0 0; }
+.fl-week-bar.empty { background: var(--line); }
+.fl-week-label { font-size: 0.78rem; color: var(--muted); white-space: nowrap; border-top: 1px solid var(--line); width: 100%; text-align: center; padding-top: 2px; }
+.fl-benchmark { margin-top: 10px; }
+.fl-tile { background: var(--bg); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .screen.play.play-fluence { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: stretch; }
+  /* pendant la lecture, la colonne de droite est à l'adulte : le chronomètre et ses boutons (la consigne a été dite) */
+  .screen.play.play-fluence:has(.fluence-zone:not([data-phase="brief"])) { grid-template-areas: "top top" "stage zone" "stage zone"; }
+  .play-fluence:has(.fluence-zone:not([data-phase="brief"])) > .instruction { display: none; }
+  .play-fluence > .stage { overflow-y: auto; }
+  .play-fluence > .choices.fluence-zone { align-self: center; }
+  .fluence-zone .big-btn { min-height: 48px; font-size: 1.1rem; }
+  .fluence-zone[data-phase="read"] .fl-hint { display: none; } /* expliqué dans la consigne pour l'adulte */
+  .fl-actions { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .fl-clock { font-size: 1.7rem; }
+  .fl-brief { padding: 8px 12px; }
+  .fl-brief h2 { font-size: 1.05rem; margin-bottom: 2px; }
+  .fl-brief p, .fl-brief li { font-size: 0.95rem; line-height: 1.3; }
+  .fluence-result p { font-size: 1rem; }
+  .fluence-mclm b { font-size: 1.4rem; }
+}
+.a11y-contrast .fl-brief, .a11y-contrast .fl-sheet, .a11y-contrast .fluence-result { box-shadow: 0 0 0 2px #000; }
+.a11y-contrast .fl-word.missed { color: #000; background: #fff; text-decoration-thickness: 4px; outline: 3px dashed #000; outline-offset: -3px; }
+.a11y-contrast .fl-word.unread, .a11y-contrast .fl-hint, .a11y-contrast .fluence-benchmark { color: #000; }

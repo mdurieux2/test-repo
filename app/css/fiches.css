@@ -1,0 +1,270 @@
+/* Fiches à imprimer (espace parents, voir js/fiches-ecran.js) : une feuille A4 d'exercices et
+   son corrigé. À l'écran, un aperçu réduit ; à l'impression, seulement les deux feuilles, en noir
+   sur blanc (les couleurs sont aussi écrites, rien n'est dit par la couleur seule). */
+
+/* ---------------------------------------------------------------- L'écran */
+
+.fiches .fiche-form { display: flex; flex-direction: column; gap: 10px; }
+.fiches .fiche-form > p { margin: 0; }
+.fiche-children { align-self: stretch; flex-wrap: wrap; }
+.fiche-children .seg { flex: 1 1 auto; justify-content: center; padding: 6px 12px; min-height: 44px; }
+.fiche-field { display: flex; flex-direction: column; gap: 4px; font-weight: 700; }
+.fiche-field .select { width: 100%; min-height: 44px; font-weight: 400; }
+.fiche-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.fiche-actions .big-btn { flex: 1 1 150px; min-height: 52px; font-size: 1.05rem; }
+.fiche-status { margin: 0; }
+.fiche-card .fiche-open { width: 100%; }
+
+.fiche-preview { margin: 4px 0 24px; overflow: hidden; border-radius: 6px; }
+.fiche-scale { --scale: 1; position: relative; }
+.fiche-sheets {
+  width: 210mm; display: flex; flex-direction: column; gap: 5mm;
+  transform: scale(var(--scale)); transform-origin: top left;
+}
+.fiche-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------------------------------------------------------------- La feuille A4 */
+
+.fiche-page {
+  position: relative; box-sizing: border-box; width: 210mm; height: 297mm; padding: 12mm 13mm;
+  overflow: hidden; display: flex; flex-direction: column; gap: 3mm;
+  background: #fff; color: #000; font-family: 'Andika', 'Avenir Next', system-ui, sans-serif;
+  font-size: 13pt; line-height: 1.25; letter-spacing: normal; word-spacing: normal;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+.fiche-page * { color: #000; }
+.fiche-head { display: flex; flex-direction: column; gap: 2mm; border-bottom: 0.5mm solid #000; padding-bottom: 2mm; }
+.fiche-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2mm 3mm; }
+.fiche-title h2 { margin: 0; font-size: 19pt; line-height: 1.1; }
+.fiche-icon { font-size: 19pt; }
+.fiche-level { font-size: 10.5pt; margin-left: auto; }
+.fiche-who { margin: 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2mm 8mm; font-size: 12pt; }
+.fiche-for { margin: 0; font-size: 11pt; font-style: italic; }
+.fiche-consigne { margin: 0; padding: 2mm 3mm; border: 0.4mm solid #000; border-radius: 2mm; font-size: 13pt; }
+.fiche-foot { position: absolute; right: 13mm; bottom: 4mm; font-size: 10pt; }
+
+/* les exercices : deux colonnes, les grands sur toute la largeur */
+.fiche-list {
+  list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3.5mm 5mm; align-content: start; padding-bottom: 4mm;
+}
+.ex {
+  display: flex; gap: 2.5mm; align-items: flex-start; min-width: 0; break-inside: avoid;
+  padding: 2mm; border: 0.3mm solid #777; border-radius: 2.5mm;
+}
+.ex.wide { grid-column: 1 / -1; }
+.ex-num {
+  flex: none; width: 6.5mm; height: 6.5mm; border-radius: 50%; border: 0.4mm solid #000;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 10pt; font-weight: 700;
+}
+.ex-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2mm; }
+.ex-text { margin: 0; font-weight: 700; font-size: 12pt; }
+.ex-box {
+  display: inline-block; width: 11mm; height: 9mm; border: 0.4mm solid #000; border-radius: 1.5mm;
+  vertical-align: middle; background: #fff;
+}
+.ex-answer { margin: 0; display: flex; align-items: center; gap: 2mm; font-size: 12pt; }
+.ex-answer-box { width: 16mm; }
+
+/* le dessin de la question (repris du jeu), à la taille du papier */
+.ex-stage { display: flex; justify-content: center; align-items: center; max-width: 100%; overflow: hidden; }
+.ex-stage > * { max-width: 100%; }
+.fiche-page .stage-picture, .fiche-page .stage-word {
+  background: none; border: 0; box-shadow: none; padding: 0; min-height: 0; width: auto; height: auto;
+  font-size: 30pt; line-height: 1.1; color: #000;
+}
+.fiche-page .stage-word { font-size: 20pt; font-weight: 700; }
+.fiche-page .stage-sentence, .fiche-page .story-text, .fiche-page .text-body, .fiche-page .accord-line {
+  font-size: 13pt; margin: 0; line-height: 1.35; text-align: left;
+}
+.fiche-page .stage-text { background: none; padding: 0; box-shadow: none; max-height: none; overflow: visible; }
+.fiche-page .stage-text .text-title { font-size: 13pt; margin: 0 0 1mm; }
+.fiche-page .stage-text .text-body { font-weight: 400; }
+.fiche-page .stage-text { border-left: 0.6mm solid #000; padding-left: 3mm; }
+.fiche-page .object { font-size: 17pt; cursor: default; }
+.fiche-page .objects.small .object, .fiche-page .objects.per-10 .object, .fiche-page .group .object { font-size: 12pt; }
+.fiche-page .objects-row { gap: 1mm; }
+.fiche-page .objects { gap: 1mm; }
+.fiche-page .equation, .fiche-page .equation.big { font-size: 18pt; gap: 2mm; flex-wrap: wrap; }
+.fiche-page .equation .num, .fiche-page .equation .op { font-size: 18pt; min-width: 0; padding: 0; background: none; box-shadow: none; color: #000; }
+.fiche-page .gap, .fiche-page .seq-item.gap, .fiche-page .pattern-item.gap {
+  border: 0.4mm dashed #000; background: #fff; color: #000; min-width: 10mm; border-radius: 1.5mm;
+}
+.fiche-page .ex-gap-box, .fiche-page .equation .ex-gap-box, .fiche-page .seq-item.ex-gap-box {
+  display: inline-block; min-width: 14mm; min-height: 10mm; border: 0.4mm solid #000; border-radius: 1.5mm; background: #fff;
+}
+.fiche-page .sequence, .fiche-page .pattern { gap: 1.5mm; flex-wrap: wrap; justify-content: center; }
+.fiche-page .seq-item, .fiche-page .pattern-item {
+  font-size: 15pt; min-width: 9mm; padding: 1mm 1.5mm; background: #fff; border: 0.3mm solid #555; box-shadow: none; border-radius: 1.5mm;
+}
+.fiche-page .stage-clock { width: 32mm; height: 32mm; }
+.fiche-page .stage-clock svg { width: 100%; height: 100%; }
+.fiche-page .stage-operation { gap: 2mm; }
+.fiche-page .frame .cell { width: 7mm; height: 7mm; }
+.fiche-page .blocks { transform: none; }
+.fiche-page .stage-swatch { width: 18mm; height: 12mm; border: 0.4mm solid #000; }
+.fiche-page .color-name { font-size: 10pt; color: #000; display: block; }
+.fiche-page svg { max-width: 100%; }
+.fiche-page .stage-drawing, .fiche-page .stage-chart, .fiche-page .stage-schema, .fiche-page .stage-fraction,
+.fiche-page .matrix, .fiche-page .scales, .fiche-page .stage-cubes, .fiche-page .stage-tangram, .fiche-page .number-line {
+  max-height: 48mm; max-width: 100%;
+}
+.fiche-page .stage-drawing svg, .fiche-page .stage-cubes svg, .fiche-page .stage-fraction svg { max-height: 44mm; max-width: 100%; }
+.fiche-page .stage-schema, .fiche-page .stage-chart { font-size: 10pt; max-height: none; }
+
+/* choix multiple : entourer (réponses côte à côte) ou cocher (une réponse par ligne) */
+.ex-choices { display: flex; flex-wrap: wrap; gap: 1mm 3mm; justify-content: center; align-items: center; }
+.ex-choice {
+  display: inline-flex; align-items: center; gap: 1.5mm; min-height: 8mm; padding: 0.5mm 1.5mm;
+  font-size: 13pt; border-radius: 4mm;
+}
+.ex-choices.cs-numbers .ex-choice, .ex-choices.cs-big-numbers .ex-choice, .ex-choices.cs-letters .ex-choice { font-size: 17pt; font-weight: 700; }
+.ex-choices.cs-pictures .ex-choice, .ex-choices.cs-arrows .ex-choice, .ex-choices.cs-claps .ex-choice { font-size: 24pt; padding: 0.5mm 2mm; }
+.ex-choices.cs-pictures { gap: 1mm 5mm; }
+.ex-choices.tick { flex-direction: column; align-items: flex-start; gap: 1.5mm; }
+.ex-choices.tick .ex-choice { font-size: 12pt; padding: 0; min-height: 0; }
+.ex-tickbox { width: 5mm; height: 5mm; border-radius: 0.8mm; flex: none; }
+.ex-choice-content { display: inline-flex; align-items: center; gap: 1mm; flex-direction: column; text-align: center; }
+.ex-choices.tick .ex-choice-content { flex-direction: row; text-align: left; }
+.fiche-page .ex-choice .shape svg, .fiche-page .ex-choice .figure-choice svg { width: 13mm; height: 13mm; }
+.fiche-page .ex-choice .shape { width: 13mm; height: 13mm; display: inline-block; }
+.fiche-page .ex-choice .swatch { display: inline-block; width: 12mm; height: 8mm; border: 0.4mm solid #000; border-radius: 1mm; }
+.fiche-page .ex-choice .flag-choice { width: 18mm; height: auto; }
+.fiche-page .ex-choice svg { max-height: 20mm; max-width: 30mm; }
+.fiche-page .ex-choice .scene { width: 24mm; max-width: 24mm; }
+.fiche-page .ex-choice .step-emoji { font-size: calc(18pt * var(--scale, 1)); }
+.fiche-page .ex-choice .step-caption { font-size: 10pt; }
+.fiche-page .ex-choice .objects .object { font-size: 11pt; }
+.fiche-page .ex-choice .bm-choice, .fiche-page .ex-choice .drawing-choice { max-width: 38mm; display: inline-block; }
+/* crayons à comparer : les uns sous les autres, alignés à gauche (leur longueur est la réponse) */
+.ex-choices.cs-bars { flex-direction: column; align-items: stretch; width: 100%; }
+.ex-choices.cs-bars .ex-choice, .ex-choices.cs-bars .ex-choice-content { width: 100%; align-items: flex-start; }
+.fiche-page .ex-choice .pencil-choice { display: block; height: 5mm; border: 0.3mm solid #000; }
+
+/* calculs à trous */
+.ex-tiles { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 1.5mm; }
+.ex-tiles-label { font-weight: 700; margin-right: 1mm; }
+.ex-tile { min-width: 8mm; padding: 0.5mm 1.5mm; border: 0.3mm solid #000; border-radius: 1.5mm; text-align: center; font-size: 13pt; }
+.ex-fill-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(52mm, 1fr)); gap: 2mm 6mm; }
+.ex-fill-row { margin: 0; display: flex; align-items: center; gap: 2mm; font-size: 16pt; }
+.ex-fill-row .ex-box { width: 11mm; height: 9mm; }
+
+/* relier : deux colonnes et des points */
+.ex-match { display: grid; grid-template-columns: auto minmax(8mm, 1fr) auto; row-gap: 2.5mm; align-items: center; font-size: 14pt; max-width: 100%; }
+.match-l, .match-r { min-width: 0; overflow-wrap: break-word; line-height: 1.15; }
+.match-l { display: flex; justify-content: flex-end; align-items: center; gap: 2mm; text-align: right; }
+.match-r { display: flex; align-items: center; gap: 2mm; }
+.match-dot { width: 2.6mm; height: 2.6mm; border-radius: 50%; background: #000; flex: none; }
+.match-emoji { font-size: 20pt; }
+.ex-match .objects .object { font-size: 11pt; }
+
+/* ranger */
+.ord-tiles { display: flex; flex-wrap: wrap; gap: 2mm; justify-content: center; }
+.ord-tile { padding: 1mm 2.5mm; border: 0.3mm solid #000; border-radius: 1.5mm; font-size: 15pt; }
+.ord-slots { margin: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1.5mm; font-size: 15pt; }
+.ord-slot { width: 15mm; }
+.ord-pics { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2mm 3mm; align-items: flex-end; }
+.ord-item { display: flex; flex-direction: column; align-items: center; gap: 1.5mm; max-width: 40mm; }
+.ord-pic { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ord-emoji { font-size: calc(24pt * var(--scale, 1)); line-height: 1.1; }
+.ord-emoji.mini { font-size: calc(14pt * var(--scale, 1)); }
+.ord-caption { font-size: 10.5pt; }
+.ord-box { width: 9mm; height: 9mm; }
+.ex-write { margin: 1mm 0 0; display: flex; }
+.ex-write-line { flex: 1; height: 10mm; border-bottom: 0.4mm solid #000; }
+
+/* opération posée */
+.ex-column { display: inline-grid; grid-template-columns: repeat(var(--w), 9mm); grid-auto-rows: 9mm; align-items: center; justify-items: center; font-size: 17pt; align-self: center; }
+.ex-column .col-rule { height: 0; border-top: 0.5mm solid #000; width: 100%; align-self: center; }
+.ex-column .col-box { width: 8mm; height: 8mm; }
+.ex-column .col-res { font-weight: 700; }
+
+/* horloge, sudoku, labyrinthe, écriture, points, quadrillages */
+.ex-clock { display: inline-block; width: 38mm; height: 38mm; align-self: center; }
+.ex-clock svg { width: 100%; height: 100%; }
+.ex-clock.mini { width: 16mm; height: 16mm; vertical-align: middle; }
+.fiche-page .clock-numbers text { font-size: 9px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: #000; }
+.fiche-page .ex-clock line[stroke="#b9b2a3"] { stroke: #666; }
+.fiche-page .hand-minute { stroke: #000; }
+
+.ex-sudoku { --n: 4; display: grid; grid-template-columns: repeat(var(--n), 1fr); width: min(100%, calc(var(--n) * 12mm), 56mm); aspect-ratio: 1; border: 0.7mm solid #000; align-self: center; }
+.ex-sudoku.n9 { width: min(100%, 64mm); }
+.ex-sudoku.n6 .sd-cell { font-size: 13pt; }
+.sd-cell { display: flex; align-items: center; justify-content: center; border: 0.2mm solid #777; font-size: 15pt; aspect-ratio: 1; }
+.ex-sudoku.n9 .sd-cell { font-size: 10.5pt; }
+.sd-cell.box-right { border-right: 0.6mm solid #000; }
+.sd-cell.box-bottom { border-bottom: 0.6mm solid #000; }
+.sd-cell.sd-found { font-weight: 700; text-decoration: underline; }
+
+.ex-maze { display: block; width: 100%; max-width: 80mm; align-self: center; }
+.ex-maze svg, .ex-grid svg, .ex-dots svg { width: 100%; height: auto; max-height: 60mm; display: block; }
+.maze-walls { fill: none; stroke: #000; stroke-width: 0.9; stroke-linecap: round; }
+.maze-path { fill: none; stroke: #000; stroke-width: 1.6; stroke-dasharray: 2 1.4; stroke-linejoin: round; stroke-linecap: round; }
+.maze-emoji { font-size: 6.6px; text-anchor: middle; dominant-baseline: central; }
+
+.ex-trace { display: block; width: 100%; }
+.ex-trace svg { width: 100%; height: auto; max-height: 26mm; display: block; }
+.ex-trace path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.trace-model path { stroke: #000; stroke-width: 3.2; }
+.trace-dots path { stroke: #555; stroke-width: 2.4; stroke-dasharray: 0.5 4.5; }
+.trace-base { stroke: #000; stroke-width: 0.8; }
+.trace-top { stroke: #888; stroke-width: 0.6; stroke-dasharray: 3 3; }
+.ex-trace .trace-start circle { fill: #fff; stroke: #000; stroke-width: 0.9; }
+.ex-trace .trace-start text { font-size: 6px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+
+.ex-dots { display: block; width: 100%; max-width: 72mm; align-self: center; }
+.ex-dots .dot { fill: #000; }
+.ex-dots .dot-num { font-size: 4.6px; font-weight: 700; }
+.ex-dots .dot-num.end { text-anchor: end; }
+.ex-dots .dots-line { fill: none; stroke: #000; stroke-width: 0.8; }
+
+.ex-grid { display: block; width: 100%; max-width: 74mm; align-self: center; }
+.ex-grid .grid-lines { fill: none; stroke: #555; stroke-width: 0.35; }
+.ex-grid .cell-dark { fill: #222; }
+.ex-grid .cell-hatch { fill: url(#fiche-hachures); stroke: #000; stroke-width: 0.5; }
+.ex-grid .grid-axis { stroke: #000; stroke-width: 1.3; stroke-dasharray: 2.5 1.5; }
+.ex-grid .clue { font-size: 4.6px; font-weight: 700; dominant-baseline: central; }
+.ex-grid .row-clue { text-anchor: end; }
+.ex-grid .col-clue { text-anchor: middle; }
+
+/* le corrigé */
+.corrige-list {
+  list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.5mm 4mm; align-content: start; font-size: 12pt;
+}
+.ans { display: flex; gap: 2mm; align-items: flex-start; break-inside: avoid; min-width: 0; }
+.ans.wide { grid-column: 1 / -1; }
+.ans-body { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5mm 2mm; min-width: 0; }
+.ans-visual { display: inline-flex; align-items: center; }
+.ans-visual svg { max-height: 14mm; max-width: 30mm; }
+.ans-visual .scene { width: 16mm; }
+.ans-visual .shape, .ans-visual .shape svg { width: 9mm; height: 9mm; }
+.ans-visual .swatch { display: inline-block; width: 9mm; height: 6mm; border: 0.3mm solid #000; }
+.ans-visual .step-emoji { font-size: 14pt; }
+.ans-visual .step-caption, .ans-visual .color-name { display: none; }
+.ans-pairs { display: flex; flex-wrap: wrap; gap: 1mm 5mm; }
+.ans .ex-column { font-size: 12pt; grid-template-columns: repeat(var(--w), 6mm); grid-auto-rows: 6mm; }
+.ans .ex-sudoku { width: min(100%, calc(var(--n) * 7mm)); }
+.ans .ex-sudoku.n9 { width: min(100%, 64mm); }
+.ans .sd-cell { font-size: 9pt; }
+.ans .ex-maze svg, .ans .ex-dots svg, .ans .ex-grid svg { max-height: 40mm; }
+.ans-visual > * { max-height: 13mm; }
+.muted-print { font-size: 10.5pt; font-style: italic; }
+
+/* ---------------------------------------------------------------- L'impression */
+
+@page { size: A4 portrait; margin: 0; }
+
+@media print {
+  html, body, #app { background: #fff !important; height: auto !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; }
+  body > :not(#app), #app > :not(main.fiches), main.fiches > :not(.fiche-preview) { display: none !important; }
+  /* pas d'agrandissement de l'écran (iPad, texte agrandi, sous-titres) sur le papier */
+  main.fiches { zoom: 1 !important; padding: 0 !important; margin: 0 !important; min-height: 0 !important; display: block !important; }
+  .fiche-preview { margin: 0; overflow: visible; border-radius: 0; }
+  .fiche-scale { height: auto !important; }
+  .fiche-sheets { transform: none !important; gap: 0; display: block; }
+  /* un rien plus courte que la feuille : sinon l'arrondi ajoute une page blanche */
+  .fiche-page { box-shadow: none; height: 296mm; break-after: page; page-break-after: always; }
+  .fiche-page:last-child { break-after: auto; page-break-after: auto; }
+  .fiche-page * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

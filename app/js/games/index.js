@@ -23,6 +23,7 @@ import { ANGLAIS_PLUS_GAMES } from './anglais-plus.js';
 import { ecrire } from './ecriture.js';
 import { regleHorloge } from './horloge.js';
 import { tablesChrono } from './chrono.js';
+import { fluence } from './fluence.js';
 import { SCIENCES_GAMES } from './sciences.js';
 import { NOMBRES_PLUS_GAMES } from './nombres-plus.js';
 import { GRAMMAIRE_GAMES } from './grammaire.js';
@@ -34,12 +35,14 @@ import { CIEL_GAMES } from './ciel.js';
 import { CORPS_GAMES } from './corps.js';
 import { TECHNO_GAMES } from './techno.js';
 import { PLANETE_GAMES } from './planete.js';
+import { CE2_GAMES } from './ce2.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
-  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES, ...GRAMMAIRE_GAMES,
+  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, fluence, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES, ...GRAMMAIRE_GAMES,
   ...VIVRE_GAMES, ...OPERATIONS_GAMES, ...VOCABULAIRE_GAMES, ...DONNEES_GAMES, ...CIEL_GAMES, ...CORPS_GAMES, ...TECHNO_GAMES, ...PLANETE_GAMES,
+  ...CE2_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -47,7 +50,7 @@ const RUBRIQUES = [
     id: 'francais',
     title: 'Lire et écrire',
     icon: '📚',
-    games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'vocabulaire', 'ponctuation', 'homophones', 'genre', 'conjugaison', 'accords', 'ecrire', 'dictee'],
+    games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'fluence', 'vocabulaire', 'ponctuation', 'homophones', 'genre', 'conjugaison', 'accords', 'imparfait', 'ecrire', 'dictee'],
   },
   { id: 'histoires', title: 'Histoires', icon: '📖', games: ['histoires', 'petits-textes', 'ordre-histoire'] },
   {
@@ -58,6 +61,7 @@ const RUBRIQUES = [
       'compter', 'vite-vu', 'panier', 'patates', 'dizaines', 'relier',
       'comparer', 'suite', 'calcul', 'trous', 'relie-calculs', 'faire-dix', 'tables', 'tables-chrono',
       'ranger', 'problemes', 'schemas', 'doubles', 'graphiques', 'droite-numerique', 'fractions', 'partage', 'addition-posee',
+      'multiplication-posee', 'division', 'grands-nombres',
     ],
   },
   {
@@ -70,7 +74,7 @@ const RUBRIQUES = [
       'labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres',
     ],
   },
-  { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
+  { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures', 'perimetres'] },
   { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'se-reperer'] },
   { id: 'sciences', title: 'Sciences', icon: '🔬', games: ['vivant', 'corps', 'milieux', 'matiere', 'melanges', 'electricite', 'objets', 'ciel', 'meteo', 'planete'] },
   {
@@ -89,7 +93,7 @@ const RUBRIQUES = [
 const SECTION_GAMES = {
   'Écrire': ['ecrire'],
   'L’heure et le calendrier': ['heure', 'regle-horloge', 'calendrier', 'saisons'],
-  'Monnaie et mesures': ['monnaie', 'mesures'],
+  'Monnaie et mesures': ['monnaie', 'mesures', 'perimetres'],
   'Puzzles, memory et coloriages': ['puzzle', 'memory', 'coloriage-magique', 'points'],
   'Logique': ['formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross'],
   'Formes et espace': ['symetrie', 'reproduire', 'tangram', 'cubes'],

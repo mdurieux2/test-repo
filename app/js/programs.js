@@ -1,6 +1,9 @@
 // Programme par classe : quels jeux, et quels niveaux de chaque jeu. Construit à partir
 // des programmes officiels (BO n°41 du 31/10/2024, en vigueur à la rentrée 2025, et
 // programme de langues vivantes du BO n°12 du 19/03/2026) :
+//   PS  : rien à lire ni à écrire (la voix dit tout, on répond en touchant des images) : écouter
+//         des histoires et des comptines, compter jusqu'à 5, formes et couleurs, gros puzzles,
+//         memory à 2 ou 3 paires, trier, l'intrus, les animaux, des labyrinthes très simples ;
 //   MS  : syllabes, rimes, lettres capitales ; dénombrer jusqu'à 6, formes, suites AB,
 //         se repérer dans l'espace (labyrinthes, ombres), ranger par taille ;
 //   GS  : son des lettres, premier son ; collections jusqu'à 10, décompositions, ajouter/retirer,
@@ -9,6 +12,9 @@
 //         calcul, problèmes, doubles, lire l'heure ;
 //   CE1 : homophones, accords, compréhension de textes ; nombres jusqu'à 1000, tables, problèmes
 //         en deux étapes, heure.
+//   CE2 : fin du cycle 2 : imparfait, futur, passé composé, accords, homophones, textes plus longs ;
+//         nombres jusqu'à 10 000, tables jusqu'à 10, multiplication posée, division, problèmes,
+//         heure et durées, mesures, périmètres, fractions ; anglais niveau A1.
 // [identifiant du jeu, niveau minimum, niveau maximum]. Le niveau s'adapte à
 // l'enfant à l'intérieur de cette fourchette. Pour « calcul », les niveaux sont
 // les paliers (1 = +5, 2 = −5, 3 = ±5, 4 = +10 … 36 = ±100).
@@ -16,6 +22,33 @@
 import { DOMAINS, findGame } from './games/index.js';
 
 export const PROGRAMS = {
+  PS: {
+    francais: [
+      ['syllabes-rythme', 1, 1], ['rimes', 1, 1], ['vocabulaire', 1, 2], ['ecrire', 1, 1],
+    ],
+    histoires: [
+      ['histoires', 1, 1],
+    ],
+    maths: [
+      ['compter', 1, 1], ['vite-vu', 1, 1], ['panier', 1, 1], ['relier', 1, 1], ['comparer', 1, 1], ['ranger', 1, 1],
+    ],
+    jeux: [
+      ['puzzle', 1, 2], ['memory', 1, 2], ['coloriage-magique', 1, 1], ['points', 1, 1],
+      ['formes', 1, 1], ['algorithmes', 1, 1], ['intrus', 1, 2], ['ombres', 1, 1], ['labyrinthe', 1, 1],
+    ],
+    temps: [
+      ['saisons', 1, 1], ['mesures', 1, 1],
+    ],
+    monde: [
+      ['animaux-monde', 1, 1], ['vivre-ensemble', 1, 1], ['se-reperer', 1, 1],
+    ],
+    sciences: [
+      ['vivant', 1, 2], ['objets', 1, 2], ['meteo', 1, 2], ['planete', 1, 1],
+    ],
+    anglais: [
+      ['ecoute', 1, 2], ['compte-anglais', 1, 1], ['ou-est', 1, 1], ['intrus-anglais', 1, 1], ['parle-anglais', 3, 3],
+    ],
+  },
   MS: {
     francais: [
       ['syllabes-rythme', 1, 2], ['rimes', 1, 1], ['lettres', 1, 2],
@@ -87,7 +120,7 @@ export const PROGRAMS = {
   },
   CP: {
     francais: [
-      ['premier-son', 1, 8], ['syllabes', 1, 8], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['vocabulaire', 2, 7], ['ponctuation', 1, 7], ['genre', 1, 1], ['conjugaison', 1, 3], ['accords', 1, 7],
+      ['premier-son', 1, 8], ['syllabes', 1, 8], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['fluence', 1, 7], ['vocabulaire', 2, 7], ['ponctuation', 1, 7], ['genre', 1, 1], ['conjugaison', 1, 3], ['accords', 1, 7],
       ['ecrire', 2, 8],
       ['dictee', 1, 5],
     ],
@@ -127,7 +160,7 @@ export const PROGRAMS = {
   },
   CE1: {
     francais: [
-      ['bon-mot', 2, 8], ['petits-mots', 2, 8], ['phrase', 1, 8], ['vocabulaire', 4, 10], ['ponctuation', 3, 10], ['homophones', 1, 8], ['genre', 1, 8],
+      ['bon-mot', 2, 8], ['petits-mots', 2, 8], ['phrase', 1, 8], ['fluence', 4, 9], ['vocabulaire', 4, 10], ['ponctuation', 3, 10], ['homophones', 1, 8], ['genre', 1, 8],
       ['conjugaison', 1, 10], ['accords', 2, 10],
       ['ecrire', 4, 8],
       ['dictee', 2, 8],
@@ -166,6 +199,62 @@ export const PROGRAMS = {
       ['memory-anglais', 1, 8], ['intrus-anglais', 1, 7], ['contraires-anglais', 1, 7], ['phrase-anglais', 1, 7],
     ],
   },
+  CE2: {
+    francais: [
+      ['bon-mot', 5, 8], ['petits-mots', 4, 8], ['phrase', 3, 8], ['fluence', 7, 9], ['vocabulaire', 5, 10], ['ponctuation', 6, 10], ['homophones', 1, 8], ['genre', 4, 8],
+      ['conjugaison', 4, 10], ['imparfait', 1, 8], ['accords', 4, 10],
+      ['ecrire', 7, 8],
+      ['dictee', 5, 8],
+    ],
+    histoires: [
+      ['histoires', 4, 8], ['petits-textes', 3, 10], ['ordre-histoire', 6, 10],
+    ],
+    maths: [
+      ['dizaines', 5, 8], ['grands-nombres', 1, 8], ['comparer', 4, 7], ['suite', 5, 8], ['calcul', 13, 36],
+      ['trous', 6, 9], ['relie-calculs', 6, 9], ['faire-dix', 5, 8], ['tables', 4, 9], ['tables-chrono', 1, 8],
+      ['multiplication-posee', 1, 8], ['division', 1, 8],
+      ['ranger', 6, 10], ['problemes', 6, 10], ['schemas', 5, 10], ['doubles', 4, 7],
+      ['graphiques', 5, 10], ['droite-numerique', 5, 10], ['fractions', 3, 10], ['partage', 7, 10], ['addition-posee', 4, 10],
+    ],
+    jeux: [
+      ['intrus', 4, 8], ['ombres', 4, 8], ['sudoku', 5, 10], ['tableau-logique', 4, 9], ['balances', 4, 8], ['picross', 3, 8], ['symetrie', 3, 7], ['reproduire', 3, 8],
+      ['tangram', 3, 8], ['cubes', 3, 7], ['labyrinthe', 5, 10], ['labyrinthe-rond', 3, 9], ['chemin-nombres', 6, 10],
+      ['chemin-lettres', 4, 7],
+      ['puzzle', 4, 8], ['memory', 4, 7], ['coloriage-magique', 5, 7], ['points', 4, 7],
+    ],
+    temps: [
+      ['heure', 3, 7], ['regle-horloge', 3, 8], ['calendrier', 3, 7], ['saisons', 4, 7], ['monnaie', 3, 7], ['mesures', 3, 8],
+      ['perimetres', 1, 9],
+    ],
+    monde: [
+      ['animaux-monde', 3, 7],
+      ['pays', 2, 8], ['drapeaux', 2, 8], ['carte-monde', 3, 10],
+      ['vivre-ensemble', 6, 10], ['se-reperer', 5, 10],
+    ],
+    sciences: [
+      ['vivant', 5, 10], ['corps', 4, 10], ['milieux', 4, 10], ['matiere', 3, 10], ['melanges', 3, 10],
+      ['electricite', 4, 10], ['objets', 5, 10], ['ciel', 4, 10], ['meteo', 5, 10], ['planete', 3, 10],
+    ],
+    anglais: [
+      ['ecoute', 5, 10], ['lis-anglais', 4, 10], ['mot-anglais', 4, 10], ['relie-anglais', 4, 10],
+      ['compte-anglais', 4, 7], ['ou-est', 3, 8], ['epelle-anglais', 3, 10], ['parle-anglais', 2, 8],
+      ['nombres-anglais', 3, 8], ['calcul-anglais', 3, 8], ['couleurs-anglais', 2, 7], ['colorie-anglais', 3, 7],
+      ['memory-anglais', 3, 8], ['intrus-anglais', 2, 7], ['contraires-anglais', 2, 7], ['phrase-anglais', 1, 7],
+    ],
+  },
+};
+
+/**
+ * Ce qu'on attend en fin d'année, en quelques mots (affiché aux parents dans le Suivi). Ce sont
+ * les grandes lignes des programmes : chaque enfant avance à son rythme.
+ */
+export const GRADE_GOALS = {
+  PS: 'Écouter des histoires et des comptines, nommer les formes et les couleurs, compter jusqu’à 3 ou 5, trier et assembler. Rien à lire ni à écrire : la voix dit tout.',
+  MS: 'Entendre les syllabes et les rimes, reconnaître les lettres capitales, compter jusqu’à 6, reproduire des suites, se repérer dans l’espace.',
+  GS: 'Entendre les sons des mots, connaître les lettres, compter jusqu’à 10, décomposer, ajouter et retirer, résoudre de premiers problèmes.',
+  CP: 'Lire des mots et de petits textes, écrire sous la dictée, connaître les nombres jusqu’à 100, calculer, résoudre des problèmes, lire l’heure.',
+  CE1: 'Lire et comprendre des textes, accorder, conjuguer au présent, au futur et au passé composé ; nombres jusqu’à 1 000, tables, problèmes en deux étapes.',
+  CE2: 'Lire des textes plus longs, conjuguer à l’imparfait, accorder ; nombres jusqu’à 10 000, tables, multiplication posée, division, mesures et périmètres.',
 };
 
 /** Les matières et jeux du programme d'une classe, avec la fourchette de niveaux de chaque jeu. */

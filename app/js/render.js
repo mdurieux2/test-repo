@@ -8,6 +8,7 @@ import { fractionSvg, numberLineSvg } from './games/nombres-plus.js';
 import { drawingSvg } from './games/vivre.js';
 import { cielSvg } from './games/ciel.js';
 import { technoSvg } from './games/techno.js';
+import { ce2Svg } from './games/ce2.js';
 import { barModelMarkup, chartMarkup, describeChart, describeModel, schemaMarkup } from './games/donnees.js';
 import {
   CONTINENTS, COUNTRIES, EUROPE_DRAWN, EUROPE_TARGETS, OCEANS, SEAS, VIEWS, WORLD_TARGETS, atIn, dotFor, mapPaths, toXY,
@@ -774,7 +775,7 @@ export function columnGrid({ op, rows, width, steps = [], offsets = [], mini = f
 /** Un dessin en SVG (feu des piétons, panneau, main, quadrillage…, Lune, thermomètre…), voir games/vivre.js et games/ciel.js. */
 function drawingElement(d, cls, label) {
   const el = h('span', { class: cls, role: 'img', 'aria-label': label });
-  el.innerHTML = cielSvg(d) ?? technoSvg(d) ?? drawingSvg(d);
+  el.innerHTML = cielSvg(d) ?? technoSvg(d) ?? ce2Svg(d) ?? drawingSvg(d);
   return el;
 }
 

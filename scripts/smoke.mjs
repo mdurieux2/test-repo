@@ -11,6 +11,8 @@
 //                  grandes cibles, texte espacé ; sur iPhone SE, Android 360 points et iPhone SE en paysage,
 //                  pour un échantillon de jeux de chaque rubrique ; A11Y=contrast,calm… ajoute d'autres réglages)
 //         ONLY=a11y   (seulement toucher sans glisser, clavier, sous-titres ; PARTS=a11y y ajoute contrastes et axe-core)
+//         ONLY=demo   (seulement la main qui montre le geste au premier lancement)
+//         ONLY=fiches   (seulement les fiches à imprimer : aperçu, impression A4 en PDF)
 //         A11Y=captions,textSize=1.15 DEVICES=375x667,667x375 PARTS=layout   (ces réglages en plus, sur ces écrans seulement)
 //         PORT=8124 pour lancer plusieurs tests en même temps
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
@@ -33,6 +35,7 @@ import { APP } from '../app/js/config.js';
 import { seasonOf } from '../app/js/themes.js';
 import { cle, planLecture } from '../app/js/voix-cles.js';
 import { DRAG_WORDS } from '../app/js/a11y-jeux.js';
+import { explain } from '../app/js/explications.js';
 
 const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
@@ -932,6 +935,114 @@ async function checkRecordings(page) {
   console.log('✔ voix des parents : enregistrement supprimé');
 }
 
+// ---------------------------------------------------------------- Lire à voix haute
+
+/**
+ * Lire à voix haute (fluence), sur un onglet à part dont l'horloge est factice (la minute passe d'un
+ * coup) : la consigne pour l'adulte, puis la lecture ; le robot touche des mots ratés (barrés en rouge),
+ * puis, la minute écoulée, le dernier mot lu ; le score (mots correctement lus par minute) est affiché
+ * et gardé sur le profil. Ensuite une lecture « sans chrono » (accessibilité), lue en entier, et le
+ * suivi des parents. Renvoie les étoiles de la seconde lecture (la première en donne 2, comme les autres jeux).
+ */
+async function checkFluence(context, game) {
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`${game.id} : ${e.message}`));
+  await page.clock.install();
+  const said = () => page.evaluate(() => globalThis.__spoken || []);
+  const plain = (t) => t.replace(/[  ]/g, ' ').replace(/‑/g, '-').replace(/\s+/g, ' ').trim();
+  const saved = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'], STORAGE_KEY);
+  await page.goto(BASE);
+  await setStore(page, `store.profiles['eva-rose'].games['${game.id}'] = { level: 3 };`);
+  await openGame(page, game);
+  await page.waitForSelector('.fluence-zone[data-phase="brief"] .fl-start');
+  const q = await page.evaluate(() => globalThis.__lc.question);
+  const tokens = q.stage.tokens;
+  const shown = plain(await page.textContent('.instruction .bubble'));
+  if (shown !== plain(q.text)) fail(`${game.id} : bulle « ${shown} » au lieu de « ${q.text} »`);
+  const brief = plain(await page.textContent('.fl-brief'));
+  if (!brief.includes('Asseyez-vous à côté de l’enfant') || !brief.includes('1 minute')) fail(`${game.id} : consigne pour l'adulte « ${brief} »`);
+  if (await page.locator('.fl-sheet').isVisible()) fail(`${game.id} : les mots sont visibles avant le départ`);
+  await page.waitForFunction((text) => (globalThis.__spoken || []).includes(text), q.instruction[0], { timeout: 5000 })
+    .catch(() => fail(`${game.id} : la consigne n'est pas dite`));
+  await page.click('.fl-start');
+  await page.waitForSelector('.fluence-zone[data-phase="read"] .fl-clock');
+  if (!(await said()).includes('À toi, Eva-Rose !')) fail(`${game.id} : « À toi, Eva-Rose ! » n'est pas dit au départ`);
+  const clockAt = async () => (await page.textContent('.fl-clock')).trim();
+  if (await clockAt() !== '⏱ 01:00') fail(`${game.id} : chronomètre « ${await clockAt()} » au départ`);
+  await page.clock.fastForward(20000);
+  await page.waitForFunction(() => document.querySelector('.fl-clock')?.textContent.trim() === '⏱ 00:40', null, { timeout: 5000 })
+    .catch(async () => fail(`${game.id} : chronomètre « ${await clockAt()} » après 20 secondes`));
+  // trois mots ratés, dont un touché une seconde fois (annulé)
+  for (const i of [1, 3, 5, 5]) await page.click(`.fl-word[data-word="${i}"]`);
+  for (const [i, on] of [[1, true], [3, true], [5, false], [0, false]]) {
+    const state = await page.$eval(`.fl-word[data-word="${i}"]`, (el) => ({
+      missed: el.classList.contains('missed'), pressed: el.getAttribute('aria-pressed'),
+      line: getComputedStyle(el).textDecorationLine, color: getComputedStyle(el).color,
+    }));
+    if (state.missed !== on || state.pressed !== String(on)) fail(`${game.id} : mot ${i} ${on ? 'non marqué raté' : 'marqué raté'} (${JSON.stringify(state)})`);
+    if (on && (!state.line.includes('line-through') || state.color !== 'rgb(179, 38, 30)')) fail(`${game.id} : un mot raté doit être barré ET rouge (${JSON.stringify(state)})`);
+  }
+  // la minute est écoulée : « C'est fini ! », et l'adulte touche le dernier mot lu
+  await page.clock.fastForward(41000);
+  await page.waitForSelector('.fluence-zone[data-phase="last"]', { timeout: 5000 }).catch(() => fail(`${game.id} : la lecture ne s'arrête pas après une minute`));
+  await page.waitForFunction(() => (globalThis.__spoken || []).includes('C’est fini !'), null, { timeout: 5000 })
+    .catch(() => fail(`${game.id} : « C’est fini ! » n'est pas dit`));
+  if (!(await page.locator('.fl-ok').isDisabled())) fail(`${game.id} : « Valider » avant d'avoir touché le dernier mot lu`);
+  await page.click('.fl-word[data-word="9"]');
+  if (!(await page.locator('.fl-word[data-word="9"].last').count()) || !(await page.locator('.fl-word[data-word="10"].unread').count())) fail(`${game.id} : dernier mot lu non marqué`);
+  await page.click('.fl-ok');
+  await page.waitForSelector('.results');
+  await assertNoJunk(page, `${game.id} résultats`);
+  const result = plain(await page.textContent('.fluence-result'));
+  if (!result.includes('8 mots bien lus en 1 minute') || !result.includes('10 lus, 2 ratés') || !result.includes('environ 50 mots par minute en fin de CP')) {
+    fail(`${game.id} : résultat « ${result} »`);
+  }
+  let stars = await page.locator('.big-star.on').count();
+  if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (8 mots bien lus sur 10)`);
+  const first = (await saved()).fluence?.at(-1);
+  if (!first || first.read !== 10 || first.errors !== 2 || first.correct !== 8 || first.mclm !== 8 || first.seconds !== 60 || first.timed !== true || first.level !== 3) {
+    fail(`${game.id} : lecture enregistrée ${JSON.stringify(first)}`);
+  }
+  // Estelle n'a lu aucun mot de la feuille (c'est l'enfant qui lit)
+  const readAloud = (await said()).filter((t) => tokens.includes(t));
+  if (readAloud.length) fail(`${game.id} : Estelle a lu des mots de la feuille (${readAloud.join(', ')})`);
+  console.log(`  ✔ ${game.id} : consigne pour l'adulte, minute chronométrée, mots ratés barrés en rouge, dernier mot lu → 8 mots bien lus, gardé sur le profil`);
+
+  // sans chrono (accessibilité) : lecture libre, le temps est donné à la fin ; tout lu sans erreur
+  await setStore(page, "store.profiles['eva-rose'].a11y = { noTimer: true };");
+  await openGame(page, game);
+  await page.waitForSelector('.fl-start');
+  if (!plain(await page.textContent('.fl-brief')).includes('à son rythme')) fail(`${game.id} sans chrono : consigne pour l'adulte`);
+  await page.click('.fl-start');
+  await page.waitForSelector('.fluence-zone[data-phase="read"]');
+  if (await page.locator('.fl-clock').count()) fail(`${game.id} sans chrono : le chronomètre est affiché`);
+  const total = (await page.evaluate(() => globalThis.__lc.question)).stage.tokens.length;
+  await page.clock.fastForward(30000);
+  await page.click('.fl-all');
+  await page.waitForSelector('.results');
+  const free = plain(await page.textContent('.fluence-result'));
+  if (!free.includes(`${total * 2} mots bien lus par minute`) || !free.includes('temps de lecture : 30 s')) fail(`${game.id} sans chrono : résultat « ${free} »`);
+  stars = await page.locator('.big-star.on').count();
+  if (stars !== 3) fail(`${game.id} sans chrono : ${stars} étoiles au lieu de 3 (tout lu sans erreur)`);
+  const kid = await saved();
+  if (kid.fluence.length !== 2 || kid.fluence[1].timed !== false || kid.games[game.id].level !== 4) {
+    fail(`${game.id} sans chrono : ${JSON.stringify(kid.fluence)}, niveau ${kid.games[game.id].level}`);
+  }
+  await setStore(page, "delete store.profiles['eva-rose'].a11y;");
+  console.log(`  ✔ ${game.id} sans chrono : pas de chronomètre, tout lu en 30 s → ${total * 2} mots par minute, niveau suivant`);
+
+  // suivi des parents : dernier et meilleur score, la semaine avec sa valeur écrite
+  await openParents(page);
+  const card = plain(await page.textContent('.fluence-card'));
+  if (!card.includes(`Dernier score${total * 2} / min`) || !card.includes(`Meilleur score${total * 2} / min`) || !card.includes("2 lectures · dernière lecture : aujourd'hui")) fail(`${game.id} : suivi « ${card} »`);
+  if ((await page.locator('.fluence-card .fl-week').count()) !== 1 || (await page.textContent('.fluence-card .fl-week-value')).trim() !== String(total * 2)) {
+    fail(`${game.id} : évolution par semaine absente du suivi`);
+  }
+  console.log(`  ✔ ${game.id} : suivi des parents (dernier score, meilleur score, la semaine)`);
+  await page.close();
+  return stars;
+}
+
 // ---------------------------------------------------------------- Parcours complet (iPhone 13)
 
 async function scenario() {
@@ -996,6 +1107,12 @@ let extraStars = 0; // étoiles gagnées en plus des 2 étoiles par jeu (deuxiè
 for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
   const grade = gradeFor(game.id);
   await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`);
+  if (game.adult) {
+    // lire à voix haute : un adulte écoute et touche les mots ratés (onglet à part, horloge factice)
+    extraStars += await checkFluence(context, game);
+    console.log(`✔ ${game.id} (${grade}) : deux lectures complètes`);
+    continue;
+  }
   if (game.id === 'calcul') {
     await goProfile(page);
     await page.click('[data-domain="maths"]');
@@ -1367,6 +1484,34 @@ await page.click('[data-edit="' + longId + '"]');
 await page.click('.delete-child');
 await page.waitForSelector('[data-child-card="matteo"]');
 if (await page.locator(`[data-child-card="${longId}"]`).count()) fail('le profil supprimé est toujours là');
+// petite section et CE2 : un enfant de chaque classe, son programme et ses attendus dans le Suivi
+for (const [name, grade, id] of [['Noé', 'PS', 'noe'], ['Inès', 'CE2', 'ines']]) {
+  await page.click('.add-child');
+  await page.fill('[data-field="name"]', name);
+  await page.click(`[data-grade="${grade}"]`);
+  if ((await page.getAttribute(`[data-grade="${grade}"]`, 'aria-checked')) !== 'true') fail(`classe ${grade} : le bouton n’est pas coché`);
+  await page.click('.child-submit');
+  await page.waitForSelector(`[data-child-card="${id}"]`);
+  const savedGrade = await page.evaluate(([key, kid]) => JSON.parse(localStorage.getItem(key)).profiles[kid]?.grade, [STORAGE_KEY, id]);
+  if (savedGrade !== grade) fail(`${name} : classe « ${savedGrade} » au lieu de « ${grade} »`);
+  if (!(await page.textContent(`[data-child-card="${id}"]`)).includes(grade === 'PS' ? 'Petite section' : 'CE2')) fail(`${name} : classe absente de la liste des enfants`);
+  await page.click('[data-tab="suivi"]');
+  await page.click(`[data-child="${id}"]`);
+  await page.waitForSelector(`[data-grade-goals="${grade}"]`);
+  const gradeRows = await page.locator('.game-row').count();
+  const gradeGames = Object.values(PROGRAMS[grade]).flat().length;
+  if (gradeRows !== gradeGames) fail(`${grade} : ${gradeRows} jeux suivis au lieu de ${gradeGames}`);
+  await assertNoJunk(page, `suivi ${grade}`);
+  await shot(`06d-suivi-${grade}`);
+  await page.click('[data-tab="enfants"]');
+}
+for (const id of ['noe', 'ines']) {
+  await page.click(`[data-edit="${id}"]`);
+  await page.click('.delete-child');
+  await page.waitForSelector('[data-child-card="matteo"]');
+  if (await page.locator(`[data-child-card="${id}"]`).count()) fail(`le profil ${id} supprimé est toujours là`);
+}
+console.log('✔ petite section et CE2 : profils créés, programme et attendus dans le Suivi, puis supprimés');
 // remettre le prénom d'origine
 await page.click('[data-edit="eva-rose"]');
 await page.fill('[data-field="name"]', 'Eva-Rose');
@@ -1569,7 +1714,7 @@ const A11Y_GAMES = [
   ['trous', 1], ['droite-numerique', 2], ['fractions', 2], ['partage', 1], ['addition-posee', 1], ['puzzle', 1],
   ['memory', 1], ['coloriage-magique', 1], ['points', 1], ['sudoku', 1], ['picross', 1], ['symetrie', 1],
   ['labyrinthe', 1], ['labyrinthe-rond', 1], ['chemin-nombres', 1], ['regle-horloge', 1], ['monnaie', 3],
-  ['carte-monde', 1], ['ranger', 1], ['dictee', 1],
+  ['carte-monde', 1], ['ranger', 1], ['dictee', 1], ['fluence', 3],
   ...['histoires', 'anglais', 'sciences'].map((domain) => [GAMES.find((g) => g.domain === domain && !g.paliers)?.id, 1]),
 ].filter(([id]) => id && findGame(id));
 
@@ -1730,6 +1875,18 @@ async function a11yPart() {
     const kind = await page.evaluate(() => globalThis.__lc?.question?.interaction || 'choix');
     await audit(`jeu ${id} (${kind})`);
   }
+  // corriger en expliquant : l'encart affiché après une première erreur (boîtes de 10, phrase à tester)
+  for (const [id, level] of [['faire-dix', 4], ['homophones', 5]]) {
+    await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor(id, level) || 'CE1'}'; store.profiles['eva-rose'].games['${id}'] = { level: ${level} };`);
+    await openGame(page, findGame(id));
+    await page.waitForSelector('.choices');
+    await page.evaluate(() => {
+      const q = globalThis.__lc.question;
+      [...document.querySelectorAll('.choice')].find((b) => b.dataset.value !== String(q.answer)).click();
+    });
+    await page.waitForSelector('.explain');
+    await audit(`jeu ${id}, explication après une erreur`);
+  }
   // une mauvaise réponse (message « Essaie encore ! », bouton barré), puis la partie jusqu'au bout
   const compter = findGame('compter');
   await setStore(page, `store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games.compter = { level: 1 };`);
@@ -1752,6 +1909,19 @@ async function a11yPart() {
   }
   await page.waitForSelector('.screen.results');
   await audit('fin de partie');
+  // lire à voix haute : la feuille de lecture (un mot raté, barré), le dernier mot lu, puis le résultat (après la fin de partie : même titre de page)
+  await setStore(page, `store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games.fluence = { level: 3 };`);
+  await openGame(page, findGame('fluence'));
+  await page.click('.fl-start');
+  await page.waitForSelector('.fluence-zone[data-phase="read"]');
+  await page.click('.fl-word[data-word="1"]');
+  await audit('jeu fluence, lecture');
+  await page.click('.fl-stop');
+  await page.click('.fl-word[data-word="5"]');
+  await audit('jeu fluence, dernier mot lu');
+  await page.click('.fl-ok');
+  await page.waitForSelector('.screen.results');
+  await audit('jeu fluence, résultat');
 
   // album, personnage
   await goProfile(page, 'eva-rose');
@@ -1775,11 +1945,19 @@ async function a11yPart() {
   await audit('espace parents, enfants');
   await page.click('[data-edit="eva-rose"]');
   await page.click('[data-domain-games="maths"] summary');
+  await page.click('[data-sons-panel="sons"] summary'); // « Sons vus en classe » : les sons et les mots-outils dépliés
+  await page.click('[data-son="ou"]');
+  await page.click('[data-sons-panel="outils"] summary');
   await audit('espace parents, modifier un enfant');
   await page.click('.top-bar .icon-btn');
   await page.click('[data-tab="reglages"]');
   await page.waitForSelector('.settings');
   await audit('espace parents, réglages');
+  await page.click('[data-fiches="reglages"]');
+  await page.waitForSelector('.fiche-page');
+  await audit('espace parents, fiches à imprimer');
+  await page.click('[data-fiche-back]');
+  await page.waitForSelector('.settings');
   await page.click('[data-voices]');
   await page.waitForSelector('.voices');
   await audit('espace parents, vos voix');
@@ -2018,6 +2196,247 @@ async function a11yChecks() {
   await context.close();
 }
 
+// ---------------------------------------------------------------- Démonstration au premier lancement (demo.js)
+
+/**
+ * La main qui montre le geste : elle apparaît la première fois qu'un enfant ouvre un jeu au geste
+ * pas évident, pas la deuxième ; le bouton « ? » la remontre ; le moindre toucher la fait partir
+ * (et sert au jeu) ; des touchers seulement avec « toucher plutôt que glisser » ; sans mouvement en
+ * mode calme ou avec « réduire les animations » ; rien pour un choix multiple simple.
+ * (Le parcours de tous les jeux, PARTS=scenario, se joue aussi avec la main au premier lancement.)
+ */
+async function demoChecks() {
+  const context = await newContext({ width: 375, height: 667 });
+  // ce que la main a dessiné (touchers, glissés, étapes numérotées), noté au fil de l'eau
+  await context.addInitScript(() => {
+    window.__demo = [];
+    new MutationObserver((records) => {
+      for (const r of records) {
+        for (const n of r.addedNodes) {
+          const cls = n.getAttribute?.('class') || '';
+          if (/\bdemo-(layer|trail|ring|step|path)\b/.test(cls)) window.__demo.push(cls);
+        }
+      }
+    }).observe(document, { childList: true, subtree: true });
+  });
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`démonstration : ${e.message}`));
+  await page.goto(BASE);
+  await page.waitForSelector('.welcome');
+  const profile = (a11y, games = '{}') => setStore(page, `store.settings = { sessionLength: 5 };
+    const kid = store.profiles['eva-rose']; kid.grade = 'CP'; kid.a11y = ${JSON.stringify(a11y)}; kid.games = ${games}; kid.demos = [];`);
+  const demoShown = (timeout = 2500) => page.waitForSelector('.demo-layer', { timeout }).then(() => true).catch(() => false);
+  const demoGone = (timeout = 5000) => page.waitForSelector('.demo-layer', { state: 'detached', timeout }).then(() => true).catch(() => false);
+  const handAt = () => page.$eval('.demo-hand', (el) => el.style.transform).catch(() => null);
+  const drawn = () => page.evaluate(() => window.__demo.join(' '));
+  const seen = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'].demos || [], STORAGE_KEY);
+
+  // 1. Premier lancement du labyrinthe : la main glisse sur le chemin, puis s'en va d'elle-même
+  await profile({}, '{ labyrinthe: { level: 1 } }');
+  await openGame(page, findGame('labyrinthe'));
+  await page.waitForSelector('.choices:not(.answered)');
+  if (!(await demoShown())) fail('démonstration : la main n’apparaît pas au premier lancement du labyrinthe');
+  if (!(await page.locator('.demo-btn').count())) fail('démonstration : pas de bouton « ? » pour la revoir');
+  const pointer = await page.$eval('.demo-layer', (el) => getComputedStyle(el).pointerEvents);
+  if (pointer !== 'none') fail(`démonstration : la main capte le doigt (pointer-events ${pointer})`);
+  const a = await handAt();
+  await page.waitForTimeout(700);
+  const b = await handAt();
+  if (!a || a === b) fail('démonstration : la main ne bouge pas (labyrinthe)');
+  if (!(await demoGone())) fail('démonstration : la main ne disparaît pas d’elle-même');
+  if (!(await drawn()).includes('demo-trail')) fail('démonstration : le labyrinthe n’est pas montré en glissant');
+  if (!(await seen()).includes('labyrinthe')) fail('démonstration : « déjà vue » n’est pas retenu avec l’enfant');
+  // la consigne n'est pas cachée par le bouton « ? » (il est dans le coin du personnage)
+  const overlap = await page.evaluate(() => {
+    const btn = document.querySelector('.demo-btn').getBoundingClientRect();
+    const bubble = document.querySelector('.instruction .bubble').getBoundingClientRect();
+    return btn.right > bubble.left + 1 && btn.bottom > bubble.top && btn.top < bubble.bottom;
+  });
+  if (overlap) fail('démonstration : le bouton « ? » cache la consigne');
+  // 2. La deuxième fois : pas de main ; le bouton « ? » la remontre ; un toucher la fait partir et joue
+  await openGame(page, findGame('labyrinthe'));
+  let zone = await page.waitForSelector('.choices:not(.answered)');
+  if (await demoShown(1800)) fail('démonstration : la main revient au deuxième lancement');
+  await page.click('.demo-btn');
+  if (!(await demoShown(1000))) fail('démonstration : le bouton « ? » ne remontre pas la main');
+  let q = await page.evaluate(() => globalThis.__lc.question);
+  await answer(page, q, false); // on joue pendant que la main montre : elle s'en va, la question est réussie
+  if (!(await demoGone(300))) fail('démonstration : la main reste après un toucher');
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 })
+    .catch(() => fail('démonstration : la main empêche de jouer (labyrinthe)'));
+  // au clavier : le bouton « ? » est atteint avec Tab et a un nom ; une touche fait partir la main
+  zone = await page.waitForSelector('.choices:not(.answered)');
+  await tabTo(page, '.demo-btn', 'bouton « ? »');
+  await assertFocusVisible(page, 'bouton « ? »');
+  if (!(await page.getAttribute('.demo-btn', 'aria-label'))?.includes('Montre-moi')) fail('démonstration : le bouton « ? » n’a pas de nom');
+  await page.keyboard.press('Enter');
+  if (!(await demoShown(1000))) fail('démonstration : le bouton « ? » ne marche pas au clavier');
+  if (!(await page.textContent('.demo-layer [role="status"]').catch(() => '')).length) await page.waitForTimeout(150);
+  if (!/Regarde/.test(await page.textContent('.demo-layer [role="status"]'))) fail('démonstration : rien n’est dit aux lecteurs d’écran');
+  await page.keyboard.press('ArrowRight');
+  if (!(await demoGone(300))) fail('démonstration : la main reste après une touche du clavier');
+
+  // 3. Toucher plutôt que glisser : relier, des touchers seulement (pas de trait qui glisse)
+  await profile({ tapOnly: true }, "{ 'relie-calculs': { level: 1 } }");
+  await openGame(page, findGame('relie-calculs'));
+  await page.waitForSelector('.choices:not(.answered)');
+  if (!(await demoShown())) fail('démonstration : pas de main avec « toucher plutôt que glisser »');
+  await demoGone();
+  const tapDrawn = await drawn();
+  if (tapDrawn.includes('demo-trail') || !tapDrawn.includes('demo-ring')) fail(`démonstration : toucher plutôt que glisser, la main glisse (${tapDrawn})`);
+
+  // 4. Mode calme, puis « réduire les animations » : la main ne bouge pas, les étapes sont numérotées
+  for (const [label, a11y, motion] of [['mode calme', { calm: true }, 'no-preference'], ['réduire les animations', {}, 'reduce']]) {
+    await page.emulateMedia({ reducedMotion: motion });
+    await profile(a11y, '{ patates: { level: 1 } }');
+    await openGame(page, findGame('patates'));
+    await page.waitForSelector('.choices:not(.answered)');
+    if (!(await demoShown())) fail(`démonstration : pas de main en ${label}`);
+    const still = await page.locator('.demo-layer.still').count();
+    const steps = await page.locator('.demo-step').count();
+    const h1 = await handAt();
+    await page.waitForTimeout(800);
+    if (!still || !steps || h1 !== (await handAt())) fail(`démonstration : en ${label}, la main bouge ou les étapes ne sont pas numérotées`);
+    if (!(await demoGone())) fail(`démonstration : en ${label}, la main ne disparaît pas`);
+  }
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+  // 5. Un choix multiple simple : ni main ni bouton
+  await profile({}, '{ compter: { level: 1 } }');
+  await openGame(page, findGame('compter'));
+  await page.waitForSelector('.choices:not(.answered)');
+  if (await demoShown(1500) || await page.locator('.demo-btn').count()) fail('démonstration : une main sur un choix multiple simple');
+  console.log('✔ démonstration : la main au premier lancement (pas au deuxième), « ? » la remontre, un toucher la fait partir, touchers seuls, sans mouvement en mode calme');
+  await context.close();
+}
+
+// ---------------------------------------------------------------- Fiches à imprimer
+
+// Jeux dont on vérifie la fiche imprimée (une forme d'exercice chacun) : [jeu, classe]
+const FICHE_SAMPLE = [
+  ['calcul', 'CP'], ['trous', 'CP'], ['relie-calculs', 'CE1'], ['ranger', 'CP'], ['heure', 'CP'], ['regle-horloge', 'CE1'],
+  ['addition-posee', 'CE1'], ['sudoku', 'CE1'], ['labyrinthe', 'CE1'], ['ecrire', 'CP'], ['points', 'CE1'], ['symetrie', 'CP'],
+  ['picross', 'CE1'], ['petits-textes', 'CE1'], ['vivant', 'CP'], ['drapeaux', 'CE1'], ['graphiques', 'CE1'], ['bon-mot', 'CP'],
+];
+
+/** La fiche imprimée : deux feuilles A4, rien d'autre de l'écran, et rien qui dépasse. */
+async function checkPrintedFiche(page, label) {
+  // à l'impression, la « fenêtre » a la taille de la feuille A4 (794 × 1123 points) : les règles
+  // de l'écran pour les grandes tablettes (agrandissement) ne doivent rien changer
+  const viewport = page.viewportSize();
+  await page.setViewportSize({ width: 794, height: 1123 });
+  await page.emulateMedia({ media: 'print' });
+  const problem = await page.evaluate(() => {
+    const mm = 96 / 25.4;
+    const visible = (el) => el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 0;
+    if (visible(document.querySelector('.top-bar')) || visible(document.querySelector('.fiche-form'))) return 'les boutons de l’écran sont imprimés';
+    const pages = [...document.querySelectorAll('.fiche-page')];
+    if (pages.length !== 2) return `${pages.length} feuilles au lieu de 2`;
+    for (const [i, p] of pages.entries()) {
+      const r = p.getBoundingClientRect();
+      if (Math.abs(r.width - 210 * mm) > 2 || r.height > 297 * mm + 1) return `feuille ${i + 1} : ${Math.round(r.width / mm)} × ${Math.round(r.height / mm)} mm au lieu de 210 × 297 mm`;
+      if (p.scrollHeight > p.clientHeight + 1) return `feuille ${i + 1} : le contenu dépasse de ${Math.round((p.scrollHeight - p.clientHeight) / mm)} mm`;
+      if (r.left < -1 || r.left > 2) return `feuille ${i + 1} décalée (${Math.round(r.left)} px)`;
+      for (const el of p.querySelectorAll('.ex, .ans')) {
+        if (el.scrollWidth > el.clientWidth + 1) return `feuille ${i + 1} : exercice trop large (« ${el.textContent.trim().slice(0, 30)} »)`;
+        const box = el.getBoundingClientRect();
+        if (box.bottom > r.bottom - 4 * mm) return `feuille ${i + 1} : exercice sous la marge du bas`;
+      }
+    }
+    if (getComputedStyle(document.querySelector('.fiche-sheets')).transform !== 'none') return 'l’aperçu réduit est imprimé réduit';
+    return null;
+  });
+  // le vrai PDF A4 de Chromium : exactement deux pages
+  const pdf = await page.pdf({ format: 'A4', preferCSSPageSize: true, printBackground: true });
+  if (process.env.FICHE_PDF) writeFileSync(`${process.env.FICHE_PDF}/${label.replace(/\W+/g, '-')}.pdf`, pdf);
+  const pdfPages = (pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
+  await page.emulateMedia({ media: 'screen' });
+  await page.setViewportSize(viewport);
+  if (problem) fail(`fiche ${label} : ${problem}`);
+  if (pdfPages !== 2) fail(`fiche ${label} : le PDF A4 a ${pdfPages} pages au lieu de 2`);
+}
+
+async function checkFiches() {
+  const context = await newContext({ width: 390, height: 844 });
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`fiches : ${e.message}`));
+  await page.goto(BASE);
+  await page.waitForSelector('.welcome');
+  await setStore(page, "store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games = { heure: { level: 2 } }; store.profiles.matteo = store.profiles.matteo || { grade: 'MS', games: {} };");
+  await openParents(page);
+  // depuis le Suivi d'Eva-Rose
+  await page.click('[data-child="eva-rose"]');
+  await page.click('[data-fiches="suivi"]');
+  await page.waitForSelector('.fiches .fiche-page');
+  if ((await page.getAttribute('main.screen', 'data-title')) !== 'Fiches à imprimer') fail('fiches : titre de l’écran');
+  const info = async () => page.evaluate(() => ({
+    exercises: document.querySelectorAll('.fiche-exercices .fiche-list > li').length,
+    answers: document.querySelectorAll('.fiche-corrige .corrige-list > li').length,
+    name: document.querySelector('.fiche-name')?.textContent,
+    date: document.querySelector('.fiche-who')?.textContent,
+    consigne: document.querySelector('.fiche-consigne')?.textContent,
+    text: document.querySelector('.fiche-exercices')?.textContent,
+    game: document.querySelector('[data-fiche-game]').value,
+    level: document.querySelector('[data-fiche-level]').value,
+    scale: Number(getComputedStyle(document.querySelector('.fiche-scale')).getPropertyValue('--scale')),
+  }));
+  let sheet = await info();
+  if (sheet.exercises < 6 || sheet.exercises > 12) fail(`fiches : ${sheet.exercises} exercices au lieu de 6 à 12`);
+  if (sheet.answers !== sheet.exercises) fail(`fiches : ${sheet.answers} corrigés pour ${sheet.exercises} exercices`);
+  if (sheet.name !== 'Eva-Rose') fail(`fiches : prénom « ${sheet.name} » au lieu d’Eva-Rose`);
+  if (!/Date : \S+ \d+ \S+ \d{4}/.test(sheet.date)) fail(`fiches : date absente (${sheet.date})`);
+  if (!(sheet.consigne || '').replace('Consigne :', '').trim()) fail('fiches : consigne vide');
+  if (!(sheet.scale > 0.3 && sheet.scale < 0.6)) fail(`fiches : l’aperçu n’est pas réduit à la largeur de l’écran (${sheet.scale})`);
+  await checkLayout(page, 'fiches à imprimer (390×844)', { reachable: false });
+  // le niveau proposé est celui de l'enfant (le 2e niveau de « Quelle heure est-il ? » au CP)
+  await page.selectOption('[data-fiche-game]', 'heure');
+  await page.waitForFunction(() => document.querySelector('.fiche-exercices .ex-stage .stage-clock'));
+  sheet = await info();
+  const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'].games.heure.level, STORAGE_KEY);
+  if (sheet.level !== String(saved)) fail(`fiches : niveau ${sheet.level} proposé au lieu du niveau de l’enfant (${saved})`);
+  // « Autres exercices » : un nouveau tirage
+  const before = sheet.text;
+  await page.click('[data-fiche-new]');
+  await page.waitForFunction((t) => document.querySelector('.fiche-exercices').textContent !== t, before);
+  // « Imprimer » ouvre l'impression du navigateur
+  await page.evaluate(() => { window.print = () => { window.__printed = (window.__printed || 0) + 1; }; });
+  await page.click('[data-fiche-print]');
+  if ((await page.evaluate(() => window.__printed)) !== 1) fail('fiches : « Imprimer » n’ouvre pas l’impression');
+  await checkPrintedFiche(page, 'heure');
+  // une forme d'exercice par jeu, à l'impression (classe où le jeu est au programme)
+  const kinds = [];
+  for (const [gameId, grade] of FICHE_SAMPLE) {
+    await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`);
+    await page.goto(BASE);
+    await openParents(page);
+    await page.click('[data-child="eva-rose"]');
+    await page.click('[data-fiches="suivi"]');
+    await page.waitForSelector('.fiche-page');
+    await page.selectOption('[data-fiche-game]', gameId);
+    await page.waitForFunction((id) => document.querySelector('[data-fiche-game]').value === id && document.querySelector('.fiche-page'), gameId);
+    // le plus haut niveau proposé (le plus chargé)
+    const last = await page.$$eval('[data-fiche-level] option', (opts) => opts.at(-1).value);
+    await page.selectOption('[data-fiche-level]', last);
+    await page.waitForTimeout(50);
+    kinds.push(await page.$eval('.fiche-list > li', (li) => [...li.classList].find((c) => c.startsWith('exk-')).slice(4)));
+    await checkPrintedFiche(page, `${gameId} niveau ${last}`);
+  }
+  // « Retour » : l'espace parents
+  await page.click('[data-fiche-back]');
+  await page.waitForSelector('.parents');
+  // depuis les Réglages, sur un petit téléphone en paysage
+  await page.setViewportSize({ width: 667, height: 375 });
+  await page.click('[data-tab="reglages"]');
+  await page.click('[data-fiches="reglages"]');
+  await page.waitForSelector('.fiche-page');
+  await checkLayout(page, 'fiches à imprimer (667×375)', { reachable: false });
+  if ((await page.locator('[data-fiche-child]').count()) !== 2) fail('fiches : le choix de l’enfant manque');
+  await page.click('[data-fiche-child="matteo"]');
+  await page.waitForFunction(() => document.querySelector('.fiche-name')?.textContent === 'Matteo');
+  await context.close();
+  console.log(`✔ fiches à imprimer : aperçu, niveau de l’enfant, nouveau tirage, impression ; ${FICHE_SAMPLE.length + 1} fiches A4 de 2 pages (${[...new Set(kinds)].join(', ')})`);
+}
+
 if (!ONLY && PARTS.includes('scenario')) await scenario();
 else if (ONLY?.includes('hors-ligne')) {
   const context = await newContext({ width: 390, height: 844 });
@@ -2026,8 +2445,11 @@ else if (ONLY?.includes('hors-ligne')) {
   await checkOffline(context, page);
   await context.close();
 }
+if ((!ONLY && PARTS.includes('scenario')) || ONLY?.includes('fiches')) await checkFiches();
 // accessibilité : avec le parcours complet (PARTS=scenario), ou seule (PARTS=a11y, ou ONLY=a11y)
 if ((!ONLY && (PARTS.includes('scenario') || PARTS.includes('a11y'))) || ONLY?.includes('a11y')) await a11yChecks();
+// la main qui montre le geste : avec le parcours complet, ou seule (ONLY=demo)
+if ((!ONLY && !PLAY && PARTS.includes('scenario')) || ONLY?.includes('demo')) await demoChecks();
 
 // ---------------------------------------------------------------- Mise en page : tous les iPhone
 
@@ -2082,7 +2504,7 @@ const STRESS = {
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
-    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game')) {
+    for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game, .son-chip')) {
       if (el.clientWidth <= 1) continue; // caché à l'écran, gardé pour le clavier (flèches du labyrinthe rond)
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
@@ -2118,6 +2540,28 @@ async function checkLayout(page, label, { reachable = true } = {}) {
   }
 }
 const layoutProblems = [];
+
+/**
+ * Corriger en expliquant : après une première erreur, l'encart d'explication (s'il y en a un pour
+ * cette question) est dans l'écran, et les réponses restent visibles. Renvoie vrai si vérifié.
+ */
+async function checkExplanation(page, label) {
+  const q = await page.evaluate(() => globalThis.__lc?.question);
+  if (!q || !explain(q)) return false;
+  if (q.interaction === 'keypad') {
+    await typeNumber(page, q.answer + 1);
+  } else {
+    await page.evaluate((answer) => [...document.querySelectorAll('.choice')].find((b) => b.dataset.value !== String(answer))?.click(), q.answer);
+  }
+  await page.waitForSelector('.explain');
+  await checkLayout(page, label);
+  const problem = await page.evaluate(() => {
+    const r = document.querySelector('.explain').getBoundingClientRect();
+    return r.top < 0 || r.bottom > window.innerHeight + 1 ? `explication hors de l'écran (${Math.round(r.top)}–${Math.round(r.bottom)})` : null;
+  });
+  if (problem) layoutProblems.push(`${label} : ${problem}`);
+  return true;
+}
 
 /** Les boutons de l'écran d'enregistrement restent visibles sans faire défiler. */
 async function checkRecordButtons(page, label) {
@@ -2166,13 +2610,14 @@ async function checkDevice(device, repeat, deviceIndex) {
   if (screens && mine(deviceIndex)) {
   await goProfiles(page);
   await checkLayout(page, tag('Qui joue ?'));
-  for (const [id, grade] of [['matteo', 'MS'], ['eva-rose', 'CP']]) {
+  // les accueils et les rubriques de chaque classe : petite section et CE2, puis MS et CP (gardés pour la suite)
+  for (const [id, grade] of [['matteo', 'PS'], ['eva-rose', 'CE2'], ['matteo', 'MS'], ['eva-rose', 'CP']]) {
     await setStore(page, `store.profiles['${id}'] = store.profiles['${id}'] || {}; store.profiles['${id}'].grade = '${grade}';`);
     await goProfile(page, id);
-    await checkLayout(page, tag(`accueil ${id}`));
+    await checkLayout(page, tag(`accueil ${id} ${grade}`));
     for (const domain of DOMAINS.map((d) => d.id)) {
       await page.click(`[data-domain="${domain}"]`);
-      await checkLayout(page, tag(`liste ${domain} ${id}`), { reachable: false });
+      await checkLayout(page, tag(`liste ${domain} ${id} ${grade}`), { reachable: false });
       await page.click('.top-bar .icon-btn');
     }
   }
@@ -2206,7 +2651,7 @@ async function checkDevice(device, repeat, deviceIndex) {
   await goProfile(page);
   await page.click('[data-dress]');
   await checkLayout(page, tag('personnage'), { reachable: false });
-  checked += 22;
+  checked += 40;
   }
 
   // chaque niveau de chaque jeu
@@ -2225,6 +2670,18 @@ async function checkDevice(device, repeat, deviceIndex) {
         await page.waitForSelector('.choices');
         await checkLayout(page, tag(`${game.id} niveau ${level}`));
         checked++;
+        if (game.adult && k === 0) {
+          // lire à voix haute : après la consigne pour l'adulte, la feuille de lecture, puis le dernier mot lu
+          await page.click('.fl-start');
+          await page.waitForSelector('.fluence-zone[data-phase="read"]');
+          await page.click('.fl-word[data-word="2"]');
+          await checkLayout(page, tag(`${game.id} niveau ${level} (lecture)`));
+          await page.click('.fl-stop');
+          await page.click('.fl-word[data-word="6"]');
+          await checkLayout(page, tag(`${game.id} niveau ${level} (dernier mot lu)`));
+          checked += 2;
+        }
+        if (k === 0 && await checkExplanation(page, tag(`${game.id} niveau ${level}, explication`))) checked++;
       }
     }
   }
@@ -2240,6 +2697,7 @@ async function checkDevice(device, repeat, deviceIndex) {
       await openGame(page, findGame('calcul'), { palier: palier.id, format });
       await page.waitForSelector('.choices');
       await checkLayout(page, tag(`calcul ${palier.id} format ${format}`));
+      if (format === 0 && await checkExplanation(page, tag(`calcul ${palier.id}, explication`))) checked++;
       if (SHOTS && palier.max === 20 && format === 0) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-calcul.png` });
       checked++;
     }
@@ -2260,12 +2718,19 @@ async function checkDevice(device, repeat, deviceIndex) {
   await checkLayout(page, tag('enfants'), { reachable: false });
   await page.click('[data-edit="eva-rose"]');
   await page.click('[data-domain-games="maths"] summary'); // « Ses jeux » : une rubrique dépliée
+  await page.click('[data-sons-panel="sons"] summary'); // « Sons vus en classe » : les sons et les mots-outils dépliés
+  await page.click('[data-sons-panel="outils"] summary');
   await checkLayout(page, tag('modifier un enfant'), { reachable: false });
   await page.click('.top-bar .icon-btn');
   await page.click('[data-tab="reglages"]');
   await page.waitForSelector('.settings');
   await checkLayout(page, tag('réglages'), { reachable: false });
-  checked += 6;
+  await page.click('[data-fiches="reglages"]');
+  await page.waitForSelector('.fiche-page');
+  await checkLayout(page, tag('fiches à imprimer'), { reachable: false });
+  await page.click('[data-fiche-back]');
+  await page.waitForSelector('.settings');
+  checked += 7;
   checked += await checkVoicesLayout(page, tag);
   await ctx.close();
   return checked;

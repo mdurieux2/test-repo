@@ -1,0 +1,102 @@
+/* Corriger en expliquant (explications.js, explications-rendu.js) : après une première erreur,
+   un petit encart dans la zone de retour, « Essaie encore ! » en plus petit au-dessus.
+   Il tient dans la place déjà gardée pour le retour (pas de défilement), même en paysage où le
+   retour est une bulle flottante en haut de l'écran. */
+
+.explain { display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: 100%; margin-top: 6px; }
+.feedback .try-small { font-size: 1.05rem; margin: 0; line-height: 1.2; }
+.explain-card {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 12px;
+  max-width: 100%; padding: 4px 12px; border-radius: 14px;
+  background: var(--card); border: 2px solid var(--accent-dark); color: var(--ink);
+}
+@media (prefers-reduced-motion: no-preference) {
+  body:not(.a11y-calm) .explain-card { animation: explain-in 0.2s ease-out; }
+}
+@keyframes explain-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ne tient pas dans l'écran (petit téléphone, texte très grand) : l'encart se resserre (fitExplanation) */
+.explain-compact .explain-rule { display: none; }
+.explain-compact .explain-card { padding: 2px 8px; gap: 2px 8px; }
+.explain-compact .explain-steps { font-size: 1rem; gap: 0 10px; }
+.explain-compact .explain-text { font-size: 0.95rem; }
+.explain-compact .explain-frame { --ec: 11px; }
+.explain-compact .explain-groups .ec { --ec: 8px; }
+.explain-compact .explain-grid { font-size: 0.85rem; }
+.explain-compact .explain-places { font-size: 0.9rem; }
+.explain-tiny .explain-frames, .explain-tiny .explain-groups, .explain-tiny .explain-places { display: none; }
+.explain-tiny .explain-card.has-visual .explain-steps { flex-direction: row; }
+.explain-tiny .explain-steps { font-size: 0.95rem; }
+.explain-none .explain-card { display: none; }
+.feedback .explain-none .try-small { font-size: 1.4rem; }
+
+.feedback .explain-rule, .feedback .explain-steps { margin: 0; }
+.explain-rule { flex-basis: 100%; font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
+.explain-steps {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0 14px; min-width: 0;
+  font-size: 1.15rem; font-weight: 700; line-height: 1.3;
+}
+/* avec un dessin : les étapes l'une sous l'autre, à côté du dessin (moins haut) */
+.explain-card.has-visual .explain-steps { flex-direction: column; align-items: center; }
+.explain-step { overflow-wrap: anywhere; }
+.explain-text { font-weight: 400; font-size: 1.05rem; }
+.explain-calc { white-space: nowrap; }
+/* un long calcul (6 × 4 = 4 + 4 + 4 + 4 + 4 + 4 = 24) passe à la ligne entre deux termes */
+.explain-calc:only-child { white-space: normal; }
+.explain-em { color: var(--accent-dark); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.explain-ok { font-weight: 700; }
+.explain-ok.yes { color: var(--good-dark); }
+.explain-ok.no { color: #c43d3d; }
+
+/* boîtes de 10 (ou de 5) : point plein, rond creux, point barré, case vide */
+.explain-frames { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.explain-frame {
+  display: grid; grid-template-columns: repeat(5, var(--ec, 15px)); gap: 2px; padding: 2px;
+  border: 2px solid var(--ink); border-radius: 5px; background: #fff;
+}
+.explain-frame.size-5 { grid-template-rows: var(--ec, 15px); }
+.ec { width: var(--ec, 15px); height: var(--ec, 15px); border-radius: 3px; box-shadow: 0 0 0 1px var(--field-line) inset; position: relative; }
+.ec-a::after, .ec-b::after, .ec-x::after { content: ''; position: absolute; inset: 2px; border-radius: 50%; }
+.ec-a::after { background: var(--accent-dark); }
+.ec-b::after { border: 2.5px solid var(--ink); background: #fff; }
+.ec-x::after { background: linear-gradient(135deg, transparent 42%, var(--ink) 42%, var(--ink) 58%, transparent 58%), #d9d4cc; }
+
+/* rangées de points (tables, doubles, moitiés) */
+.explain-groups { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.eg-row { display: flex; gap: 2px; padding: 1px 3px; border: 1.5px solid var(--field-line); border-radius: 8px; }
+.explain-groups .ec { --ec: 11px; box-shadow: none; }
+.explain-groups .ec-a::after { inset: 0; }
+
+/* tableau des chiffres : centaines, dizaines, unités */
+.explain-places { border-collapse: collapse; font-size: 1rem; font-weight: 700; line-height: 1.15; }
+.explain-places th, .explain-places td { min-width: 1.6em; padding: 0 4px; text-align: center; border: 1.5px solid var(--field-line); }
+.explain-places th { font-size: 0.85rem; color: var(--muted); }
+.explain-places abbr { text-decoration: none; }
+.explain-places .mark { background: var(--accent-soft); outline: 2.5px solid var(--accent-dark); outline-offset: -2px; text-decoration: underline; }
+
+/* conjugaison : les six personnes sur deux lignes, celle de la phrase mise en valeur */
+.explain-grid {
+  display: grid; grid-template-columns: repeat(3, auto); gap: 0 10px; justify-content: center;
+  font-size: 0.95rem; line-height: 1.3;
+}
+/* colonne étroite : deux personnes par ligne */
+.explain-side .explain-grid, .a11y-text-large .explain-grid { grid-template-columns: repeat(2, auto); }
+.eg-cell { white-space: nowrap; padding: 0 4px; border-radius: 6px; }
+.eg-cell.em { color: var(--accent-dark); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; box-shadow: 0 0 0 2px var(--accent-dark) inset; }
+
+/* téléphone en paysage : le retour est une bulle en haut ; l'encart reste sur une ou deux lignes */
+@media (orientation: landscape) and (max-height: 520px) {
+  .play > .feedback:has(.explain) { width: max-content; max-width: min(94vw, 760px); padding: 2px 10px; }
+  .explain { flex-direction: row; gap: 10px; }
+  .feedback .try-small { flex-shrink: 0; max-width: 6em; }
+  /* la bulle cacherait les réponses : elle passe au-dessus de la colonne de gauche */
+  .play > .feedback:has(.explain-side) { left: max(16px, env(safe-area-inset-left)); transform: none; max-width: calc(50vw - 28px); }
+  .explain-side { flex-direction: column; gap: 0; }
+  .explain-steps { font-size: 1.05rem; }
+  .explain-frame { --ec: 12px; }
+}
+
+/* fort contraste */
+.a11y-contrast .explain-card { border-color: #000; }
+.a11y-contrast .explain-em, .a11y-contrast .eg-cell.em { color: #000; }
+.a11y-contrast .ec-a::after { background: #000; }

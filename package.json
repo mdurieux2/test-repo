@@ -1,8 +1,8 @@
 {
   "name": "lire-et-compter",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "private": true,
-  "description": "Jeux de français, de maths et d'anglais, de la moyenne section au CE1 : web app installable sur téléphone, tablette et ordinateur",
+  "description": "Jeux de français, de maths et d'anglais, de la petite section au CE2 : web app installable sur téléphone, tablette et ordinateur",
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",

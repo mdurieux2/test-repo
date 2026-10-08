@@ -2,7 +2,7 @@
 // (en voiture, en vacances…). Changer VERSION à chaque mise à jour publiée.
 // Tout nouveau fichier de l'app doit être ajouté à PRECACHE (vérifié par les tests).
 
-const VERSION = 'v20';
+const VERSION = 'v21';
 const CACHE = `lire-et-compter-${VERSION}`;
 // Sons de la voix naturelle (voix/fr/…, voix/en/…) : leurs noms changent avec leur contenu, on les
 // garde donc d'une version à l'autre (seuls ceux qui ne sont plus dans voix/manifest.json sont retirés).
@@ -17,6 +17,9 @@ const PRECACHE = [
   './',
   './css/aides.css',
   './css/acces.css',
+  './css/demo.css',
+  './css/fiches.css',
+  './css/explications.css',
   './css/style.css',
   './fonts/andika-400.woff2',
   './fonts/andika-700.woff2',
@@ -30,6 +33,11 @@ const PRECACHE = [
   './js/config.js',
   './js/couleurs.js',
   './js/dashboard.js',
+  './js/demo.js',
+  './js/fiches-ecran.js',
+  './js/fiches.js',
+  './js/explications.js',
+  './js/explications-rendu.js',
   './js/data/anglais-data.js',
   './js/data/carte-data.js',
   './js/data/ecriture-data.js',
@@ -37,12 +45,14 @@ const PRECACHE = [
   './js/games/anglais-plus.js',
   './js/games/anglais.js',
   './js/games/carte.js',
+  './js/games/ce2.js',
   './js/games/chrono.js',
   './js/games/comprendre.js',
   './js/games/dictee.js',
   './js/games/donnees.js',
   './js/games/drapeaux.js',
   './js/games/ecriture.js',
+  './js/games/fluence.js',
   './js/games/francais-extra.js',
   './js/games/grammaire.js',
   './js/games/helpers.js',
@@ -68,6 +78,7 @@ const PRECACHE = [
   './js/games/textes.js',
   './js/games/vocabulaire.js',
   './js/games/vivre.js',
+  './js/graphemes.js',
   './js/main.js',
   './js/photo.js',
   './js/picks.js',
@@ -77,6 +88,7 @@ const PRECACHE = [
   './js/recordings.js',
   './js/render.js',
   './js/rewards.js',
+  './js/sons-vus.js',
   './js/sounds.js',
   './js/speech.js',
   './js/voix-cles.js',

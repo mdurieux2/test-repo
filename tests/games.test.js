@@ -262,6 +262,14 @@ function checkQuestion(q, ctx) {
       assert.ok(steps.length >= 1 && steps.every((s) => values.includes(s)), ctx);
       break;
     }
+    case 'fluence': {
+      // lire à voix haute (détails dans tests/fluence.test.js) : une liste ou un texte, rien à choisir
+      const { kind, tokens } = q.stage;
+      assert.ok(['syllabes', 'mots', 'texte'].includes(kind), ctx);
+      assert.ok(tokens.length >= 40 && tokens.every((t) => typeof t === 'string' && /\p{L}/u.test(t)), ctx);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
     default: {
       const values = q.choices.map((c) => c.value);
       assert.ok(values.length >= 2, ctx);

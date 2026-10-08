@@ -65,7 +65,7 @@ const MUETTES_PARTICULIERES = {
 };
 
 /** Indices des lettres muettes dans un mot en minuscules (sans apostrophe ni trait d'union). */
-function muettesMot(w, opts = {}) {
+export function muettesMot(w, opts = {}) {
   const muettes = new Set();
   const L = w.length;
   if (L < 2) return muettes;

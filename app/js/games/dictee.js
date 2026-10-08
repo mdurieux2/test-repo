@@ -5,6 +5,7 @@
 
 import { pick, sample, shuffle } from '../random.js';
 import { PICTURES } from '../data/lecture-data.js';
+import { garderDechiffrables } from '../graphemes.js';
 
 const WORDS = {
   1: ['moto', 'vélo', 'lune', 'lama', 'lit', 'rat', 'judo', 'café', 'bébé', 'radio', 'piano', 'robot'],
@@ -45,9 +46,10 @@ export const dictee = {
   icon: '📝',
   skill: 'Écrire un mot entendu, lettre après lettre, en faisant correspondre les sons et les lettres',
   levels: LEVELS.map((l) => l.label),
-  generate(level, rng) {
+  // ctx.sons : les sons vus en classe ; seulement des mots qui s'écrivent avec eux (s'il y en a au moins 3)
+  generate(level, rng, _index, { sons } = {}) {
     const { words, picture, decoys = 0, traps: kind } = LEVELS[level - 1];
-    const word = pick(rng, words.flatMap((w) => WORDS[w]));
+    const word = pick(rng, garderDechiffrables(words.flatMap((w) => WORDS[w]), sons, (w) => w, { min: 3 }));
     const letters = [...word];
     const sound = { text: word, rate: 0.8 };
     let order = shuffle(rng, letters.map((_, i) => i));

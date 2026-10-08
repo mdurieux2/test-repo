@@ -2,9 +2,11 @@
 
 import { findGame } from './games/index.js';
 import { CALC_PALIERS } from './games/maths.js';
-import { programFor } from './programs.js';
-import { gameStats } from './storage.js';
+import { fluenceBenchmark, fluenceSummary, fluenceWeeks, wordReadings } from './games/fluence.js';
+import { GRADE_GOALS, programFor } from './programs.js';
+import { GRADES, gameStats } from './storage.js';
 import { h } from './render.js';
+import { resumeSons } from './graphemes.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -137,6 +139,58 @@ function gameRow(kid, { game, min, max }, onChange) {
       stats.answered ? ` · ${rate} % de réussite · ${stats.sessions} partie${stats.sessions > 1 ? 's' : ''} · ${relativeDay(stats.lastPlayed)}` : ''));
 }
 
+// ---- Lecture à voix haute (jeu « Lire à voix haute ») : dernier et meilleur score, évolution par semaine
+
+const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const MONTHS_SHORT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
+/** Barres du meilleur score de chaque semaine, avec la valeur écrite au-dessus (et une phrase pour les lecteurs d'écran). */
+function fluenceChart(weeks, unit) {
+  const max = Math.max(1, ...weeks.map((w) => w.best || 0));
+  return h('figure', { class: 'chart fl-chart' },
+    h('figcaption', { class: 'chart-title' }, `Meilleur score de chaque semaine (${unit} par minute)`),
+    h('ol', { class: 'fl-weeks', style: { '--n': String(weeks.length) } }, weeks.map((w) => {
+      const day = `${w.start.getDate()} ${MONTHS[w.start.getMonth()]}`;
+      const said = w.best === null ? `Semaine du ${day} : pas de lecture.`
+        : `Semaine du ${day} : meilleur score ${w.best} ${unit} par minute (${w.readings} lecture${w.readings > 1 ? 's' : ''}).`;
+      return h('li', { class: 'fl-week' },
+        h('span', { class: 'visually-hidden' }, said),
+        h('span', { class: 'fl-week-value', 'aria-hidden': 'true' }, w.best === null ? '–' : String(w.best)),
+        h('span', { class: w.best === null ? 'fl-week-bar empty' : 'fl-week-bar', 'aria-hidden': 'true', style: { height: `${w.best === null ? 2 : Math.max(4, (w.best / max) * 100)}%` } }),
+        h('span', { class: 'fl-week-label', 'aria-hidden': 'true' }, `${w.start.getDate()} ${MONTHS_SHORT[w.start.getMonth()]}`));
+    })));
+}
+
+/** La carte « Lecture à voix haute » du suivi. */
+export function fluenceCard(kid, grade, now = Date.now()) {
+  const all = Array.isArray(kid.fluence) ? kid.fluence : [];
+  const wordsOnly = wordReadings(all);
+  // les lectures de syllabes ne se mélangent pas aux lectures de mots
+  const scores = wordsOnly.length ? wordsOnly : all;
+  const unit = wordsOnly.length || !all.length ? 'mots' : 'syllabes';
+  const summary = fluenceSummary(scores);
+  const benchmark = fluenceBenchmark(grade);
+  if (!summary) {
+    return h('section', { class: 'card fluence-card' },
+      h('h2', {}, '🗣️ Lecture à voix haute'),
+      h('p', { class: 'muted' }, 'Pas encore de lecture. Dans « Lire et écrire », lancez « Lire à voix haute » et asseyez-vous à côté de l’enfant : il lit pendant 1 minute, vous touchez les mots ratés.'),
+      benchmark ? h('p', { class: 'muted small fl-benchmark' }, benchmark) : null);
+  }
+  const syllables = wordsOnly.length && wordsOnly.length < all.length ? fluenceSummary(all.filter((s) => s.kind === 'syllabes')) : null;
+  return h('section', { class: 'card fluence-card' },
+    h('h2', {}, '🗣️ Lecture à voix haute'),
+    h('p', { class: 'muted small' }, `${unit === 'mots' ? 'Mots' : 'Syllabes'} correctement ${unit === 'mots' ? 'lus' : 'lues'} par minute, avec un adulte qui écoute.`),
+    h('div', { class: 'stat-tiles' },
+      // tuiles à part (fl-tile) : les « chiffres clés » de la semaine restent les quatre du haut
+      [['Dernier score', summary.last.mclm], ['Meilleur score', summary.best.mclm]].map(([label, value]) => h('div', { class: 'fl-tile' },
+        h('span', { class: 'stat-label' }, label), h('span', { class: 'stat-value' }, `${value} / min`)))),
+    h('p', { class: 'small fl-last' }, `${summary.count} lecture${summary.count > 1 ? 's' : ''} · dernière lecture : ${relativeDay(summary.last.at)} `
+      + `(${summary.last.read} ${unit} lu${unit === 'mots' ? '' : 'e'}s, ${summary.last.errors} raté${unit === 'mots' ? '' : 'e'}${summary.last.errors > 1 ? 's' : ''}).`),
+    fluenceChart(fluenceWeeks(scores, now), unit),
+    syllables ? h('p', { class: 'muted small' }, `Syllabes : dernier score ${syllables.last.mclm} par minute, meilleur ${syllables.best.mclm}.`) : null,
+    benchmark ? h('p', { class: 'muted small fl-benchmark' }, benchmark) : null);
+}
+
 function describeMistake(m) {
   const game = findGame(m.game);
   return `${game ? game.title : m.game} : « ${m.given} » au lieu de « ${m.expected} »`;
@@ -162,6 +216,9 @@ export function dashboard({ kid, grade, onChange }) {
     }
   }
   const mistakes = frequentMistakes(kid.mistakes);
+  const sons = resumeSons(kid); // textes déchiffrables : les sons cochés par les parents
+  // la lecture à voix haute : pour les classes où le jeu est au programme, ou s'il y a déjà des lectures
+  const fluenceShown = domains.some((d) => d.games.some(({ game }) => game.id === 'fluence')) || kid.fluence?.length > 0;
 
   return [
     h('section', { class: 'card' },
@@ -172,6 +229,7 @@ export function dashboard({ kid, grade, onChange }) {
         statTile('Réussite', week.total ? `${Math.round((100 * week.correct) / week.total)} %` : '–'),
         statTile('Jours d’affilée', String(streak))),
       activityChart(days)),
+    fluenceShown ? fluenceCard(kid, grade) : null,
     h('section', { class: 'card' },
       h('h2', {}, 'À retravailler'),
       toRework.length
@@ -181,8 +239,13 @@ export function dashboard({ kid, grade, onChange }) {
       mistakes.length
         ? h('ul', { class: 'plain-list' }, mistakes.map((m) => h('li', {}, describeMistake(m), h('span', { class: 'muted' }, ` (${m.count} fois)`))))
         : h('p', { class: 'muted' }, 'Aucune erreur répétée.')),
+    // les attendus de fin d'année de sa classe, en quelques mots
+    GRADE_GOALS[grade] ? h('section', { class: 'card grade-goals', 'data-grade-goals': grade },
+      h('h2', {}, `Attendus de fin d’année (${GRADES[grade]})`),
+      h('p', { class: 'muted' }, GRADE_GOALS[grade])) : null,
     ...domains.map((d) => h('section', { class: 'card' },
       h('h2', {}, `${d.icon} ${d.title} : compétences`),
+      d.id === 'francais' && sons ? h('p', { class: 'muted small sons-vus-line', 'data-sons-vus': '' }, h('b', {}, 'Sons vus en classe : '), sons) : null,
       d.games.map((entry) => gameRow(kid, entry, onChange)))),
   ];
 }

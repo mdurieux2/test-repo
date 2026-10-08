@@ -1,21 +1,25 @@
 // Données de l'app, conservées sur l'appareil (localStorage). Aucune donnée ne sort du téléphone.
 // Un profil par enfant, créé par la famille au premier lancement : prénom, dessin, photo,
-// classe, étoiles, niveaux, paliers, records (défis chrono) et historique. Chaque appareil a
+// classe, étoiles, niveaux, paliers, records (défis chrono), lectures à voix haute et historique. Chaque appareil a
 // donc ses propres enfants, même quand le lien de l'app est partagé.
 
 import { createGameState } from './progress.js';
 import { isPhoto } from './photo.js';
 import { cleanA11y } from './a11y.js';
+import { cleanSons } from './graphemes.js';
 
 export const STORAGE_KEY = 'lire-et-compter:v2';
 export const HISTORY_LIMIT = 300;
 export const MISTAKES_LIMIT = 100;
+export const FLUENCE_LIMIT = 200; // lectures à voix haute gardées (jeu « Lire à voix haute »)
 
 export const GRADES = {
+  PS: 'Petite section',
   MS: 'Moyenne section',
   GS: 'Grande section',
   CP: 'CP',
   CE1: 'CE1',
+  CE2: 'CE2',
 };
 
 export const MAX_CHILDREN = 6;
@@ -33,7 +37,7 @@ const LEGACY = {
 export const LEVELS_VERSION = 2;
 
 export function defaultChild(grade = 'CP', { name = '', look = 'fille' } = {}) {
-  return { name, look, grade, stars: 0, games: {}, paliers: {}, records: {}, history: [], mistakes: [], photo: null, levelsVersion: LEVELS_VERSION };
+  return { name, look, grade, stars: 0, games: {}, paliers: {}, records: {}, fluence: [], history: [], mistakes: [], photo: null, levelsVersion: LEVELS_VERSION };
 }
 
 export function defaultStore() {
@@ -83,7 +87,8 @@ function idList(value) {
 
 /**
  * Réglages des parents qui suivent l'enfant partout (et survivent à « effacer la progression ») :
- * objectifs, personnage, rubriques et jeux masqués, jeux conseillés, profil d'accessibilité.
+ * objectifs, personnage, rubriques et jeux masqués, jeux conseillés, profil d'accessibilité,
+ * sons vus en classe (textes déchiffrables).
  */
 function keptSettings(child = {}) {
   return {
@@ -93,6 +98,7 @@ function keptSettings(child = {}) {
     hiddenGames: idList(child.hiddenGames),
     featured: idList(child.featured),
     a11y: cleanA11y(child.a11y),
+    sons: cleanSons(child.sons),
   };
 }
 
@@ -112,6 +118,17 @@ function cleanRecords(records) {
   return out;
 }
 
+/**
+ * Lectures à voix haute (jeu « Lire à voix haute ») : [{ at, level, kind, timed, total, read, errors,
+ * correct, seconds, mclm }], de la plus ancienne à la plus récente ; les lectures abîmées sont écartées.
+ */
+export function cleanFluence(list) {
+  if (!Array.isArray(list)) return [];
+  const count = (n) => Number.isFinite(n) && n >= 0;
+  return list.filter((s) => s && typeof s === 'object' && typeof s.at === 'string' && !Number.isNaN(Date.parse(s.at))
+    && count(s.mclm) && count(s.read) && count(s.errors) && count(s.correct)).slice(-FLUENCE_LIMIT);
+}
+
 function mergeChild(id, saved) {
   if (!saved || typeof saved !== 'object') return null;
   const legacy = LEGACY[id] || {};
@@ -129,12 +146,14 @@ function mergeChild(id, saved) {
     games: saved.games && typeof saved.games === 'object' ? saved.games : {},
     paliers: saved.paliers && typeof saved.paliers === 'object' ? saved.paliers : {},
     records: cleanRecords(saved.records),
+    fluence: cleanFluence(saved.fluence),
     history: Array.isArray(saved.history) ? saved.history.slice(-HISTORY_LIMIT) : [],
     mistakes: Array.isArray(saved.mistakes) ? saved.mistakes.slice(-MISTAKES_LIMIT) : [],
     photo: isPhoto(saved.photo) ? saved.photo : null,
     review: saved.review && typeof saved.review === 'object' ? saved.review : {},
     ...keptSettings(saved),
     easyRead: saved.easyRead === true,
+    demos: idList(saved.demos),
   };
 }
 
@@ -211,13 +230,19 @@ export function logSession(child, entry) {
   child.history = [...child.history, entry].slice(-HISTORY_LIMIT);
 }
 
+/** Garde une lecture à voix haute (pour le suivi des parents, semaine par semaine). */
+export function logFluence(child, entry) {
+  child.fluence = [...(Array.isArray(child.fluence) ? child.fluence : []), entry].slice(-FLUENCE_LIMIT);
+}
+
 /** Garde la trace d'une erreur (pour repérer les confusions fréquentes : b/d, 7 + 8…). */
 export function logMistake(child, entry) {
   child.mistakes = [...child.mistakes, entry].slice(-MISTAKES_LIMIT);
 }
 
 /**
- * Efface la progression d'un enfant : étoiles, niveaux, paliers, records des défis chrono, historique.
+ * Efface la progression d'un enfant : étoiles, niveaux, paliers, records des défis chrono, lectures à
+ * voix haute, historique (et les démonstrations déjà vues : la main remontre chaque geste).
  * Prénom, dessin, classe et photo sont conservés, ainsi que les réglages des parents (objectifs,
  * lecture facilitée, jeux masqués ou conseillés) et son personnage.
  */
@@ -229,6 +254,21 @@ export function resetChild(store, id) {
     ...(spoken ? { spoken } : {}),
   };
   return store;
+}
+
+// ---------------------------------------------------------------- Démonstrations (demo.js)
+
+/**
+ * La main qui montre le geste d'un jeu n'apparaît d'elle-même qu'une fois par jeu et par enfant :
+ * les jeux déjà montrés sont dans `child.demos` (remis à zéro par « effacer la progression »).
+ */
+export function demoSeen(child, gameId) {
+  return Array.isArray(child?.demos) && child.demos.includes(gameId);
+}
+
+export function markDemoSeen(child, gameId) {
+  if (!child || !gameId || demoSeen(child, gameId)) return;
+  child.demos = [...(Array.isArray(child.demos) ? child.demos : []), gameId];
 }
 
 // ---------------------------------------------------------------- Jouer à deux

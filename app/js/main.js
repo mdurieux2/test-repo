@@ -12,15 +12,20 @@ import {
 import {
   chronoLevelAfter, chronoOn, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono, untimedQuestion,
 } from './games/chrono.js';
+import {
+  FLUENCE_SECONDS, fluenceBenchmark, fluenceEntry, fluenceLevelAfter, fluenceScore, fluenceSeconds, fluenceStars, fluenceTime,
+} from './games/fluence.js';
 import { featuredGames, levelRange, MAX_FEATURED, programFor, programForChild } from './programs.js';
 import { dailyPicks, dueReviews as reviewsDue, duoPlan, drawPool } from './picks.js';
 import { createRng, pick, randInt, sample, shuffle } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import {
-  addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
+  addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logFluence, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
   resetChild, saveStore,
 } from './storage.js';
+import { demoSeen, markDemoSeen } from './storage.js';
+import { hasDemo, playDemo, stillDemo, stopDemo } from './demo.js';
 import {
   isNaturalVoiceOn, listFrenchVoices, loadNaturalVoice, naturalVoiceFiles, naturalVoicePacks, setNaturalVoice, setSpeechEnabled, setSpeechNames,
   onCaption, setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
@@ -36,12 +41,17 @@ import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
 import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
-import { gameListenOnly, playableQuestion, tapQuestion, withoutListenOnly } from './a11y-jeux.js';
+import { contexteSons } from './graphemes.js';
+import { sonsCard } from './sons-vus.js';
+import { explain } from './explications.js';
+import { explanationBox, fitExplanation } from './explications-rendu.js';
+import { CAPTION_HIDDEN, captionPart, gameListenOnly, playableQuestion, tapQuestion, withoutListenOnly } from './a11y-jeux.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
 import { STORY_DATA } from './games/histoires.js';
 import * as recordings from './recordings.js';
 import { formatDuration, MAX_SECONDS, pickMime, sentenceAt, sentenceTimeline } from './recordings.js';
+import { fichesScreen } from './fiches-ecran.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
@@ -81,6 +91,7 @@ function save() {
 function show(...children) {
   stopSpeaking();
   stopStoryAudio();
+  stopDemo(); // la main qui montre le geste (demo.js) ne reste pas sur l'écran suivant
   if (leaveScreen) {
     const leave = leaveScreen;
     leaveScreen = null;
@@ -202,9 +213,15 @@ const captionBand = h('div', { class: 'caption-band', 'aria-hidden': 'true', hid
 document.body.append(captionBand);
 let caption = { id: 0, parts: [], long: false };
 
-function captionLine(parts) {
+// la question en cours (tant qu'elle n'est pas résolue) : ce qu'il faut trouver à l'oreille n'est pas écrit
+let captionSession = null;
+const captionQuestion = () => (captionSession && !captionSession.locked && app.querySelector('.screen.play') ? captionSession.question : null);
+
+function captionLine(rawParts) {
+  const q = captionQuestion();
+  const parts = rawParts.map((part) => ({ ...part, text: captionPart(part, q) }));
   // un mot à écouter seul (« écris : », « école »), suivi d'une phrase (« Touche les lettres… ») : un point après le mot
-  const glue = (i) => (i >= 2 && /:$/.test(parts[i - 2].text) && /^[\p{L}\p{N}’'-]+$/u.test(parts[i - 1].text)
+  const glue = (i) => (i >= 2 && /:$/.test(parts[i - 2].text) && (/^[\p{L}\p{N}’'-]+$/u.test(parts[i - 1].text) || parts[i - 1].text === CAPTION_HIDDEN)
     && /^\p{Lu}/u.test(parts[i].text) ? '. ' : ' ');
   return parts.map(({ text, lang }) => (lang && !lang.startsWith('fr') ? h('span', { lang: lang.slice(0, 2) }, text) : text))
     .flatMap((part, i) => (i ? [glue(i), part] : [part]));
@@ -748,7 +765,7 @@ function welcomeScreen(adding = !store.order.length) {
       h('div', { class: 'welcome-avatars', 'aria-hidden': 'true' },
         avatar('apercu-fille', 'avatar-md', { look: 'fille' }), avatar('apercu-garcon', 'avatar-md', { look: 'garcon' })),
       h('h1', { class: 'welcome-title' }, 'Bienvenue !'),
-      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la moyenne section au CE1.')),
+      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la petite section au CE2.')),
     added.length ? h('section', { class: 'card' }, h('h2', {}, 'Ils vont jouer'), h('div', { class: 'child-chips' }, added)) : null,
     adding
       ? h('section', { class: 'card' },
@@ -1124,8 +1141,8 @@ function startSession(game, { level, back, total, duo } = {}) {
 function newQuestion(session) {
   let q;
   const { skipListening, tapOnly } = access();
-  // contexte : le prénom de l'enfant et la saison (histoires et textes de saison)
-  const generate = (level, index) => session.game.generate(level, rng, index, { name: me().name, season: currentSeason().id });
+  // contexte : le prénom de l'enfant, la saison (histoires et textes de saison) et les sons vus en classe (textes déchiffrables)
+  const generate = (level, index) => session.game.generate(level, rng, index, { name: me().name, season: currentSeason().id, sons: contexteSons(child()) });
   for (let i = 0; i < 10; i++) {
     const index = session.index + session.formatOffset;
     if (skipListening) {
@@ -1159,6 +1176,7 @@ function nextQuestion(session) {
   session.question = q;
   session.attempts = 0;
   session.locked = false;
+  captionSession = session;
   globalThis.__lc = { question: q }; // utilisé par les tests de bout en bout
 
   const { game } = session;
@@ -1194,6 +1212,7 @@ function nextQuestion(session) {
     share: shareZone,
     column: columnZone,
     body: bodyZone,
+    fluence: fluenceZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -1207,6 +1226,15 @@ function nextQuestion(session) {
     else zone = choiceZone(ctx);
   }
   if (stage) enableCounting(stage, guide);
+
+  // démonstration du geste (demo.js) : d'elle-même la première fois que l'enfant ouvre le jeu, puis
+  // avec le bouton « ? » (pas pour les choix multiples simples ni pendant un défi chrono)
+  const runDemo = () => playDemo(app.querySelector('.screen.play'), q, { tapOnly: access().tapOnly, still: stillDemo(access().calm) });
+  const demoBtn = hasDemo(q) && !session.chrono
+    ? h('button', { class: 'demo-btn', type: 'button', onclick: runDemo, 'aria-label': 'Montre-moi comment jouer', title: 'Montre-moi' }, '?')
+    : null;
+  // le bouton « ? » est posé dans le coin du personnage, sans rien déplacer
+  const withDemoButton = (guideBtn, btn) => (btn ? h('span', { class: 'guide-wrap' }, guideBtn, btn) : guideBtn);
 
   const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
   // défi chrono : le chronomètre (mm:ss) s'affiche sous le niveau, en haut à droite
@@ -1222,13 +1250,19 @@ function nextQuestion(session) {
       ? topBar({ onBack: session.back, backLabel: 'Quitter', title: duoScoreboard(session, progress) })
       : topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
     h('div', { class: 'instruction' },
-      h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
-        avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')),
+      withDemoButton(h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
+        avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')), demoBtn),
       h('button', { class: 'bubble bubble-left', onclick: replay }, readable(frenchSpacing(brief ? q.short.text : q.text)))),
     stage,
     zone,
     feedback));
   if (clock) runChrono(session, clock);
+  const demoKey = q.from || game.id; // une révision : la démonstration de son jeu d'origine
+  if (demoBtn && !demoSeen(child(), demoKey)) {
+    markDemoSeen(child(), demoKey);
+    save();
+    setTimeout(() => { if (demoBtn.isConnected) runDemo(); }, 700);
+  }
   // histoire en karaoké : la voix d'un parent (si l'histoire est enregistrée) ou la voix de
   // synthèse lit l'histoire pendant que le texte s'allume, puis la question est posée
   const readAlong = (before = []) => (q.karaoke ? readStory(stage, guide, q, before) : null);
@@ -1434,10 +1468,14 @@ function enableCounting(stageEl, guide) {
 
 function markWrong(ctx, { message = 'Essaie encore !', speech, given } = {}) {
   const { session, q, feedback } = ctx;
+  // corriger en expliquant : après la première erreur, une courte explication (explications.js) ;
+  // après la deuxième, la bonne réponse brille, comme avant (pas pendant un défi chrono)
+  const ex = session.attempts === 0 && message === 'Essaie encore !' && !session.chrono ? explain(q) : null;
   session.attempts++;
   playSound('error');
-  feedback.replaceChildren(h('p', { class: 'try-again' }, message));
-  say(session.guide, speech || message);
+  feedback.replaceChildren(ex ? explanationBox(ex) : h('p', { class: 'try-again' }, message));
+  if (ex) fitExplanation(feedback.firstChild);
+  say(session.guide, ex ? ['Essaie encore !', ex.say, ...(q.replay || [])] : speech || message);
   if (given !== undefined) {
     logMistake(child(), { at: new Date().toISOString(), game: q.from || session.game.id, question: q.text, expected: q.answer, given });
   }
@@ -4245,13 +4283,187 @@ function columnZone(ctx) {
   return { stage: h('div', { class: 'stage stage-column' }, grid), zone };
 }
 
+// ---- Lire à voix haute (fluence) : un adulte assis à côté de l'enfant lance la lecture d'une minute
+// (sans chrono : lecture libre), touche les mots ratés (barrés en rouge), puis le dernier mot lu.
+// Estelle ne lit pas les mots : elle dit la consigne, « À toi ! » au départ et « C'est fini ! » à la fin.
+
+function fluenceZone(ctx) {
+  const { q, session } = ctx;
+  const { kind, title, tokens } = q.stage;
+  const timed = !access().noTimer;
+  const syll = kind === 'syllabes';
+  const words = {
+    one: syll ? 'syllabe' : 'mot',
+    many: syll ? 'syllabes' : 'mots',
+    missed: syll ? 'mal lue ou sautée' : 'mal lu ou sauté',
+    crossed: syll ? 'barrée' : 'barré',
+    last: syll ? 'la dernière syllabe lue' : 'le dernier mot lu',
+  };
+  const missed = new Set();
+  let phase = 'brief'; // brief → read → last
+  let last = -1;
+  let startedAt = 0;
+  let stoppedAt = 0;
+  let timer = null;
+  const elapsed = () => ((stoppedAt || Date.now()) - startedAt) / 1000;
+
+  const label = (i) => `${tokens[i]}${missed.has(i) ? `, ${syll ? 'ratée' : 'raté'}` : ''}${i === last ? `, ${syll ? 'dernière lue' : 'dernier lu'}` : ''}`;
+  const buttons = tokens.map((token, i) => h('button', {
+    class: 'fl-word', 'data-word': i, 'aria-pressed': 'false', 'aria-label': token, onclick: () => touch(i),
+  }, syll ? token : readable(token)));
+  const sheet = h('div', { class: `fl-sheet fl-${kind}`, hidden: true },
+    title ? h('h2', { class: 'fl-title' }, title) : null,
+    kind === 'texte'
+      ? h('p', { class: 'fl-para' }, buttons.flatMap((b, i) => (i ? [' ', b] : [b])))
+      : h('div', { class: 'fl-list', style: { '--fl-chars': String(Math.max(...tokens.map((t) => t.length))) } }, buttons));
+  const brief = h('div', { class: 'fl-brief' },
+    h('h2', {}, frenchSpacing('👋 Pour l’adulte')),
+    h('p', {}, timed ? 'Asseyez-vous à côté de l’enfant : il lit à voix haute pendant 1 minute.'
+      : 'Asseyez-vous à côté de l’enfant : il lit à voix haute, à son rythme.'),
+    h('ul', {},
+      h('li', {}, frenchSpacing(`Touchez chaque ${words.one} ${words.missed} : ${syll ? 'elle' : 'il'} est ${words.crossed} en rouge.`)),
+      h('li', {}, 'S’il bloque, invitez-le à passer à la suite.'),
+      h('li', {}, `À la fin, touchez ${words.last}.`)));
+
+  const clock = h('span', { class: 'fl-clock', role: 'timer' });
+  const hint = h('p', { class: 'fl-hint' });
+  const startBtn = h('button', { class: 'big-btn primary fl-start', onclick: () => start() }, frenchSpacing('▶ C’est parti !'));
+  const stopBtn = h('button', { class: 'big-btn fl-stop', onclick: () => stop() }, '⏹ Arrêter');
+  const allBtn = h('button', { class: 'big-btn fl-all', onclick: () => finish(tokens.length - 1) }, '✔ Tout lu');
+  const okBtn = h('button', { class: 'big-btn primary fl-ok', disabled: true, onclick: () => finish(last) }, '✔ Valider');
+  const zone = h('div', { class: 'choices fluence-zone', 'data-phase': phase });
+
+  const render = () => {
+    zone.dataset.phase = phase;
+    if (phase === 'brief') zone.replaceChildren(startBtn);
+    else if (phase === 'read') {
+      hint.textContent = frenchSpacing(`Touchez les ${words.many} ${syll ? 'mal lues' : 'mal lus'} ; encore une fois pour annuler.`);
+      zone.replaceChildren(...[timed ? clock : null, hint, h('div', { class: 'fl-actions' }, stopBtn, allBtn)].filter(Boolean));
+    } else {
+      hint.textContent = frenchSpacing(`Touchez ${words.last}, ou « Tout lu ».`);
+      zone.replaceChildren(hint, h('div', { class: 'fl-actions' }, allBtn, okBtn));
+    }
+  };
+
+  const tick = () => {
+    if (!zone.isConnected) {
+      clearInterval(timer); // écran quitté
+      return;
+    }
+    const left = Math.max(0, FLUENCE_SECONDS - elapsed());
+    clock.textContent = `⏱ ${formatChrono(Math.ceil(left))}`;
+    clock.setAttribute('aria-label', `Il reste ${spokenChrono(Math.ceil(left))}`);
+    clock.classList.toggle('ending', left <= 10);
+    if (left <= 0) timeUp();
+  };
+
+  async function start() {
+    if (phase !== 'brief') return;
+    phase = 'go';
+    startBtn.disabled = true;
+    // « À toi, Léa ! » : les mots n'apparaissent (et le temps ne court) qu'ensuite
+    await Promise.race([say(session.guide, `À toi, ${session.guide.spoken} !`), sleep(2500)]);
+    if (!zone.isConnected) return;
+    phase = 'read';
+    brief.hidden = true;
+    sheet.hidden = false;
+    startedAt = Date.now();
+    render();
+    if (timed) {
+      tick();
+      timer = setInterval(tick, 250);
+    }
+    buttons[0].focus({ preventScroll: true });
+  }
+
+  /** Fin de la lecture (temps écoulé, ou « Arrêter ») : l'adulte touche le dernier mot lu. */
+  function endReading() {
+    clearInterval(timer);
+    phase = 'last';
+    render();
+    say(session.guide, 'C’est fini !');
+  }
+
+  function timeUp() {
+    if (phase !== 'read') return;
+    stoppedAt = startedAt + FLUENCE_SECONDS * 1000;
+    clock.textContent = `⏱ ${formatChrono(0)}`;
+    playSound('levelUp');
+    endReading();
+  }
+
+  function stop() {
+    if (phase !== 'read') return;
+    stoppedAt = Date.now();
+    endReading();
+  }
+
+  function touch(i) {
+    if (session.locked) return;
+    const b = buttons[i];
+    if (phase === 'read') {
+      // un mot raté : barré et rouge (pas seulement rouge) ; touché encore, il redevient normal
+      if (missed.has(i)) missed.delete(i);
+      else missed.add(i);
+      b.classList.toggle('missed', missed.has(i));
+      b.setAttribute('aria-pressed', String(missed.has(i)));
+      playSound('tap');
+    } else if (phase === 'last') {
+      last = i;
+      buttons.forEach((other, j) => {
+        other.classList.toggle('unread', j > i);
+        other.classList.toggle('last', j === i);
+        if (j === i) other.setAttribute('aria-current', 'true');
+        else other.removeAttribute('aria-current');
+      });
+      okBtn.disabled = false;
+      playSound('tap');
+    } else return;
+    buttons.forEach((other, j) => other.setAttribute('aria-label', label(j)));
+  }
+
+  function finish(lastIndex) {
+    if (session.locked || (phase !== 'read' && phase !== 'last') || lastIndex < 0) return;
+    if (phase === 'read') stoppedAt = Date.now(); // « Tout lu » avant la fin de la minute
+    clearInterval(timer);
+    session.locked = true;
+    zone.classList.add('answered');
+    const allRead = lastIndex === tokens.length - 1;
+    const score = fluenceScore({ total: tokens.length, missed: [...missed], last: lastIndex, seconds: fluenceSeconds({ timed, allRead, elapsed: elapsed() }) });
+    endFluence(session, score, { timed, kind });
+  }
+
+  render();
+  return { stage: h('div', { class: `stage stage-fluence fl-kind-${kind}` }, brief, sheet), zone };
+}
+
+/** Une lecture terminée : le score est gardé (child.fluence), le niveau suit, et la partie compte pour les étoiles. */
+function endFluence(session, score, { timed, kind }) {
+  const { game } = session;
+  const kid = child();
+  const level = session.levelState.level;
+  const next = fluenceLevelAfter(level, score, session.min, session.max);
+  const stats = gameStats(kid, game.id, session.min);
+  kid.games[game.id] = {
+    ...stats, level: next, streak: 0, recent: [],
+    answered: stats.answered + score.read, correct: stats.correct + score.correct, lastPlayed: new Date().toISOString(),
+  };
+  logFluence(kid, fluenceEntry({ at: new Date().toISOString(), level, kind, timed, score }));
+  session.fluence = { score, timed, kind, level, next };
+  session.correct = 1; // une lecture faite : la partie ne pénalise jamais l'enfant
+  session.index = session.total;
+  save();
+  finishSession(session);
+}
+
 // ---- Fin de partie
 
 function finishSession(session) {
   if (session.duo) return finishDuo(session);
   const { game } = session;
   const kid = child();
-  const stars = starsFor(session.correct, session.total);
+  // lecture à voix haute : 2 étoiles pour l'effort, 3 sans presque aucune erreur (jamais 1)
+  const stars = session.fluence ? fluenceStars(session.fluence.score) : starsFor(session.correct, session.total);
   const before = kid.stars;
   kid.stars += stars;
   const stats = gameStats(kid, game.id, session.min);
@@ -4305,6 +4517,7 @@ function finishSession(session) {
       next > level ? h('p', { class: 'chrono-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')) : null);
     chronoSpeech = [`Ton temps : ${spokenChrono(seconds)}.`, record.isNew ? 'Nouveau record !' : `Ton record : ${spokenChrono(record.best)}.`];
   }
+  const fluenceLine = session.fluence ? fluenceResult(session.fluence, kid.grade) : null;
   logSession(kid, {
     at: new Date().toISOString(),
     game: game.id,
@@ -4325,7 +4538,7 @@ function finishSession(session) {
     h('div', { class: 'result-stars', 'aria-label': `${stars} étoiles sur 3` },
       [1, 2, 3].map((i) => h('span', { class: i <= stars ? 'big-star on' : 'big-star', style: { animationDelay: `${i * 0.25}s` } }, '⭐'))),
     h('h1', {}, frenchSpacing(title)),
-    h('p', { class: 'result-detail' }, `${session.correct} sur ${session.total} du premier coup`),
+    fluenceLine || h('p', { class: 'result-detail' }, `${session.correct} sur ${session.total} du premier coup`),
     chronoLine,
     palierLine,
     dailyLine,
@@ -4343,6 +4556,23 @@ function finishSession(session) {
     ...chronoSpeech,
     ...(unlocked.length ? [`Nouvel autocollant : ${unlocked.at(-1).name} !`] : []),
   ]);
+}
+
+/** Résultat d'une lecture à voix haute : mots correctement lus par minute, détail et repère de la classe. */
+function fluenceResult({ score, timed, kind, level, next }, grade) {
+  const syll = kind === 'syllabes';
+  const unit = (n) => `${syll ? 'syllabe' : 'mot'}${n > 1 ? 's' : ''} bien ${syll ? 'lue' : 'lu'}${n > 1 ? 's' : ''}`;
+  const fullMinute = timed && score.seconds === FLUENCE_SECONDS;
+  const benchmark = syll ? null : fluenceBenchmark(grade, { short: true });
+  return h('div', { class: 'fluence-result' },
+    fullMinute
+      ? h('p', { class: 'fluence-mclm' }, h('b', {}, String(score.correct)), ` ${unit(score.correct)} en 1\u00a0minute`)
+      : h('p', { class: 'fluence-mclm' }, h('b', {}, String(score.mclm)), ` ${unit(score.mclm)} par minute`),
+    h('p', { class: 'fluence-detail' },
+      `${score.read} ${syll ? 'lue' : 'lu'}${score.read > 1 ? 's' : ''}, ${score.errors} ${syll ? 'ratée' : 'raté'}${score.errors > 1 ? 's' : ''}`,
+      fullMinute ? '' : ` · ${frenchSpacing(`temps de lecture : ${fluenceTime(score.seconds)}`)}`),
+    benchmark ? h('p', { class: 'fluence-benchmark' }, frenchSpacing(benchmark)) : null,
+    next > level ? h('p', { class: 'fluence-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')) : null);
 }
 
 function confetti(stars) {
@@ -4477,7 +4707,7 @@ function bubblesGame(back) {
 
 /** Remets le portrait dans l'ordre : toucher deux pièces pour les échanger. */
 function puzzleGame(back) {
-  const n = ['MS', 'GS'].includes(child().grade) ? 2 : 3;
+  const n = ['PS', 'MS', 'GS'].includes(child().grade) ? 2 : 3;
   const order = shuffle(rng, Array.from({ length: n * n }, (_, i) => i));
   if (order.every((v, i) => v === i)) order.reverse();
   let selected = null;
@@ -4624,6 +4854,21 @@ function parentsScreen({ tab = 'suivi', childId, message = '' } = {}) {
     content));
 }
 
+/** Fiches à imprimer (fiches-ecran.js) : ouvertes depuis le Suivi d'un enfant ou les Réglages. */
+function openFiches(childId, tab = 'suivi') {
+  fichesScreen({ store, show, topBar, childId, onBack: () => parentsScreen({ tab, childId }) });
+}
+
+function fichesCard(childId, tab) {
+  const kid = store.profiles[childId];
+  return h('section', { class: 'card fiche-card' },
+    h('h2', {}, '🖨️ Fiches à imprimer'),
+    h('p', { class: 'muted small' }, kid && tab === 'suivi'
+      ? `Pour les jours sans écran : des exercices sur papier pour ${kid.name}, à son niveau, avec le corrigé.`
+      : 'Pour les jours sans écran : des exercices sur papier, au niveau de chaque enfant, avec le corrigé.'),
+    h('button', { class: 'big-btn fiche-open', 'data-fiches': tab, onclick: () => openFiches(childId, tab) }, 'Préparer une fiche'));
+}
+
 function followTab(childId) {
   const selected = store.profiles[childId] ? childId : store.profiles[store.active] ? store.active : store.order[0];
   const kid = store.profiles[selected];
@@ -4636,6 +4881,7 @@ function followTab(childId) {
     h('p', { class: 'muted follow-grade' }, `${kid.name} · ${GRADES[kid.grade]} · `,
       h('button', { class: 'link-action', onclick: () => childEditScreen(selected) }, 'Modifier')),
     dashboard({ kid, grade: kid.grade, onChange: save }),
+    fichesCard(selected, 'suivi'),
     h('details', { class: 'card tips' },
       h('summary', {}, 'Conseils'),
       h('ul', {},
@@ -4769,6 +5015,7 @@ function childEditScreen(id, message = '', { section } = {}) {
         (v) => { kid.goals = { ...(kid.goals || {}), limit: v }; save(); }),
       h('p', { class: 'muted small' }, 'Quand le temps est écoulé, la partie en cours se termine, puis une pause est proposée. Vous pouvez accorder 10 minutes de plus.')),
     a11yCard(id),
+    sonsCard(kid, save),
     kidGamesCard(id),
     h('section', { class: 'card danger-zone' },
       h('h2', {}, 'Données'),
@@ -5514,6 +5761,7 @@ function settingsTab() {
       h('p', { class: 'muted small' }, 'Voix de l’appareil (phrases rares, ou voix naturelle coupée) : pour qu’elle soit plus naturelle, Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
     voicesCard(),
     a11yShortcuts(),
+    fichesCard(store.active && store.profiles[store.active] ? store.active : store.order[0], 'reglages'),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),
