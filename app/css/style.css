@@ -1334,6 +1334,9 @@ input { -webkit-user-select: text; user-select: text; }
   /* ranger */
   .order { gap: 14px; width: 100%; }
   .order-item.order-picture { min-height: 92px; }
+  /* deux emoji côte à côte (« 🐔🥚 ») tiennent dans une case de la colonne de droite */
+  .order-items.n4 .order-emoji { font-size: calc(var(--scale, 1) * 28px); }
+  .order-items.n5 .order-emoji { font-size: calc(var(--scale, 1) * 24px); }
   /* une phrase à remettre dans l'ordre : 5 mots tiennent dans la colonne de droite */
   .order.words .order-items { gap: 6px; }
   .order.words .order-item, .order.words .order-slot { font-size: 0.9rem; }
