@@ -55,7 +55,7 @@ test('démonstration : chaque forme d’exercice à glisser, tracer ou toucher d
   // démonstration sont choisies (touchers évidents)
   const all = new Set(GAMES.flatMap((g) => questions(g, 3).map(({ q }) => q.interaction)).filter(Boolean));
   const without = [...all].filter((i) => !DEMO_INTERACTIONS.includes(i)).sort();
-  assert.deepEqual(without, ['column', 'keypad', 'memory']);
+  assert.deepEqual(without, ['column', 'fluence', 'keypad', 'memory']); // fluence : un adulte explique et accompagne
 });
 
 // ---------------------------------------------------------------- Les étapes

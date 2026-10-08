@@ -25,6 +25,7 @@ export const NON_IMPRIMABLES = new Set([
   'panier', 'patates', 'puzzle', 'memory', 'memory-anglais', 'coloriage-magique', 'colorie-anglais',
   'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres', 'carte-monde',
   'tangram', // des pièces qu'on reconnaît à leur couleur et qu'on fait tourner
+  'fluence', // lire à voix haute en une minute, avec un adulte qui écoute et touche les mots ratés
 ]);
 
 /**

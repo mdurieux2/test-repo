@@ -201,7 +201,7 @@ export const PROGRAMS = {
   },
   CE2: {
     francais: [
-      ['bon-mot', 5, 8], ['petits-mots', 4, 8], ['phrase', 3, 8], ['vocabulaire', 5, 10], ['ponctuation', 6, 10], ['homophones', 1, 8], ['genre', 4, 8],
+      ['bon-mot', 5, 8], ['petits-mots', 4, 8], ['phrase', 3, 8], ['fluence', 7, 9], ['vocabulaire', 5, 10], ['ponctuation', 6, 10], ['homophones', 1, 8], ['genre', 4, 8],
       ['conjugaison', 4, 10], ['imparfait', 1, 8], ['accords', 4, 10],
       ['ecrire', 7, 8],
       ['dictee', 5, 8],
