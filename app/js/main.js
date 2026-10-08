@@ -2971,6 +2971,10 @@ function orderZone(ctx) {
   const content = (item) => (item.emoji
     ? h('span', { class: 'order-emoji', style: { '--scale': item.scale } }, item.emoji)
     : item.label);
+  // une image et sa légende écrite dessous (histoire à remettre dans l'ordre) ; la case ne
+  // reçoit que l'image
+  const face = (item) => (item.caption ? [content(item), h('span', { class: 'order-caption' }, item.caption)] : content(item));
+  const captions = q.items.some((it) => it.caption);
   const slots = sorted.map(() => h('span', { class: 'order-slot', ...(q.lang ? { lang: q.lang } : {}) }));
   const sign = q.sign ?? (q.items[0].emoji ? '→' : q.order === 'desc' ? '>' : '<');
   const lang = q.lang ? { lang: q.lang } : {};
@@ -2978,7 +2982,7 @@ function orderZone(ctx) {
     const btn = h('button', {
       class: `order-item${item.emoji ? ' order-picture' : ''}`, 'data-value': String(item.value), 'data-label': item.label,
       'aria-label': item.label || `Taille ${item.value + 1}`, ...lang,
-    }, content(item));
+    }, face(item));
     btn.addEventListener('click', () => {
       if (ctx.session.locked || btn.disabled) return;
       if (item.value !== null && same(item, sorted[next])) {
@@ -3005,7 +3009,7 @@ function orderZone(ctx) {
   });
   // des mots entiers (une phrase à remettre dans l'ordre) : écrits un peu plus petit
   const words = q.items.some((it) => (it.label || '').length > 2);
-  const zone = h('div', { class: `choices order center${words ? ' words' : ''}` },
+  const zone = h('div', { class: `choices order center${words ? ' words' : ''}${captions ? ' captions' : ''}` },
     h('div', { class: `order-slots n${slots.length}` }, slots.flatMap((slot, i) => (i && sign ? [h('span', { class: 'order-sign', 'aria-hidden': 'true' }, sign), slot] : [slot]))),
     h('div', { class: `order-items n${q.items.length}` }, buttons));
   return zone;

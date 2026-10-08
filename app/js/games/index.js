@@ -10,6 +10,7 @@ import { ANGLAIS_GAMES } from './anglais.js';
 import { LABYRINTHE_GAMES } from './labyrinthes.js';
 import { petitsTextes } from './textes.js';
 import { histoires } from './histoires.js';
+import { COMPRENDRE_GAMES } from './comprendre.js';
 import { LOGIQUE_GAMES } from './logique.js';
 import { LOGIQUE_PLUS_GAMES } from './logique-plus.js';
 import { MONDE_GAMES } from './monde.js';
@@ -26,7 +27,7 @@ import { SCIENCES_GAMES } from './sciences.js';
 import { NOMBRES_PLUS_GAMES } from './nombres-plus.js';
 
 const ALL = [
-  ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
+  ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES,
 ];
@@ -38,7 +39,7 @@ const RUBRIQUES = [
     icon: '📚',
     games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'homophones', 'genre', 'ecrire', 'dictee'],
   },
-  { id: 'histoires', title: 'Histoires', icon: '📖', games: ['histoires', 'petits-textes'] },
+  { id: 'histoires', title: 'Histoires', icon: '📖', games: ['histoires', 'petits-textes', 'ordre-histoire'] },
   {
     id: 'maths',
     title: 'Nombres et calcul',

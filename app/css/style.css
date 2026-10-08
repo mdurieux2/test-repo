@@ -2458,3 +2458,37 @@ body:has(main.play) .voice-progress-text { display: none; }
   }
   .picross-zone { flex-direction: column; }
 }
+
+/* « Dans l'ordre » : les images d'une histoire, avec leur phrase écrite dessous (CP, CE1) */
+.order-emoji { white-space: nowrap; }
+.order.captions .order-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 4px;
+}
+.order-caption { font-size: min(0.9rem, 3.4vw); line-height: 1.15; font-weight: 700; text-align: center; overflow-wrap: break-word; }
+/* 5 images légendées : sur deux rangées (3 + 2) en portrait */
+.order.captions .order-items.n5 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.order.captions .order-items.n5 .order-item { grid-column: span 2; }
+.order.captions .order-items.n5 .order-item:nth-child(4) { grid-column: 2 / span 2; }
+.order.captions .order-items.n5 .order-caption { font-size: min(0.95rem, 3.6vw); }
+.choices-steps.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choices-steps .choice {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-height: 96px; padding: 8px 6px; font-size: min(1rem, 3.8vw); line-height: 1.15;
+}
+.step-emoji { font-size: calc(var(--scale, 1) * min(40px, 10vw)); line-height: 1; white-space: nowrap; }
+.step-caption { font-weight: 700; text-align: center; overflow-wrap: break-word; }
+@media (max-height: 700px) {
+  .choices-steps .choice { min-height: 84px; }
+  .choices-steps.n4 .choice { min-height: 76px; }
+  .step-emoji { font-size: calc(var(--scale, 1) * min(34px, 9vw)); }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  /* en paysage, les 5 images tiennent sur une rangée */
+  .order.captions .order-items.n5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .order.captions .order-items.n5 .order-item, .order.captions .order-items.n5 .order-item:nth-child(4) { grid-column: auto; }
+  .order.captions .order-item.order-picture { min-height: 80px; }
+  .order-caption, .order.captions .order-items.n5 .order-caption { font-size: 0.85rem; }
+  .choices-steps .choice, .choices-steps.n4 .choice { min-height: 64px; padding: 4px; }
+  .choices-steps .choice { font-size: 0.9rem; }
+  .step-emoji { font-size: calc(var(--scale, 1) * 30px); }
+}

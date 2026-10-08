@@ -1,6 +1,7 @@
 // Petits textes à lire (CP, CE1) : un court texte, puis une question de compréhension.
 // Le bouton « Écouter le texte » aide l'enfant qui bloque ; la question est toujours lue.
 // Niveaux 7 et 8 (CE1) : textes documentaires, puis consignes et recettes à suivre.
+// Niveaux 9 et 10 (CE1) : pourquoi ? (cause, intention), puis ce que pense ou ressent le personnage.
 
 import { pick, shuffle } from '../random.js';
 import { pickSeasonal } from './helpers.js';
@@ -248,6 +249,59 @@ const TEXTS = [
     ['Qui fait chauffer le lait ?', 'un adulte', 'l’enfant', 'le chat'],
     ['Combien de cuillères de chocolat faut-il ?', 'deux', 'une', 'cinq'],
     ['Pourquoi faut-il attendre avant de boire ?', 'c’est chaud', 'c’est froid', 'c’est sucré']] },
+
+  // ---- Niveau 9 : pourquoi ? (la cause, ce que veut faire le personnage : c'est écrit dans le texte)
+  { level: 9, title: 'Le goûter partagé', text: 'À la récré, Anna voit que Malo n’a pas de goûter : il a oublié son sac à la maison. Anna coupe sa brioche en deux et lui en donne la moitié. Malo la remercie avec un grand sourire.', questions: [
+    ['Pourquoi Malo n’a-t-il pas de goûter ?', 'il a oublié son sac', 'il n’a pas faim', 'il est malade'],
+    ['Pourquoi Anna coupe-t-elle sa brioche ?', 'pour la partager', 'pour la cacher', 'pour la jeter'],
+    ['Pourquoi Malo sourit-il ?', 'Anna l’aide', 'il a gagné', 'il rentre chez lui']] },
+  { level: 9, title: 'Le gros pull', text: 'Ce matin, Hugo sort en short et en tee-shirt. Dehors, le vent est glacé. Au bout de cinq minutes, Hugo tremble de froid. Il remonte vite dans sa chambre pour mettre un gros pull.', questions: [
+    ['Pourquoi Hugo tremble-t-il ?', 'il a froid', 'il a peur', 'il a couru'],
+    ['Pourquoi Hugo a-t-il froid ?', 'il est en short', 'il est mouillé', 'il est malade'],
+    ['Pourquoi remonte-t-il dans sa chambre ?', 'pour mettre un pull', 'pour dormir', 'pour jouer']] },
+  { level: 9, title: 'Le vase', text: 'Lou joue au ballon dans le salon. Paf ! Le ballon renverse le vase, qui se casse. Lou ramasse les morceaux et va voir maman : « Pardon, je n’aurais pas dû jouer ici. » Maman l’embrasse, car Lou a dit la vérité.', questions: [
+    ['Pourquoi le vase est-il cassé ?', 'le ballon l’a renversé', 'le chat l’a poussé', 'maman l’a lâché'],
+    ['Pourquoi Lou dit-elle pardon ?', 'elle a cassé le vase', 'elle est en retard', 'elle a crié'],
+    ['Pourquoi maman embrasse-t-elle Lou ?', 'Lou a dit la vérité', 'Lou a gagné', 'c’est sa fête']] },
+  { level: 9, title: 'Le chien des voisins', text: 'Toute la nuit, le chien des voisins aboie. Personne ne peut dormir. Au matin, on comprend tout : un chaton est coincé en haut de l’arbre ! Le chien voulait prévenir ses maîtres.', questions: [
+    ['Pourquoi personne ne peut-il dormir ?', 'le chien aboie', 'il y a un orage', 'il fait trop chaud'],
+    ['Pourquoi le chien aboie-t-il ?', 'pour prévenir', 'il a faim', 'il veut jouer']] },
+  { level: 9, title: 'Les radis', text: 'Margot sème des graines de radis. Mais elle oublie de les arroser pendant toute une semaine. La terre devient sèche et rien ne pousse. Alors Margot dessine un arrosoir sur son calendrier pour ne plus oublier.', questions: [
+    ['Pourquoi rien ne pousse-t-il ?', 'la terre est sèche', 'il fait trop froid', 'un oiseau a tout mangé'],
+    ['Pourquoi la terre est-elle sèche ?', 'Margot n’a pas arrosé', 'il pleut trop', 'le soleil est caché'],
+    ['Pourquoi Margot dessine-t-elle un arrosoir ?', 'pour ne plus oublier', 'pour faire joli', 'pour son frère']] },
+  { level: 9, title: 'La course de l’école', text: 'Tous les soirs, Théo court avec son papa pour s’entraîner. Le jour de la course de l’école, il part doucement pour garder des forces. Dans le dernier tour, il double tout le monde et il gagne !', questions: [
+    ['Pourquoi Théo court-il tous les soirs ?', 'pour s’entraîner', 'pour aller à l’école', 'pour promener le chien'],
+    ['Pourquoi Théo part-il doucement ?', 'pour garder des forces', 'il a mal au pied', 'il est tombé'],
+    ['Pourquoi Théo peut-il doubler tout le monde ?', 'il a gardé des forces', 'les autres dorment', 'il triche']] },
+  { level: 9, title: 'La tirelire', text: 'Depuis des semaines, Mila garde ses pièces dans sa tirelire. Samedi, elle l’ouvre et court au magasin. Elle achète un livre sur les chevaux, car c’est l’animal préféré de son frère. Demain, c’est son anniversaire !', questions: [
+    ['Pourquoi Mila ouvre-t-elle sa tirelire ?', 'pour acheter un cadeau', 'pour compter', 'pour la ranger'],
+    ['Pourquoi choisit-elle un livre sur les chevaux ?', 'son frère les adore', 'il est gratuit', 'elle a un cheval']] },
+
+  // ---- Niveau 10 : ce que pense ou ressent le personnage (on le devine à ce qu'il fait ou dit)
+  { level: 10, title: 'Le dessin', text: 'Jules montre son dessin à la maîtresse. Elle dit : « Bravo, il est magnifique ! » et elle l’accroche au mur de la classe. Jules rougit et ne peut pas s’empêcher de sourire.', questions: [
+    ['Comment se sent Jules ?', 'fier', 'triste', 'en colère'],
+    ['Que pense la maîtresse du dessin ?', 'il est très beau', 'il est raté', 'il est trop petit'],
+    ['Pourquoi Jules sourit-il ?', 'on l’a félicité', 'il a gagné', 'il a faim']] },
+  { level: 10, title: 'Le doudou', text: 'Le soir, Nina cherche partout son doudou. Elle a les larmes aux yeux. Enfin, papa le trouve sous le canapé. Nina le serre très fort contre elle et lui fait un gros bisou.', questions: [
+    ['Comment se sent Nina quand elle cherche ?', 'triste', 'joyeuse', 'fière'],
+    ['Comment se sent Nina à la fin ?', 'heureuse', 'triste', 'fâchée'],
+    ['Pourquoi Nina a-t-elle les larmes aux yeux ?', 'son doudou est perdu', 'elle a mal', 'elle a sommeil']] },
+  { level: 10, title: 'L’orage', text: 'Dehors, le tonnerre gronde très fort. Sacha se cache sous sa couette et ferme les yeux. Sa grande sœur vient s’asseoir près de lui et lui tient la main. Peu à peu, Sacha se calme.', questions: [
+    ['Comment se sent Sacha pendant l’orage ?', 'il a peur', 'il s’amuse', 'il est fâché'],
+    ['Pourquoi sa sœur lui tient-elle la main ?', 'pour le rassurer', 'pour jouer', 'pour partir'],
+    ['Comment se sent Sacha à la fin ?', 'plus calme', 'plus en colère', 'plus triste']] },
+  { level: 10, title: 'La tour de cubes', text: 'Léna construit une tour de cubes très haute. Son petit frère arrive en courant et la fait tomber. Léna croise les bras et fronce les sourcils. « Ce n’est pas juste ! » crie-t-elle.', questions: [
+    ['Comment se sent Léna ?', 'en colère', 'joyeuse', 'fatiguée'],
+    ['Pourquoi Léna crie-t-elle ?', 'sa tour est tombée', 'elle a gagné', 'elle a mal']] },
+  { level: 10, title: 'Le nouveau', text: 'Omar arrive dans une nouvelle école. Il ne connaît personne. À la récré, il reste seul près du mur. Zoé s’approche : « Tu veux jouer avec nous ? » Omar sourit enfin.', questions: [
+    ['Comment se sent Omar près du mur ?', 'un peu triste', 'très joyeux', 'en colère'],
+    ['Pourquoi Zoé s’approche-t-elle ?', 'pour l’inviter', 'pour le gronder', 'pour son goûter'],
+    ['Pourquoi Omar sourit-il enfin ?', 'Zoé l’invite', 'il rentre', 'il a gagné']] },
+  { level: 10, title: 'La fête de mamie', text: 'Mamie ouvre la porte. Toute la famille est là, avec des ballons et un gros gâteau ! Mamie met les mains sur sa bouche. Elle ne savait pas du tout qu’on lui préparait une fête.', questions: [
+    ['Comment se sent mamie ?', 'surprise', 'fâchée', 'fatiguée'],
+    ['Pourquoi la famille est-elle là ?', 'pour fêter mamie', 'pour dormir', 'pour travailler'],
+    ['Mamie savait-elle qu’il y aurait une fête ?', 'non', 'oui', 'un peu']] },
 ];
 
 export const petitsTextes = {
@@ -256,10 +310,11 @@ export const petitsTextes = {
   section: 'Lire',
   title: 'Petits textes',
   icon: '📚',
-  skill: 'Lire un petit texte et le comprendre (y compris ce qui n’est pas écrit)',
+  skill: 'Lire un petit texte et le comprendre (y compris ce qui n’est pas écrit, pourquoi, ce que ressent un personnage)',
   levels: [
     'Textes très courts', 'Petits textes', 'Textes de 4 phrases', 'Lire entre les lignes', 'Dialogues et pronoms',
-    'Titre et ordre des faits', 'Textes documentaires', 'Consignes et recettes',
+    'Titre et ordre des faits', 'Textes documentaires', 'Consignes et recettes', 'Pourquoi ?',
+    'Ce que pense le personnage',
   ],
   // context.season : la saison du moment (seasonOf), pour les textes de saison
   generate(level, rng, _index, context = {}) {

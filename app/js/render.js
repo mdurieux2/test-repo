@@ -624,6 +624,13 @@ export function renderChoiceContent(choice) {
   if (choice.objects) return objectsGrid(choice.objects.emoji, choice.objects.count, 5, 'small');
   if (choice.shape) return shapeSvg(choice.shape, choice.color);
   if (choice.swatch) return h('span', { class: 'swatch', style: { background: choice.swatch }, role: 'img', 'aria-label': choice.name });
+  // une image d'histoire et sa phrase écrite dessous
+  if (choice.caption) {
+    return [
+      h('span', { class: 'step-emoji', 'aria-hidden': 'true', style: { '--scale': choice.scale ?? 1 } }, choice.emoji),
+      h('span', { class: 'step-caption' }, choice.caption),
+    ];
+  }
   return choice.lang ? h('span', { lang: choice.lang }, choice.label) : choice.label;
 }
 

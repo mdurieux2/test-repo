@@ -1509,7 +1509,7 @@ const DEVICES = [
 // plus de questions tirées sur le plus petit écran pour attraper le pire cas.
 const STRESS = {
   dizaines: 15, compter: 8, tables: 8, 'vite-vu': 6, panier: 6, patates: 4, 'petits-textes': 8, problemes: 4, relier: 3,
-  'relie-calculs': 3, trous: 3,
+  'relie-calculs': 3, trous: 3, 'ordre-histoire': 6,
 };
 
 async function checkLayout(page, label, { reachable = true } = {}) {
