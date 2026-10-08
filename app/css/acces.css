@@ -37,7 +37,7 @@ svg [role='button']:focus-visible { outline: 3px solid var(--ink); outline-offse
 .magic-zone:focus-visible, [data-part]:focus-visible, .map-zone:focus-visible, .coloring [data-zone]:focus-visible {
   stroke: var(--ink); stroke-width: 2.5px; paint-order: stroke;
 }
-.trace-drawing:focus-visible, .dots-drawing:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; border-radius: 12px; }
+.trace-drawing:focus-visible, .dots-key:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; border-radius: 12px; }
 .lasso-object:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 50%; }
 
 /* ---------- Écris au doigt : les points de passage à toucher dans l'ordre ---------- */

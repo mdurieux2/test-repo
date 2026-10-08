@@ -1797,6 +1797,13 @@ body[data-season="ete"] { background: #fffbea; }
 
 /* les points à relier */
 .stage-dots { padding: 4px 0; min-height: 0; }
+.dots-frame { position: relative; width: 100%; }
+.dots-frame .dots-drawing { margin-inline: auto; }
+/* le bouton du clavier : exactement sur le dessin (carré, centré), transparent, laisse passer le doigt */
+.dots-key {
+  position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); aspect-ratio: 1;
+  padding: 0; border: 0; background: transparent; box-shadow: none; pointer-events: none; border-radius: 20px;
+}
 .dots-drawing {
   display: block; width: min(100%, 400px, calc(100vh / var(--zoom, 1) - 300px)); width: min(100%, 400px, calc(100dvh / var(--zoom, 1) - 300px));
   height: auto; aspect-ratio: 1; background: #fff; border-radius: 20px; box-shadow: 0 5px 0 var(--line); touch-action: none;
@@ -3084,7 +3091,8 @@ body.a11y-contrast { background: #fff !important; color: #000; }
 @media (prefers-reduced-motion: reduce) {
   .confetti { display: none; }
   .season-decor span { animation: none; }
-  *, *::before, *::after { transition-duration: 0.01ms !important; }
+  /* pas de transition (une durée minuscule en créerait une sur chaque propriété, contour de focus compris) */
+  *, *::before, *::after { transition: none !important; }
   .pop-bubble:not(.popped) { animation-duration: 7s !important; }
 }
 

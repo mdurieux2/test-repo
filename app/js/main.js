@@ -5,7 +5,7 @@ import { CALC_PALIERS, equationHolds } from './games/maths.js';
 import { canMove, polarCell, ringOffsets, solveLinks, solveMaze } from './games/labyrinthes.js';
 import { clockLabel } from './games/maths-extra.js';
 import { lineValueAt, lineX } from './games/nombres-plus.js';
-import { bodySvg } from './games/corps.js';
+import { bodySvg, voiciPartie } from './games/corps.js';
 import {
   clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
 } from './games/horloge.js';
@@ -1515,6 +1515,8 @@ function choiceZone(ctx) {
       if (choice.value === q.answer) {
         btn.classList.add('correct');
         zone.classList.add('answered');
+        // les autres choix, estompés, ne servent plus : inactifs (aussi pour les lecteurs d'écran)
+        zone.querySelectorAll('.choice:not(.correct)').forEach((other) => other.setAttribute('aria-disabled', 'true'));
         markCorrect(ctx);
         return;
       }
@@ -2504,7 +2506,7 @@ function bodyZone(ctx) {
     });
     const hint = ctx.session.attempts >= 1;
     if (hint) parts(steps[next]).forEach((el) => el.classList.add('hint'));
-    const said = `Ça, c’est ${names[id]}.`;
+    const said = voiciPartie(names[id]);
     const then = hint ? 'Touche la partie qui brille !' : 'Essaie encore !';
     markWrong(ctx, { message: `${said} ${then}`, speech: [said, then], given: names[id] });
   };
@@ -2535,7 +2537,8 @@ function dotsZone(ctx) {
     for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
     return node;
   };
-  const svg = el('svg', { viewBox: '-4 -4 108 108', class: 'dots-drawing', role: 'img', 'aria-label': 'Points à relier' });
+  // le dessin est caché aux lecteurs d'écran : c'est le bouton posé dessus (clavier) qui dit où on en est
+  const svg = el('svg', { viewBox: '-4 -4 108 108', class: 'dots-drawing', 'aria-hidden': 'true' });
   const shape = el('polygon', { class: 'dots-shape', points: '' });
   const line = el('polyline', { class: 'dots-line', points: '' });
   const rubber = el('line', { class: 'dots-rubber', x1: 0, y1: 0, x2: 0, y2: 0, visibility: 'hidden' });
@@ -2559,15 +2562,16 @@ function dotsZone(ctx) {
   let drawing = false;
   const linked = [];
   const { tapOnly } = access();
-  // au clavier : le dessin est un bouton ; Entrée (ou Espace) relie le point suivant
-  keyButton(svg);
+  // au clavier : un bouton transparent posé sur le dessin (sans texte : les nombres visibles du dessin
+  // ne sont pas dans son nom) ; Entrée (ou Espace) relie le point suivant
+  const key = h('button', { class: 'dots-key', type: 'button' });
   const refresh = () => {
     line.setAttribute('points', linked.map((i) => points[i].join(',')).join(' '));
     dots.forEach((g, i) => {
       g.classList.toggle('next', i === next);
       g.classList.toggle('done', linked.includes(i));
     });
-    svg.setAttribute('aria-label', next < points.length
+    key.setAttribute('aria-label', next < points.length
       ? `Points à relier : ${linked.length} sur ${points.length}. Le prochain point est le ${labels[next]}.`
       : `Points reliés : c’est ${q.stage.name}.`);
   };
@@ -2638,15 +2642,15 @@ function dotsZone(ctx) {
   svg.addEventListener('pointerup', stop);
   svg.addEventListener('pointercancel', stop);
   svg.addEventListener('pointerleave', stop);
-  svg.addEventListener('click', (e) => {
-    if (e.detail === 0 && !ctx.session.locked && next < points.length) link(next); // clavier
+  key.addEventListener('click', () => {
+    if (!ctx.session.locked && next < points.length) link(next); // clavier
   });
   refresh();
   const zone = h('div', { class: 'choices dots-zone' },
     h('span', { class: 'dots-help' }, tapOnly
       ? `Touche le ${labels[0]}, puis le ${labels[1]}, puis le ${labels[2] ?? labels[1]}…`
       : `Commence au ${labels[0]}, puis glisse ton doigt jusqu’au ${labels[1]}…`));
-  return { stage: h('div', { class: 'stage stage-dots' }, svg), zone };
+  return { stage: h('div', { class: 'stage stage-dots' }, h('div', { class: 'dots-frame' }, svg, key)), zone };
 }
 
 // ---- Écris au doigt : suivre le chemin gris, trait après trait, en partant du point vert

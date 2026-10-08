@@ -58,7 +58,7 @@ aussi : en paysage, le dessin est à gauche, la consigne et les réponses à dro
 3. Il choisit le **Défi du jour** (5 questions variées, une série de jours 🔥), **Je révise**
    (les jeux ratés qui reviennent), un des jeux **⭐ Conseillé pour toi** par ses parents, ou une
    rubrique : **Lire et écrire**, **Histoires**, **Nombres et calcul**, **Jeux et logique**,
-   **Temps et mesures**, **Le monde**, **Anglais**. Ses autocollants sont dans **Mon album**.
+   **Temps et mesures**, **Le monde**, **Sciences**, **Anglais**. Ses autocollants sont dans **Mon album**.
 4. Chaque jeu montre le niveau atteint (les points). En touchant **Niveaux ▾**, on choisit
    directement un niveau.
 5. **👫 Jouer à deux** (sur « Qui joue ? ») : deux enfants jouent à tour de rôle sur le même
@@ -75,12 +75,12 @@ l'écran d'accueil (les étapes dépendent de l'appareil) ; « Plus tard » masq
 Les jeux et les niveaux s'adaptent à la classe choisie pour chaque enfant (programmes
 officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/programs.js`.
 
-| Classe | Français | Maths | Anglais | Le monde |
-|---|---|---|---|---|
-| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E, **écrire au doigt** (traits, chiffres, capitales) | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes, **puzzle**, **memory**, **coloriage magique**, **points à relier** | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons |
-| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet, écrire au doigt (jusqu'aux lettres attachées et son prénom), **première dictée** | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes, puzzle, memory | Écouter et toucher, compter, in/on/under, les nombres, mélanger les couleurs, l'intrus, les contraires | Les bébés des animaux, les moments de la journée, **les drapeaux** |
-| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler, **dictée de mots**, écrire au doigt | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, **régler l'horloge**, la monnaie, sudoku, symétrie, cubes, coloriage magique avec des calculs | Écouter (10 thèmes), lire, relier, compter, les nombres jusqu'à 20, calculer en anglais, colorier, memory, petites phrases | Ce que mangent les animaux, les jours, les pays, les drapeaux |
-| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants, dictée (sons complexes, lettres pièges) | Nombres jusqu'à 1000, tables, **défi chrono des tables**, problèmes en deux étapes, l'heure, régler l'horloge, moitiés, **sudoku 9 × 9**, labyrinthes 9 × 9 et **ronds**, **tableau logique**, **balances**, **dessin caché**, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau, **la carte du monde** (pays, voisins, capitales) |
+| Classe | Français | Maths | Anglais | Le monde | Sciences |
+|---|---|---|---|---|---|
+| Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E, **écrire au doigt** (traits, chiffres, capitales) | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes, **puzzle**, **memory**, **coloriage magique**, **points à relier** | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons, les émotions et la politesse | Le corps et les sens, les objets de la maison, le temps qu'il fait, trier ses déchets |
+| Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet, écrire au doigt (jusqu'aux lettres attachées et son prénom), **première dictée** | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes, puzzle, memory | Écouter et toucher, compter, in/on/under, les nombres, mélanger les couleurs, l'intrus, les contraires | Les bébés des animaux, les moments de la journée, **les drapeaux**, devant, derrière, sur, sous | Le squelette, les milieux, solide ou liquide, l'aimant, l'électricité qui peut être dangereuse, le jour et la nuit, la météo |
+| CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler, **dictée de mots**, écrire au doigt | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, **régler l'horloge**, la monnaie, sudoku, symétrie, cubes, coloriage magique avec des calculs | Écouter (10 thèmes), lire, relier, compter, les nombres jusqu'à 20, calculer en anglais, colorier, memory, petites phrases | Ce que mangent les animaux, les jours, les pays, les drapeaux, traverser la rue, les numéros d'urgence | Les organes, qui mange qui, l'eau dans tous ses états, dissoudre et filtrer, le circuit électrique, la roue et le levier, la Lune, économiser l'eau |
+| CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants, dictée (sons complexes, lettres pièges) | Nombres jusqu'à 1000, tables, **défi chrono des tables**, problèmes en deux étapes, l'heure, régler l'horloge, moitiés, **sudoku 9 × 9**, labyrinthes 9 × 9 et **ronds**, **tableau logique**, **balances**, **dessin caché**, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau, **la carte du monde** (pays, voisins, capitales), plans et quadrillages | La digestion, les chaînes alimentaires, conducteurs et isolants, poulies et engrenages, les planètes et les saisons, le thermomètre, protéger la nature |
 
 Chaque jeu a de 7 à 10 niveaux de difficulté croissante (le calcul en a 36 paliers) ; le niveau s'adapte à
 l'enfant, et on peut aussi le choisir directement.
@@ -94,7 +94,12 @@ l'enfant, et on peut aussi le choisir directement.
   de compréhension (dont des textes de saison, plus fréquents pendant leur saison).
 - *Histoires* : lues en karaoké, par la voix d'Estelle ou **par la voix d'un parent** ;
   des histoires d'Halloween, de Noël, d'hiver, de printemps, d'été et d'automne reviennent pendant leur saison.
-- *Grammaire* : le bon petit mot (a/à, et/est, son/sont, on/ont), le, la, les, un, une.
+  **Dans l'ordre** : remettre de 3 à 5 images d'une histoire dans l'ordre (le début, la fin, avant, après).
+- *Grammaire* : le bon petit mot (a/à, et/est, son/sont, on/ont), le, la, les, un, une ;
+  **la conjugaison** (être, avoir, aller, faire et les verbes en -er au présent, au futur et au passé
+  composé), **les accords** (pluriel en s ou x, féminin, l'adjectif et le verbe, la lettre ajoutée
+  soulignée), **ponctuation et majuscules** (choisir . ? ou ! d'après l'intonation d'Estelle).
+- *Vocabulaire* : **les mots** (catégories, contraires, synonymes, familles de mots).
 - *Labyrinthes* : le chemin des lettres (alphabet, épeler un mot).
 - *Écrire* : **écris au doigt** (suivre le modèle dans le bon sens : traits et boucles,
   chiffres, capitales, minuscules attachées, puis son prénom) et **la dictée de mots** (on entend le mot, on touche les lettres dans
@@ -110,6 +115,10 @@ l'enfant, et on peut aussi le choisir directement.
   (glisser les nombres dans les cases, chaque calcul juste devient vert), *relie les calculs*
   (tracer un trait jusqu'au résultat), faire 10, ranger dans l'ordre, petits problèmes
   racontés avec le prénom de l'enfant, doubles et moitiés, les tables.
+- *Pour aller plus loin* : **les problèmes en schémas** (choisir le schéma en barres, puis calculer),
+  **tableaux et graphiques** (pictogrammes, barres), **la droite numérique** (placer et lire un nombre),
+  **les fractions** (moitié, tiers, quart d'une pizza ou d'une quantité), **le partage** (distribuer
+  au doigt, le reste, faire des paquets) et **l'addition posée** (en colonnes, avec la retenue).
 - *Formes et logique* : les formes, les suites de motifs, l'intrus, les ombres, le **sudoku**
   (4 × 4 en images, puis en chiffres, 6 × 6, jusqu'au **9 × 9** avec de moins en moins d'indices), la **symétrie** sur quadrillage,
   **compte les cubes** (empilements en 3D, avec des cubes cachés).
@@ -150,6 +159,22 @@ météo, émotions, famille)
   drapeaux qui se ressemblent, le continent, la couleur qui manque.
 - **La carte du monde** : toucher sur la carte les continents, les océans, la France et ses voisins,
   les pays, le pays d'un drapeau ou d'un animal, les capitales, et voyager d'un pays à son voisin.
+- **Sécurité et vivre ensemble** : les émotions, la politesse, les règles de la classe, traverser la
+  rue, les dangers de la maison, les numéros d'urgence (15, 17, 18, 112).
+- **Se repérer** : sur, sous, devant, derrière, gauche, droite, puis quadrillages, plans et flèches.
+
+**Sciences** (questionner le monde, de la moyenne section au CE1)
+- *Le vivant* : **le vivant** (le corps, les cinq sens, les cycles de vie, l'hygiène, le sommeil, bien
+  manger), **le corps humain** (toucher sur le dessin un os, une articulation, un organe, suivre le
+  trajet des aliments), **les animaux et leur milieu** (classer, qui mange qui, l'hiver des animaux).
+- *La matière et les objets* : **la matière** (solide, liquide, glace, vapeur, flotter ou couler,
+  l'aimant), **les mélanges** (dissoudre, filtrer, décanter, évaporer, mener une expérience),
+  **l'électricité** (les dangers, le circuit, l'interrupteur, conducteurs et isolants), **objets et
+  machines** (la roue, le levier, la poulie, les engrenages, les matériaux).
+- *Le ciel et la Terre* : **le ciel et la Terre** (le jour et la nuit, le Soleil, la Lune, les
+  planètes, les saisons) et **la météo** (les symboles, s'habiller, le thermomètre, le vent, l'orage).
+- *La planète* : **prendre soin de la planète** (trier ses déchets, économiser l'eau et l'énergie,
+  protéger la nature).
 
 **Défi du jour** : chaque jour, 5 questions tirées des jeux de l'enfant, à son niveau. Une étoile
 bonus et un jour de plus dans la série 🔥.
@@ -171,6 +196,32 @@ bonus et un jour de plus dans la série 🔥.
 - **Pas d'échec** : après une erreur, « Essaie encore ! » ; après deux, la bonne réponse brille.
 - **Récompenses** : étoiles, autocollants à collectionner, étoiles de maîtrise des paliers.
 - Des parties courtes (5, 10 ou 15 questions) : 10 à 15 minutes par jour suffisent.
+
+---
+
+## Accessibilité
+
+Chaque enfant a son **profil d'accessibilité**, réglé par ses parents (*Parents → Enfants →
+Accessibilité*) et gardé sur l'appareil :
+
+| Réglage | Pour qui | Ce qui change |
+|---|---|---|
+| Taille du texte, texte espacé | dyslexie, basse vision | texte grand ou très grand ; lettres, mots et lignes plus espacés |
+| Syllabes colorées | dyslexie, lecteur débutant | les syllabes des textes à lire alternent deux couleurs (et un soulignement) |
+| Couleurs nommées | daltonisme | chaque couleur à choisir porte son nom et un motif |
+| Fort contraste | basse vision | texte noir sur fond blanc, contours épais (aussi avec le réglage du système « augmenter le contraste ») |
+| Grandes cibles | dyspraxie, motricité fine | boutons et cases plus grands |
+| Toucher plutôt que glisser | dyspraxie, motricité | chaque geste glissé ou tracé se fait par touchers successifs (relier, patates, labyrinthes, écrire au doigt, points à relier…) |
+| Mode calme | attention, sensibilité sensorielle | sans musique ni décor de saison, animations réduites, petits sons plus doux |
+| Sans chrono | anxiété, lenteur | les défis chronométrés se jouent sans le temps |
+| Sous-titres | surdité, malentendance | tout ce que dit Estelle est aussi écrit en bas de l'écran |
+| Niveaux d'écoute facultatifs | surdité | les questions qui ne se jouent qu'à l'oreille sont remplacées ; un jeu entièrement à l'oreille est masqué |
+
+Pour tous : les jeux se jouent aussi **au clavier** (Tab, Entrée, Espace, flèches), avec un contour de
+focus bien visible ; les dessins sont décrits aux lecteurs d'écran (VoiceOver, TalkBack) ; aucune
+information n'est portée par la couleur seule ; les contrastes et les règles WCAG 2.1 AA (axe-core) sont
+contrôlés automatiquement à chaque modification. La déclaration d'accessibilité (RGAA) est dans
+[`docs/accessibilite.md`](docs/accessibilite.md).
 
 ---
 

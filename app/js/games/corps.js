@@ -201,6 +201,11 @@ const VIEWS = {
 };
 export const BODY_VIEWS = Object.keys(VIEWS);
 
+/** « Ça, c’est le crâne. », « Ça, ce sont les côtes. » : ce que dit Estelle d'une partie touchée par erreur. */
+export function voiciPartie(name) {
+  return `${/^les /.test(name) ? 'Ça, ce sont' : 'Ça, c’est'} ${name}.`;
+}
+
 /** Le dessin du corps (appelé par main.js) : chaque partie à toucher porte data-zone. */
 export function bodySvg(view) {
   const v = VIEWS[view] || VIEWS.squelette;

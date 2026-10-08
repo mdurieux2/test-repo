@@ -17,6 +17,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { GAMES } from '../../app/js/games/index.js';
 import { SPOKEN_SENTENCES } from '../../app/js/games/vocabulaire.js';
+import { voiciPartie } from '../../app/js/games/corps.js';
+import { tapText } from '../../app/js/a11y-jeux.js';
 import { createRng } from '../../app/js/random.js';
 import {
   autourDesPrenoms, cle, enMots, langue, morceaux, mots, normaliser, phrases, planLecture, propositions, qualitePlan, utile,
@@ -53,8 +55,14 @@ export function spoken(q) {
   for (const card of q.cards || []) push(card.say);
   // le dessin du corps (main.js, bodyZone) : une partie touchée par erreur est nommée
   if (q.interaction === 'body') {
-    push((q.choices || []).map((c) => `Ça, c’est ${c.name}.`));
+    push((q.choices || []).map((c) => voiciPartie(c.name)));
     push('Touche la partie qui brille !');
+  }
+  // réglage « toucher plutôt que glisser » (a11y-jeux.js) : les consignes qui demandent de glisser
+  // ou de tracer sont dites autrement, et Estelle doit aussi les dire
+  for (const part of [...out]) {
+    const text = tapText(part.text);
+    if (text !== part.text) out.push({ ...part, text });
   }
   return out;
 }
@@ -88,6 +96,8 @@ const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !',
   'Touche Buenos Aires, la capitale de l’Argentine.', 'Oui ! Buenos Aires est la capitale de l’Argentine.', 'Sa capitale est Buenos Aires.',
   // le partage : dit par main.js quand les parts ne sont pas égales
   'Ils n’en ont pas tous autant. Touche la flèche pour en reprendre.',
+  // toucher plutôt que glisser (main.js) : écris au doigt, points à relier
+  'Touche le point qui brille !', 'Regarde le point jaune, puis touche les points un par un !',
   // ponctuation : l'enfant choisit le signe d'après l'intonation, chaque phrase doit donc être dite d'un seul son
   ...SPOKEN_SENTENCES.flatMap(({ text, marks }) => [...marks].map((m) => (m === '.' ? `${text}.` : `${text} ${m}`)))];
 
