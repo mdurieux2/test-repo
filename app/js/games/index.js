@@ -22,11 +22,12 @@ import { ANGLAIS_PLUS_GAMES } from './anglais-plus.js';
 import { ecrire } from './ecriture.js';
 import { regleHorloge } from './horloge.js';
 import { tablesChrono } from './chrono.js';
+import { SCIENCES_GAMES } from './sciences.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
-  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono,
+  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -58,7 +59,7 @@ const RUBRIQUES = [
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
-  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde'] },
+  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'vivant', 'matiere', 'pays', 'drapeaux', 'carte-monde'] },
   {
     id: 'anglais',
     title: 'Anglais',
@@ -80,6 +81,8 @@ const SECTION_GAMES = {
   'Logique': ['formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross'],
   'Formes et espace': ['symetrie', 'reproduire', 'tangram', 'cubes'],
   'Labyrinthes': ['labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres'],
+  'Le vivant et la matière': ['animaux-monde', 'vivant', 'matiere'],
+  'Pays, drapeaux et cartes': ['pays', 'drapeaux', 'carte-monde'],
   'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
   'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
   'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais'],
