@@ -934,6 +934,114 @@ async function checkRecordings(page) {
   console.log('✔ voix des parents : enregistrement supprimé');
 }
 
+// ---------------------------------------------------------------- Lire à voix haute
+
+/**
+ * Lire à voix haute (fluence), sur un onglet à part dont l'horloge est factice (la minute passe d'un
+ * coup) : la consigne pour l'adulte, puis la lecture ; le robot touche des mots ratés (barrés en rouge),
+ * puis, la minute écoulée, le dernier mot lu ; le score (mots correctement lus par minute) est affiché
+ * et gardé sur le profil. Ensuite une lecture « sans chrono » (accessibilité), lue en entier, et le
+ * suivi des parents. Renvoie les étoiles de la seconde lecture (la première en donne 2, comme les autres jeux).
+ */
+async function checkFluence(context, game) {
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`${game.id} : ${e.message}`));
+  await page.clock.install();
+  const said = () => page.evaluate(() => globalThis.__spoken || []);
+  const plain = (t) => t.replace(/[  ]/g, ' ').replace(/‑/g, '-').replace(/\s+/g, ' ').trim();
+  const saved = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'], STORAGE_KEY);
+  await page.goto(BASE);
+  await setStore(page, `store.profiles['eva-rose'].games['${game.id}'] = { level: 3 };`);
+  await openGame(page, game);
+  await page.waitForSelector('.fluence-zone[data-phase="brief"] .fl-start');
+  const q = await page.evaluate(() => globalThis.__lc.question);
+  const tokens = q.stage.tokens;
+  const shown = plain(await page.textContent('.instruction .bubble'));
+  if (shown !== plain(q.text)) fail(`${game.id} : bulle « ${shown} » au lieu de « ${q.text} »`);
+  const brief = plain(await page.textContent('.fl-brief'));
+  if (!brief.includes('Asseyez-vous à côté de l’enfant') || !brief.includes('1 minute')) fail(`${game.id} : consigne pour l'adulte « ${brief} »`);
+  if (await page.locator('.fl-sheet').isVisible()) fail(`${game.id} : les mots sont visibles avant le départ`);
+  await page.waitForFunction((text) => (globalThis.__spoken || []).includes(text), q.instruction[0], { timeout: 5000 })
+    .catch(() => fail(`${game.id} : la consigne n'est pas dite`));
+  await page.click('.fl-start');
+  await page.waitForSelector('.fluence-zone[data-phase="read"] .fl-clock');
+  if (!(await said()).includes('À toi, Eva-Rose !')) fail(`${game.id} : « À toi, Eva-Rose ! » n'est pas dit au départ`);
+  const clockAt = async () => (await page.textContent('.fl-clock')).trim();
+  if (await clockAt() !== '⏱ 01:00') fail(`${game.id} : chronomètre « ${await clockAt()} » au départ`);
+  await page.clock.fastForward(20000);
+  await page.waitForFunction(() => document.querySelector('.fl-clock')?.textContent.trim() === '⏱ 00:40', null, { timeout: 5000 })
+    .catch(async () => fail(`${game.id} : chronomètre « ${await clockAt()} » après 20 secondes`));
+  // trois mots ratés, dont un touché une seconde fois (annulé)
+  for (const i of [1, 3, 5, 5]) await page.click(`.fl-word[data-word="${i}"]`);
+  for (const [i, on] of [[1, true], [3, true], [5, false], [0, false]]) {
+    const state = await page.$eval(`.fl-word[data-word="${i}"]`, (el) => ({
+      missed: el.classList.contains('missed'), pressed: el.getAttribute('aria-pressed'),
+      line: getComputedStyle(el).textDecorationLine, color: getComputedStyle(el).color,
+    }));
+    if (state.missed !== on || state.pressed !== String(on)) fail(`${game.id} : mot ${i} ${on ? 'non marqué raté' : 'marqué raté'} (${JSON.stringify(state)})`);
+    if (on && (!state.line.includes('line-through') || state.color !== 'rgb(179, 38, 30)')) fail(`${game.id} : un mot raté doit être barré ET rouge (${JSON.stringify(state)})`);
+  }
+  // la minute est écoulée : « C'est fini ! », et l'adulte touche le dernier mot lu
+  await page.clock.fastForward(41000);
+  await page.waitForSelector('.fluence-zone[data-phase="last"]', { timeout: 5000 }).catch(() => fail(`${game.id} : la lecture ne s'arrête pas après une minute`));
+  await page.waitForFunction(() => (globalThis.__spoken || []).includes('C’est fini !'), null, { timeout: 5000 })
+    .catch(() => fail(`${game.id} : « C’est fini ! » n'est pas dit`));
+  if (!(await page.locator('.fl-ok').isDisabled())) fail(`${game.id} : « Valider » avant d'avoir touché le dernier mot lu`);
+  await page.click('.fl-word[data-word="9"]');
+  if (!(await page.locator('.fl-word[data-word="9"].last').count()) || !(await page.locator('.fl-word[data-word="10"].unread').count())) fail(`${game.id} : dernier mot lu non marqué`);
+  await page.click('.fl-ok');
+  await page.waitForSelector('.results');
+  await assertNoJunk(page, `${game.id} résultats`);
+  const result = plain(await page.textContent('.fluence-result'));
+  if (!result.includes('8 mots bien lus en 1 minute') || !result.includes('10 lus, 2 ratés') || !result.includes('environ 50 mots par minute en fin de CP')) {
+    fail(`${game.id} : résultat « ${result} »`);
+  }
+  let stars = await page.locator('.big-star.on').count();
+  if (stars !== 2) fail(`${game.id} : ${stars} étoiles au lieu de 2 (8 mots bien lus sur 10)`);
+  const first = (await saved()).fluence?.at(-1);
+  if (!first || first.read !== 10 || first.errors !== 2 || first.correct !== 8 || first.mclm !== 8 || first.seconds !== 60 || first.timed !== true || first.level !== 3) {
+    fail(`${game.id} : lecture enregistrée ${JSON.stringify(first)}`);
+  }
+  // Estelle n'a lu aucun mot de la feuille (c'est l'enfant qui lit)
+  const readAloud = (await said()).filter((t) => tokens.includes(t));
+  if (readAloud.length) fail(`${game.id} : Estelle a lu des mots de la feuille (${readAloud.join(', ')})`);
+  console.log(`  ✔ ${game.id} : consigne pour l'adulte, minute chronométrée, mots ratés barrés en rouge, dernier mot lu → 8 mots bien lus, gardé sur le profil`);
+
+  // sans chrono (accessibilité) : lecture libre, le temps est donné à la fin ; tout lu sans erreur
+  await setStore(page, "store.profiles['eva-rose'].a11y = { noTimer: true };");
+  await openGame(page, game);
+  await page.waitForSelector('.fl-start');
+  if (!plain(await page.textContent('.fl-brief')).includes('à son rythme')) fail(`${game.id} sans chrono : consigne pour l'adulte`);
+  await page.click('.fl-start');
+  await page.waitForSelector('.fluence-zone[data-phase="read"]');
+  if (await page.locator('.fl-clock').count()) fail(`${game.id} sans chrono : le chronomètre est affiché`);
+  const total = (await page.evaluate(() => globalThis.__lc.question)).stage.tokens.length;
+  await page.clock.fastForward(30000);
+  await page.click('.fl-all');
+  await page.waitForSelector('.results');
+  const free = plain(await page.textContent('.fluence-result'));
+  if (!free.includes(`${total * 2} mots bien lus par minute`) || !free.includes('temps de lecture : 30 s')) fail(`${game.id} sans chrono : résultat « ${free} »`);
+  stars = await page.locator('.big-star.on').count();
+  if (stars !== 3) fail(`${game.id} sans chrono : ${stars} étoiles au lieu de 3 (tout lu sans erreur)`);
+  const kid = await saved();
+  if (kid.fluence.length !== 2 || kid.fluence[1].timed !== false || kid.games[game.id].level !== 4) {
+    fail(`${game.id} sans chrono : ${JSON.stringify(kid.fluence)}, niveau ${kid.games[game.id].level}`);
+  }
+  await setStore(page, "delete store.profiles['eva-rose'].a11y;");
+  console.log(`  ✔ ${game.id} sans chrono : pas de chronomètre, tout lu en 30 s → ${total * 2} mots par minute, niveau suivant`);
+
+  // suivi des parents : dernier et meilleur score, la semaine avec sa valeur écrite
+  await openParents(page);
+  const card = plain(await page.textContent('.fluence-card'));
+  if (!card.includes(`Dernier score${total * 2} / min`) || !card.includes(`Meilleur score${total * 2} / min`) || !card.includes("2 lectures · dernière lecture : aujourd'hui")) fail(`${game.id} : suivi « ${card} »`);
+  if ((await page.locator('.fluence-card .fl-week').count()) !== 1 || (await page.textContent('.fluence-card .fl-week-value')).trim() !== String(total * 2)) {
+    fail(`${game.id} : évolution par semaine absente du suivi`);
+  }
+  console.log(`  ✔ ${game.id} : suivi des parents (dernier score, meilleur score, la semaine)`);
+  await page.close();
+  return stars;
+}
+
 // ---------------------------------------------------------------- Parcours complet (iPhone 13)
 
 async function scenario() {
@@ -998,6 +1106,12 @@ let extraStars = 0; // étoiles gagnées en plus des 2 étoiles par jeu (deuxiè
 for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
   const grade = gradeFor(game.id);
   await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`);
+  if (game.adult) {
+    // lire à voix haute : un adulte écoute et touche les mots ratés (onglet à part, horloge factice)
+    extraStars += await checkFluence(context, game);
+    console.log(`✔ ${game.id} (${grade}) : deux lectures complètes`);
+    continue;
+  }
   if (game.id === 'calcul') {
     await goProfile(page);
     await page.click('[data-domain="maths"]');
@@ -1599,7 +1713,7 @@ const A11Y_GAMES = [
   ['trous', 1], ['droite-numerique', 2], ['fractions', 2], ['partage', 1], ['addition-posee', 1], ['puzzle', 1],
   ['memory', 1], ['coloriage-magique', 1], ['points', 1], ['sudoku', 1], ['picross', 1], ['symetrie', 1],
   ['labyrinthe', 1], ['labyrinthe-rond', 1], ['chemin-nombres', 1], ['regle-horloge', 1], ['monnaie', 3],
-  ['carte-monde', 1], ['ranger', 1], ['dictee', 1],
+  ['carte-monde', 1], ['ranger', 1], ['dictee', 1], ['fluence', 3],
   ...['histoires', 'anglais', 'sciences'].map((domain) => [GAMES.find((g) => g.domain === domain && !g.paliers)?.id, 1]),
 ].filter(([id]) => id && findGame(id));
 
@@ -1782,6 +1896,19 @@ async function a11yPart() {
   }
   await page.waitForSelector('.screen.results');
   await audit('fin de partie');
+  // lire à voix haute : la feuille de lecture (un mot raté, barré), le dernier mot lu, puis le résultat (après la fin de partie : même titre de page)
+  await setStore(page, `store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games.fluence = { level: 3 };`);
+  await openGame(page, findGame('fluence'));
+  await page.click('.fl-start');
+  await page.waitForSelector('.fluence-zone[data-phase="read"]');
+  await page.click('.fl-word[data-word="1"]');
+  await audit('jeu fluence, lecture');
+  await page.click('.fl-stop');
+  await page.click('.fl-word[data-word="5"]');
+  await audit('jeu fluence, dernier mot lu');
+  await page.click('.fl-ok');
+  await page.waitForSelector('.screen.results');
+  await audit('jeu fluence, résultat');
 
   // album, personnage
   await goProfile(page, 'eva-rose');
@@ -2508,6 +2635,17 @@ async function checkDevice(device, repeat, deviceIndex) {
         await page.waitForSelector('.choices');
         await checkLayout(page, tag(`${game.id} niveau ${level}`));
         checked++;
+        if (game.adult && k === 0) {
+          // lire à voix haute : après la consigne pour l'adulte, la feuille de lecture, puis le dernier mot lu
+          await page.click('.fl-start');
+          await page.waitForSelector('.fluence-zone[data-phase="read"]');
+          await page.click('.fl-word[data-word="2"]');
+          await checkLayout(page, tag(`${game.id} niveau ${level} (lecture)`));
+          await page.click('.fl-stop');
+          await page.click('.fl-word[data-word="6"]');
+          await checkLayout(page, tag(`${game.id} niveau ${level} (dernier mot lu)`));
+          checked += 2;
+        }
       }
     }
   }

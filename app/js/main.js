@@ -12,13 +12,16 @@ import {
 import {
   chronoLevelAfter, chronoOn, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono, untimedQuestion,
 } from './games/chrono.js';
+import {
+  FLUENCE_SECONDS, fluenceBenchmark, fluenceEntry, fluenceLevelAfter, fluenceScore, fluenceSeconds, fluenceStars, fluenceTime,
+} from './games/fluence.js';
 import { featuredGames, levelRange, MAX_FEATURED, programFor, programForChild } from './programs.js';
 import { dailyPicks, dueReviews as reviewsDue, duoPlan, drawPool } from './picks.js';
 import { createRng, pick, randInt, sample, shuffle } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import {
-  addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
+  addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logFluence, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
   resetChild, saveStore,
 } from './storage.js';
 import { demoSeen, markDemoSeen } from './storage.js';
@@ -1207,6 +1210,7 @@ function nextQuestion(session) {
     share: shareZone,
     column: columnZone,
     body: bodyZone,
+    fluence: fluenceZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -4273,13 +4277,187 @@ function columnZone(ctx) {
   return { stage: h('div', { class: 'stage stage-column' }, grid), zone };
 }
 
+// ---- Lire à voix haute (fluence) : un adulte assis à côté de l'enfant lance la lecture d'une minute
+// (sans chrono : lecture libre), touche les mots ratés (barrés en rouge), puis le dernier mot lu.
+// Estelle ne lit pas les mots : elle dit la consigne, « À toi ! » au départ et « C'est fini ! » à la fin.
+
+function fluenceZone(ctx) {
+  const { q, session } = ctx;
+  const { kind, title, tokens } = q.stage;
+  const timed = !access().noTimer;
+  const syll = kind === 'syllabes';
+  const words = {
+    one: syll ? 'syllabe' : 'mot',
+    many: syll ? 'syllabes' : 'mots',
+    missed: syll ? 'mal lue ou sautée' : 'mal lu ou sauté',
+    crossed: syll ? 'barrée' : 'barré',
+    last: syll ? 'la dernière syllabe lue' : 'le dernier mot lu',
+  };
+  const missed = new Set();
+  let phase = 'brief'; // brief → read → last
+  let last = -1;
+  let startedAt = 0;
+  let stoppedAt = 0;
+  let timer = null;
+  const elapsed = () => ((stoppedAt || Date.now()) - startedAt) / 1000;
+
+  const label = (i) => `${tokens[i]}${missed.has(i) ? `, ${syll ? 'ratée' : 'raté'}` : ''}${i === last ? `, ${syll ? 'dernière lue' : 'dernier lu'}` : ''}`;
+  const buttons = tokens.map((token, i) => h('button', {
+    class: 'fl-word', 'data-word': i, 'aria-pressed': 'false', 'aria-label': token, onclick: () => touch(i),
+  }, syll ? token : readable(token)));
+  const sheet = h('div', { class: `fl-sheet fl-${kind}`, hidden: true },
+    title ? h('h2', { class: 'fl-title' }, title) : null,
+    kind === 'texte'
+      ? h('p', { class: 'fl-para' }, buttons.flatMap((b, i) => (i ? [' ', b] : [b])))
+      : h('div', { class: 'fl-list', style: { '--fl-chars': String(Math.max(...tokens.map((t) => t.length))) } }, buttons));
+  const brief = h('div', { class: 'fl-brief' },
+    h('h2', {}, frenchSpacing('👋 Pour l’adulte')),
+    h('p', {}, timed ? 'Asseyez-vous à côté de l’enfant : il lit à voix haute pendant 1 minute.'
+      : 'Asseyez-vous à côté de l’enfant : il lit à voix haute, à son rythme.'),
+    h('ul', {},
+      h('li', {}, frenchSpacing(`Touchez chaque ${words.one} ${words.missed} : ${syll ? 'elle' : 'il'} est ${words.crossed} en rouge.`)),
+      h('li', {}, 'S’il bloque, invitez-le à passer à la suite.'),
+      h('li', {}, `À la fin, touchez ${words.last}.`)));
+
+  const clock = h('span', { class: 'fl-clock', role: 'timer' });
+  const hint = h('p', { class: 'fl-hint' });
+  const startBtn = h('button', { class: 'big-btn primary fl-start', onclick: () => start() }, frenchSpacing('▶ C’est parti !'));
+  const stopBtn = h('button', { class: 'big-btn fl-stop', onclick: () => stop() }, '⏹ Arrêter');
+  const allBtn = h('button', { class: 'big-btn fl-all', onclick: () => finish(tokens.length - 1) }, '✔ Tout lu');
+  const okBtn = h('button', { class: 'big-btn primary fl-ok', disabled: true, onclick: () => finish(last) }, '✔ Valider');
+  const zone = h('div', { class: 'choices fluence-zone', 'data-phase': phase });
+
+  const render = () => {
+    zone.dataset.phase = phase;
+    if (phase === 'brief') zone.replaceChildren(startBtn);
+    else if (phase === 'read') {
+      hint.textContent = frenchSpacing(`Touchez les ${words.many} ${syll ? 'mal lues' : 'mal lus'} ; encore une fois pour annuler.`);
+      zone.replaceChildren(...[timed ? clock : null, hint, h('div', { class: 'fl-actions' }, stopBtn, allBtn)].filter(Boolean));
+    } else {
+      hint.textContent = frenchSpacing(`Touchez ${words.last}, ou « Tout lu ».`);
+      zone.replaceChildren(hint, h('div', { class: 'fl-actions' }, allBtn, okBtn));
+    }
+  };
+
+  const tick = () => {
+    if (!zone.isConnected) {
+      clearInterval(timer); // écran quitté
+      return;
+    }
+    const left = Math.max(0, FLUENCE_SECONDS - elapsed());
+    clock.textContent = `⏱ ${formatChrono(Math.ceil(left))}`;
+    clock.setAttribute('aria-label', `Il reste ${spokenChrono(Math.ceil(left))}`);
+    clock.classList.toggle('ending', left <= 10);
+    if (left <= 0) timeUp();
+  };
+
+  async function start() {
+    if (phase !== 'brief') return;
+    phase = 'go';
+    startBtn.disabled = true;
+    // « À toi, Léa ! » : les mots n'apparaissent (et le temps ne court) qu'ensuite
+    await Promise.race([say(session.guide, `À toi, ${session.guide.spoken} !`), sleep(2500)]);
+    if (!zone.isConnected) return;
+    phase = 'read';
+    brief.hidden = true;
+    sheet.hidden = false;
+    startedAt = Date.now();
+    render();
+    if (timed) {
+      tick();
+      timer = setInterval(tick, 250);
+    }
+    buttons[0].focus({ preventScroll: true });
+  }
+
+  /** Fin de la lecture (temps écoulé, ou « Arrêter ») : l'adulte touche le dernier mot lu. */
+  function endReading() {
+    clearInterval(timer);
+    phase = 'last';
+    render();
+    say(session.guide, 'C’est fini !');
+  }
+
+  function timeUp() {
+    if (phase !== 'read') return;
+    stoppedAt = startedAt + FLUENCE_SECONDS * 1000;
+    clock.textContent = `⏱ ${formatChrono(0)}`;
+    playSound('levelUp');
+    endReading();
+  }
+
+  function stop() {
+    if (phase !== 'read') return;
+    stoppedAt = Date.now();
+    endReading();
+  }
+
+  function touch(i) {
+    if (session.locked) return;
+    const b = buttons[i];
+    if (phase === 'read') {
+      // un mot raté : barré et rouge (pas seulement rouge) ; touché encore, il redevient normal
+      if (missed.has(i)) missed.delete(i);
+      else missed.add(i);
+      b.classList.toggle('missed', missed.has(i));
+      b.setAttribute('aria-pressed', String(missed.has(i)));
+      playSound('tap');
+    } else if (phase === 'last') {
+      last = i;
+      buttons.forEach((other, j) => {
+        other.classList.toggle('unread', j > i);
+        other.classList.toggle('last', j === i);
+        if (j === i) other.setAttribute('aria-current', 'true');
+        else other.removeAttribute('aria-current');
+      });
+      okBtn.disabled = false;
+      playSound('tap');
+    } else return;
+    buttons.forEach((other, j) => other.setAttribute('aria-label', label(j)));
+  }
+
+  function finish(lastIndex) {
+    if (session.locked || (phase !== 'read' && phase !== 'last') || lastIndex < 0) return;
+    if (phase === 'read') stoppedAt = Date.now(); // « Tout lu » avant la fin de la minute
+    clearInterval(timer);
+    session.locked = true;
+    zone.classList.add('answered');
+    const allRead = lastIndex === tokens.length - 1;
+    const score = fluenceScore({ total: tokens.length, missed: [...missed], last: lastIndex, seconds: fluenceSeconds({ timed, allRead, elapsed: elapsed() }) });
+    endFluence(session, score, { timed, kind });
+  }
+
+  render();
+  return { stage: h('div', { class: `stage stage-fluence fl-kind-${kind}` }, brief, sheet), zone };
+}
+
+/** Une lecture terminée : le score est gardé (child.fluence), le niveau suit, et la partie compte pour les étoiles. */
+function endFluence(session, score, { timed, kind }) {
+  const { game } = session;
+  const kid = child();
+  const level = session.levelState.level;
+  const next = fluenceLevelAfter(level, score, session.min, session.max);
+  const stats = gameStats(kid, game.id, session.min);
+  kid.games[game.id] = {
+    ...stats, level: next, streak: 0, recent: [],
+    answered: stats.answered + score.read, correct: stats.correct + score.correct, lastPlayed: new Date().toISOString(),
+  };
+  logFluence(kid, fluenceEntry({ at: new Date().toISOString(), level, kind, timed, score }));
+  session.fluence = { score, timed, kind, level, next };
+  session.correct = 1; // une lecture faite : la partie ne pénalise jamais l'enfant
+  session.index = session.total;
+  save();
+  finishSession(session);
+}
+
 // ---- Fin de partie
 
 function finishSession(session) {
   if (session.duo) return finishDuo(session);
   const { game } = session;
   const kid = child();
-  const stars = starsFor(session.correct, session.total);
+  // lecture à voix haute : 2 étoiles pour l'effort, 3 sans presque aucune erreur (jamais 1)
+  const stars = session.fluence ? fluenceStars(session.fluence.score) : starsFor(session.correct, session.total);
   const before = kid.stars;
   kid.stars += stars;
   const stats = gameStats(kid, game.id, session.min);
@@ -4333,6 +4511,7 @@ function finishSession(session) {
       next > level ? h('p', { class: 'chrono-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')) : null);
     chronoSpeech = [`Ton temps : ${spokenChrono(seconds)}.`, record.isNew ? 'Nouveau record !' : `Ton record : ${spokenChrono(record.best)}.`];
   }
+  const fluenceLine = session.fluence ? fluenceResult(session.fluence, kid.grade) : null;
   logSession(kid, {
     at: new Date().toISOString(),
     game: game.id,
@@ -4353,7 +4532,7 @@ function finishSession(session) {
     h('div', { class: 'result-stars', 'aria-label': `${stars} étoiles sur 3` },
       [1, 2, 3].map((i) => h('span', { class: i <= stars ? 'big-star on' : 'big-star', style: { animationDelay: `${i * 0.25}s` } }, '⭐'))),
     h('h1', {}, frenchSpacing(title)),
-    h('p', { class: 'result-detail' }, `${session.correct} sur ${session.total} du premier coup`),
+    fluenceLine || h('p', { class: 'result-detail' }, `${session.correct} sur ${session.total} du premier coup`),
     chronoLine,
     palierLine,
     dailyLine,
@@ -4371,6 +4550,23 @@ function finishSession(session) {
     ...chronoSpeech,
     ...(unlocked.length ? [`Nouvel autocollant : ${unlocked.at(-1).name} !`] : []),
   ]);
+}
+
+/** Résultat d'une lecture à voix haute : mots correctement lus par minute, détail et repère de la classe. */
+function fluenceResult({ score, timed, kind, level, next }, grade) {
+  const syll = kind === 'syllabes';
+  const unit = (n) => `${syll ? 'syllabe' : 'mot'}${n > 1 ? 's' : ''} bien ${syll ? 'lue' : 'lu'}${n > 1 ? 's' : ''}`;
+  const fullMinute = timed && score.seconds === FLUENCE_SECONDS;
+  const benchmark = syll ? null : fluenceBenchmark(grade, { short: true });
+  return h('div', { class: 'fluence-result' },
+    fullMinute
+      ? h('p', { class: 'fluence-mclm' }, h('b', {}, String(score.correct)), ` ${unit(score.correct)} en 1\u00a0minute`)
+      : h('p', { class: 'fluence-mclm' }, h('b', {}, String(score.mclm)), ` ${unit(score.mclm)} par minute`),
+    h('p', { class: 'fluence-detail' },
+      `${score.read} ${syll ? 'lue' : 'lu'}${score.read > 1 ? 's' : ''}, ${score.errors} ${syll ? 'ratée' : 'raté'}${score.errors > 1 ? 's' : ''}`,
+      fullMinute ? '' : ` · ${frenchSpacing(`temps de lecture : ${fluenceTime(score.seconds)}`)}`),
+    benchmark ? h('p', { class: 'fluence-benchmark' }, frenchSpacing(benchmark)) : null,
+    next > level ? h('p', { class: 'fluence-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')) : null);
 }
 
 function confetti(stars) {

@@ -120,7 +120,7 @@ export const PROGRAMS = {
   },
   CP: {
     francais: [
-      ['premier-son', 1, 8], ['syllabes', 1, 8], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['vocabulaire', 2, 7], ['ponctuation', 1, 7], ['genre', 1, 1], ['conjugaison', 1, 3], ['accords', 1, 7],
+      ['premier-son', 1, 8], ['syllabes', 1, 8], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['fluence', 1, 7], ['vocabulaire', 2, 7], ['ponctuation', 1, 7], ['genre', 1, 1], ['conjugaison', 1, 3], ['accords', 1, 7],
       ['ecrire', 2, 8],
       ['dictee', 1, 5],
     ],
@@ -160,7 +160,7 @@ export const PROGRAMS = {
   },
   CE1: {
     francais: [
-      ['bon-mot', 2, 8], ['petits-mots', 2, 8], ['phrase', 1, 8], ['vocabulaire', 4, 10], ['ponctuation', 3, 10], ['homophones', 1, 8], ['genre', 1, 8],
+      ['bon-mot', 2, 8], ['petits-mots', 2, 8], ['phrase', 1, 8], ['fluence', 4, 9], ['vocabulaire', 4, 10], ['ponctuation', 3, 10], ['homophones', 1, 8], ['genre', 1, 8],
       ['conjugaison', 1, 10], ['accords', 2, 10],
       ['ecrire', 4, 8],
       ['dictee', 2, 8],

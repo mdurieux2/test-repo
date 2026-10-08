@@ -20,10 +20,11 @@ export function currentLevel(child, { game, min, max }) {
 
 /**
  * Les jeux qu'on peut tirer pour un enfant : son programme affiché, sans la carte des paliers
- * ni les défis chrono (leur partie de 10 questions chronométrées a son propre format).
+ * ni les défis chrono (leur partie de 10 questions chronométrées a son propre format), ni la lecture
+ * à voix haute (un adulte écoute et note, game.adult).
  */
 export function drawPool(child) {
-  return programForChild(child).flatMap((domain) => domain.games).filter(({ game }) => !game.paliers && !game.timed);
+  return programForChild(child).flatMap((domain) => domain.games).filter(({ game }) => !game.paliers && !game.timed && !game.adult);
 }
 
 /**
@@ -37,7 +38,7 @@ export function dailyPicks(child, seed, count = 5) {
 /** Les révisions du jour (date « AAAA-MM-JJ ») : jeux connus, à revoir, et non masqués. */
 export function dueReviews(child, today) {
   return Object.entries(child?.review || {})
-    .filter(([id, item]) => findGame(id) && !findGame(id).timed && item?.due <= today && !isGameHidden(child, id));
+    .filter(([id, item]) => findGame(id) && !findGame(id).timed && !findGame(id).adult && item?.due <= today && !isGameHidden(child, id));
 }
 
 // ---------------------------------------------------------------- Jouer à deux
