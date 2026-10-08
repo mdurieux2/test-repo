@@ -2942,6 +2942,11 @@ html { font-size: calc(100% * var(--text-scale, 1)); }
   .a11y-text-large .home-bottom .pill { font-size: 0.7rem; padding: 1px 6px; }
   .a11y-text-large .home.has-featured .home-top .domain-btn, .a11y-text-large .home.has-featured .home-bottom .domain-btn,
   .a11y-big-targets .home.has-featured .home-top .domain-btn, .a11y-big-targets .home.has-featured .home-bottom .domain-btn { min-height: 64px; }
+  /* une phrase à compléter (conjugaison…) : grande, sans pousser les réponses hors de l'écran */
+  .a11y-text-large .stage-sentence { font-size: 1.25rem; padding: 10px 14px; }
+  /* relier des mots : les mots longs (« l'éléphant ») tiennent sur une ligne */
+  .a11y-text-large .match-item { font-size: 1.2rem; overflow-wrap: normal; hyphens: manual; }
+  .a11y-text-large .match-item.right { font-size: 1.3rem; }
   /* épeler un mot sous une image (consigne longue au premier mot) : l'image et les cases un peu moins hautes */
   .a11y-text-large .play-order .stage-picture { font-size: min(110px, 15dvh); }
   .a11y-text-large .play-order .order-slot, .a11y-big-targets .play-order .order-slot { height: 64px; }
@@ -2971,6 +2976,10 @@ html { font-size: calc(100% * var(--text-scale, 1)); }
   :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-bottom .domain-btn { font-size: 0.8rem; padding: 4px 6px; gap: 4px; }
   :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-bottom .pill { font-size: 0.7rem; padding: 1px 6px; }
   .a11y-text-large .home.has-featured .domain-tile { font-size: 0.8rem; line-height: 1.1; }
+  /* problèmes en schémas : l'histoire et le schéma un peu plus serrés */
+  .a11y-text-large .stage-schema { gap: 6px; }
+  .a11y-text-large .stage-schema > .bm { padding: 4px 10px; }
+  .a11y-text-large .stage-schema .bm-seg { height: 1.7em; }
   /* mettre dans l'ordre sous une image (épeler un mot) : la consigne, souvent longue, sur toute la largeur */
   .a11y-text-large .screen.play.play-order:has(> .stage) { grid-template-areas: "top top" "instr instr" "stage zone"; }
   .a11y-text-large .play-order .order-slot, .a11y-big-targets .play-order .order-slot { height: 56px; }
