@@ -102,6 +102,8 @@ const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !',
   'Qu’est-ce qui fait tourner les ailes du moulin à vent ?', 'Les nuages sont faits de coton.',
   'Je remplis la baignoire jusqu’en haut tous les jours.', 'On recoud le trou de la chaussette.',
   'On attrape le papillon par les ailes.',
+  // imparfait (CE2) : « allions » et « voyaient », seuls, sont refusés par les contrôles
+  'Autrefois, nous allions au marché le samedi.', 'Avant, ils voyaient des loups dans la forêt.',
   // correction expliquée (explications.js) : la phrase dite avec l'encart, après une première erreur
   ...EXPLAIN_SENTENCES,
   // toucher plutôt que glisser (main.js) : écris au doigt, points à relier
