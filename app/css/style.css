@@ -781,6 +781,15 @@ input { -webkit-user-select: text; user-select: text; }
 @media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) and (max-height: 780px) {
   .play-keypad .keypad { gap: 6px 10px; }
   .play-keypad .key { min-height: 50px; }
+  /* texte agrandi ou grandes cibles (a11y.js) : déjà plus grand, sans l'agrandissement de l'iPad */
+  body.a11y-text-large, body.a11y-big-targets { --zoom: 1; }
+  /* accueil avec des jeux conseillés : l'icône au-dessus du nom (« Histoires » ne tient pas à côté) */
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .domain-tile { flex-direction: column; gap: 2px; padding: 4px 6px; }
+  /* pavé numérique (touches de 64 px) : marges resserrées, l'encart de correction tient sous le pavé */
+  :is(.a11y-text-large, .a11y-big-targets) .screen.play.play-keypad { padding-top: calc(var(--safe-top) + 4px); }
+  :is(.a11y-text-large, .a11y-big-targets) .play-keypad .instruction { margin: 2px 0; }
+  :is(.a11y-text-large, .a11y-big-targets) .play-keypad .stage { min-height: 0; padding: 4px 0; }
+  .a11y-big-targets .play-keypad .keypad { gap: 8px 12px; }
 }
 
 /* =====================================================================
