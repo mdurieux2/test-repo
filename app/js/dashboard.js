@@ -2,8 +2,8 @@
 
 import { findGame } from './games/index.js';
 import { CALC_PALIERS } from './games/maths.js';
-import { programFor } from './programs.js';
-import { gameStats } from './storage.js';
+import { GRADE_GOALS, programFor } from './programs.js';
+import { GRADES, gameStats } from './storage.js';
 import { h } from './render.js';
 import { resumeSons } from './graphemes.js';
 
@@ -183,6 +183,10 @@ export function dashboard({ kid, grade, onChange }) {
       mistakes.length
         ? h('ul', { class: 'plain-list' }, mistakes.map((m) => h('li', {}, describeMistake(m), h('span', { class: 'muted' }, ` (${m.count} fois)`))))
         : h('p', { class: 'muted' }, 'Aucune erreur répétée.')),
+    // les attendus de fin d'année de sa classe, en quelques mots
+    GRADE_GOALS[grade] ? h('section', { class: 'card grade-goals', 'data-grade-goals': grade },
+      h('h2', {}, `Attendus de fin d’année (${GRADES[grade]})`),
+      h('p', { class: 'muted' }, GRADE_GOALS[grade])) : null,
     ...domains.map((d) => h('section', { class: 'card' },
       h('h2', {}, `${d.icon} ${d.title} : compétences`),
       d.id === 'francais' && sons ? h('p', { class: 'muted small sons-vus-line', 'data-sons-vus': '' }, h('b', {}, 'Sons vus en classe : '), sons) : null,

@@ -759,7 +759,7 @@ function welcomeScreen(adding = !store.order.length) {
       h('div', { class: 'welcome-avatars', 'aria-hidden': 'true' },
         avatar('apercu-fille', 'avatar-md', { look: 'fille' }), avatar('apercu-garcon', 'avatar-md', { look: 'garcon' })),
       h('h1', { class: 'welcome-title' }, 'Bienvenue !'),
-      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la moyenne section au CE1.')),
+      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la petite section au CE2.')),
     added.length ? h('section', { class: 'card' }, h('h2', {}, 'Ils vont jouer'), h('div', { class: 'child-chips' }, added)) : null,
     adding
       ? h('section', { class: 'card' },
@@ -4504,7 +4504,7 @@ function bubblesGame(back) {
 
 /** Remets le portrait dans l'ordre : toucher deux pièces pour les échanger. */
 function puzzleGame(back) {
-  const n = ['MS', 'GS'].includes(child().grade) ? 2 : 3;
+  const n = ['PS', 'MS', 'GS'].includes(child().grade) ? 2 : 3;
   const order = shuffle(rng, Array.from({ length: n * n }, (_, i) => i));
   if (order.every((v, i) => v === i)) order.reverse();
   let selected = null;

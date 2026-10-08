@@ -1368,6 +1368,34 @@ await page.click('[data-edit="' + longId + '"]');
 await page.click('.delete-child');
 await page.waitForSelector('[data-child-card="matteo"]');
 if (await page.locator(`[data-child-card="${longId}"]`).count()) fail('le profil supprimé est toujours là');
+// petite section et CE2 : un enfant de chaque classe, son programme et ses attendus dans le Suivi
+for (const [name, grade, id] of [['Noé', 'PS', 'noe'], ['Inès', 'CE2', 'ines']]) {
+  await page.click('.add-child');
+  await page.fill('[data-field="name"]', name);
+  await page.click(`[data-grade="${grade}"]`);
+  if ((await page.getAttribute(`[data-grade="${grade}"]`, 'aria-checked')) !== 'true') fail(`classe ${grade} : le bouton n’est pas coché`);
+  await page.click('.child-submit');
+  await page.waitForSelector(`[data-child-card="${id}"]`);
+  const savedGrade = await page.evaluate(([key, kid]) => JSON.parse(localStorage.getItem(key)).profiles[kid]?.grade, [STORAGE_KEY, id]);
+  if (savedGrade !== grade) fail(`${name} : classe « ${savedGrade} » au lieu de « ${grade} »`);
+  if (!(await page.textContent(`[data-child-card="${id}"]`)).includes(grade === 'PS' ? 'Petite section' : 'CE2')) fail(`${name} : classe absente de la liste des enfants`);
+  await page.click('[data-tab="suivi"]');
+  await page.click(`[data-child="${id}"]`);
+  await page.waitForSelector(`[data-grade-goals="${grade}"]`);
+  const gradeRows = await page.locator('.game-row').count();
+  const gradeGames = Object.values(PROGRAMS[grade]).flat().length;
+  if (gradeRows !== gradeGames) fail(`${grade} : ${gradeRows} jeux suivis au lieu de ${gradeGames}`);
+  await assertNoJunk(page, `suivi ${grade}`);
+  await shot(`06d-suivi-${grade}`);
+  await page.click('[data-tab="enfants"]');
+}
+for (const id of ['noe', 'ines']) {
+  await page.click(`[data-edit="${id}"]`);
+  await page.click('.delete-child');
+  await page.waitForSelector('[data-child-card="matteo"]');
+  if (await page.locator(`[data-child-card="${id}"]`).count()) fail(`le profil ${id} supprimé est toujours là`);
+}
+console.log('✔ petite section et CE2 : profils créés, programme et attendus dans le Suivi, puis supprimés');
 // remettre le prénom d'origine
 await page.click('[data-edit="eva-rose"]');
 await page.fill('[data-field="name"]', 'Eva-Rose');
@@ -2286,13 +2314,14 @@ async function checkDevice(device, repeat, deviceIndex) {
   if (screens && mine(deviceIndex)) {
   await goProfiles(page);
   await checkLayout(page, tag('Qui joue ?'));
-  for (const [id, grade] of [['matteo', 'MS'], ['eva-rose', 'CP']]) {
+  // les accueils et les rubriques de chaque classe : petite section et CE2, puis MS et CP (gardés pour la suite)
+  for (const [id, grade] of [['matteo', 'PS'], ['eva-rose', 'CE2'], ['matteo', 'MS'], ['eva-rose', 'CP']]) {
     await setStore(page, `store.profiles['${id}'] = store.profiles['${id}'] || {}; store.profiles['${id}'].grade = '${grade}';`);
     await goProfile(page, id);
-    await checkLayout(page, tag(`accueil ${id}`));
+    await checkLayout(page, tag(`accueil ${id} ${grade}`));
     for (const domain of DOMAINS.map((d) => d.id)) {
       await page.click(`[data-domain="${domain}"]`);
-      await checkLayout(page, tag(`liste ${domain} ${id}`), { reachable: false });
+      await checkLayout(page, tag(`liste ${domain} ${id} ${grade}`), { reachable: false });
       await page.click('.top-bar .icon-btn');
     }
   }
@@ -2326,7 +2355,7 @@ async function checkDevice(device, repeat, deviceIndex) {
   await goProfile(page);
   await page.click('[data-dress]');
   await checkLayout(page, tag('personnage'), { reachable: false });
-  checked += 22;
+  checked += 40;
   }
 
   // chaque niveau de chaque jeu

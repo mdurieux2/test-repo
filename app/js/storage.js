@@ -13,10 +13,12 @@ export const HISTORY_LIMIT = 300;
 export const MISTAKES_LIMIT = 100;
 
 export const GRADES = {
+  PS: 'Petite section',
   MS: 'Moyenne section',
   GS: 'Grande section',
   CP: 'CP',
   CE1: 'CE1',
+  CE2: 'CE2',
 };
 
 export const MAX_CHILDREN = 6;

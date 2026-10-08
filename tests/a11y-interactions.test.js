@@ -89,10 +89,12 @@ test('écoute : les niveaux entiers, et les jeux masqués quand on écarte l’�
   }
   // (dans la fourchette de niveaux de la classe : en MS, « Les lettres » ne se joue qu'à l'oreille)
   assert.deepEqual(hidden, {
+    PS: ['ecoute', 'compte-anglais', 'ou-est'],
     MS: ['lettres', 'ecoute', 'compte-anglais', 'ou-est'],
     GS: ['syllabes', 'ecoute', 'compte-anglais', 'ou-est', 'nombres-anglais'],
     CP: ['petits-mots', 'ecoute'],
     CE1: ['ecoute'],
+    CE2: ['dictee', 'ecoute'], // au CE2, la dictée est sans image : elle ne se joue qu'à l'oreille
   });
 });
 

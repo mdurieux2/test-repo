@@ -156,7 +156,7 @@ test('défi du jour : jamais un jeu ni une rubrique masqués', () => {
 });
 
 test('défi du jour : sans réglage, le même tirage qu’avant (mêmes jeux le même jour)', () => {
-  for (const grade of ['MS', 'GS', 'CP', 'CE1']) {
+  for (const grade of ['PS', 'MS', 'GS', 'CP', 'CE1', 'CE2']) {
     const kid = { grade };
     const seed = `2026-10-03:${grade}`;
     // le calcul d'avant les réglages des parents (main.js : sans paliers ni défis chrono)
