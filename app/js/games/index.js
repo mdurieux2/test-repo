@@ -25,11 +25,12 @@ import { regleHorloge } from './horloge.js';
 import { tablesChrono } from './chrono.js';
 import { SCIENCES_GAMES } from './sciences.js';
 import { NOMBRES_PLUS_GAMES } from './nombres-plus.js';
+import { GRAMMAIRE_GAMES } from './grammaire.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
-  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES,
+  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES, ...GRAMMAIRE_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -37,7 +38,7 @@ const RUBRIQUES = [
     id: 'francais',
     title: 'Lire et écrire',
     icon: '📚',
-    games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'homophones', 'genre', 'ecrire', 'dictee'],
+    games: ['syllabes-rythme', 'rimes', 'lettres', 'premier-son', 'syllabes', 'bon-mot', 'petits-mots', 'phrase', 'homophones', 'genre', 'conjugaison', 'accords', 'ecrire', 'dictee'],
   },
   { id: 'histoires', title: 'Histoires', icon: '📖', games: ['histoires', 'petits-textes', 'ordre-histoire'] },
   {

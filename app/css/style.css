@@ -357,6 +357,7 @@ input { -webkit-user-select: text; user-select: text; }
 .level-up { font-size: 1.3rem; font-weight: 700; color: var(--accent-dark); animation: pop 0.5s ease-out; }
 .reveal { font-size: 2.6rem; font-weight: 700; letter-spacing: 0.04em; }
 .reveal-hl { color: var(--accent); text-decoration: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; }
+.reveal.long { font-size: min(2rem, 7.5vw); }
 
 /* ---------- résultats ---------- */
 .results { align-items: center; justify-content: center; text-align: center; gap: 8px; overflow: hidden; position: relative; }
@@ -718,6 +719,15 @@ input { -webkit-user-select: text; user-select: text; }
 .choices-sentences { grid-template-columns: 1fr !important; }
 .choices-sentences .choice { font-size: 1.25rem; min-height: 60px; text-align: left; justify-items: start; padding: 10px 16px; }
 .stage-sentence { margin: 0; background: var(--card); border-radius: 22px; padding: 18px 20px; font-size: 1.6rem; font-weight: 700; text-align: center; box-shadow: 0 5px 0 var(--line); }
+/* accords : « un chat → des … », avec l'image au-dessus */
+.stage-accord { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 100%; }
+.accord-line {
+  margin: 0; max-width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 2px 12px;
+  background: var(--card); border-radius: 22px; padding: 14px 20px; box-shadow: 0 5px 0 var(--line);
+  font-size: 1.6rem; font-weight: 700; text-align: center;
+}
+.accord-from { font-weight: 500; }
+.accord-arrow { color: var(--muted); }
 .stage-word { background: var(--card); border-radius: 26px; padding: 14px 30px; font-size: 3.2rem; font-weight: 700; box-shadow: 0 6px 0 var(--line); }
 .groups { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 360px; }
 .group { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 8px; background: var(--card); border-radius: 16px; box-shadow: 0 3px 0 var(--line); }
@@ -1280,6 +1290,7 @@ input { -webkit-user-select: text; user-select: text; }
   .equation.big { font-size: 2.8rem; }
   .stage-word { font-size: 2.6rem; padding: 10px 24px; }
   .stage-sentence, .story-text { font-size: 1.2rem; padding: 12px 16px; }
+  .accord-line { font-size: 1.2rem; padding: 10px 14px; }
   .text-body { font-size: 1.05rem; line-height: 1.4; }
   .stage-text { padding: 8px 14px 6px; gap: 4px; }
   .spell-picture { font-size: 52px; }

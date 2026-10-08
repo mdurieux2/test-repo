@@ -208,6 +208,8 @@ export function renderStage(stage, actions) {
       return h('span', { class: 'stage-swatch', style: { background: stage.color } });
     case 'sentence':
       return h('p', { class: 'stage-sentence', lang: stage.lang }, wordSpans(stage.text));
+    case 'accord':
+      return accordStage(stage);
     case 'text':
       return textStage(stage, actions);
     case 'word':
@@ -255,6 +257,16 @@ export function renderStage(stage, actions) {
     default:
       return h('div', { class: 'stage-empty' });
   }
+}
+
+/** Accords : le mot (ou la phrase) de départ et ce qu'il devient (« un chat → des … »), avec son image. */
+function accordStage({ emoji, count = 1, from, to }) {
+  return h('div', { class: 'stage-accord' },
+    emoji ? objectsGrid(emoji, count, 5, 'small') : null,
+    h('p', { class: 'accord-line' },
+      from ? h('span', { class: 'accord-from' }, from) : null,
+      from ? h('span', { class: 'accord-arrow', 'aria-hidden': 'true' }, '→') : null,
+      h('span', { class: 'accord-to' }, to)));
 }
 
 /** Petit texte à lire ; le bouton 🔊 le lit à voix haute, en cas de besoin. */
@@ -634,11 +646,21 @@ export function renderChoiceContent(choice) {
   return choice.lang ? h('span', { lang: choice.lang }, choice.label) : choice.label;
 }
 
-/** Le mot révélé après une bonne réponse, son initial en couleur. */
+/**
+ * Le mot révélé après une bonne réponse, son initial souligné et en couleur (`highlight` : nombre
+ * de lettres du début), ou les lettres ajoutées d'un accord (liste de tranches [début, fin]).
+ */
 export function revealWord(word, highlight = 0) {
-  return h('div', { class: 'reveal' },
-    highlight ? h('span', { class: 'reveal-hl' }, word.slice(0, highlight)) : null,
-    word.slice(highlight));
+  const ranges = Array.isArray(highlight) ? highlight : highlight ? [[0, highlight]] : [];
+  const parts = [];
+  let pos = 0;
+  for (const [start, end] of ranges) {
+    if (start > pos) parts.push(word.slice(pos, start));
+    parts.push(h('span', { class: 'reveal-hl' }, word.slice(start, end)));
+    pos = end;
+  }
+  if (pos < word.length) parts.push(word.slice(pos));
+  return h('div', { class: word.length > 12 ? 'reveal long' : 'reveal' }, parts);
 }
 
 // Profils des enfants (prénom, dessin, photo) pour dessiner les portraits.
