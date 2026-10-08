@@ -18,24 +18,27 @@
   color-scheme: light;
   --bg: #fff7e8;
   --ink: #2b2d42;
-  --muted: #6b6f80;
+  --muted: #606476; /* gris lisible aussi sur les fonds pastel (≥ 4,5:1) */
   --card: #ffffff;
   --line: #eadfca;
-  --lecture: #7b61ff;
+  /* couleurs des rubriques : texte blanc lisible dessus (contraste ≥ 4,5:1, même en petit) */
+  --lecture: #7257ff;
   --lecture-dark: #5a40e0;
   --lecture-soft: #eee9ff;
-  --maths: #e8650c;
-  --maths-dark: #b94c05;
+  --maths: #c1540a;
+  --maths-dark: #b04804;
   --maths-soft: #ffeadb;
-  --anglais: #1b84e8;
+  --anglais: #1576d2;
   --anglais-dark: #155fae;
   --anglais-soft: #e1f0ff;
-  --album: #0f9d6b;
+  --album: #0d865b;
   --album-dark: #0b7a53;
-  --good: #0f9d6b;
+  --good: #0d865b;
   --good-dark: #0b7a53;
   --bad: #ff5c5c;
   --hint: #ffd23f;
+  /* bord des champs et des interrupteurs : se distingue du fond (contraste ≥ 3:1) */
+  --field-line: #8f8676;
   --accent: var(--lecture);
   --accent-dark: var(--lecture-dark);
   --accent-soft: var(--lecture-soft);
@@ -225,7 +228,7 @@ input { -webkit-user-select: text; user-select: text; }
 .domain-defi { background: #d6336c; box-shadow: 0 6px 0 #a61e4d; font-size: 1.5rem; min-height: 72px; }
 .domain-defi.done { opacity: 0.85; }
 .domain-btn:active { box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25); }
-.pill { margin-left: auto; background: rgba(255, 255, 255, 0.25); border-radius: 999px; padding: 2px 12px; font-size: 1.1rem; }
+.pill { margin-left: auto; background: rgba(0, 0, 0, 0.22); border-radius: 999px; padding: 2px 12px; font-size: 1.1rem; }
 
 
 /* ---------- choix du jeu ---------- */
@@ -399,7 +402,7 @@ input { -webkit-user-select: text; user-select: text; }
 .gate-question { font-size: 2.4rem; font-weight: 700; }
 .gate-input, .text-input {
   font-size: 1.6rem; text-align: center; width: 160px; padding: 10px;
-  border-radius: 14px; border: 3px solid var(--line); background: var(--card);
+  border-radius: 14px; border: 3px solid var(--field-line); background: var(--card);
 }
 .text-input { font-size: 1.1rem; width: 150px; text-align: left; }
 .gate-error { color: #c43d3d; min-height: 1.4em; }
@@ -598,8 +601,8 @@ input { -webkit-user-select: text; user-select: text; }
   min-height: 60px; border-radius: 18px; font-size: 1.9rem; font-weight: 700; color: #fff;
   background: var(--accent); box-shadow: 0 5px 0 var(--accent-dark);
 }
-.tile:nth-child(3n + 2) { background: #22b07d; box-shadow: 0 5px 0 #16855d; }
-.tile:nth-child(3n) { background: #7b61ff; box-shadow: 0 5px 0 #5a40e0; }
+.tile:nth-child(3n + 2) { background: #1d9e70; box-shadow: 0 5px 0 #16855d; }
+.tile:nth-child(3n) { background: var(--lecture); box-shadow: 0 5px 0 var(--lecture-dark); }
 .tile.used { opacity: 0.2; transform: scale(0.9); }
 
 /* =====================================================================
@@ -740,7 +743,7 @@ input { -webkit-user-select: text; user-select: text; }
 .tabs .seg { display: flex; align-items: center; gap: 8px; padding: 6px 16px 6px 6px; }
 .select {
   font: inherit; font-size: 1rem; padding: 8px 10px; border-radius: 12px;
-  border: 2px solid var(--line); background: var(--card); color: var(--ink); max-width: 100%;
+  border: 2px solid var(--field-line); background: var(--card); color: var(--ink); max-width: 100%;
 }
 .level-select { width: 100%; margin-top: 6px; }
 .stat-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -780,6 +783,12 @@ input { -webkit-user-select: text; user-select: text; }
 .grown-up-btns { display: flex; gap: 6px; }
 .settings-btn { font-size: 1.5rem; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* « Aller au contenu » : invisible, il apparaît en haut de l'écran quand on y arrive au clavier (Tab) */
+.skip-link {
+  position: absolute; left: 12px; top: calc(var(--safe-top) + 8px); z-index: 1000;
+  padding: 10px 16px; border-radius: 12px; background: var(--ink); color: #fff; font-weight: 700;
+}
+.skip-link:not(:focus) { width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .toast { margin: 0; background: var(--good); color: #fff; font-weight: 700; padding: 10px 14px; border-radius: 14px; text-align: center; }
 .photo-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line); }
 .photo-row:first-of-type { border-top: 0; }
@@ -1162,11 +1171,11 @@ input { -webkit-user-select: text; user-select: text; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field-label { font-weight: 700; font-size: 0.95rem; color: var(--muted); }
 .text-input {
-  min-height: 52px; border-radius: 14px; border: 2px solid var(--line); background: #fff;
+  min-height: 52px; border-radius: 14px; border: 2px solid var(--field-line); background: #fff;
   padding: 0 14px; font: inherit; font-size: 1.3rem; font-weight: 700; color: var(--ink);
   width: 100%; text-align: left;
 }
-.text-input:focus { border-color: var(--lecture); outline: none; box-shadow: 0 0 0 3px var(--lecture-soft); }
+.text-input:focus { border-color: var(--lecture); outline: none; box-shadow: 0 0 0 3px var(--lecture); }
 .look-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .look-option {
   display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px;
@@ -1206,7 +1215,7 @@ input { -webkit-user-select: text; user-select: text; }
 /* interrupteurs façon iOS (la position du rond indique l'état, pas seulement la couleur) */
 .setting input[type="checkbox"] {
   appearance: none; -webkit-appearance: none; flex: none; position: relative; cursor: pointer;
-  width: 52px; height: 32px; border-radius: 999px; background: #cfc8b8; transition: background 0.2s; margin: 0;
+  width: 52px; height: 32px; border-radius: 999px; background: var(--field-line); transition: background 0.2s; margin: 0;
 }
 .setting input[type="checkbox"]::after {
   content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%;
@@ -1645,11 +1654,11 @@ body[data-season="ete"] { background: #fffbea; }
    l'album et le personnage en bas
    ===================================================================== */
 .domain-theme-histoires { --accent: #c026d3; --accent-dark: #9d1aab; --accent-soft: #fbe8fd; }
-.domain-theme-jeux { --accent: #0d9488; --accent-dark: #0a7068; --accent-soft: #dcf5f2; }
+.domain-theme-jeux { --accent: #0c8479; --accent-dark: #0a7068; --accent-soft: #dcf5f2; }
 .domain-theme-temps { --accent: #a16207; --accent-dark: #7c4a05; --accent-soft: #fdf1d8; }
 .domain-theme-monde { --accent: #4d7c0f; --accent-dark: #3a5e0b; --accent-soft: #ecf6dc; }
 .domain-histoires { background: #c026d3; box-shadow: 0 6px 0 #9d1aab; }
-.domain-jeux { background: #0d9488; box-shadow: 0 6px 0 #0a7068; }
+.domain-jeux { background: #0c8479; box-shadow: 0 6px 0 #0a7068; }
 .domain-temps { background: #a16207; box-shadow: 0 6px 0 #7c4a05; }
 .domain-monde { background: #4d7c0f; box-shadow: 0 6px 0 #3a5e0b; }
 .domain-theme-sciences { --accent: #7e22ce; --accent-dark: #5b1690; --accent-soft: #f3e8ff; }

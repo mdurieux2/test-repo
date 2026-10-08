@@ -89,8 +89,28 @@ function show(...children) {
   applyA11y(child());
   document.body.dataset.season = store.settings.seasonal === false ? '' : currentSeason().id;
   app.replaceChildren(...children.filter(Boolean));
+  screenAccess();
   window.scrollTo(0, 0);
   musicForScreen();
+}
+
+/**
+ * Accessibilité de chaque écran : le titre de la page nomme l'écran (lu par les lecteurs d'écran),
+ * et un bouton « Aller au contenu », visible seulement au clavier, saute la barre du haut.
+ */
+function screenAccess() {
+  const main = app.querySelector('main');
+  const name = main?.dataset.title || main?.querySelector('h1')?.textContent.trim();
+  document.title = name ? `${name} – ${APP.name}` : APP.name;
+  const content = main?.querySelector(':scope > header.top-bar')?.nextElementSibling;
+  if (!content) return;
+  app.prepend(h('button', {
+    class: 'skip-link',
+    onclick: () => {
+      content.setAttribute('tabindex', '-1');
+      content.focus();
+    },
+  }, 'Aller au contenu'));
 }
 
 // ---------------------------------------------------------------- Saisons
@@ -631,8 +651,10 @@ function welcomeScreen(adding = !store.order.length) {
 
 function profileChip() {
   const c = me();
-  return h('button', { class: 'profile-chip', onclick: profileScreen, 'aria-label': 'Changer de joueur' },
-    avatar(c.id, 'avatar-xs'), h('span', {}, c.name));
+  const portrait = avatar(c.id, 'avatar-xs');
+  portrait.setAttribute('aria-hidden', 'true');
+  return h('button', { class: 'profile-chip', onclick: profileScreen },
+    portrait, h('span', {}, c.name), h('span', { class: 'visually-hidden' }, ' : changer de joueur'));
 }
 
 function homeScreen() {
@@ -836,7 +858,7 @@ function dailyButton() {
 function levelDots(level, min, max) {
   const total = max - min + 1;
   if (total > 6) return h('span', { class: 'level-text' }, `Niveau ${level - min + 1}/${total}`);
-  return h('span', { class: 'level-dots', 'aria-label': `Niveau ${level - min + 1} sur ${total}` },
+  return h('span', { class: 'level-dots', role: 'img', 'aria-label': `Niveau ${level - min + 1} sur ${total}` },
     Array.from({ length: total }, (_, i) => h('span', { class: i <= level - min ? 'dot on' : 'dot' })));
 }
 
@@ -877,9 +899,9 @@ function domainScreen(domainId) {
         ? h('button', {
           class: 'level-pick',
           'data-levels': game.id,
-          'aria-label': `Choisir le niveau : ${game.title}`,
           onclick: () => levelScreen(game),
-        }, levelDots(level, min, max), h('span', { class: 'level-pick-label' }, 'Niveaux ▾'))
+        }, levelDots(level, min, max), h('span', { class: 'level-pick-label' }, 'Niveaux', h('span', { 'aria-hidden': 'true' }, ' ▾')),
+        h('span', { class: 'visually-hidden' }, ` (${game.title})`))
         : null));
   }
   show(h('main', { class: `screen domain domain-theme-${domain.id}` },
@@ -1007,7 +1029,7 @@ function nextQuestion(session) {
   const brief = Boolean(q.short) && session.briefed.has(briefKey);
   if (q.short) session.briefed.add(briefKey);
   const replay = () => say(guide, q.replay || q.instruction);
-  const progress = h('div', { class: 'progress', 'aria-label': `Question ${session.index + 1} sur ${session.total}` },
+  const progress = h('div', { class: 'progress', role: 'img', 'aria-label': `Question ${session.index + 1} sur ${session.total}` },
     Array.from({ length: session.total }, (_, i) =>
       h('span', { class: i < session.index ? 'step done' : i === session.index ? 'step current' : 'step' })));
   const feedback = h('div', { class: 'feedback', 'aria-live': 'polite' });
@@ -1044,7 +1066,10 @@ function nextQuestion(session) {
   const badge = clock
     ? h('span', { class: 'level-badge chrono-badge' }, h('span', { class: 'chrono-level' }, levelText), clock)
     : h('span', { class: 'level-badge' }, levelText);
-  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}`, 'data-game': game.id },
+  show(h('main', {
+    class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}`, 'data-game': game.id, 'data-title': game.title,
+  },
+    h('h1', { class: 'visually-hidden' }, game.title),
     session.duo
       ? topBar({ onBack: session.back, backLabel: 'Quitter', title: duoScoreboard(session, progress) })
       : topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
@@ -2861,7 +2886,7 @@ function setClockZone(ctx) {
   const shiftButton = (minutes, label, aria) => h('button', {
     class: `clock-btn ${Math.abs(minutes) === 60 ? 'clock-btn-hour' : 'clock-btn-minute'}`,
     'data-shift': minutes,
-    'aria-label': aria,
+    'aria-label': `${label} : ${aria}`,
     onclick: () => setTime(shiftClock(time, minutes)),
   }, label);
   const zone = h('div', { class: 'choices setclock-zone' },
@@ -3680,7 +3705,7 @@ function buildZone(ctx) {
         class: 'add-btn',
         'data-add': '1',
         'data-fruit': i,
-        'aria-label': `Ajouter ${item.one}`,
+        'aria-label': `+1 : ajouter ${item.one}`,
         onclick: () => add(i),
       }, h('span', { class: 'add-emoji' }, item.emoji), '+1')),
       tens ? h('button', { class: 'add-btn bag', 'data-add': '10', onclick: () => add(0, 10) }, h('span', { class: 'add-emoji' }, '🛍️'), '+10') : null),
@@ -4288,7 +4313,7 @@ function parentsScreen({ tab = 'suivi', childId, message = '' } = {}) {
     onclick: () => parentsScreen({ tab: id, childId }),
   }, icon(id), h('span', {}, label))));
   const content = tab === 'enfants' ? childrenTab() : tab === 'reglages' ? settingsTab() : followTab(childId);
-  show(h('main', { class: 'screen parents' },
+  show(h('main', { class: 'screen parents', 'data-title': `Espace parents : ${PARENT_TABS.find(([id]) => id === tab)[1]}` },
     topBar({ onBack: leaveParents, title: 'Espace parents' }),
     tabs,
     message ? h('p', { class: 'toast', role: 'status' }, message) : null,
@@ -4521,13 +4546,13 @@ function kidGamesCard(id) {
               h('span', { class: 'kid-game-ctrls' },
                 h('button', {
                   class: hidden ? 'kid-toggle' : 'kid-toggle on', 'data-show-game': game.id, 'aria-pressed': String(!hidden),
-                  'aria-label': `Afficher ${game.title}`, disabled: domainHidden,
+                  'aria-label': `${hidden ? 'Masqué' : 'Affiché'} : ${game.title}`, disabled: domainHidden,
                   // un jeu masqué n'est plus conseillé
                   onclick: change(() => { setIn('hiddenGames', game.id, !hidden); if (!hidden) setIn('featured', game.id, false); }),
                 }, hidden ? '🚫 Masqué' : '👁 Affiché'),
                 h('button', {
                   class: star ? 'kid-toggle star on' : 'kid-toggle star', 'data-feature-game': game.id, 'aria-pressed': String(star),
-                  'aria-label': `Conseiller ${game.title}`, disabled: domainHidden || hidden || (!star && full),
+                  'aria-label': `${star ? 'Conseillé' : 'Conseiller'} : ${game.title}`, disabled: domainHidden || hidden || (!star && full),
                   onclick: change(() => setIn('featured', game.id, !star)),
                 }, star ? '⭐ Conseillé' : '☆ Conseiller')));
           }));
