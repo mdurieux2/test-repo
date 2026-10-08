@@ -1,0 +1,7 @@
+[
+ {
+  "key": "fr|1|20 !",
+  "text": "vingt !",
+  "erreur": "meilleur essai : {'hauteur': 223, 'duree': 0.59, 'essai': 'Écoute bien. Vingt.', 'entendu': 'vent', 'ressemblance': 0.67, 'phonemes_attendus': 'vɛ̃', 'phonemes_entendus': 'vɑ̃', 'fautes': [], 'ecart_phonemes': 0.5}"
+ }
+]

@@ -1,0 +1,17 @@
+[
+ {
+  "key": "fr|1|l'eau gèle.",
+  "text": "l'eau gèle.",
+  "erreur": "meilleur essai : {'hauteur': 273, 'duree': 0.96, 'essai': \"l'eau gèle.\", 'entendu': \"l'ogene\", 'ressemblance': 0.59, 'phonemes_attendus': 'loʒɛl', 'phonemes_entendus': 'boʒɛl', 'fautes': [], 'ecart_phonemes': 0.2}"
+ },
+ {
+  "key": "fr|1|d'œufs",
+  "text": "d'œufs",
+  "erreur": "meilleur essai : {'hauteur': 242, 'duree': 0.88, 'essai': \"d'œufs\", 'entendu': 'de', 'ressemblance': 0.25, 'phonemes_attendus': 'dø', 'phonemes_entendus': 'dø', 'fautes': [], 'ecart_phonemes': 0.0}"
+ },
+ {
+  "key": "fr|1|bâilles",
+  "text": "bâilles",
+  "erreur": "meilleur essai : {'hauteur': 240, 'duree': 0.61, 'essai': 'Écoute bien. Bâilles.', 'entendu': 'bye', 'ressemblance': 0.4, 'phonemes_attendus': 'baj', 'phonemes_entendus': 'ba', 'fautes': [], 'ecart_phonemes': 0.33}"
+ }
+]

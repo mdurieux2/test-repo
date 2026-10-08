@@ -1,0 +1,17 @@
+[
+ {
+  "key": "fr|1|moyens",
+  "text": "moyens",
+  "erreur": "meilleur essai : {'hauteur': 250, 'duree': 0.88, 'essai': 'Moyens !', 'entendu': 'moyens', 'ressemblance': 1.0, 'phonemes_attendus': 'mwajɛ̃', 'phonemes_entendus': 'majas', 'fautes': ['« s » final prononcé'], 'ecart_phonemes': 1.6}"
+ },
+ {
+  "key": "fr|1|coulent",
+  "text": "coulent",
+  "erreur": "meilleur essai : {'hauteur': 251, 'duree': 0.65, 'essai': 'Voici le mot. Coulent.', 'entendu': 'cool', 'ressemblance': 0.55, 'phonemes_attendus': 'kulɑ̃', 'phonemes_entendus': 'kul', 'fautes': [], 'ecart_phonemes': 0.25}"
+ },
+ {
+  "key": "fr|1|Au lit !",
+  "text": "Au lit !",
+  "erreur": "meilleur essai : {'hauteur': 258, 'duree': 0.59, 'essai': 'Écoute bien. Au lit.', 'entendu': 'poli', 'ressemblance': 0.4, 'phonemes_attendus': 'oli', 'phonemes_entendus': 'oni', 'fautes': [], 'ecart_phonemes': 0.33}"
+ }
+]

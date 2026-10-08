@@ -1,0 +1,12 @@
+[
+ {
+  "key": "fr|1|jouais",
+  "text": "jouais",
+  "erreur": "meilleur essai : {'hauteur': 276, 'duree': 0.88, 'essai': 'jouais…', 'entendu': 'jouez', 'ressemblance': 0.55, 'phonemes_attendus': 'ʒwɛ', 'phonemes_entendus': 'dʒue', 'fautes': [], 'ecart_phonemes': 0.33}"
+ },
+ {
+  "key": "fr|1|voient",
+  "text": "voient",
+  "erreur": "meilleur essai : {'hauteur': 264, 'duree': 0.88, 'essai': 'voient', 'entendu': 'au revoir', 'ressemblance': 0.4, 'phonemes_attendus': 'vwa', 'phonemes_entendus': 'wa', 'fautes': [], 'ecart_phonemes': 0.33}"
+ }
+]

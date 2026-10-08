@@ -1,0 +1,12 @@
+[
+ {
+  "key": "fr|1|canaux",
+  "text": "canaux",
+  "erreur": "meilleur essai : {'hauteur': 279, 'duree': 0.88, 'essai': 'canaux.', 'entendu': 'canot', 'ressemblance': 0.55, 'phonemes_attendus': 'kano', 'phonemes_entendus': 'kanu', 'fautes': [], 'ecart_phonemes': 0.25}"
+ },
+ {
+  "key": "fr|1|champs",
+  "text": "champs",
+  "erreur": "meilleur essai : {'hauteur': 251, 'duree': 0.54, 'essai': 'Écoute bien. Champs.', 'entendu': 'chant', 'ressemblance': 0.55, 'phonemes_attendus': 'ʃɑ̃', 'phonemes_entendus': 's.ong5', 'fautes': [], 'ecart_phonemes': 0.5}"
+ }
+]

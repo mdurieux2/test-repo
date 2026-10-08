@@ -1,0 +1,7 @@
+[
+ {
+  "key": "fr|1|buenos",
+  "text": "buenos",
+  "erreur": "meilleur essai : {'hauteur': 233, 'duree': 0.96, 'essai': 'Voici le mot. Buenos.', 'entendu': 'buenos', 'ressemblance': 1.0, 'phonemes_attendus': 'byəno', 'phonemes_entendus': 'bynus', 'fautes': ['« s » final prononcé'], 'ecart_phonemes': 1.6}"
+ }
+]

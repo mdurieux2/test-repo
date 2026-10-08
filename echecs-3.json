@@ -1,0 +1,17 @@
+[
+ {
+  "key": "fr|1|étaient",
+  "text": "étaient",
+  "erreur": "meilleur essai : {'hauteur': 214, 'duree': 0.63, 'essai': 'Écoute bien. Étaient.', 'entendu': 'ete', 'ressemblance': 0.6, 'phonemes_attendus': 'etɛ', 'phonemes_entendus': 'ete', 'fautes': [], 'ecart_phonemes': 0.0}"
+ },
+ {
+  "key": "fr|1|voyais",
+  "text": "voyais",
+  "erreur": "meilleur essai : {'hauteur': 231, 'duree': 0.58, 'essai': 'Écoute bien. Voyais.', 'entendu': 'voyez', 'ressemblance': 0.55, 'phonemes_attendus': 'vwajɛ', 'phonemes_entendus': 'vaje', 'fautes': [], 'ecart_phonemes': 0.2}"
+ },
+ {
+  "key": "fr|1|croyait",
+  "text": "croyait",
+  "erreur": "meilleur essai : {'hauteur': 235, 'duree': 0.88, 'essai': 'croyait', 'entendu': 'croyez', 'ressemblance': 0.62, 'phonemes_attendus': 'kʁwajɛ', 'phonemes_entendus': 'kxoje', 'fautes': [], 'ecart_phonemes': 0.33}"
+ }
+]

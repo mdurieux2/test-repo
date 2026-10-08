@@ -1,0 +1,7 @@
+[
+ {
+  "key": "fr|1|champ",
+  "text": "champ",
+  "erreur": "meilleur essai : {'hauteur': 232, 'duree': 0.59, 'essai': 'Écoute bien. Champ.', 'entendu': 'chant', 'ressemblance': 0.6, 'phonemes_attendus': 'ʃɑ̃', 'phonemes_entendus': 's.ong5', 'fautes': [], 'ecart_phonemes': 0.5}"
+ }
+]
