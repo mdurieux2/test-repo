@@ -108,6 +108,7 @@ export const nombresAnglais = {
         replay: [sound],
         stage: { type: 'equation', parts: ['🔊', '→', null] },
         choices: [],
+        listenOnly: true, // le nombre n'est qu'entendu
       };
     }
     return {
@@ -117,6 +118,7 @@ export const nombresAnglais = {
       short: { key: 'nombres-anglais:listen', text: 'Écoute et touche.', speak: [sound] },
       replay: [sound],
       stage: { type: 'listen' },
+      listenOnly: true,
       choices,
       choiceStyle: 'numbers',
     };
@@ -197,6 +199,7 @@ export const calculAnglais = {
         short: { key: 'calcul-anglais:clavier', text: 'Écris le résultat.', speak: [sound] },
         replay: [sound],
         stage: { type: 'equation', parts: ['🔊', '=', null] },
+        listenOnly: true, // le calcul n'est qu'entendu
         choices: [],
         answer: n,
         success,
@@ -210,6 +213,7 @@ export const calculAnglais = {
         short: { key: 'calcul-anglais:ecoute', text: 'Combien ?', speak: [sound] },
         replay: [sound],
         stage: { type: 'listen' },
+        listenOnly: true,
         choices: numberChoices(rng, n, 4, 0, max).map((v) => ({ value: v, label: String(v) })),
         choiceStyle: 'numbers',
         answer: n,
@@ -296,6 +300,7 @@ export const couleursAnglais = {
       short: { key: `couleurs-anglais:${level}`, text: word ? 'Le nom en anglais ?' : 'Quelle couleur ?', speak: [ask] },
       replay: [ask],
       stage,
+      listenOnly: listen,
       choices: options.map((c) => (word
         ? { value: c, label: c, lang: 'en' }
         : { value: c, swatch: EN_COLORS[c].hex, name: EN_COLORS[c].fr })),
@@ -551,6 +556,7 @@ function moreIntrus(level, { group, odd, members, options, list, listen, hidden 
     short: { key: `intrus-anglais:${level}`, text: hidden ? 'Lequel n’est pas de la famille ?' : ask, speak: [question] },
     replay: listen ? [list] : [question],
     stage: listen ? { type: 'listen' } : { type: 'none' },
+    listenOnly: false, // les mots sont écrits : on peut jouer sans les entendre
     choices: options.map((w) => ({ value: w.en, label: w.en, lang: 'en' })),
     choiceStyle: 'words',
     answer: odd.en,
@@ -597,6 +603,7 @@ export const intrusAnglais = {
       short: { key: `intrus-anglais:${level}`, text: `Lequel n’est pas ${group.fr} ?`, speak: [question] },
       replay: listen ? [list] : [question],
       stage: listen ? { type: 'listen' } : { type: 'none' },
+      listenOnly: false, // les mots sont écrits : on peut jouer sans les entendre
       choices: options.map((w) => (level === 1
         ? { value: w.en, label: w.emoji }
         : { value: w.en, label: w.en, lang: 'en' })),
@@ -666,6 +673,7 @@ function oppositeSentence(level, rng) {
     short: { key: `contraires-anglais:${level}`, text: 'Le contraire ?', speak: [line] },
     replay: [line],
     stage: listen ? { type: 'listen' } : { type: 'sentence', text: item.s, lang: 'en' },
+    listenOnly: listen,
     choices: shuffle(rng, [item.a, ...item.wrong]).map((w) => ({ value: w, label: w, lang: 'en' })),
     choiceStyle: 'words',
     answer: item.a,
@@ -699,6 +707,7 @@ export const contrairesAnglais = {
       short: { key: `contraires-anglais:${level}`, text: 'Le contraire ?', speak: level === 3 ? [say(word.en, 0.75)] : [ask] },
       replay: level === 3 ? [say(word.en, 0.75)] : [ask],
       stage,
+      listenOnly: level === 3,
       choices: options.map((w) => (level === 1
         ? { value: w.en, label: w.emoji }
         : { value: w.en, label: w.en, lang: 'en' })),
@@ -725,6 +734,7 @@ function moreOpposites(level, rng) {
     short: { key: `contraires-anglais:${level}`, text: 'Le contraire ?', speak: listen ? [heard] : [ask] },
     replay: listen ? [heard] : [ask],
     stage: listen ? { type: 'listen' } : { type: 'word', text: word.en, lang: 'en' },
+    listenOnly: listen,
     choices: options.map((w) => ({ value: w.en, label: w.en, lang: 'en' })),
     choiceStyle: 'words',
     answer: opposite.en,
@@ -845,6 +855,7 @@ function morePhrases(level, rng, name) {
     short: { key: question ? 'phrase-anglais:question' : 'phrase-anglais:ecoute', text: 'Les mots dans l’ordre !', speak: [sound] },
     replay: [sound],
     stage: question ? { type: 'picture', emoji: sentence.emoji } : { type: 'listen' },
+    listenOnly: !question, // sans image, la phrase n'est qu'entendue
   };
 }
 

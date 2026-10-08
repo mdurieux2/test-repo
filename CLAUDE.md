@@ -18,8 +18,12 @@ Interface et commentaires en français.
   et ajouter une entrée en tête de `CHANGELOG` dans ce même fichier (les tests vérifient la cohérence).
 - Vérifier avant de pousser : `npm test` puis `npm run test:e2e` (mise en page sur 14 iPhone (dont 3 en paysage), 12 iPad et 8 Android,
   portrait et paysage).
-- Couleurs : texte blanc seulement sur des fonds à contraste ≥ 3:1 (gros textes) ; jamais d'information
-  portée par la couleur seule.
+- Couleurs : texte courant ≥ 4,5:1, gros texte (24 px, ou 18,66 px en gras) ≥ 3:1, bords des champs et
+  contour de focus ≥ 3:1 ; texte blanc sur une couleur de rubrique ≥ 4,5:1. Jamais d'information portée par
+  la couleur seule. Contrôlé par `PARTS=a11y npm run test:e2e` (contrastes, axe-core, clavier).
+- Accessibilité : profil de chaque enfant dans `a11y.js` (classes `a11y-…` sur `<body>`, `a11y(child).clé`
+  dans le code) ; une consigne qui dit de glisser ou de tracer doit avoir sa version « touche… »
+  (`TAP_WORDING` dans `a11y-jeux.js`) ; une question qui ne se joue qu'à l'oreille porte `listenOnly: true`.
 - Voix naturelle : une seule voix, « Estelle » (Pocket TTS de Kyutai), en français et en anglais, enregistrée à
   l'avance dans `app/voix/` (`manifest.json`, `fr/*.mp3`, `en/*.mp3`) et jouée par `speech.js`. Chaque énoncé est
   dit phrase par phrase, chaque phrase d'un seul son ; une phrase absente est dite par propositions, autour du

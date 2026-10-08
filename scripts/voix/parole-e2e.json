@@ -1,84 +1,116 @@
 [
  {
-  "text": "Bravo Eva-Rose !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 95,
-  "ecrans": [
-   "play syllabes-rythme",
-   "play rimes",
-   "play lettres",
-   "play premier-son",
-   "play syllabes",
-   "play bon-mot",
-   "play phrase",
-   "play homophones",
-   "play genre",
-   "play ecrire",
-   "play histoires",
-   "play petits-textes",
-   "play compter",
-   "play panier",
-   "play dizaines",
-   "play relier",
-   "play comparer",
-   "play suite",
-   "play calcul",
-   "play trous",
-   "play relie-calculs",
-   "play faire-dix",
-   "play tables-chrono",
-   "play puzzle",
-   "play memory",
-   "play coloriage-magique",
-   "play points",
-   "play algorithmes",
-   "play intrus",
-   "play sudoku",
-   "play symetrie",
-   "play reproduire",
-   "play tangram",
-   "play cubes",
-   "play labyrinthe",
-   "play chemin-lettres",
-   "play heure",
-   "play regle-horloge",
-   "play calendrier",
-   "play monnaie",
-   "play mesures",
-   "play pays",
-   "play drapeaux",
-   "play lis-anglais",
-   "play mot-anglais",
-   "play relie-anglais",
-   "play compte-anglais",
-   "play nombres-anglais",
-   "play calcul-anglais",
-   "play couleurs-anglais",
-   "play memory-anglais",
-   "play contraires-anglais",
-   "play ou-est",
-   "play phrase-anglais",
-   "play defi",
-   "play revision",
-   "play duo-play duo"
-  ]
- },
- {
   "text": "Bonjour Eva-Rose !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 85,
+  "count": 217,
   "ecrans": [
    "home",
    "home has-featured"
   ]
  },
  {
+  "text": "Bravo Eva-Rose !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 141,
+  "ecrans": [
+   "play syllabes-rythme",
+   "play rimes",
+   "play lettres",
+   "play premier-son",
+   "play bon-mot",
+   "play petits-mots",
+   "play phrase",
+   "play vocabulaire",
+   "play ponctuation",
+   "play homophones",
+   "play genre",
+   "play conjugaison",
+   "play accords",
+   "play ecrire",
+   "play dictee",
+   "play histoires",
+   "play petits-textes",
+   "play ordre-histoire",
+   "play compter",
+   "play vite-vu",
+   "play patates",
+   "play suite",
+   "play calcul",
+   "play trous",
+   "play relie-calculs",
+   "play faire-dix",
+   "play tables",
+   "play tables-chrono",
+   "play ranger",
+   "play problemes",
+   "play schemas",
+   "play doubles",
+   "play graphiques",
+   "play droite-numerique",
+   "play fractions",
+   "play partage",
+   "play addition-posee",
+   "play puzzle",
+   "play memory",
+   "play coloriage-magique",
+   "play points",
+   "play formes",
+   "play intrus",
+   "play ombres",
+   "play sudoku",
+   "play balances",
+   "play picross",
+   "play symetrie",
+   "play reproduire",
+   "play labyrinthe",
+   "play labyrinthe-rond",
+   "play chemin-nombres",
+   "play chemin-lettres",
+   "play heure",
+   "play regle-horloge",
+   "play calendrier",
+   "play saisons",
+   "play monnaie",
+   "play animaux-monde",
+   "play pays",
+   "play drapeaux",
+   "play carte-monde",
+   "play vivre-ensemble",
+   "play vivant",
+   "play corps",
+   "play milieux",
+   "play matiere",
+   "play electricite",
+   "play objets",
+   "play ciel",
+   "play meteo",
+   "play planete",
+   "play lis-anglais",
+   "play mot-anglais",
+   "play relie-anglais",
+   "play epelle-anglais",
+   "play compte-anglais",
+   "play nombres-anglais",
+   "play couleurs-anglais",
+   "play colorie-anglais",
+   "play memory-anglais",
+   "play intrus-anglais",
+   "play contraires-anglais",
+   "play ou-est",
+   "play phrase-anglais",
+   "play defi",
+   "play revision",
+   "play duo-play duo",
+   "play relier"
+  ]
+ },
+ {
   "text": "Oui, c’est ça !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 75,
+  "count": 103,
   "ecrans": [
    "play syllabes-rythme",
    "play rimes",
@@ -88,12 +120,17 @@
    "play bon-mot",
    "play petits-mots",
    "play phrase",
+   "play vocabulaire",
+   "play ponctuation",
    "play homophones",
    "play genre",
+   "play conjugaison",
+   "play accords",
    "play ecrire",
    "play dictee",
    "play histoires",
    "play petits-textes",
+   "play ordre-histoire",
    "play compter",
    "play vite-vu",
    "play panier",
@@ -110,7 +147,13 @@
    "play tables-chrono",
    "play ranger",
    "play problemes",
+   "play schemas",
    "play doubles",
+   "play graphiques",
+   "play droite-numerique",
+   "play fractions",
+   "play partage",
+   "play addition-posee",
    "play puzzle",
    "play memory",
    "play coloriage-magique",
@@ -120,11 +163,15 @@
    "play intrus",
    "play ombres",
    "play sudoku",
+   "play tableau-logique",
+   "play balances",
+   "play picross",
    "play symetrie",
    "play reproduire",
    "play tangram",
    "play cubes",
    "play labyrinthe",
+   "play labyrinthe-rond",
    "play chemin-nombres",
    "play chemin-lettres",
    "play heure",
@@ -136,6 +183,19 @@
    "play animaux-monde",
    "play pays",
    "play drapeaux",
+   "play carte-monde",
+   "play vivre-ensemble",
+   "play se-reperer",
+   "play vivant",
+   "play corps",
+   "play milieux",
+   "play matiere",
+   "play melanges",
+   "play electricite",
+   "play objets",
+   "play ciel",
+   "play meteo",
+   "play planete",
    "play ecoute",
    "play lis-anglais",
    "play mot-anglais",
@@ -158,7 +218,7 @@
   "text": "Très bien Eva-Rose ! 2 étoiles !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 73,
+  "count": 101,
   "ecrans": [
    "results"
   ]
@@ -167,7 +227,7 @@
   "text": "Essaie encore !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 62,
+  "count": 86,
   "ecrans": [
    "play syllabes-rythme",
    "play rimes",
@@ -177,11 +237,16 @@
    "play bon-mot",
    "play petits-mots",
    "play phrase",
+   "play vocabulaire",
+   "play ponctuation",
    "play homophones",
    "play genre",
+   "play conjugaison",
+   "play accords",
    "play dictee",
    "play histoires",
    "play petits-textes",
+   "play ordre-histoire",
    "play compter",
    "play vite-vu",
    "play patates",
@@ -197,11 +262,18 @@
    "play tables-chrono",
    "play ranger",
    "play problemes",
+   "play schemas",
    "play doubles",
+   "play graphiques",
+   "play droite-numerique",
+   "play fractions",
+   "play addition-posee",
    "play formes",
    "play algorithmes",
    "play intrus",
    "play ombres",
+   "play tableau-logique",
+   "play balances",
    "play tangram",
    "play cubes",
    "play chemin-nombres",
@@ -214,6 +286,18 @@
    "play animaux-monde",
    "play pays",
    "play drapeaux",
+   "play vivre-ensemble",
+   "play se-reperer",
+   "play vivant",
+   "play corps",
+   "play milieux",
+   "play matiere",
+   "play melanges",
+   "play electricite",
+   "play objets",
+   "play ciel",
+   "play meteo",
+   "play planete",
    "play ecoute",
    "play lis-anglais",
    "play mot-anglais",
@@ -231,265 +315,399 @@
   ]
  },
  {
-  "text": "Excellent !",
+  "text": "Nombres et calcul. Choisis un jeu !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 41,
+  "count": 65,
   "ecrans": [
-   "play premier-son",
-   "play syllabes",
-   "play phrase",
-   "play ecrire",
-   "play vite-vu",
-   "play panier",
-   "play dizaines",
-   "play relier",
-   "play suite",
-   "play relie-calculs",
-   "play faire-dix",
-   "play tables-chrono",
-   "play problemes",
-   "play doubles",
-   "play memory",
-   "play points",
-   "play formes",
-   "play intrus",
-   "play ombres",
-   "play sudoku",
-   "play reproduire",
-   "play cubes",
-   "play chemin-lettres",
-   "play monnaie",
-   "play ecoute",
-   "play nombres-anglais",
-   "play calcul-anglais",
-   "play couleurs-anglais",
-   "play memory-anglais",
-   "play intrus-anglais",
-   "play defi",
-   "play revision",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "Bravo !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 39,
-  "ecrans": [
-   "play lettres",
-   "play petits-mots",
-   "play dictee",
-   "play vite-vu",
-   "play panier",
-   "play patates",
-   "play suite",
-   "play calcul",
-   "play trous",
-   "play faire-dix",
-   "play tables-chrono",
-   "play ranger",
-   "play doubles",
-   "play puzzle",
-   "play ombres",
-   "play symetrie",
-   "play reproduire",
-   "play cubes",
-   "play chemin-nombres",
-   "play chemin-lettres",
-   "play saisons",
-   "play animaux-monde",
-   "play pays",
-   "play ecoute",
-   "play epelle-anglais",
-   "play colorie-anglais",
-   "play intrus-anglais",
-   "play contraires-anglais",
-   "play phrase-anglais",
-   "play parle-anglais",
-   "play defi",
-   "play duo-play duo"
+   "domain"
   ]
  },
  {
   "text": "Super !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 33,
-  "ecrans": [
-   "play lettres",
-   "play premier-son",
-   "play syllabes",
-   "play bon-mot",
-   "play petits-mots",
-   "play phrase",
-   "play histoires",
-   "play compter",
-   "play vite-vu",
-   "play dizaines",
-   "play suite",
-   "play problemes",
-   "play memory",
-   "play algorithmes",
-   "play intrus",
-   "play sudoku",
-   "play reproduire",
-   "play labyrinthe",
-   "play heure",
-   "play regle-horloge",
-   "play saisons",
-   "play ecoute",
-   "play epelle-anglais",
-   "play phrase-anglais",
-   "play parle-anglais",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "Bien joué !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 31,
+  "count": 55,
   "ecrans": [
    "play syllabes-rythme",
    "play rimes",
-   "play premier-son",
-   "play syllabes",
-   "play petits-mots",
-   "play dictee",
+   "play ponctuation",
+   "play homophones",
+   "play conjugaison",
+   "play accords",
+   "play petits-textes",
+   "play compter",
+   "play panier",
+   "play dizaines",
    "play comparer",
+   "play trous",
+   "play relie-calculs",
+   "play faire-dix",
    "play tables",
    "play tables-chrono",
-   "play doubles",
-   "play coloriage-magique",
-   "play ombres",
-   "play chemin-nombres",
-   "play heure",
-   "play calendrier",
-   "play drapeaux",
-   "play lis-anglais",
-   "play mot-anglais",
-   "play epelle-anglais",
-   "play couleurs-anglais",
-   "play colorie-anglais",
-   "play memory-anglais",
-   "play ou-est",
-   "play defi"
-  ]
- },
- {
-  "text": "Parfait !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 31,
-  "ecrans": [
-   "play syllabes-rythme",
-   "play homophones",
-   "play petits-textes",
-   "play panier",
-   "play patates",
-   "play comparer",
-   "play relie-calculs",
-   "play tables-chrono",
    "play ranger",
-   "play formes",
+   "play doubles",
+   "play partage",
+   "play addition-posee",
    "play algorithmes",
+   "play intrus",
+   "play tableau-logique",
+   "play picross",
    "play tangram",
    "play labyrinthe",
    "play regle-horloge",
-   "play saisons",
-   "play lis-anglais",
-   "play relie-anglais",
-   "play compte-anglais",
-   "play nombres-anglais",
+   "play mesures",
+   "play carte-monde",
+   "play se-reperer",
+   "play vivant",
+   "play matiere",
+   "play electricite",
+   "play objets",
+   "play mot-anglais",
+   "play epelle-anglais",
    "play calcul-anglais",
-   "play couleurs-anglais",
-   "play colorie-anglais",
    "play contraires-anglais",
-   "play parle-anglais",
+   "play phrase-anglais",
    "play revision",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "Génial !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 25,
-  "ecrans": [
-   "play rimes",
-   "play bon-mot",
+   "play duo-play duo",
    "play ecrire",
-   "play petits-textes",
-   "play compter",
-   "play dizaines",
-   "play comparer",
-   "play relie-calculs",
-   "play tables-chrono",
-   "play ranger",
    "play puzzle",
    "play coloriage-magique",
-   "play ombres",
-   "play sudoku",
-   "play symetrie",
-   "play labyrinthe",
-   "play chemin-nombres",
-   "play calendrier",
-   "play monnaie",
-   "play animaux-monde",
-   "play relie-anglais",
-   "play compte-anglais"
+   "play relier"
   ]
  },
  {
-  "text": "Très bien !",
+  "text": "Excellent !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 23,
+  "count": 54,
   "ecrans": [
-   "play homophones",
-   "play genre",
+   "play lettres",
+   "play syllabes",
+   "play bon-mot",
+   "play ponctuation",
+   "play conjugaison",
+   "play accords",
    "play dictee",
-   "play patates",
+   "play petits-textes",
+   "play ordre-histoire",
+   "play compter",
    "play relier",
+   "play trous",
+   "play tables",
    "play tables-chrono",
-   "play ranger",
    "play problemes",
+   "play doubles",
+   "play fractions",
+   "play addition-posee",
    "play puzzle",
+   "play memory",
+   "play coloriage-magique",
    "play points",
    "play formes",
-   "play cubes",
-   "play chemin-lettres",
-   "play heure",
-   "play regle-horloge",
-   "play mesures",
-   "play animaux-monde",
-   "play relie-anglais",
-   "play compte-anglais",
+   "play ombres",
+   "play sudoku",
+   "play tableau-logique",
+   "play balances",
+   "play picross",
+   "play symetrie",
+   "play chemin-nombres",
+   "play calendrier",
+   "play saisons",
+   "play se-reperer",
+   "play corps",
+   "play melanges",
+   "play meteo",
+   "play ecoute",
+   "play lis-anglais",
+   "play mot-anglais",
+   "play colorie-anglais",
    "play ou-est",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "Nombres et calcul. Choisis un jeu !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 21,
-  "ecrans": [
-   "domain"
+   "play parle-anglais",
+   "play duo-play duo",
+   "play labyrinthe",
+   "play patates",
+   "play droite-numerique",
+   "play partage"
   ]
  },
  {
   "text": "Jeux et logique. Choisis un jeu !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 16,
+  "count": 50,
   "ecrans": [
    "domain"
   ]
  },
  {
+  "text": "Très bien !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 46,
+  "ecrans": [
+   "play syllabes-rythme",
+   "play premier-son",
+   "play syllabes",
+   "play phrase",
+   "play ponctuation",
+   "play homophones",
+   "play dictee",
+   "play ordre-histoire",
+   "play vite-vu",
+   "play patates",
+   "play dizaines",
+   "play comparer",
+   "play suite",
+   "play calcul",
+   "play tables",
+   "play schemas",
+   "play fractions",
+   "play points",
+   "play formes",
+   "play ombres",
+   "play tableau-logique",
+   "play picross",
+   "play reproduire",
+   "play tangram",
+   "play heure",
+   "play calendrier",
+   "play animaux-monde",
+   "play drapeaux",
+   "play carte-monde",
+   "play melanges",
+   "play ciel",
+   "play planete",
+   "play ecoute",
+   "play compte-anglais",
+   "play nombres-anglais",
+   "play calcul-anglais",
+   "play colorie-anglais",
+   "play contraires-anglais",
+   "play revision",
+   "play lettres"
+  ]
+ },
+ {
+  "text": "Bravo !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 46,
+  "ecrans": [
+   "play syllabes-rythme",
+   "play lettres",
+   "play premier-son",
+   "play petits-mots",
+   "play ecrire",
+   "play dictee",
+   "play compter",
+   "play panier",
+   "play trous",
+   "play tables-chrono",
+   "play schemas",
+   "play droite-numerique",
+   "play intrus",
+   "play ombres",
+   "play balances",
+   "play tangram",
+   "play heure",
+   "play regle-horloge",
+   "play saisons",
+   "play monnaie",
+   "play mesures",
+   "play animaux-monde",
+   "play pays",
+   "play vivant",
+   "play corps",
+   "play milieux",
+   "play objets",
+   "play mot-anglais",
+   "play relie-anglais",
+   "play calcul-anglais",
+   "play memory-anglais",
+   "play parle-anglais",
+   "play defi",
+   "play revision",
+   "play duo-play duo",
+   "play points"
+  ]
+ },
+ {
+  "text": "Parfait !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 46,
+  "ecrans": [
+   "play petits-mots",
+   "play phrase",
+   "play vocabulaire",
+   "play homophones",
+   "play genre",
+   "play accords",
+   "play ecrire",
+   "play relier",
+   "play comparer",
+   "play calcul",
+   "play tables-chrono",
+   "play ranger",
+   "play problemes",
+   "play graphiques",
+   "play addition-posee",
+   "play memory",
+   "play algorithmes",
+   "play sudoku",
+   "play balances",
+   "play reproduire",
+   "play cubes",
+   "play chemin-nombres",
+   "play chemin-lettres",
+   "play regle-horloge",
+   "play drapeaux",
+   "play se-reperer",
+   "play milieux",
+   "play ecoute",
+   "play lis-anglais",
+   "play nombres-anglais",
+   "play couleurs-anglais",
+   "play colorie-anglais",
+   "play intrus-anglais",
+   "play parle-anglais",
+   "play defi",
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "Bien joué !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 44,
+  "ecrans": [
+   "play rimes",
+   "play premier-son",
+   "play petits-mots",
+   "play genre",
+   "play histoires",
+   "play vite-vu",
+   "play panier",
+   "play comparer",
+   "play suite",
+   "play calcul",
+   "play relie-calculs",
+   "play faire-dix",
+   "play tables-chrono",
+   "play doubles",
+   "play graphiques",
+   "play partage",
+   "play memory",
+   "play points",
+   "play algorithmes",
+   "play intrus",
+   "play sudoku",
+   "play symetrie",
+   "play cubes",
+   "play monnaie",
+   "play mesures",
+   "play pays",
+   "play vivre-ensemble",
+   "play vivant",
+   "play objets",
+   "play relie-anglais",
+   "play nombres-anglais",
+   "play intrus-anglais",
+   "play contraires-anglais",
+   "play duo-play duo",
+   "play labyrinthe-rond"
+  ]
+ },
+ {
+  "text": "Lire et écrire. Choisis un jeu !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 39,
+  "ecrans": [
+   "domain"
+  ]
+ },
+ {
+  "text": "Bonjour Éva-Rose !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 36,
+  "ecrans": [
+   "home"
+  ]
+ },
+ {
+  "text": "Génial !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 35,
+  "ecrans": [
+   "play rimes",
+   "play syllabes",
+   "play vocabulaire",
+   "play histoires",
+   "play petits-textes",
+   "play dizaines",
+   "play tables-chrono",
+   "play schemas",
+   "play fractions",
+   "play puzzle",
+   "play formes",
+   "play tangram",
+   "play labyrinthe",
+   "play animaux-monde",
+   "play vivre-ensemble",
+   "play milieux",
+   "play electricite",
+   "play ciel",
+   "play meteo",
+   "play planete",
+   "play epelle-anglais",
+   "play compte-anglais",
+   "play calcul-anglais",
+   "play memory-anglais",
+   "play intrus-anglais",
+   "play ou-est",
+   "play duo-play duo",
+   "play relie-calculs",
+   "play trous",
+   "play labyrinthe-rond",
+   "play coloriage-magique",
+   "play ecrire"
+  ]
+ },
+ {
   "text": "Anglais. Choisis un jeu !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 33,
+  "ecrans": [
+   "domain"
+  ]
+ },
+ {
+  "text": "Sciences. Choisis un jeu !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 20,
+  "ecrans": [
+   "domain"
+  ]
+ },
+ {
+  "text": "Relie !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 16,
+  "ecrans": [
+   "play relier",
+   "play relie-calculs",
+   "play relie-anglais"
+  ]
+ },
+ {
+  "text": "Temps et mesures. Choisis un jeu !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 16,
@@ -501,43 +719,20 @@
   "text": "Tout est relié !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 12,
+  "count": 15,
   "ecrans": [
    "play relier",
    "play calcul",
-   "play relie-calculs",
-   "play duo-play duo"
+   "play relie-calculs"
   ]
  },
  {
-  "text": "Relie !",
+  "text": "Le monde. Choisis un jeu !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 12,
   "ecrans": [
-   "play relier",
-   "play relie-calculs",
-   "play relie-anglais"
-  ]
- },
- {
-  "text": "Lire et écrire. Choisis un jeu !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 11,
-  "ecrans": [
    "domain"
-  ]
- },
- {
-  "text": "Bravo, tu as bien écouté l’histoire !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 8,
-  "ecrans": [
-   "play histoires",
-   "play defi",
-   "play duo-play duo"
   ]
  },
  {
@@ -551,6 +746,16 @@
   ]
  },
  {
+  "text": "Tous les calculs sont justes !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 8,
+  "ecrans": [
+   "play calcul",
+   "play trous"
+  ]
+ },
+ {
   "text": "Retrouve les paires.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -561,23 +766,95 @@
   ]
  },
  {
-  "text": "1, 2, 3, 4, 5",
+  "text": "C’est bien tracé !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 7,
   "ecrans": [
-   "play suite",
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Histoires. Choisis un jeu !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 7,
+  "ecrans": [
+   "domain"
+  ]
+ },
+ {
+  "text": "Remets les images dans l’ordre de l’histoire.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 7,
+  "ecrans": [
+   "play ordre-histoire",
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Un paquet !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 7,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "Bravo, le puzzle est terminé !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 7,
+  "ecrans": [
+   "play puzzle"
+  ]
+ },
+ {
+  "text": "La couleur de chaque nombre !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 7,
+  "ecrans": [
+   "play coloriage-magique"
+  ]
+ },
+ {
+  "text": "De 1 à 5 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 7,
+  "ecrans": [
+   "play points",
    "play chemin-nombres"
   ]
  },
  {
-  "text": "a",
+  "text": "Choisis la bonne forme du verbe.",
   "lang": "fr-FR",
-  "rate": 0.800000011920929,
+  "rate": 0.949999988079071,
   "count": 6,
   "ecrans": [
-   "play lettres",
-   "play revision"
+   "play conjugaison"
+  ]
+ },
+ {
+  "text": "2 paquets !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 6,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "Des paquets de 2 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 6,
+  "ecrans": [
+   "play patates"
   ]
  },
  {
@@ -590,33 +867,50 @@
   ]
  },
  {
-  "text": "Tous les calculs sont justes !",
+  "text": "1, 2, 3, 4, 5",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 6,
   "ecrans": [
-   "play calcul",
+   "play suite",
+   "play chemin-nombres"
+  ]
+ },
+ {
+  "text": "Complète !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 6,
+  "ecrans": [
    "play trous"
   ]
  },
  {
-  "text": "Bravo, tu as trouvé toutes les paires !",
+  "text": "Remets l’image dans l’ordre.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 6,
   "ecrans": [
-   "play memory",
+   "play puzzle"
+  ]
+ },
+ {
+  "text": "Bravo, la grille est complète !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 6,
+  "ecrans": [
+   "play sudoku",
    "play duo-play duo"
   ]
  },
  {
-  "text": "De 1 à 5 !",
+  "text": "Trouve le dessin caché !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 6,
   "ecrans": [
-   "play points",
-   "play chemin-nombres"
+   "play picross"
   ]
  },
  {
@@ -630,22 +924,22 @@
   ]
  },
  {
-  "text": "Temps et mesures. Choisis un jeu !",
+  "text": "Oui, c’est la bonne pièce !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 6,
   "ecrans": [
-   "domain"
+   "play tangram",
+   "play duo-play duo"
   ]
  },
  {
-  "text": "Oui, c’est le plus long !",
+  "text": "Est-ce que ça se dissout ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 6,
   "ecrans": [
-   "play mesures",
-   "play duo-play duo"
+   "play melanges"
   ]
  },
  {
@@ -667,32 +961,31 @@
   ]
  },
  {
-  "text": "C’est bien tracé !",
+  "text": "i",
   "lang": "fr-FR",
-  "rate": 0.949999988079071,
+  "rate": 0.800000011920929,
   "count": 5,
   "ecrans": [
-   "play ecrire"
+   "play lettres",
+   "play revision"
   ]
  },
  {
-  "text": "Qui regarde Maya ?",
+  "text": "Bravo, tu as bien écouté l’histoire !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 5,
   "ecrans": [
-   "play histoires",
-   "play defi",
-   "play duo-play duo"
+   "play histoires"
   ]
  },
  {
-  "text": "Un paquet !",
+  "text": "Glisse les nombres dans les cases, pour que les calculs soient justes. Chaque calcul juste devient vert.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 5,
   "ecrans": [
-   "play patates"
+   "play trous"
   ]
  },
  {
@@ -705,12 +998,22 @@
   ]
  },
  {
-  "text": "Bravo, le puzzle est terminé !",
+  "text": "Bravo, tu as trouvé toutes les paires !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 5,
   "ecrans": [
-   "play puzzle"
+   "play memory"
+  ]
+ },
+ {
+  "text": "Colorie chaque zone avec la couleur de son nombre. Touche une couleur en bas, puis les zones.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 5,
+  "ecrans": [
+   "play coloriage-magique",
+   "play duo-play duo"
   ]
  },
  {
@@ -723,12 +1026,12 @@
   ]
  },
  {
-  "text": "Bravo, la grille est complète !",
+  "text": "Sur chaque ligne, c’est la même forme.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 5,
   "ecrans": [
-   "play sudoku"
+   "play tableau-logique"
   ]
  },
  {
@@ -741,12 +1044,13 @@
   ]
  },
  {
-  "text": "Oui, c’est la bonne pièce !",
+  "text": "Bravo, le chien a trouvé l'os !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 5,
   "ecrans": [
-   "play tangram"
+   "play labyrinthe",
+   "play labyrinthe-rond"
   ]
  },
  {
@@ -786,6 +1090,33 @@
   ]
  },
  {
+  "text": "Oui, c’est le plus long !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 5,
+  "ecrans": [
+   "play mesures"
+  ]
+ },
+ {
+  "text": "Le jour ou la nuit ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 5,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "Touche le bon dessin.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 5,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
   "text": "Well done!",
   "lang": "en-GB",
   "rate": 0.949999988079071,
@@ -804,24 +1135,22 @@
   ]
  },
  {
-  "text": "Touche la lettre :",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 4,
-  "ecrans": [
-   "play lettres",
-   "play revision",
-   "play duo-play duo"
-  ]
- },
- {
   "text": "u",
   "lang": "fr-FR",
   "rate": 0.800000011920929,
   "count": 4,
   "ecrans": [
-   "play lettres",
-   "play duo-play duo"
+   "play lettres"
+  ]
+ },
+ {
+  "text": "mi",
+  "lang": "fr-FR",
+  "rate": 0.699999988079071,
+  "count": 4,
+  "ecrans": [
+   "play syllabes",
+   "play revision"
   ]
  },
  {
@@ -843,6 +1172,24 @@
   ]
  },
  {
+  "text": "Laquelle va avec ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 4,
+  "ecrans": [
+   "play vocabulaire"
+  ]
+ },
+ {
+  "text": "Où est le point ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 4,
+  "ecrans": [
+   "play ponctuation"
+  ]
+ },
+ {
   "text": "Touche les lettres dans l’ordre.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -850,39 +1197,6 @@
   "ecrans": [
    "play dictee",
    "play epelle-anglais"
-  ]
- },
- {
-  "text": "C’est l’automne.",
-  "lang": "fr-FR",
-  "rate": 0.8500000238418579,
-  "count": 4,
-  "ecrans": [
-   "play histoires",
-   "play defi",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "Maya ramasse des châtaignes.",
-  "lang": "fr-FR",
-  "rate": 0.8500000238418579,
-  "count": 4,
-  "ecrans": [
-   "play histoires",
-   "play defi",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "Dans un arbre, un écureuil la regarde.",
-  "lang": "fr-FR",
-  "rate": 0.8500000238418579,
-  "count": 4,
-  "ecrans": [
-   "play histoires",
-   "play defi",
-   "play duo-play duo"
   ]
  },
  {
@@ -895,39 +1209,12 @@
   ]
  },
  {
-  "text": "2 paquets !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 4,
-  "ecrans": [
-   "play patates"
-  ]
- },
- {
-  "text": "Des paquets de 2 !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 4,
-  "ecrans": [
-   "play patates"
-  ]
- },
- {
   "text": "Où y en a-t-il le plus ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 4,
   "ecrans": [
    "play comparer"
-  ]
- },
- {
-  "text": "Complète !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 4,
-  "ecrans": [
-   "play trous"
   ]
  },
  {
@@ -949,30 +1236,21 @@
   ]
  },
  {
-  "text": "Remets l’image dans l’ordre.",
+  "text": "Quel nombre montre la flèche ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 4,
   "ecrans": [
-   "play puzzle"
+   "play droite-numerique"
   ]
  },
  {
-  "text": "La couleur de chaque nombre !",
+  "text": "Calcule l’addition.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 4,
   "ecrans": [
-   "play coloriage-magique"
-  ]
- },
- {
-  "text": "Touche le rond.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 4,
-  "ecrans": [
-   "play formes"
+   "play addition-posee"
   ]
  },
  {
@@ -1012,6 +1290,15 @@
   ]
  },
  {
+  "text": "Quel dessin manque ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 4,
+  "ecrans": [
+   "play tableau-logique"
+  ]
+ },
+ {
   "text": "Colorie le reflet !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -1036,6 +1323,15 @@
   "count": 4,
   "ecrans": [
    "play tangram"
+  ]
+ },
+ {
+  "text": "Glisse ton doigt, ou touche les cases, pour guider la poule jusqu’au maïs.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 4,
+  "ecrans": [
+   "play labyrinthe"
   ]
  },
  {
@@ -1102,6 +1398,16 @@
   ]
  },
  {
+  "text": "six",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 4,
+  "ecrans": [
+   "play relie-anglais",
+   "play nombres-anglais"
+  ]
+ },
+ {
   "text": "Lis la couleur, et colorie !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -1111,22 +1417,21 @@
   ]
  },
  {
-  "text": "Which one is not food?",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 4,
-  "ecrans": [
-   "play intrus-anglais",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "I love cats.",
+  "text": "I like apples.",
   "lang": "en-GB",
   "rate": 0.75,
   "count": 4,
   "ecrans": [
    "play phrase-anglais"
+  ]
+ },
+ {
+  "text": "ou",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 4,
+  "ecrans": [
+   "play parle-anglais"
   ]
  },
  {
@@ -1137,6 +1442,25 @@
   "ecrans": [
    "play syllabes-rythme",
    "play revision"
+  ]
+ },
+ {
+  "text": "Touche la lettre :",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play lettres",
+   "play revision"
+  ]
+ },
+ {
+  "text": "e",
+  "lang": "fr-FR",
+  "rate": 0.800000011920929,
+  "count": 3,
+  "ecrans": [
+   "play lettres"
   ]
  },
  {
@@ -1160,7 +1484,7 @@
   ]
  },
  {
-  "text": "mi",
+  "text": "si",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 3,
@@ -1169,7 +1493,7 @@
   ]
  },
  {
-  "text": "la",
+  "text": "le",
   "lang": "fr-FR",
   "rate": 0.800000011920929,
   "count": 3,
@@ -1178,7 +1502,7 @@
   ]
  },
  {
-  "text": "les",
+  "text": "è",
   "lang": "fr-FR",
   "rate": 0.800000011920929,
   "count": 3,
@@ -1196,12 +1520,12 @@
   ]
  },
  {
-  "text": "J’ai un chien et un chat.",
+  "text": "3 paquets !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play homophones"
+   "play patates"
   ]
  },
  {
@@ -1210,36 +1534,62 @@
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play relier",
-   "play duo-play duo"
+   "play relier"
   ]
  },
  {
-  "text": "5 fois 5 ?",
+  "text": "Combien y a-t-il de papillons ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play tables-chrono"
+   "play graphiques",
+   "play compter"
   ]
  },
  {
-  "text": "Retrouve les paires d’images. Retourne deux cartes à la fois.",
+  "text": "Les 2 parts ont la même taille.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play memory",
-   "play duo-play duo"
+   "play fractions"
   ]
  },
  {
-  "text": "Bravo, c’est un bateau !",
+  "text": "Remets l’image dans l’ordre : touche deux pièces pour les échanger.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play puzzle"
+  ]
+ },
+ {
+  "text": "Bravo, c’est un diamant !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
    "play points"
+  ]
+ },
+ {
+  "text": "De 1 à 4 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play points"
+  ]
+ },
+ {
+  "text": "Touche le rond.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play formes"
   ]
  },
  {
@@ -1262,13 +1612,32 @@
   ]
  },
  {
-  "text": "Trouve l’intrus : celui qui n’est pas de la même famille que les autres.",
+  "text": "Regarde l’image. Touche son ombre.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play intrus",
+   "play ombres",
    "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Complète la grille. Dans chaque ligne, chaque colonne et chaque carré, chaque image doit être là une seule fois. Touche une case vide, puis une image.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play sudoku",
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Colorie les cases pour trouver le dessin caché. Chaque nombre dit combien de cases se suivent sur la ligne ou la colonne.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play picross"
   ]
  },
  {
@@ -1282,143 +1651,135 @@
   ]
  },
  {
+  "text": "Regarde le trou dans le carré. Quelle pièce le bouche exactement ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play tangram",
+   "play duo-play duo"
+  ]
+ },
+ {
   "text": "Bravo, la souris a trouvé le fromage !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play labyrinthe"
+   "play labyrinthe",
+   "play labyrinthe-rond"
   ]
  },
  {
-  "text": "C’est quelle saison ?",
+  "text": "Bravo, le lapin a trouvé la carotte !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play saisons",
-   "play defi"
+   "play labyrinthe",
+   "play labyrinthe-rond"
   ]
  },
  {
-  "text": "Touche le crayon le plus long.",
+  "text": "Compte l’argent. Combien d’euros y a-t-il ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play mesures",
+   "play monnaie",
    "play duo-play duo"
   ]
  },
  {
-  "text": "Le monde. Choisis un jeu !",
+  "text": "Il y a 6 euros.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "domain"
+   "play monnaie",
+   "play duo-play duo"
   ]
  },
  {
-  "text": "orange",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 3,
-  "ecrans": [
-   "play ecoute",
-   "play lis-anglais",
-   "play epelle-anglais"
-  ]
- },
- {
-  "text": "C’est orange !",
+  "text": "Oui, c’est liquide : ça coule et ça prend la forme du récipient.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play ecoute",
-   "play lis-anglais",
-   "play epelle-anglais"
+   "play matiere"
   ]
  },
  {
-  "text": "red",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 3,
-  "ecrans": [
-   "play ecoute",
-   "play lis-anglais",
-   "play mot-anglais"
-  ]
- },
- {
-  "text": "C’est rouge !",
+  "text": "Touche l’objet qui marche sans électricité.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play ecoute",
-   "play lis-anglais",
-   "play mot-anglais"
+   "play electricite"
   ]
  },
  {
-  "text": "blue",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 3,
-  "ecrans": [
-   "play lis-anglais",
-   "play mot-anglais",
-   "play epelle-anglais"
-  ]
- },
- {
-  "text": "C’est bleu !",
+  "text": "Oui, cet objet marche sans électricité.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 3,
   "ecrans": [
-   "play lis-anglais",
-   "play mot-anglais",
-   "play epelle-anglais"
+   "play electricite"
   ]
  },
  {
-  "text": "purple",
+  "text": "Touche l’objet qui marche à l’électricité.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play electricite"
+  ]
+ },
+ {
+  "text": "Oui, la nuit : il fait noir.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "lion",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 3,
   "ecrans": [
-   "play relie-anglais"
+   "play memory-anglais"
   ]
  },
  {
-  "text": "brown",
+  "text": "Which one is not an animal?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 3,
   "ecrans": [
-   "play relie-anglais"
+   "play intrus-anglais"
   ]
  },
  {
-  "text": "Well done! It's a boat!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 3,
-  "ecrans": [
-   "play colorie-anglais"
-  ]
- },
- {
-  "text": "I am happy.",
+  "text": "I love cats.",
   "lang": "en-GB",
   "rate": 0.75,
   "count": 3,
   "ecrans": [
    "play phrase-anglais"
+  ]
+ },
+ {
+  "text": "Combien y a-t-il d’étoiles ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 3,
+  "ecrans": [
+   "play compter",
+   "play duo-play duo"
   ]
  },
  {
@@ -1440,30 +1801,12 @@
   ]
  },
  {
-  "text": "bateau",
+  "text": "lit",
   "lang": "fr-FR",
   "rate": 0.6000000238418579,
   "count": 2,
   "ecrans": [
    "play syllabes-rythme"
-  ]
- },
- {
-  "text": "e",
-  "lang": "fr-FR",
-  "rate": 0.800000011920929,
-  "count": 2,
-  "ecrans": [
-   "play lettres"
-  ]
- },
- {
-  "text": "i",
-  "lang": "fr-FR",
-  "rate": 0.800000011920929,
-  "count": 2,
-  "ecrans": [
-   "play lettres"
   ]
  },
  {
@@ -1476,7 +1819,16 @@
   ]
  },
  {
-  "text": "abeille",
+  "text": "a",
+  "lang": "fr-FR",
+  "rate": 0.800000011920929,
+  "count": 2,
+  "ecrans": [
+   "play lettres"
+  ]
+ },
+ {
+  "text": "olive",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 2,
@@ -1485,23 +1837,13 @@
   ]
  },
  {
-  "text": "arbre",
-  "lang": "fr-FR",
-  "rate": 0.699999988079071,
-  "count": 2,
-  "ecrans": [
-   "play premier-son",
-   "play revision"
-  ]
- },
- {
-  "text": "arbre",
+  "text": "os",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
    "play premier-son",
-   "play revision"
+   "play bon-mot"
   ]
  },
  {
@@ -1514,7 +1856,7 @@
   ]
  },
  {
-  "text": "mo",
+  "text": "lo",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 2,
@@ -1523,16 +1865,7 @@
   ]
  },
  {
-  "text": "lu",
-  "lang": "fr-FR",
-  "rate": 0.699999988079071,
-  "count": 2,
-  "ecrans": [
-   "play syllabes"
-  ]
- },
- {
-  "text": "ma",
+  "text": "ra",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 2,
@@ -1547,26 +1880,6 @@
   "count": 2,
   "ecrans": [
    "play bon-mot"
-  ]
- },
- {
-  "text": "moto",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play bon-mot",
-   "play dictee"
-  ]
- },
- {
-  "text": "judo",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play bon-mot",
-   "play dictee"
   ]
  },
  {
@@ -1588,7 +1901,7 @@
   ]
  },
  {
-  "text": "un",
+  "text": "une",
   "lang": "fr-FR",
   "rate": 0.800000011920929,
   "count": 2,
@@ -1597,7 +1910,7 @@
   ]
  },
  {
-  "text": "et",
+  "text": "la",
   "lang": "fr-FR",
   "rate": 0.800000011920929,
   "count": 2,
@@ -1615,6 +1928,52 @@
   ]
  },
  {
+  "text": "Il pleut.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play phrase",
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Regarde les images. Laquelle va avec elles ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play vocabulaire"
+  ]
+ },
+ {
+  "text": "Ce sont tous des animaux !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play vocabulaire"
+  ]
+ },
+ {
+  "text": "Le point se met à la fin de la phrase. Quelle phrase est bien écrite ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play ponctuation"
+  ]
+ },
+ {
+  "text": "La soupe est chaude.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play homophones"
+  ]
+ },
+ {
   "text": "Quel mot faut-il écrire ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -1624,7 +1983,7 @@
   ]
  },
  {
-  "text": "Je vais à l’école.",
+  "text": "J’ai un chien et un chat.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1642,12 +2001,21 @@
   ]
  },
  {
-  "text": "Il est content.",
+  "text": "Elle a faim.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
    "play homophones"
+  ]
+ },
+ {
+  "text": "Trace les vagues.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play ecrire"
   ]
  },
  {
@@ -1660,7 +2028,7 @@
   ]
  },
  {
-  "text": "lit",
+  "text": "lune",
   "lang": "fr-FR",
   "rate": 0.800000011920929,
   "count": 2,
@@ -1669,42 +2037,12 @@
   ]
  },
  {
-  "text": "Histoires. Choisis un jeu !",
+  "text": "Qui regarde Maya ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "domain"
-  ]
- },
- {
-  "text": "Minou est un petit chat.",
-  "lang": "fr-FR",
-  "rate": 0.8500000238418579,
-  "count": 2,
-  "ecrans": [
-   "play histoires",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "Il joue avec une pelote de laine.",
-  "lang": "fr-FR",
-  "rate": 0.8500000238418579,
-  "count": 2,
-  "ecrans": [
-   "play histoires",
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "La pelote roule sous le lit !",
-  "lang": "fr-FR",
-  "rate": 0.8500000238418579,
-  "count": 2,
-  "ecrans": [
-   "play histoires",
-   "play duo-play duo"
+   "play histoires"
   ]
  },
  {
@@ -1713,8 +2051,43 @@
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play histoires",
-   "play duo-play duo"
+   "play histoires"
+  ]
+ },
+ {
+  "text": "Il pleut très fort.",
+  "lang": "fr-FR",
+  "rate": 0.8500000238418579,
+  "count": 2,
+  "ecrans": [
+   "play histoires"
+  ]
+ },
+ {
+  "text": "Léo met ses bottes et prend son parapluie.",
+  "lang": "fr-FR",
+  "rate": 0.8500000238418579,
+  "count": 2,
+  "ecrans": [
+   "play histoires"
+  ]
+ },
+ {
+  "text": "Il saute dans les flaques !",
+  "lang": "fr-FR",
+  "rate": 0.8500000238418579,
+  "count": 2,
+  "ecrans": [
+   "play histoires"
+  ]
+ },
+ {
+  "text": "Que prend Léo ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play histoires"
   ]
  },
  {
@@ -1727,12 +2100,39 @@
   ]
  },
  {
-  "text": "Que voit Lili ?",
+  "text": "Qui a une moto ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
    "play petits-textes"
+  ]
+ },
+ {
+  "text": "Elle prend une feuille.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Elle dessine.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Elle accroche son dessin.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play ordre-histoire"
   ]
  },
  {
@@ -1745,16 +2145,7 @@
   ]
  },
  {
-  "text": "3 paquets !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play patates"
-  ]
- },
- {
-  "text": "4 paquets de 2 et 1 tout seul. Combien y en a-t-il en tout ?",
+  "text": "3 paquets de 2. Combien y en a-t-il en tout ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1772,22 +2163,12 @@
   ]
  },
  {
-  "text": "4 plus 1, égale 5",
+  "text": "Choisis ton palier !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play calcul",
-   "play faire-dix"
-  ]
- },
- {
-  "text": "Glisse les nombres dans les cases, pour que les calculs soient justes. Chaque calcul juste devient vert.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play trous"
+   "paliers"
   ]
  },
  {
@@ -1809,7 +2190,7 @@
   ]
  },
  {
-  "text": "2 plus 3, égale 5",
+  "text": "1 plus 4, égale 5",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1818,7 +2199,7 @@
   ]
  },
  {
-  "text": "3 fois 2 ?",
+  "text": "9 fois 2 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1828,7 +2209,7 @@
   ]
  },
  {
-  "text": "9 fois 10 ?",
+  "text": "2 fois 10 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1855,7 +2236,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a un bonbon. On lui en donne 4. Combien de bonbons a Eva-Rose maintenant ?",
+  "text": "Eva-Rose a 2 étoiles. On lui en donne 1. Combien d’étoiles a Eva-Rose maintenant ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1864,7 +2245,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a 5 bonbons.",
+  "text": "Eva-Rose a 3 étoiles.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1873,7 +2254,16 @@
   ]
  },
  {
-  "text": "Quel est le double de 1 ?",
+  "text": "3 plus 2, ça fait 5.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "Quel est le double de 5 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1882,16 +2272,97 @@
   ]
  },
  {
-  "text": "Remets l’image dans l’ordre : touche deux pièces pour les échanger.",
+  "text": "Le double de 5, c’est 10.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play puzzle"
+   "play doubles"
   ]
  },
  {
-  "text": "Colorie chaque zone avec la couleur de son nombre. Touche une couleur en bas, puis les zones.",
+  "text": "Quel est le double de 4 ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play doubles"
+  ]
+ },
+ {
+  "text": "Combien d’enfants aiment les pommes ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play graphiques"
+  ]
+ },
+ {
+  "text": "Combien d’enfants aiment les poires ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play graphiques"
+  ]
+ },
+ {
+  "text": "Quel nombre montre la flèche ? Aide-toi des nombres écrits sur la droite.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "Touche la tablette coupée en 2 parts égales. Les 2 parts doivent avoir la même taille.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play fractions"
+  ]
+ },
+ {
+  "text": "Non, une part est plus grande que l’autre.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play fractions"
+  ]
+ },
+ {
+  "text": "Partage 8 étoiles entre 2 enfants.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Calcule l’addition posée. Commence par les unités, à droite.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play addition-posee"
+  ]
+ },
+ {
+  "text": "Retrouve les paires d’images. Retourne deux cartes à la fois.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play memory"
+  ]
+ },
+ {
+  "text": "Bravo, c’est la fleur !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1910,7 +2381,25 @@
   ]
  },
  {
-  "text": "De 1 à 4 !",
+  "text": "Bravo, c’est le poisson !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play coloriage-magique"
+  ]
+ },
+ {
+  "text": "Bravo, c’est la maison !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play coloriage-magique"
+  ]
+ },
+ {
+  "text": "Relie les points dans l’ordre, de 1 à 5. Un dessin va apparaître !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1919,7 +2408,34 @@
   ]
  },
  {
-  "text": "Oui ! Les autres sont des fruits.",
+  "text": "Bravo, c’est une maison !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play points"
+  ]
+ },
+ {
+  "text": "Bravo, c’est un bateau !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play points"
+  ]
+ },
+ {
+  "text": "Touche le triangle.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play formes"
+  ]
+ },
+ {
+  "text": "Trouve l’intrus : celui qui n’est pas de la même famille que les autres.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -1928,31 +2444,57 @@
   ]
  },
  {
-  "text": "Oui ! Les autres sont des instruments de musique.",
+  "text": "Oui ! Les autres sont des affaires d’école.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play intrus",
-   "play duo-play duo"
+   "play intrus"
   ]
  },
  {
-  "text": "Regarde l’image. Touche son ombre.",
+  "text": "Regarde bien chaque ligne du tableau. Quel dessin va dans la case vide ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play ombres"
+   "play tableau-logique"
   ]
  },
  {
-  "text": "Complète la grille. Dans chaque ligne, chaque colonne et chaque carré, chaque image doit être là une seule fois. Touche une case vide, puis une image.",
+  "text": "La balance est en équilibre : les deux côtés pèsent pareil. Combien pèse le canard ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play sudoku"
+   "play balances"
+  ]
+ },
+ {
+  "text": "Bravo, c’est un sablier !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play picross"
+  ]
+ },
+ {
+  "text": "Bravo, c’est un champignon !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play picross"
+  ]
+ },
+ {
+  "text": "Bravo, c’est une flèche !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play picross"
   ]
  },
  {
@@ -1975,15 +2517,6 @@
   ]
  },
  {
-  "text": "Regarde le trou dans le carré. Quelle pièce le bouche exactement ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play tangram"
-  ]
- },
- {
   "text": "Combien y a-t-il de cubes ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -2002,39 +2535,49 @@
   ]
  },
  {
-  "text": "Glisse ton doigt, ou touche les cases, pour guider la souris jusqu’au fromage.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play labyrinthe"
-  ]
- },
- {
-  "text": "Aide l'abeille à trouver la fleur.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play labyrinthe"
-  ]
- },
- {
-  "text": "Bravo, l'abeille a trouvé la fleur !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play labyrinthe"
-  ]
- },
- {
   "text": "Aide la souris à trouver le fromage.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
    "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Suis les étoiles !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play labyrinthe",
+   "play labyrinthe-rond"
+  ]
+ },
+ {
+  "text": "Aide le lapin à trouver la carotte.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Aide la souris à trouver le fromage, au centre.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play labyrinthe-rond"
+  ]
+ },
+ {
+  "text": "Aide le chien à trouver l'os, au centre.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play labyrinthe-rond"
   ]
  },
  {
@@ -2065,7 +2608,7 @@
   ]
  },
  {
-  "text": "Oui, c’est l’automne !",
+  "text": "C’est quelle saison ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -2083,7 +2626,7 @@
   ]
  },
  {
-  "text": "l’été, le printemps ou l’hiver",
+  "text": "l’hiver, le printemps ou l’automne",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -2092,30 +2635,203 @@
   ]
  },
  {
-  "text": "Compte l’argent. Combien d’euros y a-t-il ?",
+  "text": "Oui, c’est le printemps !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play monnaie"
+   "play saisons"
   ]
  },
  {
-  "text": "Le Colisée de Rome… dans quel pays ?",
+  "text": "Touche le crayon le plus long.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play pays"
+   "play mesures"
   ]
  },
  {
-  "text": "À quel pays est ce drapeau ?",
+  "text": "Touche l’Antarctique.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play drapeaux"
+   "play carte-monde"
+  ]
+ },
+ {
+  "text": "Touche le visage triste.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play vivre-ensemble"
+  ]
+ },
+ {
+  "text": "Oui, ce visage est triste : il pleure.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play vivre-ensemble"
+  ]
+ },
+ {
+  "text": "Touche le visage en colère.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play vivre-ensemble"
+  ]
+ },
+ {
+  "text": "Touche le lapin dans le panier.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Touche la dent.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Touche le crâne.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play corps",
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Oui, c’est le crâne : il protège le cerveau.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play corps",
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Touche le fémur.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Vole, nage ou rampe ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Oui, l’aigle vole.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Touche un animal qui vole.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Oui, c’est solide : ça garde sa forme.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play matiere"
+  ]
+ },
+ {
+  "text": "Oui, cet objet a besoin d’électricité pour marcher.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play electricite"
+  ]
+ },
+ {
+  "text": "Pour serrer une vis, que prends-tu ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Oui, le jour : il fait clair.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "Il y a du soleil et des nuages.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Oui : le soleil est à moitié caché par un nuage.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Où vont les feuilles mortes ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play planete"
+  ]
+ },
+ {
+  "text": "Oui : au compost, les restes deviennent de la bonne terre.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play planete"
   ]
  },
  {
@@ -2128,26 +2844,6 @@
   ]
  },
  {
-  "text": "brown",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play ecoute",
-   "play mot-anglais"
-  ]
- },
- {
-  "text": "C’est marron !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play ecoute",
-   "play mot-anglais"
-  ]
- },
- {
   "text": "green",
   "lang": "en-GB",
   "rate": 0.800000011920929,
@@ -2157,42 +2853,53 @@
   ]
  },
  {
-  "text": "green",
+  "text": "nine",
   "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
    "play ecoute",
-   "play lis-anglais"
+   "play mot-anglais"
   ]
  },
  {
-  "text": "C’est vert !",
+  "text": "C’est 9 !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
    "play ecoute",
-   "play lis-anglais"
+   "play mot-anglais"
   ]
  },
  {
-  "text": "orange",
+  "text": "pink",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play ecoute",
+   "play mot-anglais"
+  ]
+ },
+ {
+  "text": "C’est rose !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play ecoute",
+   "play mot-anglais"
+  ]
+ },
+ {
+  "text": "one",
   "lang": "en-GB",
   "rate": 0.800000011920929,
   "count": 2,
   "ecrans": [
    "play ecoute",
    "play epelle-anglais"
-  ]
- },
- {
-  "text": "red",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 2,
-  "ecrans": [
-   "play ecoute"
   ]
  },
  {
@@ -2205,7 +2912,27 @@
   ]
  },
  {
-  "text": "purple",
+  "text": "C’est 7 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play lis-anglais",
+   "play nombres-anglais"
+  ]
+ },
+ {
+  "text": "brown",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 2,
+  "ecrans": [
+   "play lis-anglais",
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "brown",
   "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 2,
@@ -2215,7 +2942,7 @@
   ]
  },
  {
-  "text": "C’est violet !",
+  "text": "C’est marron !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -2225,23 +2952,73 @@
   ]
  },
  {
-  "text": "pink",
+  "text": "yellow",
   "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play mot-anglais",
+   "play lis-anglais",
+   "play mot-anglais"
+  ]
+ },
+ {
+  "text": "C’est jaune !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play lis-anglais",
+   "play mot-anglais"
+  ]
+ },
+ {
+  "text": "ten",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play lis-anglais",
    "play epelle-anglais"
   ]
  },
  {
-  "text": "C’est rose !",
+  "text": "C’est 10 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play lis-anglais",
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "white",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play lis-anglais",
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "C’est blanc !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play lis-anglais",
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "C’est 3 !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
    "play mot-anglais",
-   "play epelle-anglais"
+   "play nombres-anglais"
   ]
  },
  {
@@ -2254,7 +3031,7 @@
   ]
  },
  {
-  "text": "orange",
+  "text": "two",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2263,27 +3040,29 @@
   ]
  },
  {
-  "text": "red",
+  "text": "five",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
   "ecrans": [
-   "play relie-anglais"
+   "play relie-anglais",
+   "play nombres-anglais"
+  ]
+ },
+ {
+  "text": "seven",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 2,
+  "ecrans": [
+   "play relie-anglais",
+   "play nombres-anglais"
   ]
  },
  {
   "text": "Écris le mot anglais :",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
-  "count": 2,
-  "ecrans": [
-   "play epelle-anglais"
-  ]
- },
- {
-  "text": "black",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
   "count": 2,
   "ecrans": [
    "play epelle-anglais"
@@ -2308,7 +3087,7 @@
   ]
  },
  {
-  "text": "Show me two!",
+  "text": "Show me one!",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2320,6 +3099,15 @@
   "text": "Écoute le nombre anglais, et touche-le.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play nombres-anglais"
+  ]
+ },
+ {
+  "text": "four",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
   "count": 2,
   "ecrans": [
    "play nombres-anglais"
@@ -2344,15 +3132,6 @@
   ]
  },
  {
-  "text": "two plus two?",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 2,
-  "ecrans": [
-   "play calcul-anglais"
-  ]
- },
- {
   "text": "one plus one?",
   "lang": "en-GB",
   "rate": 0.800000011920929,
@@ -2371,7 +3150,7 @@
   ]
  },
  {
-  "text": "white and red make...?",
+  "text": "red and blue make...?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2389,6 +3168,24 @@
   ]
  },
  {
+  "text": "Well done! It's a boat!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 2,
+  "ecrans": [
+   "play colorie-anglais"
+  ]
+ },
+ {
+  "text": "Well done! It's a house!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 2,
+  "ecrans": [
+   "play colorie-anglais"
+  ]
+ },
+ {
   "text": "Retrouve les paires : chaque image va avec son mot anglais. Retourne deux cartes à la fois.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -2398,7 +3195,7 @@
   ]
  },
  {
-  "text": "lion",
+  "text": "fish",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2407,7 +3204,7 @@
   ]
  },
  {
-  "text": "pig",
+  "text": "cat",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2416,7 +3213,7 @@
   ]
  },
  {
-  "text": "rabbit",
+  "text": "elephant",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2425,17 +3222,27 @@
   ]
  },
  {
-  "text": "Which one is not weather?",
+  "text": "Lequel n’est pas une partie du corps ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play intrus-anglais",
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Which one is not a part of the body?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
   "ecrans": [
    "play intrus-anglais",
-   "play defi"
+   "play duo-play duo"
   ]
  },
  {
-  "text": "Which one is not an animal?",
+  "text": "Which one is not food?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2444,7 +3251,7 @@
   ]
  },
  {
-  "text": "What is the opposite of cold?",
+  "text": "What is the opposite of small?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2462,7 +3269,7 @@
   ]
  },
  {
-  "text": "The rabbit is on the table.",
+  "text": "The cat is on the table.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 2,
@@ -2480,9 +3287,18 @@
   ]
  },
  {
-  "text": "J’adore les chats.",
+  "text": "J’aime les pommes.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play phrase-anglais"
+  ]
+ },
+ {
+  "text": "I am happy.",
+  "lang": "en-GB",
+  "rate": 0.75,
   "count": 2,
   "ecrans": [
    "play phrase-anglais"
@@ -2498,25 +3314,16 @@
   ]
  },
  {
-  "text": "I like apples.",
+  "text": "Goodbye!",
   "lang": "en-GB",
-  "rate": 0.75,
-  "count": 2,
-  "ecrans": [
-   "play phrase-anglais"
-  ]
- },
- {
-  "text": "ou",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
+  "rate": 0.8500000238418579,
   "count": 2,
   "ecrans": [
    "play parle-anglais"
   ]
  },
  {
-  "text": "C’est l’heure de dormir. Tu dis…",
+  "text": "On te donne un cadeau. Tu dis…",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 2,
@@ -2534,12 +3341,12 @@
   ]
  },
  {
-  "text": "li",
+  "text": "Combien y a-t-il de voitures ?",
   "lang": "fr-FR",
-  "rate": 0.699999988079071,
+  "rate": 0.949999988079071,
   "count": 2,
   "ecrans": [
-   "play revision"
+   "play compter"
   ]
  },
  {
@@ -2552,7 +3359,44 @@
   ]
  },
  {
-  "text": "dragon",
+  "text": "Combien y a-t-il de ballons ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play duo-play duo",
+   "play compter"
+  ]
+ },
+ {
+  "text": "Déplace les aiguilles pour mettre l’horloge à 5 heures. La petite aiguille montre les heures, la grande aiguille montre les minutes.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 2,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "esse",
+  "lang": "fr-FR",
+  "rate": 0.800000011920929,
+  "count": 2,
+  "ecrans": [
+   "play lettres"
+  ]
+ },
+ {
+  "text": "bé",
+  "lang": "fr-FR",
+  "rate": 0.800000011920929,
+  "count": 2,
+  "ecrans": [
+   "play lettres"
+  ]
+ },
+ {
+  "text": "main",
   "lang": "fr-FR",
   "rate": 0.6000000238418579,
   "count": 1,
@@ -2561,7 +3405,7 @@
   ]
  },
  {
-  "text": "dragon : 2 syllabes !",
+  "text": "main : 1 syllabe !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2570,7 +3414,7 @@
   ]
  },
  {
-  "text": "bateau : 2 syllabes !",
+  "text": "lit : 1 syllabe !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2579,7 +3423,7 @@
   ]
  },
  {
-  "text": "feu",
+  "text": "chat",
   "lang": "fr-FR",
   "rate": 0.6000000238418579,
   "count": 1,
@@ -2588,7 +3432,7 @@
   ]
  },
  {
-  "text": "feu : 1 syllabe !",
+  "text": "chat : 1 syllabe !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2597,7 +3441,7 @@
   ]
  },
  {
-  "text": "pied",
+  "text": "hibou",
   "lang": "fr-FR",
   "rate": 0.6000000238418579,
   "count": 1,
@@ -2606,7 +3450,7 @@
   ]
  },
  {
-  "text": "pied : 1 syllabe !",
+  "text": "hibou : 2 syllabes !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2615,7 +3459,7 @@
   ]
  },
  {
-  "text": "soleil",
+  "text": "jus",
   "lang": "fr-FR",
   "rate": 0.6000000238418579,
   "count": 1,
@@ -2624,7 +3468,7 @@
   ]
  },
  {
-  "text": "soleil : 2 syllabes !",
+  "text": "jus : 1 syllabe !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2633,7 +3477,7 @@
   ]
  },
  {
-  "text": "Quel mot rime avec : oiseau ?",
+  "text": "Quel mot rime avec : moto ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2642,7 +3486,7 @@
   ]
  },
  {
-  "text": "dauphin, requin, ou moto",
+  "text": "bonbon, requin, ou gâteau",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2651,7 +3495,70 @@
   ]
  },
  {
-  "text": "oiseau, moto : ça rime !",
+  "text": "moto, gâteau : ça rime !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play rimes"
+  ]
+ },
+ {
+  "text": "tracteur, ordinateur : ça rime !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play rimes"
+  ]
+ },
+ {
+  "text": "café ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play rimes"
+  ]
+ },
+ {
+  "text": "bébé, renard, ou fleur",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play rimes"
+  ]
+ },
+ {
+  "text": "café, bébé : ça rime !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play rimes"
+  ]
+ },
+ {
+  "text": "melon ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play rimes"
+  ]
+ },
+ {
+  "text": "poisson, dé, ou lapin",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play rimes"
+  ]
+ },
+ {
+  "text": "melon, poisson : ça rime !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2669,7 +3576,7 @@
   ]
  },
  {
-  "text": "chapeau, renard, ou dauphin",
+  "text": "renard, mouton, ou souris",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2687,87 +3594,6 @@
   ]
  },
  {
-  "text": "chat ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
-  "text": "rat, sapin, ou poisson",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
-  "text": "chat, rat : ça rime !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
-  "text": "ordinateur ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
-  "text": "hibou, fleur, ou fusée",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
-  "text": "ordinateur, fleur : ça rime !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
-  "text": "souris ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
-  "text": "lit, fusée, ou cadeau",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
-  "text": "souris, lit : ça rime !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play rimes"
-  ]
- },
- {
   "text": "Nouvel autocollant : le chien !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -2777,7 +3603,7 @@
   ]
  },
  {
-  "text": "écureuil",
+  "text": "mouche",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 1,
@@ -2786,7 +3612,7 @@
   ]
  },
  {
-  "text": "écureuil",
+  "text": "mouche",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2795,7 +3621,7 @@
   ]
  },
  {
-  "text": "abeille",
+  "text": "olive",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2804,7 +3630,7 @@
   ]
  },
  {
-  "text": "salade",
+  "text": "lapin",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 1,
@@ -2813,7 +3639,7 @@
   ]
  },
  {
-  "text": "salade",
+  "text": "lapin",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2822,7 +3648,7 @@
   ]
  },
  {
-  "text": "requin",
+  "text": "os",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 1,
@@ -2831,7 +3657,16 @@
   ]
  },
  {
-  "text": "requin",
+  "text": "arbre",
+  "lang": "fr-FR",
+  "rate": 0.699999988079071,
+  "count": 1,
+  "ecrans": [
+   "play premier-son"
+  ]
+ },
+ {
+  "text": "arbre",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2849,7 +3684,7 @@
   ]
  },
  {
-  "text": "piano",
+  "text": "bébé",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2858,7 +3693,7 @@
   ]
  },
  {
-  "text": "lama",
+  "text": "tulipe",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2867,34 +3702,43 @@
   ]
  },
  {
-  "text": "radio",
+  "text": "café",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play bon-mot"
+  ]
+ },
+ {
+  "text": "vélo",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play bon-mot"
+  ]
+ },
+ {
+  "text": "Joyeux anniversaire !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play phrase"
+  ]
+ },
+ {
+  "text": "Elle lit un livre.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play phrase"
   ]
  },
  {
   "text": "La fusée décolle.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play phrase"
-  ]
- },
- {
-  "text": "Il dort.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play phrase"
-  ]
- },
- {
-  "text": "Le soleil brille.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2912,15 +3756,6 @@
   ]
  },
  {
-  "text": "Il neige.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play phrase"
-  ]
- },
- {
   "text": "Nouvel autocollant : le lapin !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -2930,7 +3765,79 @@
   ]
  },
  {
-  "text": "Quel petit mot va devant : poule ?",
+  "text": "Ce sont tous des instruments de musique !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vocabulaire"
+  ]
+ },
+ {
+  "text": "Ce sont tous des fruits !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vocabulaire"
+  ]
+ },
+ {
+  "text": "Ce sont tous des vêtements !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vocabulaire"
+  ]
+ },
+ {
+  "text": "Il pleut beaucoup.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ponctuation"
+  ]
+ },
+ {
+  "text": "Le soleil brille.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ponctuation"
+  ]
+ },
+ {
+  "text": "Je prends mon bain.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ponctuation"
+  ]
+ },
+ {
+  "text": "Le chat dort.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ponctuation"
+  ]
+ },
+ {
+  "text": "Le gâteau est bon.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ponctuation"
+  ]
+ },
+ {
+  "text": "Quel petit mot va devant : arbre ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2939,7 +3846,7 @@
   ]
  },
  {
-  "text": "une poule",
+  "text": "un arbre",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2948,7 +3855,7 @@
   ]
  },
  {
-  "text": "pomme ?",
+  "text": "éléphant ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -2957,25 +3864,7 @@
   ]
  },
  {
-  "text": "une pomme",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play genre"
-  ]
- },
- {
-  "text": "voiture ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play genre"
-  ]
- },
- {
-  "text": "une voiture",
+  "text": "un éléphant",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3002,7 +3891,7 @@
   ]
  },
  {
-  "text": "abeille ?",
+  "text": "fleur ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3011,7 +3900,7 @@
   ]
  },
  {
-  "text": "une abeille",
+  "text": "une fleur",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3020,7 +3909,70 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le renard !",
+  "text": "étoile ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play genre"
+  ]
+ },
+ {
+  "text": "une étoile",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play genre"
+  ]
+ },
+ {
+  "text": "Tu es très drôle.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play conjugaison"
+  ]
+ },
+ {
+  "text": "On est au parc.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play conjugaison"
+  ]
+ },
+ {
+  "text": "Tu es dans ta chambre.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play conjugaison"
+  ]
+ },
+ {
+  "text": "Vous êtes très gentils.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play conjugaison"
+  ]
+ },
+ {
+  "text": "Nous sommes amis.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play conjugaison"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : l'ours !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3029,7 +3981,88 @@
   ]
  },
  {
-  "text": "Trace les vagues. Suis le chemin avec ton doigt, en partant du point vert.",
+  "text": "un chat",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "une pieuvre, ou des pieuvres ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "une pieuvre",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "une robe, ou des robes ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "une robe",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "une voiture, ou des voitures ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "des voitures",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "une pizza, ou des pizzas ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "une pizza",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "Trace le rond, en tournant vers la gauche. Suis le chemin avec ton doigt, en partant du point vert.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3047,15 +4080,6 @@
   ]
  },
  {
-  "text": "Trace les coupes.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play ecrire"
-  ]
- },
- {
   "text": "Regarde le point jaune, puis fais pareil avec ton doigt !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -3065,7 +4089,7 @@
   ]
  },
  {
-  "text": "Trace les traits penchés, du haut vers le bas.",
+  "text": "Trace les coupes.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3074,7 +4098,7 @@
   ]
  },
  {
-  "text": "Trace les ponts.",
+  "text": "Trace les boucles.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3083,12 +4107,57 @@
   ]
  },
  {
-  "text": "Trace les traits du haut vers le bas.",
+  "text": "Trace les traits de gauche à droite.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play ecrire"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le panda !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
+  ]
+ },
+ {
+  "text": "lune",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play dictee"
+  ]
+ },
+ {
+  "text": "moto",
+  "lang": "fr-FR",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play dictee"
+  ]
+ },
+ {
+  "text": "moto",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play dictee"
+  ]
+ },
+ {
+  "text": "lit",
+  "lang": "fr-FR",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play dictee"
   ]
  },
  {
@@ -3101,7 +4170,7 @@
   ]
  },
  {
-  "text": "café",
+  "text": "robot",
   "lang": "fr-FR",
   "rate": 0.800000011920929,
   "count": 1,
@@ -3110,7 +4179,7 @@
   ]
  },
  {
-  "text": "café",
+  "text": "robot",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3128,25 +4197,7 @@
   ]
  },
  {
-  "text": "moto",
-  "lang": "fr-FR",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play dictee"
-  ]
- },
- {
-  "text": "bébé",
-  "lang": "fr-FR",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play dictee"
-  ]
- },
- {
-  "text": "bébé",
+  "text": "judo",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3155,7 +4206,7 @@
   ]
  },
  {
-  "text": "Un petit poisson nage dans la mer.",
+  "text": "C’est l’automne.",
   "lang": "fr-FR",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -3164,7 +4215,7 @@
   ]
  },
  {
-  "text": "Il rencontre une grosse baleine.",
+  "text": "Maya ramasse des châtaignes.",
   "lang": "fr-FR",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -3173,16 +4224,7 @@
   ]
  },
  {
-  "text": "Qui le poisson rencontre-t-il ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play histoires"
-  ]
- },
- {
-  "text": "C’est l’anniversaire de Zoé.",
+  "text": "Dans un arbre, un écureuil la regarde.",
   "lang": "fr-FR",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -3191,7 +4233,7 @@
   ]
  },
  {
-  "text": "Maman a fait un gros gâteau au chocolat.",
+  "text": "Minou est un petit chat.",
   "lang": "fr-FR",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -3200,7 +4242,7 @@
   ]
  },
  {
-  "text": "Zoé souffle les bougies.",
+  "text": "Il joue avec une pelote de laine.",
   "lang": "fr-FR",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -3209,16 +4251,7 @@
   ]
  },
  {
-  "text": "C’est l’anniversaire de qui ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play histoires"
-  ]
- },
- {
-  "text": "Le soir, Lina met son pyjama.",
+  "text": "La pelote roule sous le lit !",
   "lang": "fr-FR",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -3227,7 +4260,7 @@
   ]
  },
  {
-  "text": "Papa lui lit une histoire.",
+  "text": "Ce matin, tout est blanc.",
   "lang": "fr-FR",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -3236,7 +4269,7 @@
   ]
  },
  {
-  "text": "Lina s’endort avec son doudou lapin.",
+  "text": "Il a neigé toute la nuit.",
   "lang": "fr-FR",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -3245,25 +4278,7 @@
   ]
  },
  {
-  "text": "Quel est le doudou de Lina ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play histoires"
-  ]
- },
- {
-  "text": "Nouvel autocollant : l'ours !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "results"
-  ]
- },
- {
-  "text": "De quelle couleur sont les feuilles ?",
+  "text": "Où va Rémi ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3272,7 +4287,7 @@
   ]
  },
  {
-  "text": "Rousses !",
+  "text": "Au bois !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3281,43 +4296,7 @@
   ]
  },
  {
-  "text": "Une tortue !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play petits-textes"
-  ]
- },
- {
-  "text": "Qui a un chat ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play petits-textes"
-  ]
- },
- {
-  "text": "Léo !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play petits-textes"
-  ]
- },
- {
-  "text": "Qui fait la tarte ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play petits-textes"
-  ]
- },
- {
-  "text": "Papa !",
+  "text": "Papi !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3344,7 +4323,124 @@
   ]
  },
  {
-  "text": "Combien y a-t-il de grenouilles ?",
+  "text": "De quelle couleur est le chat ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play petits-textes"
+  ]
+ },
+ {
+  "text": "Roux !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play petits-textes"
+  ]
+ },
+ {
+  "text": "Que met papa dans la tarte ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play petits-textes"
+  ]
+ },
+ {
+  "text": "Des pommes !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play petits-textes"
+  ]
+ },
+ {
+  "text": "Elle met ses chaussettes.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Elle met ses baskets.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Elle va au parc.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Il prend son bain.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Papa lit une histoire.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Il s’endort.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Le réveil sonne.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Il prend sa douche.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Il s’habille.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ordre-histoire"
+  ]
+ },
+ {
+  "text": "Combien y a-t-il de poussins ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3353,43 +4449,7 @@
   ]
  },
  {
-  "text": "1 grenouille",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play compter"
-  ]
- },
- {
-  "text": "Combien de pommes ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play compter"
-  ]
- },
- {
-  "text": "4 pommes",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play compter"
-  ]
- },
- {
-  "text": "Combien de coccinelles ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play compter"
-  ]
- },
- {
-  "text": "2 coccinelles",
+  "text": "4 poussins",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3407,7 +4467,7 @@
   ]
  },
  {
-  "text": "5 ballons",
+  "text": "1 ballon",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3416,7 +4476,7 @@
   ]
  },
  {
-  "text": "Combien de papillons ?",
+  "text": "Combien de fraises ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3425,7 +4485,7 @@
   ]
  },
  {
-  "text": "3 papillons",
+  "text": "5 fraises",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3434,7 +4494,43 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le panda !",
+  "text": "Combien de gâteaux ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play compter"
+  ]
+ },
+ {
+  "text": "3 gâteaux",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play compter"
+  ]
+ },
+ {
+  "text": "Combien de poissons ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play compter"
+  ]
+ },
+ {
+  "text": "2 poissons",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play compter"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le tigre !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3443,7 +4539,7 @@
   ]
  },
  {
-  "text": "1",
+  "text": "2",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3452,7 +4548,7 @@
   ]
  },
  {
-  "text": "6",
+  "text": "3",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3470,7 +4566,7 @@
   ]
  },
  {
-  "text": "2",
+  "text": "6",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3479,7 +4575,7 @@
   ]
  },
  {
-  "text": "4",
+  "text": "1",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3506,7 +4602,7 @@
   ]
  },
  {
-  "text": "Mets un kiwi.",
+  "text": "Mets une poire.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3524,7 +4620,7 @@
   ]
  },
  {
-  "text": "un kiwi",
+  "text": "une poire",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3533,7 +4629,7 @@
   ]
  },
  {
-  "text": "Mets une fraise.",
+  "text": "Mets 4 bananes.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3542,7 +4638,7 @@
   ]
  },
  {
-  "text": "une fraise",
+  "text": "4 bananes",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3551,7 +4647,7 @@
   ]
  },
  {
-  "text": "Mets 2 oranges.",
+  "text": "Mets 3 citrons.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3560,7 +4656,7 @@
   ]
  },
  {
-  "text": "2 oranges",
+  "text": "3 citrons",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3569,7 +4665,7 @@
   ]
  },
  {
-  "text": "Mets un citron.",
+  "text": "Mets 5 oranges.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3578,7 +4674,7 @@
   ]
  },
  {
-  "text": "un citron",
+  "text": "5 oranges",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3587,7 +4683,7 @@
   ]
  },
  {
-  "text": "Fais des patates : entoure des paquets de 2 ballons avec ton doigt. Ensuite, on comptera combien il y en a en tout.",
+  "text": "Fais des patates : entoure des paquets de 2 voitures avec ton doigt. Ensuite, on comptera combien il y en a en tout.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3605,7 +4701,7 @@
   ]
  },
  {
-  "text": "4 paquets de 2 et 1 : 9 ballons !",
+  "text": "4 paquets !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3614,7 +4710,7 @@
   ]
  },
  {
-  "text": "3 paquets de 2 et 1 tout seul. Combien y en a-t-il en tout ?",
+  "text": "5 paquets de 2. Combien y en a-t-il en tout ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3623,25 +4719,7 @@
   ]
  },
  {
-  "text": "3 paquets de 2 et 1 : 7 gâteaux !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play patates"
-  ]
- },
- {
-  "text": "3 paquets de 2. Combien y en a-t-il en tout ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play patates"
-  ]
- },
- {
-  "text": "3 paquets de 2 : 6 voitures !",
+  "text": "5 paquets de 2 : 10 voitures !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3659,7 +4737,7 @@
   ]
  },
  {
-  "text": "2 paquets de 2 et 1 : 5 poissons !",
+  "text": "2 paquets de 2 et 1 : 5 coccinelles !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3668,7 +4746,7 @@
   ]
  },
  {
-  "text": "4 paquets de 2 et 1 : 9 coccinelles !",
+  "text": "3 paquets de 2 : 6 poissons !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3677,7 +4755,43 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le koala !",
+  "text": "3 paquets de 2 et 1 tout seul. Combien y en a-t-il en tout ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "3 paquets de 2 et 1 : 7 fleurs !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "4 paquets de 2. Combien y en a-t-il en tout ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "4 paquets de 2 : 8 fleurs !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le lion !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3686,7 +4800,25 @@
   ]
  },
  {
+  "text": "1 dizaine et 3 unités : 13",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play dizaines"
+  ]
+ },
+ {
   "text": "1 dizaine et 6 unités : 16",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play dizaines"
+  ]
+ },
+ {
+  "text": "1 dizaine et 2 unités : 12",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3704,7 +4836,7 @@
   ]
  },
  {
-  "text": "1 dizaine et 0 unité : 10",
+  "text": "1 dizaine et 9 unités : 19",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3713,25 +4845,7 @@
   ]
  },
  {
-  "text": "1 dizaine et 3 unités : 13",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play dizaines"
-  ]
- },
- {
-  "text": "1 dizaine et 5 unités : 15",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play dizaines"
-  ]
- },
- {
-  "text": "Nouvel autocollant : le tigre !",
+  "text": "Nouvel autocollant : la vache !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3740,30 +4854,12 @@
   ]
  },
  {
-  "text": "Où y a-t-il le plus de poussins ?",
+  "text": "Où y a-t-il le plus de gâteaux ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play comparer"
-  ]
- },
- {
-  "text": "2, 3, 4, 5, 6",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play suite"
-  ]
- },
- {
-  "text": "3, 4, 5, 6, 7",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play suite"
   ]
  },
  {
@@ -3776,61 +4872,34 @@
   ]
  },
  {
-  "text": "Choisis ton palier !",
+  "text": "5, 6, 7, 8, 9",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "paliers"
+   "play suite"
   ]
  },
  {
-  "text": "Combien font 4 plus 1 ?",
+  "text": "2, 3, 4, 5, 6",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play calcul"
+   "play suite"
   ]
  },
  {
-  "text": "Relie chaque calcul à son résultat.",
+  "text": "4, 5, 6, 7, 8",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play calcul"
+   "play suite"
   ]
  },
  {
-  "text": "2 plus 2 ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calcul"
-  ]
- },
- {
-  "text": "2 plus 2, égale 4",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calcul"
-  ]
- },
- {
-  "text": "Place les nombres dans les cases, pour que les calculs soient justes.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calcul"
-  ]
- },
- {
-  "text": "1 plus 1 ?",
+  "text": "Combien font 1 plus 1 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3848,7 +4917,61 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le lion !",
+  "text": "Relie chaque calcul à son résultat.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calcul"
+  ]
+ },
+ {
+  "text": "2 plus 1 ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calcul"
+  ]
+ },
+ {
+  "text": "2 plus 1, égale 3",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calcul"
+  ]
+ },
+ {
+  "text": "Place les nombres dans les cases, pour que les calculs soient justes.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calcul"
+  ]
+ },
+ {
+  "text": "1 plus 2 ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calcul"
+  ]
+ },
+ {
+  "text": "1 plus 2, égale 3",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calcul"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le cochon !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3857,12 +4980,30 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : la vache !",
+  "text": "Nouvel autocollant : la grenouille !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "results"
+  ]
+ },
+ {
+  "text": "2 plus 3, égale 5",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play faire-dix"
+  ]
+ },
+ {
+  "text": "4 plus 1, égale 5",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play faire-dix"
   ]
  },
  {
@@ -3875,16 +5016,7 @@
   ]
  },
  {
-  "text": "1 plus 4, égale 5",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play faire-dix"
-  ]
- },
- {
-  "text": "Combien font 8 fois 2 ?",
+  "text": "Combien font 5 fois 2 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3893,7 +5025,34 @@
   ]
  },
  {
-  "text": "8 fois 2, égale 16",
+  "text": "5 fois 2, égale 10",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play tables"
+  ]
+ },
+ {
+  "text": "9 fois 2, égale 18",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play tables"
+  ]
+ },
+ {
+  "text": "7 fois 2 ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play tables"
+  ]
+ },
+ {
+  "text": "7 fois 2, égale 14",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3920,7 +5079,7 @@
   ]
  },
  {
-  "text": "10 fois 2 ?",
+  "text": "8 fois 2 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3929,7 +5088,7 @@
   ]
  },
  {
-  "text": "10 fois 2, égale 20",
+  "text": "8 fois 2, égale 16",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3938,34 +5097,34 @@
   ]
  },
  {
-  "text": "3 fois 2, égale 6",
+  "text": "Défi chrono ! Dix calculs, le plus vite possible. Combien font 5 fois 4 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play tables"
+   "play tables-chrono"
   ]
  },
  {
-  "text": "1 fois 2 ?",
+  "text": "10 fois 8 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play tables"
+   "play tables-chrono"
   ]
  },
  {
-  "text": "1 fois 2, égale 2",
+  "text": "5 fois 3 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play tables"
+   "play tables-chrono"
   ]
  },
  {
-  "text": "Défi chrono ! Dix calculs, le plus vite possible. Combien font 5 fois 7 ?",
+  "text": "2 fois 4 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -3975,33 +5134,6 @@
  },
  {
   "text": "5 fois 2 ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play tables-chrono"
-  ]
- },
- {
-  "text": "5 fois 8 ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play tables-chrono"
-  ]
- },
- {
-  "text": "5 fois 9 ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play tables-chrono"
-  ]
- },
- {
-  "text": "2 fois 10 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4028,7 +5160,7 @@
   ]
  },
  {
-  "text": "Défi chrono ! Dix calculs, le plus vite possible. Combien font 9 fois 5 ?",
+  "text": "4 fois 2 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4037,7 +5169,25 @@
   ]
  },
  {
-  "text": "9 fois 2 ?",
+  "text": "Nouveau record !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le singe !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
+  ]
+ },
+ {
+  "text": "Défi chrono ! Dix calculs, le plus vite possible. Combien font 2 fois 10 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4046,7 +5196,7 @@
   ]
  },
  {
-  "text": "2 fois 2 ?",
+  "text": "2 fois 9 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4055,7 +5205,7 @@
   ]
  },
  {
-  "text": "5 fois 3 ?",
+  "text": "5 fois 5 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4064,7 +5214,7 @@
   ]
  },
  {
-  "text": "8 fois 5 ?",
+  "text": "2 fois 5 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4073,7 +5223,7 @@
   ]
  },
  {
-  "text": "7 fois 2 ?",
+  "text": "5 fois 4 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4091,6 +5241,33 @@
   ]
  },
  {
+  "text": "2 fois 8 ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play tables-chrono"
+  ]
+ },
+ {
+  "text": "7 fois 5 ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play tables-chrono"
+  ]
+ },
+ {
+  "text": "5 fois 9 ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play tables-chrono"
+  ]
+ },
+ {
   "text": "Ton record : une seconde.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -4100,7 +5277,7 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : la grenouille !",
+  "text": "Nouvel autocollant : la poule !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4109,7 +5286,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a 4 crayons. On lui en donne 1. Combien de crayons a Eva-Rose maintenant ?",
+  "text": "Eva-Rose a une pomme. On lui en donne 1. Combien de pommes a Eva-Rose maintenant ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4118,7 +5295,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a 5 crayons.",
+  "text": "Eva-Rose a 2 pommes.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4127,7 +5304,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a un poisson. On lui en donne 1. Combien de poissons a Eva-Rose maintenant ?",
+  "text": "Eva-Rose a un ballon. On lui en donne 4. Combien de ballons a Eva-Rose maintenant ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4136,7 +5313,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a 2 poissons.",
+  "text": "Eva-Rose a 5 ballons.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4145,7 +5322,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a 3 bonbons. On lui en donne 2. Combien de bonbons a Eva-Rose maintenant ?",
+  "text": "Eva-Rose a 4 poissons. On lui en donne 1. Combien de poissons a Eva-Rose maintenant ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4154,7 +5331,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a 2 pommes. On lui en donne 1. Combien de pommes a Eva-Rose maintenant ?",
+  "text": "Eva-Rose a 5 poissons.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4163,52 +5340,97 @@
   ]
  },
  {
-  "text": "Eva-Rose a 3 pommes.",
+  "text": "Eva-Rose a une étoile. On lui en donne 2. Combien d’étoiles a Eva-Rose maintenant ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play problemes"
+  ]
+ },
+ {
+  "text": "Eva-Rose a 3 images. Sa mamie lui en donne 2. Combien d’images a Eva-Rose maintenant ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "Eva-Rose a 2 billes rouges et 6 billes bleues. Combien de billes a Eva-Rose en tout ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "2 plus 6, ça fait 8.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "Eva-Rose prend le bus. Il y a 3 enfants et 6 adultes. Combien de personnes y a-t-il dans le bus ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "3 plus 6, ça fait 9.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "Eva-Rose prend le bus. Il y a 3 enfants et 5 adultes. Combien de personnes y a-t-il dans le bus ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "3 plus 5, ça fait 8.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "Eva-Rose prend le bus. Il y a 3 enfants et 2 adultes. Combien de personnes y a-t-il dans le bus ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "Quel est le double de 1 ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play doubles"
   ]
  },
  {
   "text": "Le double de 1, c’est 2.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play doubles"
-  ]
- },
- {
-  "text": "Quel est le double de 3 ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play doubles"
-  ]
- },
- {
-  "text": "Le double de 3, c’est 6.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play doubles"
-  ]
- },
- {
-  "text": "Quel est le double de 5 ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play doubles"
-  ]
- },
- {
-  "text": "Le double de 5, c’est 10.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4235,15 +5457,6 @@
   ]
  },
  {
-  "text": "Quel est le double de 4 ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play doubles"
-  ]
- },
- {
   "text": "Le double de 4, c’est 8.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -4253,7 +5466,7 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le singe !",
+  "text": "Nouvel autocollant : le pingouin !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4262,30 +5475,291 @@
   ]
  },
  {
-  "text": "Bravo, c’est la fleur !",
+  "text": "Regarde les dessins. Combien d’enfants aiment les poissons ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play coloriage-magique"
+   "play graphiques"
   ]
  },
  {
-  "text": "Bravo, c’est la maison !",
+  "text": "Les poissons : 4 !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play coloriage-magique"
+   "play graphiques"
   ]
  },
  {
-  "text": "Bravo, c’est le poisson !",
+  "text": "Les pommes : 8 !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play coloriage-magique"
+   "play graphiques"
+  ]
+ },
+ {
+  "text": "Les poires : 8 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play graphiques"
+  ]
+ },
+ {
+  "text": "Les papillons : 7 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play graphiques"
+  ]
+ },
+ {
+  "text": "Les poires : 3 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play graphiques"
+  ]
+ },
+ {
+  "text": "La flèche montre 6.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "La flèche montre 1.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "La flèche montre 7.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "La flèche montre 9.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "La flèche montre 5.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le hibou !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
+  ]
+ },
+ {
+  "text": "Regarde la pizza. Les 2 parts sont-elles égales ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play fractions"
+  ]
+ },
+ {
+  "text": "Touche la tablette coupée en 2 parts égales.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play fractions"
+  ]
+ },
+ {
+  "text": "Regarde la tablette. Les 2 parts sont-elles égales ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play fractions"
+  ]
+ },
+ {
+  "text": "Touche la pizza coupée en 2 parts égales.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play fractions"
+  ]
+ },
+ {
+  "text": "Partage 6 fraises entre 2 enfants. Chaque enfant doit en avoir autant. Touche un enfant pour lui en donner une.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Chacun a 3 fraises.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Ils n’en ont pas tous autant. Touche la flèche pour en reprendre.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Chacun a 4 étoiles.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Partage 4 biscuits entre 2 enfants.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Chacun a 2 biscuits.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Partage 8 fraises entre 2 enfants.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Chacun a 4 fraises.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Partage 4 bonbons entre 2 enfants.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Chacun a 2 bonbons.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "59 plus 40, égale 99",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play addition-posee"
+  ]
+ },
+ {
+  "text": "21 plus 54, égale 75",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play addition-posee"
+  ]
+ },
+ {
+  "text": "33 plus 53, égale 86",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play addition-posee"
+  ]
+ },
+ {
+  "text": "65 plus 33, égale 98",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play addition-posee"
+  ]
+ },
+ {
+  "text": "67 plus 30, égale 97",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play addition-posee"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : la licorne !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
   ]
  },
  {
@@ -4307,34 +5781,7 @@
   ]
  },
  {
-  "text": "Relie les points dans l’ordre, de 1 à 4. Un dessin va apparaître !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play points"
-  ]
- },
- {
   "text": "Cherche le 1 !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play points"
-  ]
- },
- {
-  "text": "Bravo, c’est un diamant !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play points"
-  ]
- },
- {
-  "text": "Bravo, c’est une maison !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4361,15 +5808,6 @@
   ]
  },
  {
-  "text": "Touche le triangle.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play formes"
-  ]
- },
- {
   "text": "Oui, c’est le triangle !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -4379,21 +5817,12 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le pingouin !",
+  "text": "Nouvel autocollant : le papillon !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "results"
-  ]
- },
- {
-  "text": "Oui ! Les autres sont des vêtements.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play intrus"
   ]
  },
  {
@@ -4406,7 +5835,25 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le hibou !",
+  "text": "Oui ! Les autres sont des fruits.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play intrus"
+  ]
+ },
+ {
+  "text": "Oui ! Les autres sont des animaux.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play intrus"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : la tortue !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4424,7 +5871,7 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : la licorne !",
+  "text": "Nouvel autocollant : la pieuvre !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4433,7 +5880,124 @@
   ]
  },
  {
-  "text": "Il y a 3 cubes.",
+  "text": "Le canard pèse 8 kilos.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "Combien pèse le renard ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "Le renard pèse 2 kilos.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "Combien pèse la tortue ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "La tortue pèse 4 kilos.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "Combien pèse le lapin ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "Le lapin pèse 4 kilos.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "Combien pèse la poule ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "La poule pèse 7 kilos.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play balances"
+  ]
+ },
+ {
+  "text": "Il manque 12 cases !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play picross"
+  ]
+ },
+ {
+  "text": "Bravo, c’est une tasse !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play picross"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le dauphin !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : la baleine !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
+  ]
+ },
+ {
+  "text": "Il y a 2 cubes.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4451,7 +6015,7 @@
   ]
  },
  {
-  "text": "Il y a 2 cubes.",
+  "text": "Il y a 3 cubes.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4460,16 +6024,7 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : l'abeille !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "results"
-  ]
- },
- {
-  "text": "Suis les étoiles !",
+  "text": "Bravo, la poule a trouvé le maïs !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4478,7 +6033,34 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le papillon !",
+  "text": "Aide le chien à trouver l'os.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Aide l'abeille à trouver la fleur.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Bravo, l'abeille a trouvé la fleur !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le requin !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4487,21 +6069,39 @@
   ]
  },
  {
-  "text": "Il est 8 heures.",
+  "text": "L'os est au centre du labyrinthe. Glisse ton doigt le long du chemin pour guider le chien.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play heure"
+   "play labyrinthe-rond"
   ]
  },
  {
-  "text": "Il est 2 heures.",
+  "text": "Aide le singe à trouver la banane, au centre.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play heure"
+   "play labyrinthe-rond"
+  ]
+ },
+ {
+  "text": "Bravo, le singe a trouvé la banane !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe-rond"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le crocodile !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
   ]
  },
  {
@@ -4514,7 +6114,25 @@
   ]
  },
  {
-  "text": "Il est 6 heures.",
+  "text": "Il est 12 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play heure"
+  ]
+ },
+ {
+  "text": "Il est 11 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play heure"
+  ]
+ },
+ {
+  "text": "Il est 5 heures.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4532,79 +6150,7 @@
   ]
  },
  {
-  "text": "Déplace les aiguilles pour mettre l’horloge à 5 heures. La petite aiguille montre les heures, la grande aiguille montre les minutes.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play regle-horloge"
-  ]
- },
- {
-  "text": "L’horloge montre 5 heures.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play regle-horloge"
-  ]
- },
- {
-  "text": "12 heures.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play regle-horloge"
-  ]
- },
- {
-  "text": "La petite aiguille montre les heures.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play regle-horloge"
-  ]
- },
- {
-  "text": "Il faut 12 heures. Mets les aiguilles sur les pointillés.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play regle-horloge"
-  ]
- },
- {
-  "text": "L’horloge montre 12 heures.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play regle-horloge"
-  ]
- },
- {
-  "text": "8 heures.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play regle-horloge"
-  ]
- },
- {
-  "text": "L’horloge montre 8 heures.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play regle-horloge"
-  ]
- },
- {
-  "text": "9 heures.",
+  "text": "Déplace les aiguilles pour mettre l’horloge à 9 heures. La petite aiguille montre les heures, la grande aiguille montre les minutes.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4622,7 +6168,7 @@
   ]
  },
  {
-  "text": "7 heures.",
+  "text": "6 heures.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4631,7 +6177,7 @@
   ]
  },
  {
-  "text": "L’horloge montre 7 heures.",
+  "text": "La petite aiguille montre les heures.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4640,7 +6186,79 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : la tortue !",
+  "text": "Il faut 6 heures. Mets les aiguilles sur les pointillés.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "L’horloge montre 6 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "3 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "L’horloge montre 3 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "4 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "L’horloge montre 4 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "Une heure.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "L’horloge montre une heure.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : la girafe !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4649,7 +6267,7 @@
   ]
  },
  {
-  "text": "Aujourd’hui, c’est mercredi. Hier, c’était…",
+  "text": "Aujourd’hui, c’est samedi. Hier, c’était…",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4658,7 +6276,16 @@
   ]
  },
  {
-  "text": "vendredi, mardi ou dimanche ?",
+  "text": "vendredi, dimanche ou lundi ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calendrier"
+  ]
+ },
+ {
+  "text": "Hier, c’était vendredi.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4676,6 +6303,33 @@
   ]
  },
  {
+  "text": "Aujourd’hui, c’est samedi. Demain, ce sera…",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calendrier"
+  ]
+ },
+ {
+  "text": "vendredi, dimanche ou mercredi ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calendrier"
+  ]
+ },
+ {
+  "text": "Demain, ce sera dimanche.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play calendrier"
+  ]
+ },
+ {
   "text": "Aujourd’hui, c’est vendredi. Hier, c’était…",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -4685,7 +6339,7 @@
   ]
  },
  {
-  "text": "samedi, lundi ou jeudi ?",
+  "text": "jeudi, dimanche ou mardi ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4703,7 +6357,7 @@
   ]
  },
  {
-  "text": "Aujourd’hui, c’est lundi. Demain, ce sera…",
+  "text": "Aujourd’hui, c’est mercredi. Demain, ce sera…",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4712,7 +6366,7 @@
   ]
  },
  {
-  "text": "jeudi, mardi ou samedi ?",
+  "text": "jeudi, mardi ou vendredi ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4721,7 +6375,7 @@
   ]
  },
  {
-  "text": "Demain, ce sera mardi.",
+  "text": "Demain, ce sera jeudi.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4730,61 +6384,7 @@
   ]
  },
  {
-  "text": "Aujourd’hui, c’est dimanche. Hier, c’était…",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calendrier"
-  ]
- },
- {
-  "text": "samedi, jeudi ou mercredi ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calendrier"
-  ]
- },
- {
-  "text": "Hier, c’était samedi.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calendrier"
-  ]
- },
- {
-  "text": "Aujourd’hui, c’est lundi. Hier, c’était…",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calendrier"
-  ]
- },
- {
-  "text": "vendredi, dimanche ou jeudi ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calendrier"
-  ]
- },
- {
-  "text": "Hier, c’était dimanche.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play calendrier"
-  ]
- },
- {
-  "text": "L’hiver, le printemps ou l’automne ?",
+  "text": "Le printemps, l’été ou l’hiver ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4793,7 +6393,7 @@
   ]
  },
  {
-  "text": "le printemps, l’automne ou l’été",
+  "text": "l’été, l’automne ou l’hiver",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4802,7 +6402,7 @@
   ]
  },
  {
-  "text": "Oui, c’est l’hiver !",
+  "text": "l’hiver, l’automne ou le printemps",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4811,48 +6411,12 @@
   ]
  },
  {
-  "text": "le printemps, l’automne ou l’hiver",
+  "text": "Oui, c’est l’automne !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play saisons"
-  ]
- },
- {
-  "text": "Il y a 5 euros.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play monnaie"
-  ]
- },
- {
-  "text": "Il y a 8 euros.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play monnaie"
-  ]
- },
- {
-  "text": "Il y a 6 euros.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play monnaie"
-  ]
- },
- {
-  "text": "Il y a 7 euros.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play monnaie"
   ]
  },
  {
@@ -4865,7 +6429,25 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : la pieuvre !",
+  "text": "Il y a 3 euros.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play monnaie"
+  ]
+ },
+ {
+  "text": "Il y a 5 euros.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play monnaie"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : l'éléphant !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4874,7 +6456,7 @@
   ]
  },
  {
-  "text": "Où vit la vache ?",
+  "text": "Où vit le zèbre ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4883,61 +6465,7 @@
   ]
  },
  {
-  "text": "Dans la forêt, à la ferme ou dans la savane ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play animaux-monde"
-  ]
- },
- {
-  "text": "La vache vit à la ferme.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play animaux-monde"
-  ]
- },
- {
-  "text": "La chouette ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play animaux-monde"
-  ]
- },
- {
-  "text": "sur la banquise, dans la mer ou dans la forêt",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play animaux-monde"
-  ]
- },
- {
-  "text": "La chouette vit dans la forêt.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play animaux-monde"
-  ]
- },
- {
-  "text": "Le zèbre ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play animaux-monde"
-  ]
- },
- {
-  "text": "dans la savane, à la ferme ou dans la forêt",
+  "text": "À la ferme, dans la forêt ou dans la savane ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4955,7 +6483,7 @@
   ]
  },
  {
-  "text": "Le cochon ?",
+  "text": "Le dauphin ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4964,7 +6492,7 @@
   ]
  },
  {
-  "text": "à la ferme, sur la banquise ou dans la savane",
+  "text": "dans la forêt, dans la mer ou sur la banquise",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4973,7 +6501,7 @@
   ]
  },
  {
-  "text": "Le cochon vit à la ferme.",
+  "text": "Le dauphin vit dans la mer.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -4982,7 +6510,7 @@
   ]
  },
  {
-  "text": "Le canard ?",
+  "text": "Le mouton ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5000,7 +6528,7 @@
   ]
  },
  {
-  "text": "Le canard vit à la ferme.",
+  "text": "Le mouton vit à la ferme.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5009,21 +6537,57 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le dauphin !",
+  "text": "Le cheval ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play animaux-monde"
+  ]
+ },
+ {
+  "text": "à la ferme, sur la banquise ou dans la forêt",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play animaux-monde"
+  ]
+ },
+ {
+  "text": "Le cheval vit à la ferme.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play animaux-monde"
+  ]
+ },
+ {
+  "text": "Le renard ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play animaux-monde"
+  ]
+ },
+ {
+  "text": "Le renard vit dans la forêt.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play animaux-monde"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le zèbre !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "results"
-  ]
- },
- {
-  "text": "Le Colisée est en Italie.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play pays"
   ]
  },
  {
@@ -5037,24 +6601,6 @@
  },
  {
   "text": "La paella vient d’Espagne.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play pays"
-  ]
- },
- {
-  "text": "La tour Eiffel… dans quel pays ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play pays"
-  ]
- },
- {
-  "text": "La tour Eiffel est en France.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5081,7 +6627,7 @@
   ]
  },
  {
-  "text": "Les gardes de Londres… dans quel pays ?",
+  "text": "La tour Eiffel… dans quel pays ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5090,7 +6636,7 @@
   ]
  },
  {
-  "text": "Les gardes sont au Royaume-Uni.",
+  "text": "La tour Eiffel est en France.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5099,7 +6645,43 @@
   ]
  },
  {
-  "text": "Suisse, Royaume-Uni, Belgique ?",
+  "text": "La baguette… dans quel pays ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play pays"
+  ]
+ },
+ {
+  "text": "La baguette vient de France.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play pays"
+  ]
+ },
+ {
+  "text": "Le Colisée de Rome… dans quel pays ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play pays"
+  ]
+ },
+ {
+  "text": "Le Colisée est en Italie.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play pays"
+  ]
+ },
+ {
+  "text": "C’est le drapeau de le Japon !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5109,6 +6691,15 @@
  },
  {
   "text": "C’est le drapeau de la Belgique !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play drapeaux"
+  ]
+ },
+ {
+  "text": "C’est le drapeau de le Royaume-Uni !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5135,61 +6726,79 @@
   ]
  },
  {
-  "text": "C’est le drapeau de le Royaume-Uni !",
+  "text": "Oui, voici l’Antarctique !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play drapeaux"
+   "play carte-monde"
   ]
  },
  {
-  "text": "C’est le drapeau de l’Allemagne !",
+  "text": "Touche l’Afrique.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play drapeaux"
+   "play carte-monde"
   ]
  },
  {
-  "text": "brown",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play ecoute"
-  ]
- },
- {
-  "text": "yellow",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play ecoute"
-  ]
- },
- {
-  "text": "yellow",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play ecoute"
-  ]
- },
- {
-  "text": "C’est jaune !",
+  "text": "Oui, voici l’Afrique !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
-   "play ecoute"
+   "play carte-monde"
   ]
  },
  {
-  "text": "Nouvel autocollant : la baleine !",
+  "text": "Oui, voici l’Europe !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play carte-monde"
+  ]
+ },
+ {
+  "text": "Touche l’Amérique du Nord.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play carte-monde"
+  ]
+ },
+ {
+  "text": "Oui, voici l’Amérique du Nord !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play carte-monde"
+  ]
+ },
+ {
+  "text": "Touche l’Asie.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play carte-monde"
+  ]
+ },
+ {
+  "text": "Oui, voici l’Asie !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play carte-monde"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le dinosaure !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5198,16 +6807,808 @@
   ]
  },
  {
-  "text": "purple",
+  "text": "Oui, ce visage est en colère : il fronce les sourcils.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivre-ensemble"
+  ]
+ },
+ {
+  "text": "Touche le visage content.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivre-ensemble"
+  ]
+ },
+ {
+  "text": "Oui, ce visage est content : il sourit.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivre-ensemble"
+  ]
+ },
+ {
+  "text": "Touche le visage qui a peur.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivre-ensemble"
+  ]
+ },
+ {
+  "text": "Oui, ce visage a peur : il ouvre grand les yeux.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivre-ensemble"
+  ]
+ },
+ {
+  "text": "Touche le lapin sous la table.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Oui, le lapin est sous la table.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Touche la souris sur la table.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Oui, la souris est sur la table.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Touche le chien dans le panier.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Oui, le chien est dans le panier.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Oui, le lapin est dans le panier.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Touche le chat dans le panier.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Oui, le chat est dans le panier.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play se-reperer"
+  ]
+ },
+ {
+  "text": "Nouvel autocollant : le dragon !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "results"
+  ]
+ },
+ {
+  "text": "Touche le nez.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Oui, c’est le nez !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Touche la main.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Oui, c’est la main !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Touche la langue.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Oui, c’est la langue !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Oui, c’est la dent !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Touche l’œil.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Oui, c’est l’œil !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play vivant"
+  ]
+ },
+ {
+  "text": "Touche les côtes.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Ça, c’est le crâne.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Oui, ce sont les côtes : elles protègent le cœur et les poumons.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Touche le bassin.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Oui, c’est le bassin : les jambes y sont attachées.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Touche la colonne vertébrale.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Oui, c’est la colonne vertébrale : elle soutient le dos.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Oui, c’est le fémur : l’os de la cuisse, le plus long du corps.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play corps"
+  ]
+ },
+ {
+  "text": "Pour se déplacer, le serpent…",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Rampe, marche ou saute ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Oui, le serpent rampe.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Pour se déplacer, l’aigle…",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Oui, le papillon vole.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Pour se déplacer, le poisson-globe…",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Oui, le poisson-globe nage.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "La brique, c’est solide ou liquide ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play matiere"
+  ]
+ },
+ {
+  "text": "La pluie, c’est solide ou liquide ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play matiere"
+  ]
+ },
+ {
+  "text": "Le lait, c’est solide ou liquide ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play matiere"
+  ]
+ },
+ {
+  "text": "Le glaçon, c’est solide ou liquide ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play matiere"
+  ]
+ },
+ {
+  "text": "On met du sucre dans l’eau et on mélange.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "Oui : on ne voit plus le sucre, mais l’eau a un goût sucré.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "On met des cailloux dans l’eau et on mélange.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "Non : les cailloux restent au fond, on les voit encore.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "On met de l’huile dans l’eau et on mélange.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "Non : l’huile ne se dissout pas, elle reste au-dessus de l’eau.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "On met des pâtes dans l’eau et on mélange.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "Non : on voit encore les pâtes.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "On met du sable dans l’eau et on mélange.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "Non : on voit encore les grains de sable.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "Pour balayer le sol, que prends-tu ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Oui, avec le balai.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Pour manger ta soupe, que prends-tu ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Oui, avec la cuillère.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Pour colorier un dessin, que prends-tu ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Oui, avec la craie grasse.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Oui, avec le tournevis.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Pour tracer un trait bien droit, que prends-tu ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Oui, avec la règle.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play objets"
+  ]
+ },
+ {
+  "text": "Regarde l’image. C’est le jour ou la nuit ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "Quand la chauve-souris vole-t-elle ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "Quand prend-on le petit-déjeuner ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "Quand va-t-on à l’école ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "Quand la chouette part-elle chasser ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "Il y a de l’orage.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Oui : un nuage et un éclair, c’est l’orage.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Il y a du vent.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Oui : le visage qui souffle, c’est le vent.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Il neige.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Oui : le flocon, c’est la neige.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play meteo"
+  ]
+ },
+ {
+  "text": "Où va le pot de confiture en verre ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play planete"
+  ]
+ },
+ {
+  "text": "Oui : le verre va dans le conteneur à verre. Il sera recyclé.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play planete"
+  ]
+ },
+ {
+  "text": "Où va la vieille brosse à dents ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play planete"
+  ]
+ },
+ {
+  "text": "Oui : ça ne se recycle pas. Ça va dans la poubelle des ordures ménagères.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play planete"
+  ]
+ },
+ {
+  "text": "Où va la boîte en carton ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play planete"
+  ]
+ },
+ {
+  "text": "Oui : les emballages et les papiers vont dans le bac de tri jaune. Ils seront recyclés.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play planete"
+  ]
+ },
+ {
+  "text": "orange",
   "lang": "en-GB",
   "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "orange",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "C’est orange !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "green",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "C’est vert !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "nine",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "pink",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "one",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "C’est 1 !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecoute"
+  ]
+ },
+ {
+  "text": "seven",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play lis-anglais"
   ]
  },
  {
-  "text": "Comment dit-on violet en anglais ?",
+  "text": "Comment dit-on marron en anglais ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5216,7 +7617,7 @@
   ]
  },
  {
-  "text": "rouge, en anglais ?",
+  "text": "9, en anglais ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5225,8 +7626,26 @@
   ]
  },
  {
-  "text": "bleu, en anglais ?",
+  "text": "jaune, en anglais ?",
   "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play mot-anglais"
+  ]
+ },
+ {
+  "text": "3, en anglais ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play mot-anglais"
+  ]
+ },
+ {
+  "text": "three",
+  "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
@@ -5243,21 +7662,21 @@
   ]
  },
  {
-  "text": "marron, en anglais ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
+  "text": "white",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
   "count": 1,
   "ecrans": [
-   "play mot-anglais"
+   "play relie-anglais"
   ]
  },
  {
-  "text": "Nouvel autocollant : le requin !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
+  "text": "red",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
   "count": 1,
   "ecrans": [
-   "results"
+   "play relie-anglais"
   ]
  },
  {
@@ -5270,7 +7689,7 @@
   ]
  },
  {
-  "text": "white",
+  "text": "orange",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5279,7 +7698,7 @@
   ]
  },
  {
-  "text": "yellow",
+  "text": "blue",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5297,12 +7716,93 @@
   ]
  },
  {
-  "text": "pink",
+  "text": "ten",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
   "ecrans": [
    "play relie-anglais"
+  ]
+ },
+ {
+  "text": "nine",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play relie-anglais"
+  ]
+ },
+ {
+  "text": "red",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "red",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "C’est rouge !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "ten",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "blue",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "blue",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "C’est bleu !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play epelle-anglais"
+  ]
+ },
+ {
+  "text": "black",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play epelle-anglais"
   ]
  },
  {
@@ -5324,24 +7824,6 @@
   ]
  },
  {
-  "text": "blue",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play epelle-anglais"
-  ]
- },
- {
-  "text": "pink",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play epelle-anglais"
-  ]
- },
- {
   "text": "white",
   "lang": "en-GB",
   "rate": 0.800000011920929,
@@ -5351,25 +7833,7 @@
   ]
  },
  {
-  "text": "white",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play epelle-anglais"
-  ]
- },
- {
-  "text": "C’est blanc !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play epelle-anglais"
-  ]
- },
- {
-  "text": "Show me three!",
+  "text": "Show me two!",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5378,7 +7842,7 @@
   ]
  },
  {
-  "text": "three cars",
+  "text": "two ducks",
   "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5387,34 +7851,7 @@
   ]
  },
  {
-  "text": "four frogs",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play compte-anglais"
-  ]
- },
- {
-  "text": "two balloons",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play compte-anglais"
-  ]
- },
- {
-  "text": "Show me one!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play compte-anglais"
-  ]
- },
- {
-  "text": "one frog",
+  "text": "four ducks",
   "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5441,16 +7878,34 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le crocodile !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
+  "text": "Show me three!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
   "count": 1,
   "ecrans": [
-   "results"
+   "play compte-anglais"
   ]
  },
  {
-  "text": "eight",
+  "text": "three cars",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play compte-anglais"
+  ]
+ },
+ {
+  "text": "one apple",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play compte-anglais"
+  ]
+ },
+ {
+  "text": "seven",
   "lang": "en-GB",
   "rate": 0.800000011920929,
   "count": 1,
@@ -5459,7 +7914,7 @@
   ]
  },
  {
-  "text": "eight",
+  "text": "four",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5468,7 +7923,7 @@
   ]
  },
  {
-  "text": "C’est 8 !",
+  "text": "C’est 4 !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5477,18 +7932,18 @@
   ]
  },
  {
-  "text": "six",
+  "text": "three",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play nombres-anglais"
+  ]
+ },
+ {
+  "text": "three",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play nombres-anglais"
-  ]
- },
- {
-  "text": "C’est 6 !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play nombres-anglais"
@@ -5498,15 +7953,6 @@
   "text": "five",
   "lang": "en-GB",
   "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play nombres-anglais"
-  ]
- },
- {
-  "text": "five",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
   "count": 1,
   "ecrans": [
    "play nombres-anglais"
@@ -5522,84 +7968,12 @@
   ]
  },
  {
-  "text": "seven",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play nombres-anglais"
-  ]
- },
- {
-  "text": "seven",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play nombres-anglais"
-  ]
- },
- {
-  "text": "C’est 7 !",
+  "text": "C’est 6 !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play nombres-anglais"
-  ]
- },
- {
-  "text": "nine",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play nombres-anglais"
-  ]
- },
- {
-  "text": "nine",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play nombres-anglais"
-  ]
- },
- {
-  "text": "C’est 9 !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play nombres-anglais"
-  ]
- },
- {
-  "text": "four plus one?",
-  "lang": "en-GB",
-  "rate": 0.800000011920929,
-  "count": 1,
-  "ecrans": [
-   "play calcul-anglais"
-  ]
- },
- {
-  "text": "four plus one is five!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play calcul-anglais"
-  ]
- },
- {
-  "text": "two plus two is four!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play calcul-anglais"
   ]
  },
  {
@@ -5630,7 +8004,7 @@
   ]
  },
  {
-  "text": "one plus three?",
+  "text": "one plus four?",
   "lang": "en-GB",
   "rate": 0.800000011920929,
   "count": 1,
@@ -5639,7 +8013,7 @@
   ]
  },
  {
-  "text": "one plus three is four!",
+  "text": "one plus four is five!",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5648,18 +8022,63 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : la girafe !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
+  "text": "three plus two?",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
   "count": 1,
   "ecrans": [
-   "results"
+   "play calcul-anglais"
   ]
  },
  {
-  "text": "blue and red make...?",
+  "text": "three plus two is five!",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play calcul-anglais"
+  ]
+ },
+ {
+  "text": "three plus one?",
+  "lang": "en-GB",
+  "rate": 0.800000011920929,
+  "count": 1,
+  "ecrans": [
+   "play calcul-anglais"
+  ]
+ },
+ {
+  "text": "three plus one is four!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play calcul-anglais"
+  ]
+ },
+ {
+  "text": "yellow and blue make...?",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play couleurs-anglais"
+  ]
+ },
+ {
+  "text": "blue and yellow make green!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play couleurs-anglais"
+  ]
+ },
+ {
+  "text": "bleu et jaune, ça fait vert !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play couleurs-anglais"
@@ -5684,79 +8103,7 @@
   ]
  },
  {
-  "text": "red and white make pink!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play couleurs-anglais"
-  ]
- },
- {
-  "text": "rouge et blanc, ça fait rose !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play couleurs-anglais"
-  ]
- },
- {
-  "text": "white and black make...?",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play couleurs-anglais"
-  ]
- },
- {
-  "text": "black and white make grey!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play couleurs-anglais"
-  ]
- },
- {
-  "text": "noir et blanc, ça fait gris !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play couleurs-anglais"
-  ]
- },
- {
-  "text": "red and green make...?",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play couleurs-anglais"
-  ]
- },
- {
-  "text": "red and green make brown!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play couleurs-anglais"
-  ]
- },
- {
-  "text": "rouge et vert, ça fait marron !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play couleurs-anglais"
-  ]
- },
- {
-  "text": "red and yellow make...?",
+  "text": "yellow and red make...?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5783,6 +8130,60 @@
   ]
  },
  {
+  "text": "black and white make...?",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play couleurs-anglais"
+  ]
+ },
+ {
+  "text": "black and white make grey!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play couleurs-anglais"
+  ]
+ },
+ {
+  "text": "noir et blanc, ça fait gris !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play couleurs-anglais"
+  ]
+ },
+ {
+  "text": "white and red make...?",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play couleurs-anglais"
+  ]
+ },
+ {
+  "text": "red and white make pink!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play couleurs-anglais"
+  ]
+ },
+ {
+  "text": "rouge et blanc, ça fait rose !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play couleurs-anglais"
+  ]
+ },
+ {
   "text": "Well done! It's a butterfly!",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
@@ -5792,16 +8193,7 @@
   ]
  },
  {
-  "text": "Well done! It's a house!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play colorie-anglais"
-  ]
- },
- {
-  "text": "mouse",
+  "text": "frog",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5810,52 +8202,7 @@
   ]
  },
  {
-  "text": "elephant",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play memory-anglais"
-  ]
- },
- {
-  "text": "dog",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play memory-anglais"
-  ]
- },
- {
-  "text": "horse",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play memory-anglais"
-  ]
- },
- {
-  "text": "Nouvel autocollant : l'éléphant !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "results"
-  ]
- },
- {
-  "text": "Lequel n’est pas une partie du corps ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play intrus-anglais"
-  ]
- },
- {
-  "text": "Which one is not a part of the body?",
+  "text": "Yes! The wind is not a part of the body.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5864,7 +8211,7 @@
   ]
  },
  {
-  "text": "Yes! The pen is not a part of the body.",
+  "text": "Yes! The school is not food.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5873,7 +8220,7 @@
   ]
  },
  {
-  "text": "Yes! The tooth is not food.",
+  "text": "Which one is not weather?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5882,7 +8229,7 @@
   ]
  },
  {
-  "text": "Yes! The cake is not weather.",
+  "text": "Yes! The bread is not weather.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5891,7 +8238,7 @@
   ]
  },
  {
-  "text": "Yes! The rainbow is not an animal.",
+  "text": "Yes! The hand is not an animal.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5900,7 +8247,7 @@
   ]
  },
  {
-  "text": "Yes! The bag is not food.",
+  "text": "Yes! The school is not an animal.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5909,7 +8256,7 @@
   ]
  },
  {
-  "text": "Quel est le contraire de « tall » ?",
+  "text": "Quel est le contraire de « young » ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -5918,7 +8265,7 @@
   ]
  },
  {
-  "text": "What is the opposite of tall?",
+  "text": "What is the opposite of young?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5927,7 +8274,43 @@
   ]
  },
  {
-  "text": "tall, short!",
+  "text": "young, old!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play contraires-anglais"
+  ]
+ },
+ {
+  "text": "small, big!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play contraires-anglais"
+  ]
+ },
+ {
+  "text": "What is the opposite of sad?",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play contraires-anglais"
+  ]
+ },
+ {
+  "text": "sad, happy!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play contraires-anglais"
+  ]
+ },
+ {
+  "text": "What is the opposite of cold?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5945,7 +8328,7 @@
   ]
  },
  {
-  "text": "What is the opposite of closed?",
+  "text": "What is the opposite of open?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5954,7 +8337,7 @@
   ]
  },
  {
-  "text": "closed, open!",
+  "text": "open, closed!",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -5963,52 +8346,7 @@
   ]
  },
  {
-  "text": "What is the opposite of fast?",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play contraires-anglais"
-  ]
- },
- {
-  "text": "fast, slow!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play contraires-anglais"
-  ]
- },
- {
-  "text": "What is the opposite of night?",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play contraires-anglais"
-  ]
- },
- {
-  "text": "night, day!",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play contraires-anglais"
-  ]
- },
- {
-  "text": "Nouvel autocollant : le zèbre !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "results"
-  ]
- },
- {
-  "text": "The dog is under the table.",
+  "text": "The rabbit is in the basket.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -6017,7 +8355,7 @@
   ]
  },
  {
-  "text": "The dog is under the table.",
+  "text": "The rabbit is in the basket.",
   "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6026,7 +8364,7 @@
   ]
  },
  {
-  "text": "Le chien est sous la table !",
+  "text": "Le lapin est dans le panier !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6035,7 +8373,7 @@
   ]
  },
  {
-  "text": "The rabbit is on the table.",
+  "text": "The cat is on the table.",
   "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6044,7 +8382,61 @@
   ]
  },
  {
-  "text": "Le lapin est sur la table !",
+  "text": "Le chat est sur la table !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ou-est"
+  ]
+ },
+ {
+  "text": "The cat is under the table.",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play ou-est"
+  ]
+ },
+ {
+  "text": "The cat is under the table.",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ou-est"
+  ]
+ },
+ {
+  "text": "Le chat est sous la table !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ou-est"
+  ]
+ },
+ {
+  "text": "The cat is in the basket.",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play ou-est"
+  ]
+ },
+ {
+  "text": "The cat is in the basket.",
+  "lang": "en-GB",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ou-est"
+  ]
+ },
+ {
+  "text": "Le chat est dans le panier !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6080,70 +8472,7 @@
   ]
  },
  {
-  "text": "The dog is in the basket.",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play ou-est"
-  ]
- },
- {
-  "text": "The dog is in the basket.",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play ou-est"
-  ]
- },
- {
-  "text": "Le chien est dans le panier !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play ou-est"
-  ]
- },
- {
-  "text": "The mouse is in the basket.",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play ou-est"
-  ]
- },
- {
-  "text": "The mouse is in the basket.",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play ou-est"
-  ]
- },
- {
-  "text": "La souris est dans le panier !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play ou-est"
-  ]
- },
- {
-  "text": "Il fait beau.",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play phrase-anglais"
-  ]
- },
- {
-  "text": "J’aime les pommes.",
+  "text": "J’adore les chats.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6161,9 +8490,27 @@
   ]
  },
  {
+  "text": "Il fait beau.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play phrase-anglais"
+  ]
+ },
+ {
   "text": "C’est le matin. Tu dis…",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play parle-anglais"
+  ]
+ },
+ {
+  "text": "Good night!",
+  "lang": "en-GB",
+  "rate": 0.8500000238418579,
   "count": 1,
   "ecrans": [
    "play parle-anglais"
@@ -6188,16 +8535,7 @@
   ]
  },
  {
-  "text": "Good night!",
-  "lang": "en-GB",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play parle-anglais"
-  ]
- },
- {
-  "text": "Tu rentres chez toi. Tu dis à ta copine…",
+  "text": "C’est l’heure de dormir. Tu dis…",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6206,7 +8544,7 @@
   ]
  },
  {
-  "text": "Goodbye!",
+  "text": "Good night!",
   "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6233,8 +8571,17 @@
   ]
  },
  {
-  "text": "On te donne un cadeau. Tu dis…",
+  "text": "C’est l’anniversaire de ton ami. Tu dis…",
   "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play parle-anglais"
+  ]
+ },
+ {
+  "text": "Happy birthday!",
+  "lang": "en-GB",
   "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
@@ -6251,15 +8598,6 @@
   ]
  },
  {
-  "text": "Nouvel autocollant : le dinosaure !",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "results"
-  ]
- },
- {
   "text": "Choisis ton niveau !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -6269,16 +8607,7 @@
   ]
  },
  {
-  "text": "Combien y a-t-il de poussins ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play compter"
-  ]
- },
- {
-  "text": "Encore 4 étoiles pour le prochain autocollant.",
+  "text": "Bravo, ton album est complet !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6287,7 +8616,7 @@
   ]
  },
  {
-  "text": "Lequel n’est pas la météo ?",
+  "text": "Trouve l’intrus : quelle image ne va pas avec les autres ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6296,16 +8625,7 @@
   ]
  },
  {
-  "text": "Yes! The school is not weather.",
-  "lang": "en-GB",
-  "rate": 0.8500000238418579,
-  "count": 1,
-  "ecrans": [
-   "play defi"
-  ]
- },
- {
-  "text": "Déplace les aiguilles pour mettre l’horloge à 6 heures. La petite aiguille montre les heures, la grande aiguille montre les minutes.",
+  "text": "Ce sont tous des outils !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6314,7 +8634,7 @@
   ]
  },
  {
-  "text": "L’horloge montre 6 heures.",
+  "text": "Relie les points dans l’ordre, de 1 à 10. Un dessin va apparaître !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6323,7 +8643,7 @@
   ]
  },
  {
-  "text": "Le printemps, l’été ou l’automne ?",
+  "text": "Bravo, c’est un cœur !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6332,7 +8652,7 @@
   ]
  },
  {
-  "text": "Oui, c’est le printemps !",
+  "text": "Pour se déplacer, la girafe…",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6341,7 +8661,43 @@
   ]
  },
  {
-  "text": "ours",
+  "text": "Vole, rampe ou marche ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play defi"
+  ]
+ },
+ {
+  "text": "Oui, la girafe marche.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play defi"
+  ]
+ },
+ {
+  "text": "Quel petit mot va devant : vache ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play defi"
+  ]
+ },
+ {
+  "text": "une vache",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play defi"
+  ]
+ },
+ {
+  "text": "train",
   "lang": "fr-FR",
   "rate": 0.6000000238418579,
   "count": 1,
@@ -6350,7 +8706,7 @@
   ]
  },
  {
-  "text": "ours : 1 syllabe !",
+  "text": "train : 1 syllabe !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6359,7 +8715,7 @@
   ]
  },
  {
-  "text": "Quel mot rime avec : robot ?",
+  "text": "Quel mot rime avec : souris ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6368,7 +8724,7 @@
   ]
  },
  {
-  "text": "moto, avion, ou ballon",
+  "text": "bébé, cochon, ou lit",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6377,7 +8733,25 @@
   ]
  },
  {
-  "text": "robot, moto : ça rime !",
+  "text": "souris, lit : ça rime !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play revision"
+  ]
+ },
+ {
+  "text": "ordinateur",
+  "lang": "fr-FR",
+  "rate": 0.699999988079071,
+  "count": 1,
+  "ecrans": [
+   "play revision"
+  ]
+ },
+ {
+  "text": "ordinateur",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6422,7 +8796,7 @@
   ]
  },
  {
-  "text": "Combien y a-t-il de fraises ?",
+  "text": "Il fait du vélo.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6431,7 +8805,7 @@
   ]
  },
  {
-  "text": "3 fraises",
+  "text": "Il tombe.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6440,7 +8814,7 @@
   ]
  },
  {
-  "text": "Lequel n’est pas à manger ?",
+  "text": "Maman met un pansement.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6449,9 +8823,54 @@
   ]
  },
  {
-  "text": "Yes! The nose is not food.",
+  "text": "Il sourit.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Touche le bras.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Oui, c’est le bras !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "4 étoiles",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "Yes! The cake is not a part of the body.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
+  "count": 1,
+  "ecrans": [
+   "play duo-play duo"
+  ]
+ },
+ {
+  "text": "3 ballons",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
   "count": 1,
   "ecrans": [
    "play duo-play duo"
@@ -6476,24 +8895,6 @@
   ]
  },
  {
-  "text": "Où vit le renard ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play duo-play duo"
-  ]
- },
- {
-  "text": "Dans la savane, dans la mer ou dans la forêt ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play duo-play duo"
-  ]
- },
- {
   "text": "Matteo a assez joué aujourd’hui. C’est l’heure de la pause !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
@@ -6512,7 +8913,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a 6 petites voitures. On lui en donne 4. Combien de petites voitures a Eva-Rose maintenant ?",
+  "text": "Eva-Rose a 2 pommes. Eva-Rose en donne 1. Combien de pommes reste-t-il à Eva-Rose ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6530,7 +8931,7 @@
   ]
  },
  {
-  "text": "chat",
+  "text": "nez",
   "lang": "fr-FR",
   "rate": 0.6000000238418579,
   "count": 1,
@@ -6539,7 +8940,7 @@
   ]
  },
  {
-  "text": "Quel mot rime avec : dragon ?",
+  "text": "Quel mot rime avec : bateau ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6548,7 +8949,7 @@
   ]
  },
  {
-  "text": "bébé, ballon, ou ordinateur",
+  "text": "hibou, mouton, ou gâteau",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6557,7 +8958,7 @@
   ]
  },
  {
-  "text": "école",
+  "text": "avion",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 1,
@@ -6566,7 +8967,7 @@
   ]
  },
  {
-  "text": "ri",
+  "text": "la",
   "lang": "fr-FR",
   "rate": 0.699999988079071,
   "count": 1,
@@ -6575,7 +8976,16 @@
   ]
  },
  {
-  "text": "Quel petit mot va devant : voiture ?",
+  "text": "Je vais à l’école.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play homophones"
+  ]
+ },
+ {
+  "text": "Quel petit mot va devant : bateau ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6584,7 +8994,25 @@
   ]
  },
  {
-  "text": "Trace les ponts. Suis le chemin avec ton doigt, en partant du point vert.",
+  "text": "Regarde bien l’image.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "un œuf, ou des œufs ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play accords"
+  ]
+ },
+ {
+  "text": "Trace les traits penchés, du haut vers le bas. Suis le chemin avec ton doigt, en partant du point vert.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6593,7 +9021,7 @@
   ]
  },
  {
-  "text": "Où va Rémi ?",
+  "text": "De quelle couleur sont les feuilles ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6602,16 +9030,7 @@
   ]
  },
  {
-  "text": "Combien y a-t-il d’étoiles ?",
-  "lang": "fr-FR",
-  "rate": 0.949999988079071,
-  "count": 1,
-  "ecrans": [
-   "play compter"
-  ]
- },
- {
-  "text": "Mets 4 kiwis dans le panier.",
+  "text": "Mets 2 poires dans le panier.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6620,7 +9039,7 @@
   ]
  },
  {
-  "text": "Fais des patates : entoure des paquets de 2 papillons avec ton doigt. Ensuite, on comptera combien il y en a en tout.",
+  "text": "Fais des patates : entoure des paquets de 2 poussins avec ton doigt. Ensuite, on comptera combien il y en a en tout.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6629,7 +9048,7 @@
   ]
  },
  {
-  "text": "Où y a-t-il le plus de voitures ?",
+  "text": "Où y a-t-il le plus de grenouilles ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6638,7 +9057,7 @@
   ]
  },
  {
-  "text": "Combien font 1 plus 2 ?",
+  "text": "Combien font 2 plus 1 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6647,7 +9066,7 @@
   ]
  },
  {
-  "text": "Combien font 5 fois 2 ?",
+  "text": "Combien font 8 fois 2 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6656,7 +9075,7 @@
   ]
  },
  {
-  "text": "Défi chrono ! Dix calculs, le plus vite possible. Combien font 2 fois 10 ?",
+  "text": "Défi chrono ! Dix calculs, le plus vite possible. Combien font 5 fois 7 ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6665,7 +9084,7 @@
   ]
  },
  {
-  "text": "Eva-Rose a un gâteau. On lui en donne 2. Combien de gâteaux a Eva-Rose maintenant ?",
+  "text": "Eva-Rose a 2 petites voitures. On lui en donne 1. Combien de petites voitures a Eva-Rose maintenant ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6674,7 +9093,34 @@
   ]
  },
  {
-  "text": "Relie les points dans l’ordre, de 1 à 5. Un dessin va apparaître !",
+  "text": "Eva-Rose a 3 billes rouges et 5 billes bleues. Combien de billes a Eva-Rose en tout ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play schemas"
+  ]
+ },
+ {
+  "text": "Regarde les dessins. Combien d’enfants aiment les bananes ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play graphiques"
+  ]
+ },
+ {
+  "text": "Partage 6 ballons entre 2 enfants. Chaque enfant doit en avoir autant. Touche un enfant pour lui en donner un.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Relie les points dans l’ordre, de 1 à 4. Un dessin va apparaître !",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6683,7 +9129,16 @@
   ]
  },
  {
-  "text": "Déplace les aiguilles pour mettre l’horloge à 9 heures. La petite aiguille montre les heures, la grande aiguille montre les minutes.",
+  "text": "Le maïs est au centre du labyrinthe. Glisse ton doigt le long du chemin pour guider la poule.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe-rond"
+  ]
+ },
+ {
+  "text": "Déplace les aiguilles pour mettre l’horloge à 10 heures. La petite aiguille montre les heures, la grande aiguille montre les minutes.",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6692,7 +9147,7 @@
   ]
  },
  {
-  "text": "Aujourd’hui, c’est samedi. Hier, c’était…",
+  "text": "Aujourd’hui, c’est vendredi. Demain, ce sera…",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6701,7 +9156,7 @@
   ]
  },
  {
-  "text": "dimanche, jeudi ou vendredi ?",
+  "text": "mardi, samedi ou dimanche ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6710,7 +9165,7 @@
   ]
  },
  {
-  "text": "L’automne, l’hiver ou l’été ?",
+  "text": "Le printemps, l’hiver ou l’automne ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6719,7 +9174,7 @@
   ]
  },
  {
-  "text": "Où vit la baleine ?",
+  "text": "Où vit le dauphin ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6728,7 +9183,7 @@
   ]
  },
  {
-  "text": "Dans la savane, sur la banquise ou dans la mer ?",
+  "text": "À la ferme, dans la savane ou dans la mer ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6737,7 +9192,16 @@
   ]
  },
  {
-  "text": "Portugal, Royaume-Uni, France ?",
+  "text": "Le bretzel… dans quel pays ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play pays"
+  ]
+ },
+ {
+  "text": "À quel pays est ce drapeau ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6746,7 +9210,70 @@
   ]
  },
  {
-  "text": "Comment dit-on rose en anglais ?",
+  "text": "États-Unis, Portugal, Espagne ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play drapeaux"
+  ]
+ },
+ {
+  "text": "Pour se déplacer, l’éléphant…",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Vole, marche ou saute ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play milieux"
+  ]
+ },
+ {
+  "text": "Le crayon, c’est solide ou liquide ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play matiere"
+  ]
+ },
+ {
+  "text": "On met du miel dans l’eau et on mélange.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play melanges"
+  ]
+ },
+ {
+  "text": "Quand voit-on les étoiles ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ciel"
+  ]
+ },
+ {
+  "text": "Où va le flacon de shampoing ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play planete"
+  ]
+ },
+ {
+  "text": "Comment dit-on 9 en anglais ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6755,16 +9282,16 @@
   ]
  },
  {
-  "text": "four",
+  "text": "four plus one?",
   "lang": "en-GB",
   "rate": 0.800000011920929,
   "count": 1,
   "ecrans": [
-   "play nombres-anglais"
+   "play calcul-anglais"
   ]
  },
  {
-  "text": "yellow and red make...?",
+  "text": "red and green make...?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -6782,7 +9309,7 @@
   ]
  },
  {
-  "text": "Quel est le contraire de « short » ?",
+  "text": "Quel est le contraire de « old » ?",
   "lang": "fr-FR",
   "rate": 0.949999988079071,
   "count": 1,
@@ -6791,7 +9318,7 @@
   ]
  },
  {
-  "text": "What is the opposite of short?",
+  "text": "What is the opposite of old?",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -6800,7 +9327,7 @@
   ]
  },
  {
-  "text": "The chick is on the table.",
+  "text": "The dog is on the table.",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -6809,7 +9336,7 @@
   ]
  },
  {
-  "text": "Good night!",
+  "text": "Thank you!",
   "lang": "en-GB",
   "rate": 0.8500000238418579,
   "count": 1,
@@ -6824,6 +9351,411 @@
   "count": 1,
   "ecrans": [
    "play parle-anglais"
+  ]
+ },
+ {
+  "text": "Touche chaque calcul, puis son résultat.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play relie-calculs"
+  ]
+ },
+ {
+  "text": "Touche une case, puis un nombre, pour que les calculs soient justes. Chaque calcul juste devient vert.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play trous"
+  ]
+ },
+ {
+  "text": "Touche les cases, une par une, pour guider l'ours jusqu’au miel.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Bravo, l'ours a trouvé le miel !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "La carotte est au centre du labyrinthe. Touche les cases du chemin pour guider le lapin.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe-rond"
+  ]
+ },
+ {
+  "text": "Aide la poule à trouver le maïs, au centre.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe-rond"
+  ]
+ },
+ {
+  "text": "Fais des paquets de 2 poissons : touche-les un par un. Ensuite, on comptera combien il y en a en tout.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "4 paquets de 2 et 1 tout seul. Combien y en a-t-il en tout ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "4 paquets de 2 et 1 : 9 poissons !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "3 paquets de 2 : 6 fraises !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play patates"
+  ]
+ },
+ {
+  "text": "Trace les pointes, comme des dents. Touche les points du chemin, un par un, en partant du point vert.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Trace les traits penchés, du haut vers le bas.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Écris le cé en lettres attachées. Touche les points du chemin, un par un, en partant du point vert.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Voilà un beau cé !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Le enne en attaché !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Voilà un beau enne !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Le emme en attaché !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "L’horloge montre 5 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "12 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "L’horloge montre 12 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "10 heures.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "Où est le nombre 2 ? Touche la droite pour placer la flèche, puis appuie sur « C’est ici ».",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "Le nombre 2 est bien ici.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "Place le nombre 7.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "Le nombre 7 est bien ici.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "Place le nombre 1.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play droite-numerique"
+  ]
+ },
+ {
+  "text": "Partage 4 fraises entre 2 enfants. Chaque enfant doit en avoir autant. Touche un enfant pour lui en donner une.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Chacun a 2 fraises.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Partage 8 biscuits entre 2 enfants.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Chacun a 4 biscuits.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play partage"
+  ]
+ },
+ {
+  "text": "Glisse ton doigt, ou touche les cases, pour guider le chien jusqu’à l'os.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Aide la poule à trouver le maïs.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Écris la lettre ixe. Suis le chemin avec ton doigt, en partant du point vert.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Voilà un beau ixe !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "La lettre effe !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Combien y a-t-il de gâteaux ?",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play compter"
+  ]
+ },
+ {
+  "text": "Déplace les aiguilles pour mettre l’horloge à 6 heures. La petite aiguille montre les heures, la grande aiguille montre les minutes.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "Écris la lettre vé. Suis le chemin avec ton doigt, en partant du point vert.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Glisse ton doigt, ou touche les cases, pour guider l'ours jusqu’au miel.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play labyrinthe"
+  ]
+ },
+ {
+  "text": "Écris la lettre esse. Suis le chemin avec ton doigt, en partant du point vert.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "Déplace les aiguilles pour mettre l’horloge à 2 heures. La petite aiguille montre les heures, la grande aiguille montre les minutes.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play regle-horloge"
+  ]
+ },
+ {
+  "text": "Écris la lettre erre. Suis le chemin avec ton doigt, en partant du point vert.",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play ecrire"
+  ]
+ },
+ {
+  "text": "2 papillons",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play compter"
+  ]
+ },
+ {
+  "text": "Voici la lettre majuscule :",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play lettres"
+  ]
+ },
+ {
+  "text": "Trouve-la en minuscule !",
+  "lang": "fr-FR",
+  "rate": 0.949999988079071,
+  "count": 1,
+  "ecrans": [
+   "play lettres"
   ]
  }
 ]

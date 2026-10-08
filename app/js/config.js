@@ -4,13 +4,26 @@
 
 export const APP = {
   name: 'Lire, compter et s’amuser\u00a0!',
-  version: '1.12.0',
+  version: '1.13.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.13.0',
+    date: '2026-10-08',
+    changes: [
+      'Français : nouveaux jeux « Conjugaison » (être, avoir, verbes en -er au présent, futur, passé composé), « Les accords » (pluriel, féminin, le verbe s’accorde, la lettre ajoutée soulignée), « Ponctuation et majuscules » (choisir . ? ou ! d’après l’intonation d’Estelle) et « Les mots » (catégories, contraires, synonymes, familles de mots).',
+      'Histoires : nouveau jeu « Dans l’ordre » (remettre 3 à 5 images d’une histoire dans l’ordre, avant, ensuite), et deux niveaux de plus dans les petits textes : « Pourquoi ? » et « Ce que pense le personnage ».',
+      'Maths : nouveaux jeux « La droite numérique » (placer et lire un nombre sur une ligne graduée), « Les fractions » (moitié, tiers, quart d’une pizza ou d’une quantité), « Tableaux et graphiques », « Problèmes en schémas » (le schéma en barres avant le calcul), « Le partage » (distribuer au doigt, restes, paquets) et « L’addition posée » (en colonnes, avec la retenue).',
+      'Nouvelle rubrique « Sciences » 🔬 : dix jeux, du vivant à la planète. « Le vivant » (corps, cinq sens, cycles de vie, hygiène, sommeil, bien manger), « Le corps humain » (squelette, articulations, organes, dents : toucher la partie sur le dessin), « Les animaux et leur milieu » (classer, qui mange qui, l’hiver des animaux), « La matière » (eau, glace, vapeur, flotter ou couler, aimant, matériaux), « Les mélanges » (dissoudre, filtrer, évaporer, mener une expérience), « L’électricité » (dangers, circuit, interrupteur, conducteurs), « Objets et machines » (roue, levier, poulie, engrenages), « Le ciel et la Terre » (jour et nuit, Lune, planètes, saisons), « La météo » (symboles, thermomètre, s’habiller) et « Prendre soin de la planète » (trier, économiser l’eau et l’énergie).',
+      'Le monde : nouveaux jeux « Sécurité et vivre ensemble » (émotions, politesse, traverser la rue, numéros d’urgence 15, 17, 18, 112) et « Se repérer » (devant, derrière, gauche, droite, plan, flèches) ; la rubrique est rangée en sections.',
+      'Accessibilité, réglée pour chaque enfant dans l’espace parents : texte plus grand ou plus espacé, fort contraste, grandes cibles, mode calme (sans musique ni décor, animations réduites), sans chrono, syllabes colorées dans les textes à lire (dyslexie), couleurs nommées ou à motifs (daltonisme), sous-titres de tout ce que dit Estelle, niveaux d’écoute facultatifs (surdité) et « toucher plutôt que glisser » (chaque geste glissé ou tracé se fait aussi en touchers).',
+      'Accessibilité pour tous : les jeux se jouent aussi au clavier (Tab, Entrée, flèches), dessins et labyrinthes compris, avec un contour de focus bien visible, les dessins sont décrits aux lecteurs d’écran, les contrastes des couleurs sont contrôlés automatiquement, et une déclaration d’accessibilité (RGAA) est jointe.',
+    ],
+  },
   {
     version: '1.12.0',
     date: '2026-10-08',

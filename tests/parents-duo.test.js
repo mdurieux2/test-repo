@@ -119,7 +119,7 @@ test('programme de l’enfant : sans réglage, c’est celui de sa classe', () =
 });
 
 test('programme de l’enfant : rubriques et jeux masqués retirés, rubrique vide retirée aussi', () => {
-  const kid = { grade: 'CP', hiddenDomains: ['anglais'], hiddenGames: ['tables', 'compter', 'histoires', 'petits-textes'] };
+  const kid = { grade: 'CP', hiddenDomains: ['anglais'], hiddenGames: ['tables', 'compter', 'histoires', 'petits-textes', 'ordre-histoire'] };
   const program = programForChild(kid);
   const domains = program.map((d) => d.id);
   assert.ok(!domains.includes('anglais'), 'rubrique masquée');
@@ -219,7 +219,7 @@ test('duo : 10 questions en alternance A, B, A, B…, chacune du programme de l�
 
 test('duo : impossible si l’un des deux n’a plus aucun jeu affiché', () => {
   const store = family();
-  store.profiles.matteo.hiddenDomains = ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'anglais'];
+  store.profiles.matteo.hiddenDomains = ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'sciences', 'anglais'];
   assert.equal(duoPlan(store.profiles, ['eva-rose', 'matteo'], createRng(1)), null);
   assert.equal(duoPlan(store.profiles, ['eva-rose'], createRng(1)), null);
   // un seul jeu affiché : il revient à chaque tour

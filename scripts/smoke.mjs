@@ -6,16 +6,24 @@
 //         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
 //         ONLY=ecrans npm run test:e2e          (seulement la mise en page des écrans fixes : accueil, listes, duo, parents)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
-//         PARTS=scenario | PARTS=layout SHARD=1/4   (une partie du test, comme dans la CI)
+//         PARTS=scenario | PARTS=layout SHARD=1/4 | PARTS=a11y   (une partie du test, comme dans la CI)
+//         A11Y=1 PARTS=layout npm run test:e2e   (mise en page avec un profil d'accessibilité : texte très grand,
+//                  grandes cibles, texte espacé ; sur iPhone SE, Android 360 points et iPhone SE en paysage,
+//                  pour un échantillon de jeux de chaque rubrique ; A11Y=contrast,calm… ajoute d'autres réglages)
+//         ONLY=a11y   (seulement toucher sans glisser, clavier, sous-titres ; PARTS=a11y y ajoute contrastes et axe-core)
+//         A11Y=captions,textSize=1.15 DEVICES=375x667,667x375 PARTS=layout   (ces réglages en plus, sur ces écrans seulement)
 //         PORT=8124 pour lancer plusieurs tests en même temps
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
 
 import { chromium } from 'playwright';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { auditSource } from './a11y-audit.mjs';
 import { startServer } from './serve.mjs';
 import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
 import { formatChrono } from '../app/js/games/chrono.js';
+import { lineX, NL } from '../app/js/games/nombres-plus.js';
 import { STORY_DATA } from '../app/js/games/histoires.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
@@ -24,20 +32,44 @@ import { STORAGE_KEY } from '../app/js/storage.js';
 import { APP } from '../app/js/config.js';
 import { seasonOf } from '../app/js/themes.js';
 import { cle, planLecture } from '../app/js/voix-cles.js';
+import { DRAG_WORDS } from '../app/js/a11y-jeux.js';
 
 const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
 const SHOTS = process.env.SCREENSHOTS;
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
-// En CI, le test est découpé : PARTS=scenario (le parcours complet), ou PARTS=layout avec SHARD=2/4
-// (la mise en page sur un quart des appareils). Sans rien, tout est fait.
-const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : ['scenario', 'layout'];
+// En CI, le test est découpé : PARTS=scenario (le parcours complet), PARTS=layout avec SHARD=2/4
+// (la mise en page sur un quart des appareils) ou PARTS=a11y (accessibilité). Sans rien, tout est fait.
+const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : process.env.A11Y ? ['layout'] : ['scenario', 'layout', 'a11y'];
 const SHARD = process.env.SHARD ? process.env.SHARD.split('/').map(Number) : null;
+const ONLY_DEVICES = process.env.DEVICES ? process.env.DEVICES.split(',') : null; // DEVICES=375x667,667x375
 // SPEECH_LOG=fichier.json : tout ce que l'application dit est noté (avec le nombre de fois et les
 // écrans où c'est dit), pour choisir les phrases de la voix naturelle (scripts/voix/phrases.mjs) et
 // vérifier écran par écran comment elles sont dites (scripts/voix/rapport.mjs)
 const SPEECH_LOG = process.env.SPEECH_LOG;
+// A11Y : chaque profil reçoit un profil d'accessibilité exigeant pour la mise en page (voir app/js/a11y.js)
+const A11Y = process.env.A11Y
+  ? {
+    textSize: 1.3, bigTargets: true, spacing: true,
+    // A11Y=contrast,captions,textSize=1.15 : d'autres réglages en plus (ou à la place de ceux-là)
+    ...Object.fromEntries(process.env.A11Y.split(',').filter((k) => k && k !== '1').map((item) => {
+      const [key, value] = item.split('=');
+      return [key, value === undefined ? true : Number(value)];
+    })),
+  }
+  : null;
+// A11Y : un échantillon de jeux de chaque rubrique (les plus chargés en texte, et chaque façon de répondre)
+const A11Y_SAMPLE = [
+  'lettres', 'bon-mot', 'phrase', 'conjugaison', 'dictee', 'ecrire',
+  'histoires', 'petits-textes', 'ordre-histoire',
+  'compter', 'trous', 'relie-calculs', 'tables-chrono', 'problemes', 'schemas', 'droite-numerique',
+  'memory', 'sudoku', 'labyrinthe', 'intrus', 'picross',
+  'heure', 'regle-horloge', 'monnaie',
+  'pays', 'drapeaux', 'vivre-ensemble',
+  'vivant', 'matiere',
+  'ecoute', 'mot-anglais', 'relie-anglais', 'epelle-anglais', 'phrase-anglais',
+];
 const spokenLog = new Map();
 const spokenScreens = new Map();
 if (SPEECH_LOG) {
@@ -123,15 +155,17 @@ function gradeFor(gameId, level = null) {
 
 /** Modifie les données enregistrées de l'app (le code reçoit l'objet `store`). */
 async function setStore(page, code) {
-  await page.evaluate(([key, body]) => {
+  await page.evaluate(([key, body, a11y]) => {
     const store = JSON.parse(localStorage.getItem(key) || '{}');
     store.profiles = store.profiles || {};
     store.profiles['eva-rose'] = store.profiles['eva-rose'] || {};
     store.profiles['eva-rose'].games = store.profiles['eva-rose'].games || {};
     // eslint-disable-next-line no-new-func
     new Function('store', body)(store);
+    // A11Y : le profil d'accessibilité est posé sur chaque enfant avant chaque vérification
+    if (a11y) for (const kid of Object.values(store.profiles)) kid.a11y = a11y;
     localStorage.setItem(key, JSON.stringify(store));
-  }, [STORAGE_KEY, code]);
+  }, [STORAGE_KEY, code, A11Y]);
 }
 
 /** Ouvre l'app sur l'écran « Qui joue ? ». */
@@ -296,6 +330,7 @@ async function testTrace(page, q) {
 
 // Règle l'horloge : l'heure montrée par le cadran (attributs data-h et data-m du cadran).
 let clockDragTested = false;
+let numberLineButtonsTested = false; // la droite numérique : les boutons ◀ ▶ (une fois)
 const clockMinutes = ({ h, m }) => (h % 12) * 60 + m;
 async function clockTime(page) {
   return page.$eval('.setclock-dial', (el) => ({ h: Number(el.dataset.h), m: Number(el.dataset.m) }));
@@ -607,6 +642,17 @@ async function answer(page, q, wrongFirst) {
       await zone(q.answer).dispatchEvent('click');
       break;
     }
+    case 'body': {
+      // le corps humain : une autre partie d'abord (son nom est dit), puis la bonne, ou les bonnes dans l'ordre
+      const part = (id) => page.locator(`.body-drawing [data-zone="${id}"] >> nth=0`).dispatchEvent('click');
+      const steps = q.sequence || [q.answer];
+      if (wrongFirst) {
+        await part(q.choices.find((c) => c.value !== steps[0]).value);
+        await page.waitForSelector('.try-again');
+      }
+      for (const id of steps) await part(id);
+      break;
+    }
     case 'dots': {
       const centers = await page.$$eval('.dot .dot-point', (els) => els.map((el) => {
         const r = el.getBoundingClientRect();
@@ -646,6 +692,93 @@ async function answer(page, q, wrongFirst) {
       }
       await setClockWithButtons(page, q.target);
       await page.click('.setclock-zone .validate-btn');
+      break;
+    }
+    case 'numberline': {
+      // la droite numérique : toucher la droite à l'endroit du nombre (la flèche se cale sur la graduation)
+      const touch = async (v) => {
+        const box = await page.locator('.stage-nl .nl-svg').boundingBox();
+        await page.mouse.click(box.x + (lineX(q.stage, v) / NL.width) * box.width, box.y + box.height * 0.6);
+      };
+      const placed = async () => Number(await page.getAttribute('.nl-place', 'data-value'));
+      if (wrongFirst) {
+        // trop loin (au-delà de l'écart accepté) : un conseil, puis encore : les pointillés
+        const off = (q.tolerance || 0) + q.stage.snap;
+        await touch(q.target + off <= q.stage.max ? q.target + off : q.target - off);
+        await page.click('.numberline-zone .validate-btn');
+        await page.waitForSelector('.try-again');
+        if (!(await page.textContent('.try-again')).includes('C’est')) fail('droite numérique : pas de conseil après une erreur');
+        await page.click('.numberline-zone .validate-btn');
+        await page.waitForSelector('.nl-place.show-hint');
+      } else if (!numberLineButtonsTested) {
+        // les boutons ◀ ▶ déplacent la flèche d'une graduation
+        numberLineButtonsTested = true;
+        await touch(q.stage.min);
+        await page.click('[data-move="1"]');
+        if ((await placed()) !== q.stage.min + q.stage.snap) fail(`droite numérique : ▶ mène à ${await placed()}`);
+      }
+      await touch(q.target);
+      if (Math.abs((await placed()) - q.target) > (q.tolerance || 0)) fail(`droite numérique : flèche sur ${await placed()} au lieu de ${q.target}`);
+      await page.click('.numberline-zone .validate-btn');
+      break;
+    }
+    case 'shade': {
+      // colorier : une part de trop d'abord, puis exactement le bon nombre de parts
+      const part = (i) => page.locator(`.fraction-shade [data-part="${i}"]`).dispatchEvent('click');
+      if (wrongFirst) {
+        for (let i = 0; i <= q.target; i++) await part(i);
+        await page.click('.shade-zone .validate-btn');
+        await page.waitForSelector('.try-again');
+        await part(q.target);
+      } else {
+        for (let i = 0; i < q.target; i++) await part(i);
+      }
+      const count = Number(await page.getAttribute('.fraction-shade', 'data-count'));
+      if (count !== q.target) fail(`fractions : ${count} parts coloriées au lieu de ${q.target}`);
+      await page.click('.shade-zone .validate-btn');
+      break;
+    }
+    case 'share': {
+      // le partage : toucher les enfants (ou le paquet ouvert), puis dire combien il en reste / de paquets
+      const { total, groups, size } = q.stage;
+      const plate = (i) => `.share-plate[data-plate="${i}"]`;
+      const inPlate = (i) => page.locator(`${plate(i)} .share-item`).count();
+      if (size) {
+        for (let k = 0; k < Math.floor(total / size) * size; k++) await page.click('.share-bag.open');
+      } else {
+        const per = Math.floor(total / groups);
+        if (wrongFirst) {
+          // un de trop pour le premier enfant : les parts ne sont pas égales
+          for (let k = 0; k <= per; k++) await page.click(plate(0));
+          for (let i = 1; i < groups; i++) for (let k = 0; k < per && (await page.locator('.share-object').count()); k++) await page.click(plate(i));
+          await page.waitForSelector('.try-again');
+          await page.click(`${plate(0)} .share-back`); // on le reprend (la flèche)
+        }
+        for (let i = 0; i < groups; i++) while ((await inPlate(i)) < per) await page.click(plate(i));
+      }
+      if (q.ask) {
+        await page.waitForSelector('.share-zone .choice');
+        if (wrongFirst && size) {
+          await page.click(`.choice[data-value="${q.choices.find((c) => c.value !== q.answer).value}"]`);
+          await page.waitForSelector('.choice.wrong');
+        }
+        await page.click(`.choice[data-value="${q.answer}"]`);
+      }
+      break;
+    }
+    case 'column': {
+      // l'opération posée : chaque chiffre du résultat et chaque retenue, de droite à gauche
+      const key = (d) => page.click(`.column-zone .key[data-digit="${d}"]`);
+      if (wrongFirst) {
+        await key((q.stage.steps[0].digit + 1) % 10);
+        await page.waitForSelector('.try-again');
+      }
+      for (const step of q.stage.steps) {
+        if (!(await page.locator(`.column-sum [data-cell="${step.kind === 'carry' ? 'c' : 'r'}${step.col}"].active`).count())) {
+          fail(`opération posée : la case ${step.kind} ${step.col} n’est pas la case active`);
+        }
+        await key(step.digit);
+      }
       break;
     }
     default:
@@ -1333,10 +1466,23 @@ if (voiceManifest.paquets?.length) {
   if (after !== 'Voix d’Estelle prête ✓') fail(`barre de téléchargement à la fin : « ${after} »`);
   await page.waitForSelector('.voice-progress', { state: 'detached', timeout: 5000 });
   const files = new Set(Object.values(voiceManifest.clips));
-  const cached = await page.evaluate(async () => (await (await caches.open('lire-et-compter-voix')).keys())
-    .map((r) => new URL(r.url).pathname.split('/voix/')[1]));
-  const missing = [...files].filter((f) => !cached.includes(f));
+  // son par son (cache.keys() refuse au-delà d'environ 20 000 sons sur Chrome)
+  const missing = await page.evaluate(async (list) => {
+    const cache = await caches.open('lire-et-compter-voix');
+    const out = [];
+    for (let i = 0; i < list.length; i += 200) {
+      const batch = list.slice(i, i + 200);
+      const hits = await Promise.all(batch.map((f) => cache.match(new Request(`voix/${f}`))));
+      batch.forEach((f, j) => { if (!hits[j]) out.push(f); });
+    }
+    return out;
+  }, [...files]);
   if (missing.length) fail(`téléchargement des sons : ${missing.length} manquants (${missing.slice(0, 3).join(', ')})`);
+  // lancement suivant : tous les sons sont là, rien à retélécharger, même quand le cache est trop
+  // grand pour être listé d'un coup ; une fois vérifié, c'est noté pour cette version de la voix
+  await page.evaluate(() => { localStorage.removeItem('lire-et-compter:voix-complete'); window.dispatchEvent(new Event('online')); });
+  await page.waitForFunction(() => localStorage.getItem('lire-et-compter:voix-complete'), null, { timeout: 120000 });
+  if (await page.locator('.voice-progress').count()) fail('voix : des sons retéléchargés alors qu’ils sont déjà là');
   // un son gardé est bien un MP3 (redécoupé au bon endroit dans son paquet)
   const head = await page.evaluate(async (file) => [...new Uint8Array(await (await fetch(`voix/${file}`)).arrayBuffer()).slice(0, 2)], [...files][5]);
   if (head[0] !== 0xff || (head[1] & 0xe0) !== 0xe0) fail(`son mal découpé : ${head}`);
@@ -1407,6 +1553,471 @@ async function checkOffline(context, page) {
     + (clipsMissing ? ` (${clipsMissing} sons pas encore téléchargés : voix de l'appareil)` : ''));
 }
 
+// ---------------------------------------------------------------- Accessibilité (PARTS=a11y)
+
+// Sur les écrans principaux : contrastes de chaque texte et des champs (scripts/a11y-audit.mjs),
+// règles WCAG 2.1 A et AA d'axe-core, titre de la page, zoom permis, et au clavier : chaque
+// élément atteint par Tab a un contour de focus visible, et on n'est jamais coincé.
+// A11Y_DETAILS=1 : liste aussi les textes non mesurables (sur image, dans un dessin).
+const require = createRequire(import.meta.url);
+const AUDIT_SOURCE = auditSource(readFileSync(new URL('./a11y-audit.mjs', import.meta.url), 'utf8'));
+const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+
+/** Un écran par forme d'exercice (et un jeu d'anglais, une histoire, un jeu de sciences). */
+const A11Y_GAMES = [
+  ['syllabes-rythme', 1], ['rimes', 1], ['ecrire', 1], ['panier', 1], ['patates', 1], ['relier', 1], ['calcul', null],
+  ['trous', 1], ['droite-numerique', 2], ['fractions', 2], ['partage', 1], ['addition-posee', 1], ['puzzle', 1],
+  ['memory', 1], ['coloriage-magique', 1], ['points', 1], ['sudoku', 1], ['picross', 1], ['symetrie', 1],
+  ['labyrinthe', 1], ['labyrinthe-rond', 1], ['chemin-nombres', 1], ['regle-horloge', 1], ['monnaie', 3],
+  ['carte-monde', 1], ['ranger', 1], ['dictee', 1],
+  ...['histoires', 'anglais', 'sciences'].map((domain) => [GAMES.find((g) => g.domain === domain && !g.paliers)?.id, 1]),
+].filter(([id]) => id && findGame(id));
+
+async function a11yPart() {
+  const AXE_SOURCE = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
+  const context = await newContext({ width: 390, height: 844 });
+  const page = await context.newPage();
+  await page.emulateMedia({ reducedMotion: 'reduce' }); // pas de texte mesuré au milieu d'un fondu
+  page.on('pageerror', (e) => errors.push(`accessibilité : ${e.message}`));
+  const problems = [];
+  const skipped = new Set();
+  const titles = new Map();
+  let texts = 0;
+  let tabs = 0;
+
+  const contrasts = async (name) => {
+    const result = await page.evaluate(`(() => { ${AUDIT_SOURCE}\nreturn auditPage(); })()`);
+    texts += result.checked;
+    for (const f of result.failures) {
+      problems.push(`${name} : ${f.kind} ${f.label} ${f.ratio}:1 < ${f.need}:1 (${f.color} sur ${f.background}${f.size ? `, ${f.size} px ${f.weight >= 700 ? 'gras' : ''}` : ''})`);
+    }
+    for (const s of result.skipped) skipped.add(`${name} : ${s}`);
+  };
+  const audit = async (name) => {
+    await page.waitForTimeout(250);
+    // 1. contrastes
+    await contrasts(name);
+    // 2. axe-core, règles WCAG 2.1 A et AA
+    if (!(await page.evaluate(() => Boolean(window.axe)))) await page.evaluate(AXE_SOURCE);
+    const violations = await page.evaluate(async (tags) => {
+      const r = await window.axe.run(document, { runOnly: { type: 'tag', values: tags }, resultTypes: ['violations'] });
+      return r.violations.map((v) => `${v.id} (${v.impact}) : ${v.help} → ${v.nodes.slice(0, 4).map((n) => n.target.join(' ')).join(' | ')}`
+        + (v.nodes.length > 4 ? ` (+${v.nodes.length - 4})` : ''));
+    }, AXE_TAGS);
+    for (const v of violations) problems.push(`${name} : axe ${v}`);
+    // 3. titre de la page : il nomme l'écran
+    const title = await page.title();
+    if (!title.includes(' – ')) problems.push(`${name} : le titre de la page ne nomme pas l'écran (« ${title} »)`);
+    titles.set(name, title);
+    // 4. clavier : Tab parcourt l'écran, chaque élément montre son focus, et on ressort (pas de piège)
+    const positive = await page.$$eval('[tabindex]', (els) => els.filter((el) => el.tabIndex > 0).map((el) => el.outerHTML.slice(0, 60)));
+    if (positive.length) problems.push(`${name} : tabindex positif (ordre de tabulation forcé) : ${positive.join(', ')}`);
+    await page.evaluate(() => document.activeElement?.blur());
+    const seen = [];
+    let stuck = 0;
+    for (let i = 0; i < 60; i++) {
+      await page.keyboard.press('Tab');
+      tabs++;
+      const id = await page.evaluate(() => {
+        const el = document.activeElement;
+        if (!el || el === document.body) return null;
+        el.dataset.a11yTab = el.dataset.a11yTab || String(Math.random());
+        return el.dataset.a11yTab;
+      });
+      if (id === null) break; // sorti de la page : retour au début
+      if (seen.includes(id)) {
+        if (id === seen[0]) break; // un tour complet
+        if (id === seen[seen.length - 1] && ++stuck >= 2) {
+          problems.push(`${name} : piège au clavier (Tab reste sur le même élément)`);
+          break;
+        }
+        continue;
+      }
+      seen.push(id);
+      const focus = await page.evaluate(`(() => { ${AUDIT_SOURCE}\nreturn focusProblem(); })()`);
+      if (focus) problems.push(`${name} : ${focus}`);
+    }
+    await page.evaluate(() => document.activeElement?.blur());
+  };
+
+  // zoom du navigateur permis
+  await page.goto(BASE);
+  const viewport = await page.getAttribute('meta[name=viewport]', 'content');
+  if (/maximum-scale|user-scalable\s*=\s*(no|0)/i.test(viewport)) problems.push(`zoom bloqué : <meta name="viewport" content="${viewport}">`);
+  if ((await page.getAttribute('html', 'lang')) !== 'fr') problems.push('la langue de la page n’est pas « fr »');
+
+  // premier lancement : création des profils (avec le message d'erreur du prénom manquant)
+  await page.waitForSelector('.welcome');
+  await audit('bienvenue');
+  await page.click('.child-submit');
+  await page.waitForSelector('.form-error:not(:empty)');
+  await audit('bienvenue, prénom manquant');
+  await page.fill('[data-field="name"]', 'Eva-Rose');
+  await page.click('[data-grade="CP"]');
+  await page.click('.child-submit');
+  await audit('bienvenue, un enfant ajouté');
+  await page.click('.add-another');
+  await page.fill('[data-field="name"]', 'Matteo');
+  await page.click('[data-look="garcon"]');
+  await page.click('[data-grade="MS"]');
+  await page.click('.child-submit');
+  await page.click('.start-btn');
+  await page.waitForSelector('.profiles');
+  await setStore(page, 'store.settings = { sessionLength: 5 };');
+  await page.reload();
+  await page.waitForSelector('.profiles');
+  await audit('Qui joue ?');
+  await pickDuo(page, ['eva-rose', 'matteo']);
+  await audit('jouer à deux');
+
+  // accueil et rubriques
+  await goProfile(page, 'eva-rose');
+  await audit('accueil');
+  for (const domain of DOMAINS) {
+    await goProfile(page, 'eva-rose');
+    if (!(await page.locator(`[data-domain="${domain.id}"]`).count())) continue;
+    await page.click(`[data-domain="${domain.id}"]`);
+    await audit(`rubrique ${domain.title}`);
+  }
+  // sur les petits écrans, les textes rapetissent : le texte blanc des tuiles doit rester lisible
+  for (const size of [{ width: 375, height: 667 }, { width: 667, height: 375 }]) {
+    await page.setViewportSize(size);
+    await goProfile(page, 'eva-rose');
+    await audit(`accueil ${size.width}×${size.height}`);
+    await page.click('[data-domain="maths"]');
+    await audit(`rubrique Nombres et calcul ${size.width}×${size.height}`);
+  }
+  // zoom à 400 % d'un écran d'ordinateur (320 points de large) : rien ne déborde en largeur (RGAA 10.11)
+  await page.setViewportSize({ width: 320, height: 568 });
+  for (const [name, open] of [
+    ['accueil', () => goProfile(page, 'eva-rose')],
+    ['rubrique', async () => { await goProfile(page, 'eva-rose'); await page.click('[data-domain="francais"]'); }],
+    ['jeu', async () => { await openGame(page, findGame('compter')); await page.waitForSelector('.choices'); }],
+    ['réglages', async () => { await openParents(page); await page.click('[data-tab="reglages"]'); await page.waitForSelector('.settings'); }],
+  ]) {
+    await open();
+    const wide = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (wide > 1) problems.push(`${name} 320×568 : la page déborde en largeur de ${wide} px (zoom 400 %)`);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  // « Aller au contenu » : premier arrêt de Tab, il saute la barre du haut
+  await goProfile(page, 'eva-rose');
+  await page.keyboard.press('Tab');
+  if (!(await page.evaluate(() => document.activeElement?.matches('.skip-link')))) problems.push('accueil : « Aller au contenu » n’est pas le premier arrêt de Tab');
+  await page.keyboard.press('Enter');
+  if (!(await page.evaluate(() => document.activeElement?.matches('.home-hero')))) problems.push('accueil : « Aller au contenu » ne mène pas au contenu');
+  await page.keyboard.press('Tab');
+  if (await page.evaluate(() => Boolean(document.activeElement?.closest('.top-bar')))) problems.push('accueil : après « Aller au contenu », Tab revient dans la barre du haut');
+  await goProfile(page, 'eva-rose');
+  await page.click('[data-domain="maths"]');
+  await page.click('[data-levels="calcul"], [data-levels="compter"]');
+  await page.waitForSelector('.level-list');
+  await audit('choix du niveau');
+  await goProfile(page, 'eva-rose');
+  await page.click('[data-domain="maths"]');
+  await page.click('[data-game="calcul"]');
+  await page.waitForSelector('.palier-tile');
+  await audit('carte des paliers');
+
+  // un écran de jeu par forme d'exercice
+  for (const [id, level] of A11Y_GAMES) {
+    const game = findGame(id);
+    const grade = gradeFor(id, level) || gradeFor(id) || 'CE1';
+    await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`
+      + (level ? ` store.profiles['eva-rose'].games['${id}'] = { level: ${level} };` : ''));
+    await openGame(page, game);
+    await page.waitForSelector('.choices');
+    const kind = await page.evaluate(() => globalThis.__lc?.question?.interaction || 'choix');
+    await audit(`jeu ${id} (${kind})`);
+  }
+  // une mauvaise réponse (message « Essaie encore ! », bouton barré), puis la partie jusqu'au bout
+  const compter = findGame('compter');
+  await setStore(page, `store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games.compter = { level: 1 };`);
+  await openGame(page, compter);
+  await page.waitForSelector('.choices');
+  const wrong = await page.evaluate(() => {
+    const q = globalThis.__lc.question;
+    return q.choices.find((c) => c.value !== q.answer).value;
+  });
+  await page.click(`.choice[data-value="${wrong}"]`);
+  await page.waitForSelector('.try-again');
+  await audit('jeu, mauvaise réponse');
+  for (let i = 0; i < 10 && !(await page.locator('.screen.results').count()); i++) {
+    const answer = await page.evaluate(() => globalThis.__lc.question.answer);
+    await page.click(`.choice[data-value="${answer}"]`);
+    await page.waitForSelector('.screen.results, .feedback .praise');
+    // la bonne réponse ne reste qu'un instant : seulement ses contrastes (« Bravo ! », bouton vert)
+    if (i === 0) await contrasts('jeu, bonne réponse');
+    await page.waitForSelector(`.screen.results, .choices:not(.answered)`, { timeout: 8000 });
+  }
+  await page.waitForSelector('.screen.results');
+  await audit('fin de partie');
+
+  // album, personnage
+  await goProfile(page, 'eva-rose');
+  await page.click('.domain-album');
+  await page.waitForSelector('.album');
+  await audit('album');
+  await goProfile(page, 'eva-rose');
+  await page.click('[data-dress]');
+  await audit('personnage');
+
+  // espace parents : la multiplication, puis chaque onglet
+  await goProfiles(page);
+  await page.evaluate(() => sessionStorage.clear()); // la multiplication est redemandée
+  await page.reload();
+  await page.click('.parent-btn');
+  await page.waitForSelector('.gate');
+  await audit('espace parents, multiplication');
+  await openParents(page);
+  await audit('espace parents, suivi');
+  await page.click('[data-tab="enfants"]');
+  await audit('espace parents, enfants');
+  await page.click('[data-edit="eva-rose"]');
+  await page.click('[data-domain-games="maths"] summary');
+  await audit('espace parents, modifier un enfant');
+  await page.click('.top-bar .icon-btn');
+  await page.click('[data-tab="reglages"]');
+  await page.waitForSelector('.settings');
+  await audit('espace parents, réglages');
+  await page.click('[data-voices]');
+  await page.waitForSelector('.voices');
+  await audit('espace parents, vos voix');
+
+  // chaque écran a son propre titre
+  const sameTitle = [...titles].filter(([, t], i, all) => all.findIndex(([, u]) => u === t) !== i && !/^jeu |^bienvenue|×/.test(all[i][0]));
+  if (sameTitle.length) problems.push(`titres de page identiques : ${sameTitle.map(([n, t]) => `${n} (« ${t} »)`).join(', ')}`);
+
+  await context.close();
+  if (process.env.A11Y_DETAILS) console.log(`textes non mesurables :\n${[...skipped].join('\n')}`);
+  if (problems.length) fail(`accessibilité :\n${problems.join('\n')}`);
+  console.log(`✔ accessibilité : ${titles.size} écrans, ${texts} textes et champs contrastés, axe-core WCAG 2.1 A et AA sans erreur, `
+    + `${tabs} appuis sur Tab sans piège, chaque focus visible (${skipped.size} textes sur image ou dessin, non mesurables)`);
+}
+
+if (PARTS.includes('a11y') && !ONLY && !PLAY) await a11yPart();
+
+// ---------------------------------------------------------------- Accessibilité : toucher, clavier, sous-titres
+
+/** Le centre d'un élément à l'écran. */
+async function centreOf(page, selector) {
+  const box = await page.locator(selector).first().boundingBox();
+  if (!box) fail(`accessibilité : ${selector} introuvable`);
+  return [box.x + box.width / 2, box.y + box.height / 2];
+}
+
+/**
+ * Toucher plutôt que glisser : répond à la question avec des clics simples seulement (jamais
+ * bouton enfoncé en bougeant). Les jeux à glisser ont chacun leur façon de jouer par touchers.
+ */
+async function answerByTaps(page, q) {
+  switch (q.interaction) {
+    case 'match':
+      for (let i = 0; i < q.pairs.length; i++) {
+        await page.click(`[data-left="${i}"]`);
+        await page.click(`[data-right="${q.pairs[i].right}"]:not([disabled])`);
+      }
+      return;
+    case 'fill':
+      for (let r = 0; r < q.equations.length; r++) {
+        for (let c = 0; c < 2; c++) {
+          await page.click(`.fill-box[data-row="${r}"][data-col="${c}"]`);
+          await page.click(`.tile[data-value="${q.equations[r].solution[c]}"]:not(.used)`);
+        }
+      }
+      return;
+    case 'roundmaze': {
+      // une case touchée à la fois, le long du chemin
+      const { sectors, solution } = q.stage;
+      const box = await page.locator('.rmaze-svg').boundingBox();
+      const V = sectors.length * 10 + 2;
+      for (const cell of solution.slice(1)) {
+        let ring = 0;
+        let first = 0;
+        while (first + sectors[ring] <= cell) first += sectors[ring++];
+        const a = 2 * Math.PI * ((cell - first + 0.5) / sectors[ring]);
+        const rho = ring ? (ring + 0.5) * 10 : 0;
+        await page.mouse.click(box.x + ((rho * Math.sin(a) + V) / (2 * V)) * box.width, box.y + ((V - rho * Math.cos(a)) / (2 * V)) * box.height);
+      }
+      return;
+    }
+    case 'lasso': {
+      const needed = Math.floor(q.stage.count / q.stage.group) * q.stage.group;
+      while ((await page.locator('.lasso-object.grouped').count()) < needed) await page.click('.lasso-object:not(.grouped):not(.picked) >> nth=0');
+      await page.waitForSelector('.lasso-zone .choice');
+      await page.click(`.choice[data-value="${q.answer}"]`);
+      return;
+    }
+    case 'trace':
+      // les points de passage, un par un : le suivant brille
+      for (let k = 0; k < 300 && !(await page.locator('.trace-drawing.finished').count()); k++) {
+        await page.mouse.click(...await centreOf(page, '.trace-stop.next'));
+      }
+      if (!(await page.locator('.trace-drawing.finished').count())) fail('toucher plutôt que glisser : écris au doigt, le tracé n’est pas fini');
+      return;
+    case 'dots':
+      for (let i = 0; i < q.stage.points.length; i++) await page.mouse.click(...await centreOf(page, `.dot[data-dot="${i}"] .dot-point`));
+      return;
+    case 'setclock':
+      await setClockWithButtons(page, q.target);
+      await page.click('.setclock-zone .validate-btn');
+      return;
+    case 'picross':
+      for (const cell of q.stage.solution.filter((c) => !q.stage.given.includes(c))) await page.click(`.pc-cell[data-cell="${cell}"]`);
+      return;
+    default:
+      await answer(page, q, false); // des touchers seulement (boutons, cases, pièces…)
+  }
+}
+
+// Un échantillon de jeux qui se jouent en glissant ou en traçant (et l'ordre, le partage, le puzzle…)
+const TAP_GAMES = [
+  ['relie-calculs', 1], ['trous', 1], ['labyrinthe', 1], ['labyrinthe-rond', 1], ['patates', 1], ['ecrire', 1], ['ecrire', 4],
+  ['points', 1], ['regle-horloge', 1], ['droite-numerique', 2], ['picross', 1], ['partage', 1], ['puzzle', 1],
+  ['coloriage-magique', 1], ['relier', 1],
+];
+
+/** Passe les touches Tab jusqu'à cet élément (comme un clavier ou un contacteur). */
+async function tabTo(page, selector, label) {
+  for (let k = 0; k < 150; k++) {
+    if (await page.evaluate((sel) => document.activeElement?.matches(sel), selector)) return;
+    await page.keyboard.press('Tab');
+  }
+  fail(`clavier : ${label} — impossible d’atteindre ${selector} avec Tab`);
+}
+
+/** L'élément qui a le focus clavier se voit (contour, ou trait pour un morceau de dessin). */
+async function assertFocusVisible(page, label) {
+  const style = await page.evaluate(() => {
+    const s = getComputedStyle(document.activeElement);
+    return { outline: s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) >= 2, stroke: s.strokeWidth };
+  });
+  if (!style.outline && !(parseFloat(style.stroke) >= 2)) fail(`clavier : ${label}, le focus ne se voit pas`);
+}
+
+async function a11yChecks() {
+  const context = await newContext({ width: 375, height: 667 });
+  // un doigt (ou une souris) qui bouge bouton enfoncé : c'est un glisser, interdit dans ce passage
+  await context.addInitScript(() => {
+    window.__drags = 0;
+    window.addEventListener('pointermove', (e) => { if (e.buttons) window.__drags++; }, true);
+  });
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`accessibilité : ${e.message}`));
+  await page.goto(BASE);
+  await page.waitForSelector('.welcome');
+  const profile = (a11y, extra = '') => setStore(page, `store.settings = { sessionLength: 5 }; store.profiles['eva-rose'].a11y = ${JSON.stringify(a11y)}; ${extra}`);
+
+  // 1. Toucher plutôt que glisser : chaque jeu de l'échantillon, deux questions, des clics simples seulement
+  for (const [id, level] of TAP_GAMES) {
+    const game = findGame(id);
+    await profile({ tapOnly: true }, `store.profiles['eva-rose'].grade = '${gradeFor(id, level)}'; store.profiles['eva-rose'].games['${id}'] = { level: ${level} };`);
+    await openGame(page, game);
+    for (let i = 0; i < 2; i++) {
+      const zone = await page.waitForSelector('.choices:not(.answered)');
+      const q = await page.evaluate(() => globalThis.__lc.question);
+      const said = await page.evaluate(() => [document.querySelector('.instruction .bubble')?.textContent || '', document.querySelector('.dots-help, .lasso-help')?.textContent || '', ...(window.__spoken || [])].join(' '));
+      if (DRAG_WORDS.test(said)) fail(`toucher plutôt que glisser : ${id}, la consigne dit « ${said.match(DRAG_WORDS)[0]} »`);
+      await answerByTaps(page, q);
+      await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 })
+        .catch(() => fail(`toucher plutôt que glisser : ${id} niveau ${level}, la question ${i + 1} n’est pas réussie avec des touchers`));
+    }
+    const drags = await page.evaluate(() => window.__drags);
+    if (drags) fail(`toucher plutôt que glisser : ${id}, ${drags} mouvements bouton enfoncé`);
+  }
+  console.log(`✔ toucher plutôt que glisser : ${TAP_GAMES.length} jeux à glisser ou à tracer joués avec des clics simples seulement`);
+
+  // 2. Au clavier, sans réglage : le labyrinthe (flèches), écris au doigt et le coloriage magique (Tab, Entrée)
+  await profile({}, "store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games = { labyrinthe: { level: 1 }, ecrire: { level: 3 }, 'coloriage-magique': { level: 1 } };");
+  await openGame(page, findGame('labyrinthe'));
+  let zone = await page.waitForSelector('.choices:not(.answered)');
+  let q = await page.evaluate(() => globalThis.__lc.question);
+  const { cols, solution } = q.stage;
+  for (let k = 1; k < solution.length; k++) {
+    const d = solution[k] - solution[k - 1];
+    await page.keyboard.press(d === 1 ? 'ArrowRight' : d === -1 ? 'ArrowLeft' : d === cols ? 'ArrowDown' : 'ArrowUp');
+  }
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 }).catch(() => fail('clavier : le labyrinthe ne se joue pas avec les flèches'));
+  await openGame(page, findGame('ecrire'));
+  zone = await page.waitForSelector('.choices:not(.answered)');
+  await tabTo(page, '.trace-drawing', 'écris au doigt');
+  await assertFocusVisible(page, 'écris au doigt');
+  if (!/à tracer/.test(await page.getAttribute('.trace-drawing', 'aria-label'))) fail('clavier : le dessin à tracer n’a pas d’étiquette');
+  for (let k = 0; k < 300 && !(await page.locator('.trace-drawing.finished').count()); k++) await page.keyboard.press('Enter');
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 }).catch(() => fail('clavier : écris au doigt ne se joue pas avec Entrée'));
+  await openGame(page, findGame('coloriage-magique'));
+  zone = await page.waitForSelector('.choices:not(.answered)');
+  q = await page.evaluate(() => globalThis.__lc.question);
+  for (const [i, z] of q.stage.zones.entries()) {
+    await tabTo(page, `.magic-color[data-color="${z.c}"]`, 'coloriage magique');
+    await page.keyboard.press('Enter');
+    await tabTo(page, `.magic-zone[data-zone="${i}"]`, 'coloriage magique');
+    if (i === 0) await assertFocusVisible(page, 'coloriage magique');
+    await page.keyboard.press(' ');
+  }
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 }).catch(() => fail('clavier : le coloriage magique ne se joue pas au clavier'));
+  console.log('✔ clavier : labyrinthe aux flèches, écris au doigt et coloriage magique avec Tab et Entrée (focus visible)');
+
+  // 3. Sous-titres (avec le texte très grand) : ce que dit Estelle est écrit, sans cacher les réponses
+  const captionText = () => page.evaluate(() => (document.querySelector('.caption-band:not([hidden]) .caption-band-text')?.textContent || '').replace(/[  ]/g, ' ').replace(/‑/g, '-'));
+  const lastSaid = () => page.evaluate(() => (window.__spoken || []).at(-1) || '');
+  await profile({ captions: true, textSize: 1.3 }, "store.profiles['eva-rose'].grade = 'CP';");
+  await goProfile(page);
+  await page.click('[data-domain="maths"]');
+  await page.waitForFunction(() => document.querySelector('.caption-band:not([hidden]) .caption-band-text')?.textContent.includes('Choisis un jeu'), null, { timeout: 5000 })
+    .catch(() => fail('sous-titres : la phrase dite sur la liste des jeux n’est pas écrite'));
+  for (const [w, hgt] of [[375, 667], [667, 375], [360, 740]]) {
+    await page.setViewportSize({ width: w, height: hgt });
+    for (const id of ['compter', 'trous', 'labyrinthe', 'regle-horloge', 'ecrire']) {
+      await openGame(page, findGame(id));
+      await page.waitForSelector('.choices');
+      await page.waitForFunction(() => document.querySelector('.caption-band-text')?.textContent.trim(), null, { timeout: 5000 });
+      const problem = await page.evaluate(() => {
+        const band = document.querySelector('.caption-band').getBoundingClientRect();
+        const side = band.width < window.innerWidth - 1;
+        if (document.documentElement.scrollHeight > window.innerHeight + 1) return 'la page défile';
+        for (const el of document.querySelectorAll('.choices, .stage, .instruction')) {
+          const r = el.getBoundingClientRect();
+          if (side ? r.right > band.left + 1 : r.bottom > band.top + 1) return `${el.className} sous le bandeau`;
+        }
+        const text = document.querySelector('.caption-band-text');
+        if (text.scrollHeight > text.clientHeight + 2) return 'texte coupé dans le bandeau';
+        return null;
+      });
+      if (problem) fail(`sous-titres : ${id} (${w}×${hgt}) : ${problem}`);
+    }
+  }
+  await page.setViewportSize({ width: 375, height: 667 });
+  // une bonne réponse : les félicitations sont écrites
+  await openGame(page, findGame('compter'));
+  zone = await page.waitForSelector('.choices:not(.answered)');
+  q = await page.evaluate(() => globalThis.__lc.question);
+  await page.click(`.choice[data-value="${q.answer}"]`);
+  await page.waitForFunction(() => document.querySelector('.feedback .praise'));
+  await page.waitForTimeout(100);
+  const praise = await lastSaid();
+  if (!(await captionText()).includes(praise.split(' ')[0])) fail(`sous-titres : « ${praise} » n’est pas écrit (${await captionText()})`);
+  console.log('✔ sous-titres : phrases des menus, consignes et félicitations écrites ; le bandeau ne cache rien (portrait, paysage, texte très grand)');
+
+  // 4. Niveaux d'écoute facultatifs : « Écoute et touche » disparaît, les questions d'écoute sont remplacées
+  await profile({ skipListening: true }, "store.profiles['eva-rose'].grade = 'GS'; store.profiles['eva-rose'].games = { lettres: { level: 1 } };");
+  await goProfile(page);
+  await page.click('[data-domain="anglais"]');
+  if (await page.locator('[data-game="ecoute"]').count()) fail('niveaux d’écoute facultatifs : « Écoute et touche » est encore proposé');
+  await page.click('.top-bar .icon-btn');
+  await page.click('[data-domain="francais"]');
+  await page.click('[data-game="lettres"]');
+  for (let i = 0; i < 3; i++) {
+    zone = await page.waitForSelector('.choices:not(.answered)');
+    q = await page.evaluate(() => globalThis.__lc.question);
+    if (q.listenOnly || q.stage.type === 'listen') fail('niveaux d’écoute facultatifs : une question à écouter est posée');
+    await answer(page, q, false);
+    await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 });
+  }
+  console.log('✔ niveaux d’écoute facultatifs : jeu d’écoute masqué, niveaux d’écoute passés');
+  await context.close();
+}
+
 if (!ONLY && PARTS.includes('scenario')) await scenario();
 else if (ONLY?.includes('hors-ligne')) {
   const context = await newContext({ width: 390, height: 844 });
@@ -1415,6 +2026,8 @@ else if (ONLY?.includes('hors-ligne')) {
   await checkOffline(context, page);
   await context.close();
 }
+// accessibilité : avec le parcours complet (PARTS=scenario), ou seule (PARTS=a11y, ou ONLY=a11y)
+if ((!ONLY && (PARTS.includes('scenario') || PARTS.includes('a11y'))) || ONLY?.includes('a11y')) await a11yChecks();
 
 // ---------------------------------------------------------------- Mise en page : tous les iPhone
 
@@ -1463,18 +2076,27 @@ const DEVICES = [
 // plus de questions tirées sur le plus petit écran pour attraper le pire cas.
 const STRESS = {
   dizaines: 15, compter: 8, tables: 8, 'vite-vu': 6, panier: 6, patates: 4, 'petits-textes': 8, problemes: 4, relier: 3,
-  'relie-calculs': 3, trous: 3,
+  'relie-calculs': 3, trous: 3, 'ordre-histoire': 6,
 };
 
 async function checkLayout(page, label, { reachable = true } = {}) {
   const problem = await page.evaluate((mustReach) => {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
     for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game')) {
+      if (el.clientWidth <= 1) continue; // caché à l'écran, gardé pour le clavier (flèches du labyrinthe rond)
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
     }
+    // sous-titres : le bandeau (en bas, ou à droite sur un téléphone en paysage) ne cache rien
+    const band = document.querySelector('.caption-band:not([hidden])')?.getBoundingClientRect();
+    const bottom = band && band.width >= window.innerWidth - 1 ? band.top : window.innerHeight;
+    if (band && band.width < window.innerWidth - 1) {
+      for (const el of document.querySelectorAll('.choices, .stage, .home-menu')) {
+        if (el.getBoundingClientRect().right > band.left + 1) return `${el.className.split(' ')[0]} sous les sous-titres`;
+      }
+    }
     const zone = document.querySelector('.choices, .home-menu, .profile-list');
-    if (mustReach && zone && zone.getBoundingClientRect().bottom > window.innerHeight + 1) {
-      return `boutons hors de l'écran (${Math.round(zone.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
+    if (mustReach && zone && zone.getBoundingClientRect().bottom > bottom + 1) {
+      return `boutons hors de l'écran (${Math.round(zone.getBoundingClientRect().bottom)} > ${bottom})`;
     }
     // « Jouer à deux » : le bouton « C'est parti ! » sous les portraits doit aussi être visible
     const go = document.querySelector('.duo-go');
@@ -1483,13 +2105,17 @@ async function checkLayout(page, label, { reachable = true } = {}) {
     }
     // en paysage, le dessin est à côté des réponses : il doit aussi tenir dans l'écran
     const stage = document.querySelector('.stage');
-    if (mustReach && stage && stage.getBoundingClientRect().bottom > window.innerHeight + 1) {
-      return `dessin hors de l'écran (${Math.round(stage.getBoundingClientRect().bottom)} > ${window.innerHeight})`;
+    if (mustReach && stage && stage.getBoundingClientRect().bottom > bottom + 1) {
+      return `dessin hors de l'écran (${Math.round(stage.getBoundingClientRect().bottom)} > ${bottom})`;
     }
     return null;
   }, reachable);
   // on note tous les problèmes de mise en page, et on échoue à la fin avec la liste complète
-  if (problem) layoutProblems.push(`${label} : ${problem}`);
+  if (problem) {
+    layoutProblems.push(`${label} : ${problem}`);
+    // SCREENSHOTS=dossier : une capture de chaque écran fautif
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/probleme-${layoutProblems.length}-${label.replace(/[^\p{L}\d]+/gu, '-')}.png` });
+  }
 }
 const layoutProblems = [];
 
@@ -1564,6 +2190,15 @@ async function checkDevice(device, repeat, deviceIndex) {
   await checkLayout(page, tag('choix du duo'));
   await goProfile(page);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-accueil.png` });
+  if (A11Y?.noTimer) {
+    // défi chrono joué « sans chrono » (A11Y=noTimer) : pas de chronomètre affiché
+    await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor('tables-chrono')}';`);
+    await openGame(page, findGame('tables-chrono'));
+    await page.waitForSelector('.choices');
+    if (await page.locator('.chrono-clock').count()) layoutProblems.push(tag('sans chrono : le chronomètre est affiché'));
+    await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
+    await goProfile(page);
+  }
   await page.click('[data-domain="maths"]');
   await page.click('[data-levels="calcul"], [data-levels="compter"]');
   await page.waitForSelector('.level-list');
@@ -1577,11 +2212,16 @@ async function checkDevice(device, repeat, deviceIndex) {
   // chaque niveau de chaque jeu
   for (const [gameIndex, game] of GAMES.entries()) {
     if (game.paliers || ONLY && !ONLY.includes(game.id) || !mine(gameIndex + deviceIndex)) continue;
-    for (let level = 1; level <= game.levels.length; level++) {
+    if (A11Y && !ONLY && !A11Y_SAMPLE.includes(game.id)) continue;
+    // A11Y : le premier niveau, celui du milieu et le dernier
+    const n = game.levels.length;
+    const levels = A11Y ? [...new Set([1, Math.ceil(n / 2), n])] : Array.from({ length: n }, (_, i) => i + 1);
+    for (const level of levels) {
       const grade = gradeFor(game.id, level);
       await setStore(page, `store.profiles['eva-rose'].grade = '${grade}'; store.profiles['eva-rose'].games['${game.id}'] = { level: ${level} };`);
-      for (let k = 0; k < (repeat > 1 ? STRESS[game.id] || repeat : repeat); k++) {
-        await openGame(page, game);
+      // un jeu qui alterne deux formes de questions (game.formats) : chacune est vérifiée
+      for (let k = 0; k < (repeat > 1 ? STRESS[game.id] || repeat : repeat) * (game.formats || 1); k++) {
+        await openGame(page, game, { format: k % (game.formats || 1) });
         await page.waitForSelector('.choices');
         await checkLayout(page, tag(`${game.id} niveau ${level}`));
         checked++;
@@ -1633,7 +2273,9 @@ async function checkDevice(device, repeat, deviceIndex) {
 
 if (SHOTS) mkdirSync(`${SHOTS}/devices`, { recursive: true });
 // 6 appareils à la fois, pour ne pas saturer la machine de test
-const devices = PLAY || !PARTS.includes('layout') ? [] : DEVICES;
+// A11Y : les écrans les plus petits seulement (iPhone SE en portrait et en paysage, Android 360 points)
+const A11Y_DEVICES = (d) => (d.width === 375 && d.height === 667) || (d.width === 360 && d.height === 740) || (d.width === 667 && d.height === 375);
+const devices = PLAY || !PARTS.includes('layout') ? [] : DEVICES.filter((d) => (ONLY_DEVICES ? ONLY_DEVICES.includes(`${d.width}x${d.height}`) : !A11Y || A11Y_DEVICES(d)));
 // plus de tirages sur les deux écrans les plus petits (iPhone SE, Android 360 points)
 const smallest = (d) => (d.width === 375 && d.height === 667) || (d.width === 360 && d.height === 740);
 const counts = [];

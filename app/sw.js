@@ -2,7 +2,7 @@
 // (en voiture, en vacances…). Changer VERSION à chaque mise à jour publiée.
 // Tout nouveau fichier de l'app doit être ajouté à PRECACHE (vérifié par les tests).
 
-const VERSION = 'v19';
+const VERSION = 'v20';
 const CACHE = `lire-et-compter-${VERSION}`;
 // Sons de la voix naturelle (voix/fr/…, voix/en/…) : leurs noms changent avec leur contenu, on les
 // garde donc d'une version à l'autre (seuls ceux qui ne sont plus dans voix/manifest.json sont retirés).
@@ -15,6 +15,8 @@ const isVoicePack = (url) => /\/voix\/paquet-[0-9a-f]+\.mp3$/.test(url.pathname)
 
 const PRECACHE = [
   './',
+  './css/aides.css',
+  './css/acces.css',
   './css/style.css',
   './fonts/andika-400.woff2',
   './fonts/andika-700.woff2',
@@ -23,7 +25,10 @@ const PRECACHE = [
   './icons/icon-512.png',
   './index.html',
   './js/characters.js',
+  './js/a11y-jeux.js',
+  './js/a11y.js',
   './js/config.js',
+  './js/couleurs.js',
   './js/dashboard.js',
   './js/data/anglais-data.js',
   './js/data/carte-data.js',
@@ -33,10 +38,13 @@ const PRECACHE = [
   './js/games/anglais.js',
   './js/games/carte.js',
   './js/games/chrono.js',
+  './js/games/comprendre.js',
   './js/games/dictee.js',
+  './js/games/donnees.js',
   './js/games/drapeaux.js',
   './js/games/ecriture.js',
   './js/games/francais-extra.js',
+  './js/games/grammaire.js',
   './js/games/helpers.js',
   './js/games/histoires.js',
   './js/games/horloge.js',
@@ -50,7 +58,16 @@ const PRECACHE = [
   './js/games/maths.js',
   './js/games/mesures.js',
   './js/games/monde.js',
+  './js/games/sciences.js',
+  './js/games/ciel.js',
+  './js/games/corps.js',
+  './js/games/techno.js',
+  './js/games/planete.js',
+  './js/games/nombres-plus.js',
+  './js/games/operations.js',
   './js/games/textes.js',
+  './js/games/vocabulaire.js',
+  './js/games/vivre.js',
   './js/main.js',
   './js/photo.js',
   './js/picks.js',
@@ -64,6 +81,7 @@ const PRECACHE = [
   './js/speech.js',
   './js/voix-cles.js',
   './js/storage.js',
+  './js/syllabes.js',
   './js/themes.js',
   './manifest.webmanifest',
   './voix/manifest.json',
@@ -76,7 +94,11 @@ self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()));
 });
 
-/** Retire du cache des voix les sons qui ne sont plus dans le manifeste de cette version. */
+/**
+ * Retire du cache des voix les sons qui ne sont plus dans le manifeste de cette version. Au-delà
+ * d'environ 20 000 sons, Chrome refuse de lister le cache (cache.keys()) : le nettoyage est alors
+ * sauté (l'erreur est ignorée à l'activation) ; les anciens sons restent, sans gêner.
+ */
 async function pruneVoices() {
   const manifest = await caches.match('./voix/manifest.json');
   if (!manifest) return;

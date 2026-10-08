@@ -63,6 +63,32 @@ export function recordAfter(records, gameId, level, seconds) {
 }
 
 /**
+ * Le chronomètre tourne-t-il ? Oui pour un défi chrono, sauf si l'enfant joue « sans chrono »
+ * (profil d'accessibilité, a11y.js) : ni temps affiché, ni temps compté, ni record.
+ */
+export function chronoOn(game, settings) {
+  return Boolean(game?.timed) && settings?.noTimer !== true;
+}
+
+/**
+ * Une question de défi chrono jouée sans chrono : la consigne ne parle plus de vitesse
+ * (« Défi chrono ! Dix calculs, le plus vite possible. » est retiré). Seules des phrases déjà
+ * dites par le jeu sont gardées : la question seule (q.replay) et le texte court.
+ */
+export function untimedQuestion(q) {
+  if (!q) return q;
+  const calm = (text) => text.replace(/\s+vite(?=\s*[!?.])/u, ''); // « Calcule vite ! » → « Calcule ! »
+  const plain = calm(q.short?.text ?? q.text.replace(/^Défi chrono\s*:\s*/u, ''));
+  const text = plain.charAt(0).toUpperCase() + plain.slice(1);
+  return {
+    ...q,
+    text,
+    instruction: q.replay ?? q.instruction,
+    ...(q.short ? { short: { ...q.short, key: q.short.key ?? q.short.text, text } } : {}),
+  };
+}
+
+/**
  * Le niveau ne change pas pendant un défi (le record est celui du niveau joué) ; à la fin,
  * 9 bonnes réponses du premier coup sur 10 font monter, moins de 6 font redescendre.
  */

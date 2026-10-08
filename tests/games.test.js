@@ -216,6 +216,52 @@ function checkQuestion(q, ctx) {
       assert.deepEqual(q.choices, [], ctx);
       break;
     }
+    case 'numberline': {
+      // placer un nombre sur la droite (détails dans tests/nombres-plus.test.js)
+      const { min, max, snap } = q.stage;
+      assert.ok(q.target >= min && q.target <= max && (q.target - min) % snap === 0, ctx);
+      assert.equal(q.answer, q.target, ctx);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
+    case 'shade': {
+      // colorier des parts égales (détails dans tests/nombres-plus.test.js)
+      const { sizes, shaded } = q.stage;
+      assert.ok(sizes.every((s) => s === sizes[0]) && shaded.length === 0, ctx);
+      assert.ok(q.target >= 1 && q.target < sizes.length, ctx);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
+    case 'share': {
+      // le partage (détails dans tests/operations.test.js) : des parts égales, et un reste plus petit
+      const { total, groups, size, who } = q.stage;
+      const unit = size || groups;
+      assert.ok(Number.isInteger(total) && total >= unit && total <= 30, ctx);
+      if (!size) assert.equal(new Set(who).size, groups, ctx);
+      if (q.ask) {
+        assert.equal(q.answer, size ? Math.floor(total / size) : total % groups, ctx);
+        assert.equal(q.choices.filter((c) => c.value === q.answer).length, 1, ctx);
+      } else {
+        assert.equal(total % groups, 0, ctx);
+        assert.equal(q.answer, total / groups, ctx);
+      }
+      break;
+    }
+    case 'column': {
+      const { steps } = q.stage;
+      assert.ok(steps.length >= 2 && steps.every((s) => Number.isInteger(s.digit) && s.digit >= 0 && s.digit <= 9 && s.label), ctx);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
+    case 'body': {
+      // le corps humain : toucher une partie du dessin, ou plusieurs dans l'ordre (détails dans tests/corps.test.js)
+      const values = q.choices.map((c) => c.value);
+      assert.equal(new Set(values).size, values.length, ctx);
+      assert.ok(q.choices.every((c) => c.name), ctx);
+      const steps = q.sequence || [q.answer];
+      assert.ok(steps.length >= 1 && steps.every((s) => values.includes(s)), ctx);
+      break;
+    }
     default: {
       const values = q.choices.map((c) => c.value);
       assert.ok(values.length >= 2, ctx);
@@ -229,7 +275,7 @@ test('les identifiants de jeux sont uniques et rangés par matière', () => {
   const ids = GAMES.map((g) => g.id);
   assert.equal(new Set(ids).size, ids.length);
   for (const d of DOMAINS) for (const g of d.games) assert.equal(g.domain, d.id, g.id);
-  assert.deepEqual(DOMAINS.map((d) => d.id), ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'anglais']);
+  assert.deepEqual(DOMAINS.map((d) => d.id), ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'sciences', 'anglais']);
   assert.equal(findGame('calcul').title, 'Calcul');
 });
 
@@ -530,7 +576,7 @@ test('intrus et ombres : une seule bonne réponse, dans le bon sens', () => {
 test('petits textes : questions variées, réponses distinctes, textes courts', () => {
   for (const level of [1, 2, 3, 4, 5, 6]) assert.ok(TEXT_DATA.filter((t) => t.level === level).length >= 5);
   for (const t of TEXT_DATA) {
-    assert.ok(t.text.length <= [0, 80, 140, 220, 220, 220, 220, 220, 220][t.level], `${t.title} trop long (${t.text.length})`);
+    assert.ok(t.text.length <= [0, 80, 140, 220, 220, 220, 220, 220, 220, 220, 220][t.level], `${t.title} trop long (${t.text.length})`);
     for (const [question, ...answers] of t.questions) {
       assert.ok(question.endsWith('?') || question.endsWith('…'), question);
       assert.equal(new Set(answers).size, 3, question);

@@ -5,10 +5,10 @@ import { findGame, GAMES } from '../app/js/games/index.js';
 import { GRADES } from '../app/js/storage.js';
 import { dayKey, frequentMistakes, lastSevenDays, skillStatus, streakDays } from '../app/js/dashboard.js';
 
-test('chaque classe a un programme dans les 7 rubriques', () => {
+test('chaque classe a un programme dans les 8 rubriques', () => {
   assert.deepEqual(Object.keys(PROGRAMS), Object.keys(GRADES));
   for (const grade of Object.keys(GRADES)) {
-    assert.deepEqual(programFor(grade).map((d) => d.id), ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'anglais'], grade);
+    assert.deepEqual(programFor(grade).map((d) => d.id), ['francais', 'histoires', 'maths', 'jeux', 'temps', 'monde', 'sciences', 'anglais'], grade);
   }
 });
 

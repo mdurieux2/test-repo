@@ -78,6 +78,7 @@ export const dictee = {
       short: { key: `dictee:${picture}`, text: 'Écris le mot.', speak: [sound] },
       replay: [sound],
       stage: picture ? { type: 'picture', emoji: PICTURES[word] } : { type: 'listen' },
+      listenOnly: !picture, // sans image, le mot n'est qu'entendu
       items: mixed,
       order: 'asc',
       sign: '',

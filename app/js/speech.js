@@ -338,6 +338,32 @@ function saySynth(part, id) {
   });
 }
 
+// ---- Sous-titres : ce que dit Estelle est aussi écrit (réglage « sous-titres », voir main.js)
+
+const captionListeners = new Set();
+let captionId = 0;
+
+/**
+ * `listener({ type: 'start', id, parts: [{ text, lang }], spoken })` quand Estelle commence à
+ * parler (spoken : faux si la voix est coupée, le texte s'affiche quand même), puis
+ * `{ type: 'part', id, index }` au début de chaque morceau, et `{ type: 'end', id, spoken }`.
+ * Renvoie de quoi se désabonner.
+ */
+export function onCaption(listener) {
+  captionListeners.add(listener);
+  return () => captionListeners.delete(listener);
+}
+
+function caption(event) {
+  for (const listener of captionListeners) {
+    try {
+      listener(event);
+    } catch {
+      // un sous-titre qui échoue ne doit jamais empêcher la voix
+    }
+  }
+}
+
 /**
  * Dit une phrase ou une suite de morceaux (chaîne ou {text, rate, lang}).
  * `style` ({voice: 'female'|'male', pitch}) donne la voix d'un personnage.
@@ -346,12 +372,34 @@ function saySynth(part, id) {
  * l'interface.
  */
 export async function speak(parts, style = {}) {
-  if (!enabled || !parts || (!synth && !natural.clips)) return;
-  stopSpeaking();
+  if (!parts) return;
+  const audible = enabled && Boolean(synth || natural.clips);
+  if (!audible && !captionListeners.size) return;
+  if (audible) stopSpeaking();
   const id = queueId;
-  const list = (Array.isArray(parts) ? parts : [parts])
+  const shown = ++captionId;
+  const said = (Array.isArray(parts) ? parts : [parts])
     .map((part) => ({ ...style, ...(typeof part === 'string' ? { text: part } : part) }))
     .filter((part) => part.text);
+  if (captionListeners.size && said.length) {
+    caption({ type: 'start', id: shown, parts: said.map(({ text, lang }) => ({ text, lang })), spoken: audible });
+  }
+  if (!audible) {
+    if (said.length) caption({ type: 'end', id: shown, spoken: false });
+    return;
+  }
+  // chaque morceau annonce son début (sous-titres d'une longue lecture, morceau par morceau)
+  const list = captionListeners.size
+    ? said.map((part, index) => ({ ...part, onStart: () => { caption({ type: 'part', id: shown, index }); part.onStart?.(); } }))
+    : said;
+  try {
+    await speakList(list, id);
+  } finally {
+    if (captionListeners.size && said.length) caption({ type: 'end', id: shown, spoken: id === queueId });
+  }
+}
+
+async function speakList(list, id) {
   let i = 0;
   while (i < list.length && id === queueId) {
     const plans = [];

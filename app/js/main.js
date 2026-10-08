@@ -4,11 +4,13 @@ import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
 import { canMove, polarCell, ringOffsets, solveLinks, solveMaze } from './games/labyrinthes.js';
 import { clockLabel } from './games/maths-extra.js';
+import { lineValueAt, lineX } from './games/nombres-plus.js';
+import { bodySvg, voiciPartie } from './games/corps.js';
 import {
   clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
 } from './games/horloge.js';
 import {
-  chronoLevelAfter, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono,
+  chronoLevelAfter, chronoOn, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono, untimedQuestion,
 } from './games/chrono.js';
 import { featuredGames, levelRange, MAX_FEATURED, programFor, programForChild } from './programs.js';
 import { dailyPicks, dueReviews as reviewsDue, duoPlan, drawPool } from './picks.js';
@@ -21,16 +23,20 @@ import {
 } from './storage.js';
 import {
   isNaturalVoiceOn, listFrenchVoices, loadNaturalVoice, naturalVoiceFiles, naturalVoicePacks, setNaturalVoice, setSpeechEnabled, setSpeechNames,
-  setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
+  onCaption, setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
 } from './speech.js';
-import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
+import { playSound, setSoundsEnabled, setSoundsSoft, startMusic, stopMusic, unlockAudio } from './sounds.js';
 import {
-  avatar, clockSvg, flagElement, h, mapElement, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles,
+  avatar, clockSvg, colorName, columnGrid, emojiColorName, flagElement, fractionElement, h, mapElement, moneyItem, numberLineElement, readable, renderChoiceContent,
+  renderStage, revealWord, setAides, setProfiles,
 } from './render.js';
 import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
+import { a11y, applyA11y, cleanA11y } from './a11y.js';
+import { syllabesPermises } from './syllabes.js';
+import { gameListenOnly, playableQuestion, tapQuestion, withoutListenOnly } from './a11y-jeux.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
 import { STORY_DATA } from './games/histoires.js';
@@ -81,10 +87,35 @@ function show(...children) {
     leave();
   }
   document.body.classList.toggle('easy-read', Boolean(child()?.easyRead));
-  document.body.dataset.season = store.settings.seasonal === false ? '' : currentSeason().id;
+  applyA11y(child());
+  // réglage du système « augmenter le contraste » : le fort contraste, même sans réglage du profil
+  if (globalThis.matchMedia?.('(prefers-contrast: more)').matches) document.body.classList.add('a11y-contrast');
+  setSoundsSoft(a11y(child()).calm); // mode calme : petits sons plus doux
+  clearCaption();
+  document.body.dataset.season = seasonsShown() ? currentSeason().id : '';
   app.replaceChildren(...children.filter(Boolean));
+  screenAccess();
   window.scrollTo(0, 0);
   musicForScreen();
+}
+
+/**
+ * Accessibilité de chaque écran : le titre de la page nomme l'écran (lu par les lecteurs d'écran),
+ * et un bouton « Aller au contenu », visible seulement au clavier, saute la barre du haut.
+ */
+function screenAccess() {
+  const main = app.querySelector('main');
+  const name = main?.dataset.title || main?.querySelector('h1')?.textContent.trim();
+  document.title = name ? `${name} – ${APP.name}` : APP.name;
+  const content = main?.querySelector(':scope > header.top-bar')?.nextElementSibling;
+  if (!content) return;
+  app.prepend(h('button', {
+    class: 'skip-link',
+    onclick: () => {
+      content.setAttribute('tabindex', '-1');
+      content.focus();
+    },
+  }, 'Aller au contenu'));
 }
 
 // ---------------------------------------------------------------- Saisons
@@ -93,8 +124,13 @@ function currentSeason() {
   return seasonOf(new Date());
 }
 
+/** Décors de saison : coupés par les parents, ou par le mode calme de l'enfant. */
+function seasonsShown() {
+  return store.settings.seasonal !== false && !a11y(child()).calm;
+}
+
 function seasonDecor() {
-  if (store.settings.seasonal === false) return null;
+  if (!seasonsShown()) return null;
   return h('div', { class: 'season-decor', 'aria-hidden': 'true' }, currentSeason().deco.map((e) => h('span', {}, e)));
 }
 
@@ -117,13 +153,129 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// ---------------------------------------------------------------- Accessibilité de l'enfant qui joue
+
+/** Le profil d'accessibilité de l'enfant qui joue (réglé par les parents). */
+function access() {
+  return a11y(child());
+}
+
+/**
+ * Au clavier (Tab, Entrée, Espace) : un élément qui n'est pas un bouton (un morceau de dessin,
+ * un objet) se comporte comme un bouton. `label` dit ce qu'il est (et son état).
+ */
+function keyButton(el, label) {
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('role', 'button');
+  if (label) el.setAttribute('aria-label', label);
+  el.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+  });
+  return el;
+}
+
+/** Les flèches du clavier, tant que `el` est à l'écran (labyrinthes). `move(dx, dy)`. */
+function arrowKeys(el, move) {
+  const DIRS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+  const onKey = (e) => {
+    if (!el.isConnected) {
+      window.removeEventListener('keydown', onKey);
+      return;
+    }
+    const dir = DIRS[e.key];
+    if (!dir || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.('input, select, textarea')) return;
+    e.preventDefault();
+    move(...dir);
+  };
+  window.addEventListener('keydown', onKey);
+}
+
+// ---- Sous-titres : tout ce que dit Estelle est aussi écrit, dans un bandeau en bas de l'écran
+// (réduit sur un téléphone en paysage). Le bandeau garde sa place : il ne cache jamais les réponses.
+
+const CAPTION_LONG = 140; // au-delà (une histoire lue), le bandeau suit la lecture morceau par morceau
+const captionText = h('p', { class: 'caption-band-text' });
+const captionBand = h('div', { class: 'caption-band', 'aria-hidden': 'true', hidden: true },
+  h('span', { class: 'caption-band-icon' }, '🔊'), captionText);
+document.body.append(captionBand);
+let caption = { id: 0, parts: [], long: false };
+
+function captionLine(parts) {
+  // un mot à écouter seul (« écris : », « école »), suivi d'une phrase (« Touche les lettres… ») : un point après le mot
+  const glue = (i) => (i >= 2 && /:$/.test(parts[i - 2].text) && /^[\p{L}\p{N}’'-]+$/u.test(parts[i - 1].text)
+    && /^\p{Lu}/u.test(parts[i].text) ? '. ' : ' ');
+  return parts.map(({ text, lang }) => (lang && !lang.startsWith('fr') ? h('span', { lang: lang.slice(0, 2) }, text) : text))
+    .flatMap((part, i) => (i ? [glue(i), part] : [part]));
+}
+
+/** Un nouvel écran : le bandeau est vide jusqu'à la prochaine parole. */
+function clearCaption() {
+  const on = Boolean(child()) && access().captions;
+  captionBand.hidden = !on;
+  captionText.replaceChildren();
+  captionBand.classList.remove('said');
+  caption = { id: caption.id, parts: [], long: false };
+  fitCaptions();
+}
+
+/** L'écran est réduit (zoom) de la hauteur du bandeau : la mise en page reste la même, en plus petit. */
+function fitCaptions() {
+  const height = captionBand.hidden ? 0 : captionBand.getBoundingClientRect().height;
+  const fit = height ? Math.max(0.6, (window.innerHeight - height) / window.innerHeight) : 1;
+  document.documentElement.style.setProperty('--captions-fit', fit.toFixed(4));
+}
+window.addEventListener('resize', fitCaptions);
+
+/** Le texte du bandeau, en entier : écrit plus petit s'il est long. */
+function showCaption(nodes) {
+  captionText.style.fontSize = '';
+  captionText.replaceChildren(...nodes.map(frenchNode));
+  const base = parseFloat(getComputedStyle(captionText).fontSize) || 18;
+  for (let size = base; captionText.scrollHeight > captionText.clientHeight + 1 && size > 11; size -= 1) {
+    captionText.style.fontSize = `${size - 1}px`;
+  }
+}
+
+onCaption((event) => {
+  if (!child() || !access().captions) {
+    captionBand.hidden = true;
+    return;
+  }
+  if (captionBand.hidden) {
+    captionBand.hidden = false;
+    fitCaptions();
+  }
+  if (event.type === 'start') {
+    const all = event.parts.map((p) => p.text).join(' ');
+    caption = { id: event.id, parts: event.parts, long: all.length > CAPTION_LONG };
+    showCaption(captionLine(caption.long ? event.parts.slice(0, 1) : event.parts));
+    captionBand.classList.remove('said');
+    captionBand.classList.toggle('long', caption.long);
+    return;
+  }
+  if (event.id !== caption.id) return; // une parole déjà remplacée par une autre
+  if (event.type === 'part' && caption.long) {
+    showCaption(captionLine(caption.parts.slice(event.index, event.index + 1)));
+  }
+  // fini : le texte reste écrit (un peu plus pâle) jusqu'à la prochaine parole ou au prochain écran
+  if (event.type === 'end') captionBand.classList.add('said');
+});
+
+function frenchNode(node) {
+  if (typeof node === 'string') return frenchSpacing(node);
+  node.textContent = frenchSpacing(node.textContent);
+  return node;
+}
+
 function starCounter() {
   return h('div', { class: 'star-counter', 'aria-label': `${child().stars} étoiles` }, '⭐ ', child().stars);
 }
 
 /** La musique douce joue sur l'accueil et les menus, jamais pendant un jeu ni chez les parents. */
 function musicForScreen() {
-  const calm = app.querySelector('.screen.play, .screen.parents, .screen.gate');
+  const calm = app.querySelector('.screen.play, .screen.parents, .screen.gate') || a11y(child()).calm; // mode calme : jamais de musique
   if (store.settings.music && !calm) startMusic();
   else stopMusic();
 }
@@ -254,7 +406,7 @@ function clearSessionFlag(key) {
 
 /** Une rubrique de l'enfant qui joue (absente si les parents l'ont masquée). */
 function domainById(id) {
-  return programForChild(child()).find((d) => d.id === id);
+  return childProgram().find((d) => d.id === id);
 }
 
 // ---------------------------------------------------------------- Qui joue ?
@@ -625,13 +777,15 @@ function welcomeScreen(adding = !store.order.length) {
 
 function profileChip() {
   const c = me();
-  return h('button', { class: 'profile-chip', onclick: profileScreen, 'aria-label': 'Changer de joueur' },
-    avatar(c.id, 'avatar-xs'), h('span', {}, c.name));
+  const portrait = avatar(c.id, 'avatar-xs');
+  portrait.setAttribute('aria-hidden', 'true');
+  return h('button', { class: 'profile-chip', onclick: profileScreen },
+    portrait, h('span', {}, c.name), h('span', { class: 'visually-hidden' }, ' : changer de joueur'));
 }
 
 function homeScreen() {
   const c = me();
-  const domains = programForChild(child());
+  const domains = childProgram();
   const featured = featuredBlock();
   show(h('main', { class: `screen home${featured ? ' has-featured' : ''}` },
     homeBar(),
@@ -659,7 +813,8 @@ function homeScreen() {
 
 /** « ⭐ Conseillé pour toi » : les jeux choisis par les parents, en haut de l'accueil. */
 function featuredBlock() {
-  const list = featuredGames(child()).slice(0, MAX_FEATURED);
+  const list = featuredGames(child())
+    .filter(({ game, min, max }) => !access().skipListening || !gameListenOnly(game, min, max)).slice(0, MAX_FEATURED);
   if (!list.length) return null;
   return h('section', { class: 'home-featured', 'aria-labelledby': 'featured-label' },
     h('h2', { class: 'featured-label', id: 'featured-label' }, '⭐ Conseillé pour toi'),
@@ -830,7 +985,7 @@ function dailyButton() {
 function levelDots(level, min, max) {
   const total = max - min + 1;
   if (total > 6) return h('span', { class: 'level-text' }, `Niveau ${level - min + 1}/${total}`);
-  return h('span', { class: 'level-dots', 'aria-label': `Niveau ${level - min + 1} sur ${total}` },
+  return h('span', { class: 'level-dots', role: 'img', 'aria-label': `Niveau ${level - min + 1} sur ${total}` },
     Array.from({ length: total }, (_, i) => h('span', { class: i <= level - min ? 'dot on' : 'dot' })));
 }
 
@@ -871,9 +1026,9 @@ function domainScreen(domainId) {
         ? h('button', {
           class: 'level-pick',
           'data-levels': game.id,
-          'aria-label': `Choisir le niveau : ${game.title}`,
           onclick: () => levelScreen(game),
-        }, levelDots(level, min, max), h('span', { class: 'level-pick-label' }, 'Niveaux ▾'))
+        }, levelDots(level, min, max), h('span', { class: 'level-pick-label' }, 'Niveaux', h('span', { 'aria-hidden': 'true' }, ' ▾')),
+        h('span', { class: 'visually-hidden' }, ` (${game.title})`))
         : null));
   }
   show(h('main', { class: `screen domain domain-theme-${domain.id}` },
@@ -960,32 +1115,59 @@ function startSession(game, { level, back, total, duo } = {}) {
     levelState: { level: startLevel, streak: game.paliers || level ? 0 : stats.streak, recent: game.paliers || level ? [] : stats.recent },
     formatOffset: Number(new URLSearchParams(location.search).get('format') || 0),
     duo, // partie à deux : { players, plan, scores }
+    // défi chrono : le temps compte, sauf pour un enfant qui joue « sans chrono » (accessibilité)
+    chrono: chronoOn(game, a11y(child())),
   };
   nextQuestion(session);
 }
 
 function newQuestion(session) {
   let q;
+  const { skipListening, tapOnly } = access();
+  // contexte : le prénom de l'enfant et la saison (histoires et textes de saison)
+  const generate = (level, index) => session.game.generate(level, rng, index, { name: me().name, season: currentSeason().id });
   for (let i = 0; i < 10; i++) {
-    // contexte : le prénom de l'enfant et la saison (histoires et textes de saison)
-    q = session.game.generate(session.levelState.level, rng, session.index + session.formatOffset, { name: me().name, season: currentSeason().id });
+    const index = session.index + session.formatOffset;
+    if (skipListening) {
+      // niveaux d'écoute facultatifs : une autre question du même niveau, ou le niveau jouable le plus proche
+      const found = playableQuestion(generate, { level: session.levelState.level, min: session.min, max: session.max, index: index + i * PLAYABLE_STEP });
+      q = found.q;
+      if (found.level !== session.levelState.level) session.levelState = { ...session.levelState, level: found.level };
+    } else {
+      q = generate(session.levelState.level, index);
+    }
     if (!session.recentKeys.includes(q.key)) break;
   }
   session.recentKeys = [...session.recentKeys, q.key].slice(-4);
-  return q;
+  return tapOnly ? tapQuestion(q) : q;
+}
+
+const PLAYABLE_STEP = 13; // essais suivants : d'autres index (les jeux qui alternent leurs formes de questions)
+
+/** Les rubriques de l'enfant qui joue (sans les jeux qui ne se jouent qu'à l'oreille, si les parents l'ont choisi). */
+function childProgram() {
+  const domains = programForChild(child());
+  return access().skipListening ? withoutListenOnly(domains) : domains;
 }
 
 function nextQuestion(session) {
   if (session.index >= session.total) return finishSession(session);
   // à deux : la question est celle de l'enfant dont c'est le tour (son prénom, son personnage, sa voix)
   if (session.duo) store.active = session.duo.plan[session.index].player;
-  const q = newQuestion(session);
+  // sans chrono : la consigne d'un défi chrono ne parle plus de vitesse
+  const q = session.game.timed && !session.chrono ? untimedQuestion(newQuestion(session)) : newQuestion(session);
   session.question = q;
   session.attempts = 0;
   session.locked = false;
   globalThis.__lc = { question: q }; // utilisé par les tests de bout en bout
 
   const { game } = session;
+  // aides de lecture de l'enfant qui joue : syllabes colorées (sauf dans les jeux de sons et de
+  // syllabes, où elles donneraient la réponse) et couleurs nommées ; la question d'une révision
+  // suit les règles de son jeu d'origine
+  const aids = a11y(child());
+  const origin = (q.from && findGame(q.from)) || game;
+  setAides({ syllables: aids.syllables && syllabesPermises(origin.id, origin.domain), namedColors: aids.namedColors, domain: origin.domain });
   const guide = me(); // seul l'enfant qui joue apparaît, avec sa photo ou son dessin et sa voix
   session.guide = guide;
   // La consigne complète est dite la première fois ; ensuite, une version courte
@@ -995,7 +1177,7 @@ function nextQuestion(session) {
   const brief = Boolean(q.short) && session.briefed.has(briefKey);
   if (q.short) session.briefed.add(briefKey);
   const replay = () => say(guide, q.replay || q.instruction);
-  const progress = h('div', { class: 'progress', 'aria-label': `Question ${session.index + 1} sur ${session.total}` },
+  const progress = h('div', { class: 'progress', role: 'img', 'aria-label': `Question ${session.index + 1} sur ${session.total}` },
     Array.from({ length: session.total }, (_, i) =>
       h('span', { class: i < session.index ? 'step done' : i === session.index ? 'step current' : 'step' })));
   const feedback = h('div', { class: 'feedback', 'aria-live': 'polite' });
@@ -1007,7 +1189,11 @@ function nextQuestion(session) {
     build: buildZone, maze: mazeZone, roundmaze: roundMazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
     swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
     picross: picrossZone,
+    map: mapZone, numberline: numberLineZone, shade: shadeZone,
     map: mapZone,
+    share: shareZone,
+    column: columnZone,
+    body: bodyZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -1024,18 +1210,21 @@ function nextQuestion(session) {
 
   const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
   // défi chrono : le chronomètre (mm:ss) s'affiche sous le niveau, en haut à droite
-  const clock = game.timed ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
+  const clock = session.chrono ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
   const badge = clock
     ? h('span', { class: 'level-badge chrono-badge' }, h('span', { class: 'chrono-level' }, levelText), clock)
     : h('span', { class: 'level-badge' }, levelText);
-  show(h('main', { class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}`, 'data-game': game.id },
+  show(h('main', {
+    class: `screen play domain-theme-${game.domain} play-${q.interaction || 'choice'}${session.duo ? ' duo-play' : ''}`, 'data-game': game.id, 'data-title': game.title,
+  },
+    h('h1', { class: 'visually-hidden' }, game.title),
     session.duo
       ? topBar({ onBack: session.back, backLabel: 'Quitter', title: duoScoreboard(session, progress) })
       : topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
     h('div', { class: 'instruction' },
       h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
         avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')),
-      h('button', { class: 'bubble bubble-left', onclick: replay }, frenchSpacing(brief ? q.short.text : q.text))),
+      h('button', { class: 'bubble bubble-left', onclick: replay }, readable(frenchSpacing(brief ? q.short.text : q.text)))),
     stage,
     zone,
     feedback));
@@ -1285,7 +1474,7 @@ async function markCorrect(ctx) {
   };
   save();
   session.index++;
-  if (game.timed && session.index >= session.total) session.chronoEnd = Date.now(); // dernière bonne réponse : le chrono s'arrête
+  if (session.chrono && session.index >= session.total) session.chronoEnd = Date.now(); // dernière bonne réponse : le chrono s'arrête
 
   const name = me().name;
   const praise = firstTry ? (rng() < 0.3 ? `Bravo ${name} !` : pick(rng, PRAISES)) : 'Oui, c’est ça !';
@@ -1301,7 +1490,7 @@ async function markCorrect(ctx) {
     toSay.push('Tu passes au niveau suivant !');
     setTimeout(() => playSound('levelUp'), 300);
   }
-  if (game.timed) {
+  if (session.chrono) {
     // défi chrono : on enchaîne vite, le temps tourne
     say(session.guide, praise);
     await sleep(800);
@@ -1329,6 +1518,8 @@ function choiceZone(ctx) {
       if (choice.value === q.answer) {
         btn.classList.add('correct');
         zone.classList.add('answered');
+        // les autres choix, estompés, ne servent plus : inactifs (aussi pour les lecteurs d'écran)
+        zone.querySelectorAll('.choice:not(.correct)').forEach((other) => other.setAttribute('aria-disabled', 'true'));
         markCorrect(ctx);
         return;
       }
@@ -1417,7 +1608,7 @@ function matchZone(ctx) {
   // à gauche : un calcul, un mot… ou une collection d'objets à compter
   const lefts = q.pairs.map((p, i) => h('button', { class: `match-item left${p.objects ? ' has-objects' : ''}${p.emoji ? ' has-emoji' : ''}`, 'data-left': i, 'aria-label': p.objects ? String(p.left) : undefined },
     p.objects ? renderChoiceContent({ objects: p.objects })
-      : p.swatch ? h('span', { class: 'swatch', style: { background: p.swatch }, role: 'img', 'aria-label': p.left })
+      : p.swatch ? h('span', { class: 'color-named' }, h('span', { class: 'swatch', style: { background: p.swatch }, role: 'img', 'aria-label': p.left }), colorName(p.left))
         : p.emoji || p.left));
   const rightLang = q.rightLang ? { lang: q.rightLang } : {};
   const rights = q.rights.map((v) => h('button', { class: `match-item right${typeof v === 'string' ? ' is-word' : ''}`, 'data-right': v, ...rightLang }, v));
@@ -1513,7 +1704,9 @@ function matchZone(ctx) {
       e.preventDefault();
       const points = [local(e.clientX, e.clientY)];
       let trace = null;
+      const tapOnly = access().tapOnly; // toucher plutôt que glisser : un doigt qui bouge un peu reste un toucher
       const move = (ev) => {
+        if (tapOnly) return;
         const p = local(ev.clientX, ev.clientY);
         const last = points.at(-1);
         if (Math.hypot(p[0] - last[0], p[1] - last[1]) < 3) return;
@@ -1679,6 +1872,7 @@ function fillZone(ctx) {
         return box && zone.contains(box) && !box.disabled ? box : null;
       };
       const move = (ev) => {
+        if (access().tapOnly) return; // toucher plutôt que glisser : pas de glisser-déposer
         if (!ghost && Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) > 8) {
           ghost = h('div', { class: 'tile tile-ghost', 'aria-hidden': 'true', style: { width: `${rect.width}px`, height: `${rect.height}px` } }, q.tiles[t]);
           document.body.append(ghost);
@@ -1927,7 +2121,7 @@ function picrossZone(ctx) {
     start(Number(cell.dataset.cell));
   });
   board.addEventListener('pointermove', (e) => {
-    if (!painting) return;
+    if (!painting || access().tapOnly) return; // toucher plutôt que glisser : une case par toucher
     const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('.pc-cell');
     const i = cell && board.contains(cell) ? Number(cell.dataset.cell) : -1;
     if (i < 0 || i === painting.last) return;
@@ -1999,12 +2193,14 @@ function swapZone(ctx) {
   let selected = null;
   const board = h('div', { class: 'pz-board', style: { '--cols': cols, '--rows': rows } });
   const draw = () => {
+    // au clavier, la pièce qui avait le focus le garde après l'échange
+    const focused = board.contains(document.activeElement) ? document.activeElement.dataset.pos : null;
     board.replaceChildren(...order.map((piece, pos) => {
       const tile = h('button', {
         class: `pz-tile${selected === pos ? ' selected' : ''}${piece === pos ? ' placed' : ''}`,
         'data-pos': pos,
         'data-piece': piece,
-        'aria-label': `Pièce ${pos + 1}${piece === pos ? ', bien placée' : ''}`,
+        'aria-label': `Pièce ${pos + 1}${piece === pos ? ', bien placée' : ''}${selected === pos ? ', choisie' : ''}`,
       }, puzzlePiece(q.stage, piece));
       tile.addEventListener('click', () => {
         if (ctx.session.locked) return;
@@ -2020,6 +2216,7 @@ function swapZone(ctx) {
       });
       return tile;
     }));
+    if (focused !== null) board.querySelector(`[data-pos="${focused}"]`)?.focus();
   };
   const checkSolved = () => {
     if (!order.every((v, i) => v === i)) return;
@@ -2063,7 +2260,8 @@ function memoryZone(ctx) {
   const count = h('span', { class: 'memory-count', 'aria-live': 'polite' }, `0 / ${n / 2}`);
   const cards = q.cards.map((card, i) => {
     const el = h('button', { class: 'memory-card', 'data-card': i, 'aria-label': 'Carte retournée' },
-      h('span', { class: `memory-face${card.small ? ' small' : ''}${card.word ? ' word' : ''}`, lang: card.lang }, card.label));
+      h('span', { class: `memory-face${card.small ? ' small' : ''}${card.word ? ' word' : ''}`, lang: card.lang },
+        card.label, card.word ? null : emojiColorName(card.label)));
     el.addEventListener('click', () => {
       if (ctx.session.locked || busy || found.has(i) || open.includes(i)) return;
       open.push(i);
@@ -2117,8 +2315,9 @@ function colorbyZone(ctx) {
   const svg = document.createElementNS(ns, 'svg');
   svg.setAttribute('viewBox', '0 0 120 120');
   svg.setAttribute('class', 'magic-drawing');
-  svg.setAttribute('role', 'img');
+  svg.setAttribute('role', 'group');
   svg.setAttribute('aria-label', 'Dessin à colorier');
+  const zoneLabel = (i) => `Zone ${i + 1} : ${zones[i].label}${done.has(i) ? ', coloriée' : ''}`;
   const shapes = zones.map((z, i) => {
     const path = document.createElementNS(ns, 'path');
     path.setAttribute('d', z.d);
@@ -2127,9 +2326,11 @@ function colorbyZone(ctx) {
     path.setAttribute('class', 'magic-zone');
     path.dataset.zone = i;
     path.addEventListener('click', () => paint(i));
+    keyButton(path); // au clavier : Tab jusqu'à la zone, puis Entrée
     svg.append(path);
     return path;
   });
+  shapes.forEach((path, i) => path.setAttribute('aria-label', zoneLabel(i)));
   // les nombres par-dessus (ils ne captent pas le doigt)
   zones.forEach((z) => {
     const t = document.createElementNS(ns, 'text');
@@ -2148,6 +2349,7 @@ function colorbyZone(ctx) {
     }
     if (zones[i].c === color) {
       done.add(i);
+      shapes[i].setAttribute('aria-label', zoneLabel(i));
       shapes[i].setAttribute('fill', legend[color].hex);
       shapes[i].classList.add('painted');
       playSound('tap');
@@ -2173,7 +2375,7 @@ function colorbyZone(ctx) {
     const btn = h('button', {
       class: 'magic-color', 'data-color': i, style: { '--paint': c.hex },
       'aria-label': words ? c.name : `${c.n} : ${c.name}`, 'aria-pressed': 'false',
-    }, h('span', { class: 'magic-swatch', 'aria-hidden': 'true' }), words ? null : h('span', { class: 'magic-n' }, c.n));
+    }, h('span', { class: 'magic-swatch', 'aria-hidden': 'true' }), words ? null : h('span', { class: 'magic-n' }, c.n), colorName(c.name));
     btn.addEventListener('click', () => {
       color = i;
       buttons.forEach((b, k) => {
@@ -2213,6 +2415,12 @@ function mapZone(ctx) {
   const labels = (id) => [...map.querySelectorAll(`.map-label[data-for="${CSS.escape(id)}"]`)];
   const water = st.layer === 'oceans' || st.layer === 'seas';
   const zone = h('div', { class: 'choices map-clue' }, mapClue(q.clue));
+  // au clavier : Tab de zone en zone (sans dire son nom : c'est lui qu'on cherche), puis Entrée
+  map.setAttribute('role', 'group');
+  [...named].forEach((id, k) => {
+    const first = parts(id)[0];
+    if (first) keyButton(first, `Zone ${k + 1} de la carte`);
+  });
   map.addEventListener('click', (e) => {
     if (ctx.session.locked) return;
     const target = e.target.closest('[data-zone], [data-kind]');
@@ -2256,6 +2464,65 @@ function mapZone(ctx) {
   return { stage: h('div', { class: 'stage stage-map' }, map), zone };
 }
 
+// ---- Le corps humain : toucher une partie du dessin (un os, une articulation, un organe), ou
+// plusieurs dans l'ordre (le trajet des aliments). Une partie trouvée se remplit et reçoit une
+// coche ou son numéro (pas seulement une couleur) ; après une erreur, la bonne partie brille.
+
+function bodyZone(ctx) {
+  const { q } = ctx;
+  const pic = h('div', { class: `body-drawing body-${q.stage.view}`, role: 'group', 'aria-label': q.stage.label });
+  pic.innerHTML = bodySvg(q.stage.view);
+  const names = Object.fromEntries(q.choices.map((c) => [c.value, c.name]));
+  const steps = q.sequence || [q.answer];
+  let next = 0;
+  const parts = (id) => [...pic.querySelectorAll(`[data-zone="${CSS.escape(id)}"]`)];
+  const progress = h('span', { class: 'body-clue-text' }, q.sequence ? `0 / ${steps.length}` : names[q.answer]);
+  const zone = h('div', { class: 'choices map-clue body-clue' }, h('span', { class: 'map-clue-emoji', 'aria-hidden': 'true' }, '👆'), progress);
+  const touch = (id) => {
+    if (ctx.session.locked) return;
+    if (!names[id]) {
+      nudge(ctx, 'Essaie encore !');
+      return;
+    }
+    if (id === steps[next]) {
+      parts(id).forEach((el) => { el.classList.remove('hint'); el.classList.add('found'); });
+      const badge = pic.querySelector(`[data-badge="${CSS.escape(id)}"]`);
+      if (badge) {
+        badge.querySelector('text').textContent = q.sequence ? String(next + 1) : '✔';
+        badge.classList.add('show');
+      }
+      next++;
+      if (q.sequence) progress.textContent = `${next} / ${steps.length}`;
+      if (next === steps.length) {
+        zone.classList.add('answered');
+        markCorrect(ctx);
+      } else {
+        playSound('tap');
+      }
+      return;
+    }
+    if (parts(id)[0].classList.contains('found')) return; // déjà touchée
+    parts(id).forEach((el) => {
+      el.classList.remove('missed');
+      el.getBoundingClientRect(); // relance l'animation
+      el.classList.add('missed');
+    });
+    const hint = ctx.session.attempts >= 1;
+    if (hint) parts(steps[next]).forEach((el) => el.classList.add('hint'));
+    const said = voiciPartie(names[id]);
+    const then = hint ? 'Touche la partie qui brille !' : 'Essaie encore !';
+    markWrong(ctx, { message: `${said} ${then}`, speech: [said, then], given: names[id] });
+  };
+  pic.addEventListener('click', (e) => touch(e.target.closest('[data-zone]')?.dataset.zone));
+  pic.addEventListener('keydown', (e) => {
+    const target = e.target.closest('[data-zone]');
+    if (!target || (e.key !== 'Enter' && e.key !== ' ')) return;
+    e.preventDefault();
+    touch(target.dataset.zone);
+  });
+  return { stage: h('div', { class: 'stage stage-body' }, pic), zone };
+}
+
 /** Message court sous l'exercice, sans compter d'erreur. */
 function nudge(ctx, message) {
   ctx.feedback.replaceChildren(h('p', { class: 'try-again' }, message));
@@ -2273,7 +2540,8 @@ function dotsZone(ctx) {
     for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
     return node;
   };
-  const svg = el('svg', { viewBox: '-4 -4 108 108', class: 'dots-drawing', role: 'img', 'aria-label': 'Points à relier' });
+  // le dessin est caché aux lecteurs d'écran : c'est le bouton posé dessus (clavier) qui dit où on en est
+  const svg = el('svg', { viewBox: '-4 -4 108 108', class: 'dots-drawing', 'aria-hidden': 'true' });
   const shape = el('polygon', { class: 'dots-shape', points: '' });
   const line = el('polyline', { class: 'dots-line', points: '' });
   const rubber = el('line', { class: 'dots-rubber', x1: 0, y1: 0, x2: 0, y2: 0, visibility: 'hidden' });
@@ -2296,12 +2564,19 @@ function dotsZone(ctx) {
   let next = 0;
   let drawing = false;
   const linked = [];
+  const { tapOnly } = access();
+  // au clavier : un bouton transparent posé sur le dessin (sans texte : les nombres visibles du dessin
+  // ne sont pas dans son nom) ; Entrée (ou Espace) relie le point suivant
+  const key = h('button', { class: 'dots-key', type: 'button' });
   const refresh = () => {
     line.setAttribute('points', linked.map((i) => points[i].join(',')).join(' '));
     dots.forEach((g, i) => {
       g.classList.toggle('next', i === next);
       g.classList.toggle('done', linked.includes(i));
     });
+    key.setAttribute('aria-label', next < points.length
+      ? `Points à relier : ${linked.length} sur ${points.length}. Le prochain point est le ${labels[next]}.`
+      : `Points reliés : c’est ${q.stage.name}.`);
   };
   const toSvg = (e) => {
     const pt = svg.createSVGPoint();
@@ -2309,7 +2584,8 @@ function dotsZone(ctx) {
     pt.y = e.clientY;
     return pt.matrixTransform(svg.getScreenCTM().inverse());
   };
-  const near = (p, i) => Math.hypot(p.x - points[i][0], p.y - points[i][1]) < 8;
+  // toucher plutôt que glisser : on touche les points un par un (une cible un peu plus grande)
+  const near = (p, i) => Math.hypot(p.x - points[i][0], p.y - points[i][1]) < (tapOnly ? 11 : 8);
   const link = (i) => {
     linked.push(i);
     next++;
@@ -2342,8 +2618,9 @@ function dotsZone(ctx) {
     if (ctx.session.locked) return;
     e.preventDefault();
     const p = toSvg(e);
-    if (near(p, next)) {
-      drawing = true;
+    // toucher plutôt que glisser : le nombre écrit à côté du point compte aussi
+    if (near(p, next) || (tapOnly && Number(e.target.closest?.('.dot')?.dataset.dot) === next)) {
+      drawing = !tapOnly;
       link(next);
       return;
     }
@@ -2368,10 +2645,15 @@ function dotsZone(ctx) {
   svg.addEventListener('pointerup', stop);
   svg.addEventListener('pointercancel', stop);
   svg.addEventListener('pointerleave', stop);
+  key.addEventListener('click', () => {
+    if (!ctx.session.locked && next < points.length) link(next); // clavier
+  });
   refresh();
   const zone = h('div', { class: 'choices dots-zone' },
-    h('span', { class: 'dots-help' }, `Commence au ${labels[0]}, puis glisse ton doigt jusqu’au ${labels[1]}…`));
-  return { stage: h('div', { class: 'stage stage-dots' }, svg), zone };
+    h('span', { class: 'dots-help' }, tapOnly
+      ? `Touche le ${labels[0]}, puis le ${labels[1]}, puis le ${labels[2] ?? labels[1]}…`
+      : `Commence au ${labels[0]}, puis glisse ton doigt jusqu’au ${labels[1]}…`));
+  return { stage: h('div', { class: 'stage stage-dots' }, h('div', { class: 'dots-frame' }, svg, key)), zone };
 }
 
 // ---- Écris au doigt : suivre le chemin gris, trait après trait, en partant du point vert
@@ -2408,6 +2690,27 @@ function traceCheckpoints(points) {
   return out;
 }
 
+const TRACE_STOP = 18; // toucher plutôt que glisser : un point de passage environ tous les 18 unités du trait
+const TRACE_TAP = 16; // distance à laquelle un toucher atteint le point de passage
+
+/**
+ * Les points de passage d'un trait, à toucher dans l'ordre (réglage « toucher plutôt que glisser »,
+ * et clavier) : le nombre de points de contrôle atteints à chaque arrêt (le départ, puis environ
+ * tous les TRACE_STOP, et toujours la fin).
+ */
+function traceStops(stroke, cps) {
+  const out = [1];
+  let run = 0;
+  for (let k = 1; k < cps.length; k++) {
+    for (let i = cps[k - 1] + 1; i <= cps[k]; i++) run += Math.hypot(stroke[i][0] - stroke[i - 1][0], stroke[i][1] - stroke[i - 1][1]);
+    if (run >= TRACE_STOP || k === cps.length - 1) {
+      out.push(k + 1);
+      run = 0;
+    }
+  }
+  return [...new Set(out)];
+}
+
 /** Distance d'un point à une ligne brisée. */
 function distanceToLine([px, py], points) {
   let best = Infinity;
@@ -2435,8 +2738,11 @@ function traceZone(ctx) {
   }[set];
   const svg = el('svg', {
     viewBox: `${TRACE_VIEW.x} ${TRACE_VIEW.x} ${TRACE_VIEW.size} ${TRACE_VIEW.size}`,
-    class: `trace-drawing trace-${set}`, role: 'img', 'aria-label': `${what} à tracer`,
+    class: `trace-drawing trace-${set}`, 'aria-label': `${what} à tracer`,
   });
+  // au clavier : le dessin est un bouton ; Entrée (ou Espace) trace jusqu'au point de passage suivant
+  keyButton(svg);
+  const { tapOnly } = access();
   // lignes d'écriture de la cursive : ligne de base (pleine) et hauteur des minuscules (pointillés)
   if (lines) {
     svg.append(
@@ -2453,9 +2759,12 @@ function traceZone(ctx) {
   const arrow = el('path', { class: 'trace-arrow', d: 'M-2.6 -3.4 L3.6 0 L-2.6 3.4 Z' });
   const here = el('circle', { class: 'trace-here', r: 3.4, visibility: 'hidden' });
   const hintDot = el('circle', { class: 'trace-hint-dot', r: 4.4, visibility: 'hidden' });
-  svg.append(...guides, ...done, inkLayer, arrow, start, here, hintDot);
+  // toucher plutôt que glisser : les points de passage du trait en cours, le suivant brille
+  const stopLayer = el('g', { class: 'trace-stops' });
+  svg.append(...guides, ...done, inkLayer, arrow, start, stopLayer, here, hintDot);
 
   const checkpoints = strokes.map(traceCheckpoints);
+  const stops = strokes.map((st, i) => traceStops(st, checkpoints[i]));
   let current = 0; // trait en cours
   let reached = 0; // points de contrôle déjà atteints sur ce trait
   let finished = false;
@@ -2497,7 +2806,7 @@ function traceZone(ctx) {
         arrow.setAttribute('visibility', 'visible');
       }
       // doigt levé au milieu d'un trait : on montre où reprendre
-      if (reached > 0 && !drawing) {
+      if (reached > 0 && !drawing && !tapOnly) {
         const p = st[checkpoints[current][reached - 1]];
         here.setAttribute('cx', p[0]);
         here.setAttribute('cy', p[1]);
@@ -2510,6 +2819,15 @@ function traceZone(ctx) {
       s.textContent = i < current ? '✓' : String(i + 1);
     });
     stepsLabel.textContent = finished ? 'Terminé' : `Trait ${current + 1} sur ${strokes.length}`;
+    svg.setAttribute('aria-label', finished ? `${what} : terminé` : `${what} à tracer : trait ${current + 1} sur ${strokes.length}`);
+    stopLayer.replaceChildren();
+    if (tapOnly && show) {
+      const next = stops[current].find((k) => k > reached);
+      for (const k of stops[current].filter((x) => x > reached)) {
+        const [x, y] = strokes[current][checkpoints[current][k - 1]];
+        stopLayer.append(el('circle', { class: k === next ? 'trace-stop next' : 'trace-stop', cx: x, cy: y, r: k === next ? 4.8 : 2.6 }));
+      }
+    }
   };
 
   const finish = () => {
@@ -2579,9 +2897,42 @@ function traceZone(ctx) {
     inkPoints.push(p);
     ink.setAttribute('points', inkPoints.map((pt) => `${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' '));
   };
+  // Toucher plutôt que glisser, et clavier : le trait avance jusqu'au point de passage suivant.
+  let tapNudged = 0;
+  const advance = () => {
+    if (session.locked || finished) return;
+    waitLift = false;
+    reached = stops[current].find((k) => k > reached) ?? checkpoints[current].length;
+    if (reached >= checkpoints[current].length) strokeDone();
+    else {
+      playSound('tap');
+      refresh();
+    }
+  };
+  const tapAt = (p) => {
+    const k = stops[current].find((x) => x > reached) ?? checkpoints[current].length;
+    const [x, y] = strokes[current][checkpoints[current][k - 1]];
+    if (Math.hypot(p[0] - x, p[1] - y) <= TRACE_TAP) {
+      if (lostMessage?.isConnected) ctx.feedback.replaceChildren();
+      advance();
+      return;
+    }
+    if (Date.now() - tapNudged > 2500) {
+      tapNudged = Date.now();
+      nudge(ctx, 'Touche le point qui brille !');
+      lostMessage = ctx.feedback.firstChild;
+    }
+  };
+  svg.addEventListener('click', (e) => {
+    if (e.detail === 0) advance(); // clavier
+  });
   svg.addEventListener('pointerdown', (e) => {
     if (session.locked || finished) return;
     e.preventDefault();
+    if (tapOnly) {
+      tapAt(toSvg(e));
+      return;
+    }
     try { svg.setPointerCapture(e.pointerId); } catch { /* pointeur déjà relâché */ }
     drawing = true;
     waitLift = false;
@@ -2644,7 +2995,7 @@ function traceZone(ctx) {
       else setTimeout(() => { if (run === hintRun) hintDot.setAttribute('visibility', 'hidden'); }, 500);
     };
     hintFrame = requestAnimationFrame(step);
-    say(session.guide, 'Regarde le point jaune, puis fais pareil avec ton doigt !');
+    say(session.guide, tapOnly ? 'Regarde le point jaune, puis touche les points un par un !' : 'Regarde le point jaune, puis fais pareil avec ton doigt !');
   };
   // ↺ : on efface et on recommence le glyphe
   const restart = () => {
@@ -2751,7 +3102,7 @@ function setClockZone(ctx) {
     follow(p);
   });
   svg.addEventListener('pointermove', (e) => {
-    if (grabbed) follow(pointer(e));
+    if (grabbed && !access().tapOnly) follow(pointer(e)); // toucher plutôt que glisser : l'aiguille va là où l'on touche
   });
   const release = () => {
     grabbed = null;
@@ -2785,7 +3136,7 @@ function setClockZone(ctx) {
   const shiftButton = (minutes, label, aria) => h('button', {
     class: `clock-btn ${Math.abs(minutes) === 60 ? 'clock-btn-hour' : 'clock-btn-minute'}`,
     'data-shift': minutes,
-    'aria-label': aria,
+    'aria-label': `${label} : ${aria}`,
     onclick: () => setTime(shiftClock(time, minutes)),
   }, label);
   const zone = h('div', { class: 'choices setclock-zone' },
@@ -2795,6 +3146,129 @@ function setClockZone(ctx) {
     h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ C’est l’heure'));
   render();
   return { stage: h('div', { class: 'stage stage-setclock' }, dial), zone };
+}
+
+// ---- La droite numérique : toucher (ou glisser) pour poser la flèche, puis « C'est ici »
+
+function numberLineZone(ctx) {
+  const { q } = ctx;
+  const st = q.stage;
+  const wrap = numberLineElement(st, { place: true, target: q.target });
+  wrap.classList.add('nl-place');
+  const svg = wrap.querySelector('svg');
+  const cursor = svg.querySelector('.nl-cursor');
+  let value = null; // pas encore de flèche posée
+  const setValue = (v) => {
+    if (ctx.session.locked || v === value) return;
+    value = v;
+    playSound('tap');
+    cursor.setAttribute('transform', `translate(${lineX(st, value).toFixed(2)} 0)`);
+    wrap.classList.add('placed');
+    wrap.dataset.value = value;
+  };
+  // la flèche se cale sur la graduation la plus proche du doigt
+  const pointerValue = (e) => {
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    return lineValueAt(st, pt.matrixTransform(svg.getScreenCTM().inverse()).x);
+  };
+  let dragging = false;
+  svg.addEventListener('pointerdown', (e) => {
+    if (ctx.session.locked) return;
+    e.preventDefault();
+    dragging = true;
+    try {
+      svg.setPointerCapture(e.pointerId);
+    } catch {
+      // sans capture, le glisser marche tant que le doigt reste sur la droite
+    }
+    setValue(pointerValue(e));
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (dragging && !access().tapOnly) setValue(pointerValue(e));
+  });
+  const release = () => { dragging = false; };
+  svg.addEventListener('pointerup', release);
+  svg.addEventListener('pointercancel', release);
+  // les boutons ◀ ▶ : une graduation de plus ou de moins (petits doigts, accessibilité)
+  const move = (dir) => setValue(value === null ? st.min : Math.min(st.max, Math.max(st.min, value + dir * st.snap)));
+
+  const validate = () => {
+    if (ctx.session.locked) return;
+    if (value === null) {
+      nudge(ctx, 'Touche la droite pour placer la flèche.');
+      return;
+    }
+    if (Math.abs(value - q.target) <= (q.tolerance || 0)) {
+      wrap.classList.add('right');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    wrap.classList.add('shake');
+    setTimeout(() => wrap.classList.remove('shake'), 400);
+    // après deux erreurs, la bonne place est montrée en pointillés
+    const hint = ctx.session.attempts >= 1;
+    if (hint) wrap.classList.add('show-hint');
+    const message = hint ? 'Mets la flèche sur les pointillés.'
+      : value < q.target ? 'C’est plus loin : va vers la droite.' : 'C’est moins loin : reviens vers la gauche.';
+    markWrong(ctx, { message, given: value });
+  };
+  const zone = h('div', { class: 'choices numberline-zone' },
+    h('button', { class: 'nl-btn', 'data-move': '-1', 'aria-label': 'Reculer la flèche', onclick: () => move(-1) }, '◀'),
+    h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ C’est ici'),
+    h('button', { class: 'nl-btn', 'data-move': '1', 'aria-label': 'Avancer la flèche', onclick: () => move(1) }, '▶'));
+  return { stage: h('div', { class: 'stage stage-nl' }, wrap), zone };
+}
+
+// ---- Les fractions : toucher les parts pour les colorier, puis « J'ai fini »
+
+function shadeZone(ctx) {
+  const { q } = ctx;
+  const parts = q.stage.sizes.length;
+  const pic = fractionElement(q.stage, 'fraction-shade');
+  const svg = pic.querySelector('svg');
+  const on = new Set();
+  // au clavier : chaque part est un bouton (Entrée ou Espace la colorie)
+  pic.setAttribute('role', 'group');
+  svg.removeAttribute('aria-hidden');
+  const partLabel = (i) => `Part ${i + 1} sur ${parts}${on.has(i) ? ', coloriée' : ''}`;
+  svg.querySelectorAll('[data-part]').forEach((part) => keyButton(part, partLabel(Number(part.dataset.part))));
+  svg.addEventListener('click', (e) => {
+    const part = e.target.closest('[data-part]');
+    if (!part || ctx.session.locked) return;
+    const i = Number(part.dataset.part);
+    if (on.has(i)) on.delete(i);
+    else on.add(i);
+    // la part coloriée est rayée (le motif, pas seulement la couleur)
+    part.classList.toggle('on', on.has(i));
+    part.setAttribute('aria-label', partLabel(i));
+    part.setAttribute('aria-pressed', String(on.has(i)));
+    part.setAttribute('fill', on.has(i) ? `url(#${svg.dataset.pattern})` : svg.dataset.base);
+    pic.dataset.count = on.size;
+    playSound('tap');
+  });
+  const validate = () => {
+    if (ctx.session.locked) return;
+    if (on.size === q.target) {
+      pic.classList.add('right');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    if (!on.size) {
+      nudge(ctx, 'Touche les parts pour les colorier.');
+      return;
+    }
+    pic.classList.add('shake');
+    setTimeout(() => pic.classList.remove('shake'), 400);
+    const message = ctx.session.attempts >= 1 ? `Colorie ${q.target} part${q.target > 1 ? 's' : ''} sur ${parts}.`
+      : on.size > q.target ? 'Tu as colorié trop de parts.' : 'Il manque des parts à colorier.';
+    markWrong(ctx, { message, given: `${on.size}/${parts}` });
+  };
+  const zone = h('div', { class: 'choices shade-zone' }, h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
+  return { stage: h('div', { class: 'stage stage-shade' }, pic), zone };
 }
 
 // ---- Payer le bon prix : toucher les pièces et les billets
@@ -2853,6 +3327,10 @@ function orderZone(ctx) {
   const content = (item) => (item.emoji
     ? h('span', { class: 'order-emoji', style: { '--scale': item.scale } }, item.emoji)
     : item.label);
+  // une image et sa légende écrite dessous (histoire à remettre dans l'ordre) ; la case ne
+  // reçoit que l'image
+  const face = (item) => (item.caption ? [content(item), h('span', { class: 'order-caption' }, item.caption)] : content(item));
+  const captions = q.items.some((it) => it.caption);
   const slots = sorted.map(() => h('span', { class: 'order-slot', ...(q.lang ? { lang: q.lang } : {}) }));
   const sign = q.sign ?? (q.items[0].emoji ? '→' : q.order === 'desc' ? '>' : '<');
   const lang = q.lang ? { lang: q.lang } : {};
@@ -2860,7 +3338,7 @@ function orderZone(ctx) {
     const btn = h('button', {
       class: `order-item${item.emoji ? ' order-picture' : ''}`, 'data-value': String(item.value), 'data-label': item.label,
       'aria-label': item.label || `Taille ${item.value + 1}`, ...lang,
-    }, content(item));
+    }, face(item));
     btn.addEventListener('click', () => {
       if (ctx.session.locked || btn.disabled) return;
       if (item.value !== null && same(item, sorted[next])) {
@@ -2887,7 +3365,7 @@ function orderZone(ctx) {
   });
   // des mots entiers (une phrase à remettre dans l'ordre) : écrits un peu plus petit
   const words = q.items.some((it) => (it.label || '').length > 2);
-  const zone = h('div', { class: `choices order center${words ? ' words' : ''}` },
+  const zone = h('div', { class: `choices order center${words ? ' words' : ''}${captions ? ' captions' : ''}` },
     h('div', { class: `order-slots n${slots.length}` }, slots.flatMap((slot, i) => (i && sign ? [h('span', { class: 'order-sign', 'aria-hidden': 'true' }, sign), slot] : [slot]))),
     h('div', { class: `order-items n${q.items.length}` }, buttons));
   return zone;
@@ -2951,9 +3429,11 @@ function mazeZone(ctx) {
     'aria-label': `Labyrinthe de ${cols} cases sur ${rows}${items.length ? `, avec ${items.length} clés à ramasser` : ''}`,
     style: { '--cols': cols, '--rows': rows },
   }, cells);
+  const mazeLabel = grid.getAttribute('aria-label');
   const place = () => {
     cells[pos].append(heroEl);
     cells.forEach((c, i) => c.classList.toggle('here', i === pos));
+    grid.setAttribute('aria-label', `${mazeLabel}. ${hero} est ligne ${Math.floor(pos / cols) + 1}, colonne ${(pos % cols) + 1}.`);
   };
   const bump = () => {
     heroEl.classList.remove('bump');
@@ -3003,12 +3483,14 @@ function mazeZone(ctx) {
     if (cell !== null) slideTo(cell);
   });
   grid.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
+    if (!dragging || access().tapOnly) return; // toucher plutôt que glisser : une case touchée à la fois
     const cell = cellAt(e);
     if (cell !== null) slideTo(cell, true);
   });
   for (const type of ['pointerup', 'pointercancel']) grid.addEventListener(type, () => { dragging = false; });
   place();
+  // les flèches du clavier (ordinateur)
+  arrowKeys(grid, (dx, dy) => { if (!moveTo(pos + dx + dy * cols)) bump(); });
 
   const arrow = (label, symbol, delta) => h('button', {
     class: 'maze-arrow',
@@ -3197,12 +3679,26 @@ function roundMazeZone(ctx) {
     if (cell !== null) slideTo(cell);
   });
   board.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
+    if (!dragging || access().tapOnly) return; // toucher plutôt que glisser : une case touchée à la fois
     const cell = cellAt(e);
     if (cell !== null) slideTo(cell, true);
   });
   for (const type of ['pointerup', 'pointercancel']) board.addEventListener(type, () => { dragging = false; });
 
+  // Les flèches (clavier, ou boutons) : la case voisine, sans mur, dans cette direction à l'écran.
+  const step = (dx, dy) => {
+    if (ctx.session.locked) return;
+    const [x0, y0] = centreOf(pos);
+    let best = null;
+    let score = 0.4;
+    for (const c of links[pos]) {
+      const [x, y] = centreOf(c);
+      const s = ((x - x0) * dx + (y - y0) * dy) / (Math.hypot(x - x0, y - y0) || 1);
+      if (s > score) [best, score] = [c, s];
+    }
+    if (best === null || !moveTo(best)) bump();
+  };
+  arrowKeys(board, step);
   // L'indice montre les 3 prochaines cases ; il compte comme une aide (pas d'étoile « du premier coup »).
   const hint = () => {
     if (ctx.session.locked) return;
@@ -3216,7 +3712,11 @@ function roundMazeZone(ctx) {
     }
     say(ctx.session.guide, 'Suis les étoiles !');
   };
+  // les boutons-flèches : affichés avec « toucher plutôt que glisser », ou dès qu'on y arrive au clavier
+  const arrowButton = (label, symbol, dx, dy) => h('button', { class: 'maze-arrow', 'aria-label': label, onclick: () => step(dx, dy) }, symbol);
   const zone = h('div', { class: 'choices rmaze-controls' },
+    h('div', { class: 'rmaze-arrows' },
+      arrowButton('Gauche', '←', -1, 0), arrowButton('Haut', '↑', 0, -1), arrowButton('Bas', '↓', 0, 1), arrowButton('Droite', '→', 1, 0)),
     h('button', { class: 'maze-arrow maze-hint', 'aria-label': 'Indice', onclick: hint }, '💡'));
   return { stage: h('div', { class: 'stage stage-maze stage-rmaze' }, board), zone };
 }
@@ -3302,9 +3802,15 @@ function lassoZone(ctx) {
   svg.setAttribute('aria-hidden', 'true');
   // une marge de 5 % tout autour : aucun objet ne touche le bord du cadre
   const spot = positions.map((p) => [5 + p.x * 0.9, 5 + p.y * 0.9]);
-  const objects = spot.map(([x, y], i) => h('span', { class: 'lasso-object', 'data-i': i, style: { left: `${x}%`, top: `${y}%` } }, emoji));
-  const field = h('div', { class: 'lasso-field', role: 'img', 'aria-label': `${count} ${many}`, style: { '--cols': cols, '--rows': rows } }, svg, objects);
-  const help = h('p', { class: 'lasso-help' }, `Entoure ${group} ${emoji} avec ton doigt, ou touche-les un par un.`);
+  const { tapOnly } = access();
+  // au clavier : chaque objet est un bouton (Tab, puis Entrée pour le choisir)
+  const objects = spot.map(([x, y], i) => keyButton(h('span', {
+    class: 'lasso-object', 'data-i': i, style: { left: `${x}%`, top: `${y}%` }, 'aria-pressed': 'false',
+  }, emoji), `${q.stage.one || emoji} ${i + 1}`));
+  const field = h('div', { class: 'lasso-field', role: 'group', 'aria-label': `${count} ${many}`, style: { '--cols': cols, '--rows': rows } }, svg, objects);
+  const help = h('p', { class: 'lasso-help' }, tapOnly
+    ? `Touche ${group} ${emoji}, un par un, pour faire un paquet.`
+    : `Entoure ${group} ${emoji} avec ton doigt, ou touche-les un par un.`);
   const zone = h('div', { class: 'choices lasso-zone' }, help);
 
   const newPath = (cls) => {
@@ -3336,6 +3842,8 @@ function lassoZone(ctx) {
       grouped.add(i);
       objects[i].classList.remove('picked');
       objects[i].classList.add('grouped');
+      objects[i].setAttribute('aria-pressed', 'true');
+      objects[i].setAttribute('aria-label', `${q.stage.one || emoji} ${i + 1}, dans le paquet ${groups}`);
       objects[i].style.setProperty('--pair', color);
       objects[i].dataset.group = groups;
       delete objects[i].dataset.n;
@@ -3361,6 +3869,7 @@ function lassoZone(ctx) {
       picked.push(i);
       objects[i].classList.add('picked');
     }
+    objects[i].setAttribute('aria-pressed', String(picked.includes(i)));
     picked.forEach((x, n) => { objects[x].dataset.n = n + 1; });
     if (picked.length === group) closeGroup(picked, null);
   };
@@ -3371,8 +3880,14 @@ function lassoZone(ctx) {
     const r = field.getBoundingClientRect();
     return [((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100];
   };
+  // toucher un objet (toucher plutôt que glisser, ou Entrée au clavier) : il est choisi
+  field.addEventListener('click', (e) => {
+    if ((!tapOnly && e.detail !== 0) || ctx.session.locked || groups === needed) return;
+    const target = e.target.closest('.lasso-object');
+    if (target && field.contains(target)) togglePick(Number(target.dataset.i));
+  });
   field.addEventListener('pointerdown', (e) => {
-    if (ctx.session.locked || groups === needed) return;
+    if (ctx.session.locked || groups === needed || tapOnly) return;
     e.preventDefault();
     field.setPointerCapture?.(e.pointerId);
     points = [norm(e)];
@@ -3484,12 +3999,250 @@ function buildZone(ctx) {
         class: 'add-btn',
         'data-add': '1',
         'data-fruit': i,
-        'aria-label': `Ajouter ${item.one}`,
+        'aria-label': `+1 : ajouter ${item.one}`,
         onclick: () => add(i),
       }, h('span', { class: 'add-emoji' }, item.emoji), '+1')),
       tens ? h('button', { class: 'add-btn bag', 'data-add': '10', onclick: () => add(0, 10) }, h('span', { class: 'add-emoji' }, '🛍️'), '+10') : null),
     h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
   return { stage: h('div', { class: 'stage stage-build' }, list, basket, counter), zone };
+}
+
+// ---- Le partage : donner les objets un par un aux enfants (ou les ranger par paquets)
+
+// Objets par ligne dans l'assiette d'un enfant, selon le nombre d'enfants (comme dans style.css).
+const SHARE_PER_ROW = { 2: 6, 3: 5, 4: 4, 5: 3 };
+
+function shareZone(ctx) {
+  const { q } = ctx;
+  const { emoji, total, groups, size, who } = q.stage;
+  const packets = Boolean(size);
+  const guide = ctx.session.guide;
+  let left = total;
+  let finished = false;
+  let selected = false; // un objet du tas est choisi : le prochain enfant touché le reçoit
+  // objets de chaque assiette ; en paquets, objets de chaque paquet (le dernier est ouvert)
+  const counts = packets ? [0] : who.map(() => 0);
+  // une assiette ne peut pas recevoir beaucoup plus que sa part : le dessin ne déborde jamais
+  const cap = packets ? size : Math.ceil(total / groups) + 2;
+  const perRow = total > 10 ? 10 : 5;
+  const pileEl = h('div', { class: `share-pile per-${perRow}`, style: { '--rows': Math.ceil(total / perRow) } });
+  const holders = packets
+    ? h('div', { class: 'share-bags', style: { '--rows': Math.ceil(Math.floor(total / size) / 2) } })
+    : h('div', { class: `share-plates n${groups}`, style: { '--rows': Math.ceil(cap / SHARE_PER_ROW[groups]) } });
+  const help = h('p', { class: 'share-help' }, packets ? `Touche le paquet pour y mettre 1 ${emoji}.` : `Touche un enfant pour lui donner 1 ${emoji}.`);
+  const zone = h('div', { class: 'choices share-zone' }, help);
+
+  const plates = packets ? [] : who.map((kid, i) => {
+    const dish = h('span', { class: 'share-dish' });
+    const count = h('span', { class: 'share-count', 'aria-hidden': 'true' });
+    // toucher l'enfant (ou son assiette) lui donne un objet ; la flèche en reprend un, remis sur le tas
+    const back = h('button', { class: 'share-back', 'aria-label': `Reprendre à l’enfant ${i + 1}`, hidden: true, onclick: () => takeBack(i) }, '↩');
+    const el = h('div', { class: 'share-plate', 'data-plate': i },
+      h('button', { class: 'share-give', 'aria-label': `Donner à l’enfant ${i + 1}`, onclick: () => give(i) },
+        h('span', { class: 'share-who', 'aria-hidden': 'true' }, kid), dish),
+      h('span', { class: 'share-foot' }, count, back));
+    return { el, dish, count, back };
+  });
+  if (!packets) holders.append(...plates.map((p) => p.el));
+
+  // glisser un objet du tas jusqu'à un enfant (ou jusqu'au paquet), ou le toucher
+  const targetAt = (ev) => {
+    const el = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.share-plate, .share-bag.open');
+    return el && holders.contains(el) ? el : null;
+  };
+  const dropOn = (el) => (packets ? fill() : give(Number(el.dataset.plate)));
+  const tapObject = () => {
+    if (packets) return fill();
+    selected = !selected;
+    return render();
+  };
+  const pileObject = (i) => {
+    const el = h('button', { class: `share-object${selected && i === left - 1 ? ' selected' : ''}`, 'aria-label': `Prendre 1 ${emoji}` }, emoji);
+    let fromPointer = false; // le toucher est déjà traité au lever du doigt
+    el.addEventListener('click', () => {
+      if (fromPointer) { fromPointer = false; return; }
+      if (!ctx.session.locked && !finished) tapObject(); // clavier, lecteur d'écran
+    });
+    el.addEventListener('pointerdown', (e) => {
+      if (ctx.session.locked || finished) return;
+      e.preventDefault();
+      const start = [e.clientX, e.clientY];
+      const rect = el.getBoundingClientRect();
+      let ghost = null;
+      let over = null;
+      const move = (ev) => {
+        if (access().tapOnly) return; // toucher plutôt que glisser : pas de glisser-déposer
+        if (!ghost && Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) > 8) {
+          ghost = h('div', { class: 'share-ghost', 'aria-hidden': 'true', style: { width: `${rect.width}px`, height: `${rect.height}px` } }, emoji);
+          document.body.append(ghost);
+          el.classList.add('dragging');
+        }
+        if (!ghost) return;
+        ghost.style.transform = `translate(${ev.clientX - rect.width / 2}px, ${ev.clientY - rect.height / 2}px)`;
+        ghost.hidden = true; // pour trouver l'enfant sous le doigt
+        const target = targetAt(ev);
+        ghost.hidden = false;
+        if (target !== over) {
+          over?.classList.remove('drop-target');
+          target?.classList.add('drop-target');
+          over = target;
+        }
+      };
+      const up = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        fromPointer = true;
+        setTimeout(() => { fromPointer = false; }, 400);
+        over?.classList.remove('drop-target');
+        if (!ghost) return tapObject();
+        ghost.remove();
+        el.classList.remove('dragging');
+        const target = ev.type === 'pointerup' ? targetAt(ev) : null;
+        return target ? dropOn(target) : undefined;
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    });
+    return el;
+  };
+
+  const items = (n) => Array.from({ length: n }, () => h('span', { class: 'share-item' }, emoji));
+  const render = () => {
+    pileEl.replaceChildren(...Array.from({ length: left }, (_, i) => pileObject(i)));
+    pileEl.setAttribute('aria-label', String(left));
+    if (packets) {
+      holders.replaceChildren(...counts.map((c, i) => (i === counts.length - 1 && c < size && !finished
+        ? h('button', { class: 'share-bag open', 'data-bag': i, 'aria-label': `Mettre 1 ${emoji} dans le paquet`, onclick: () => fill() },
+          items(c), Array.from({ length: size - c }, () => h('span', { class: 'share-slot' })))
+        : h('span', { class: 'share-bag full', role: 'img', 'aria-label': `Un paquet de ${size}` }, items(c)))));
+      return;
+    }
+    plates.forEach(({ el, dish, count, back }, i) => {
+      dish.replaceChildren(...items(counts[i]));
+      count.textContent = counts[i];
+      back.hidden = !counts[i] || finished;
+      el.classList.remove('hint');
+    });
+  };
+  const finish = () => {
+    finished = true;
+    render();
+    holders.classList.add('done');
+    if (!q.ask) {
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    // il reste à dire combien il en reste (ou combien de paquets) : les réponses apparaissent
+    const bubble = app.querySelector('.instruction .bubble');
+    if (bubble) bubble.textContent = frenchSpacing(q.ask.text);
+    ctx.feedback.replaceChildren();
+    zone.replaceChildren(...[q.ask.summary ? h('p', { class: 'share-summary' }, q.ask.summary) : null, choiceZone(ctx)].filter(Boolean));
+    say(guide, [q.ask.summary, q.ask.text].filter(Boolean));
+  };
+  // tout ce qui se partage est donné (il ne reste que le reste) : les parts sont-elles égales ?
+  const rest = packets ? 0 : total % groups;
+  const check = (gave) => {
+    if (left > rest) return;
+    if (counts.every((c) => c === counts[0])) return finish();
+    if (!gave) return;
+    if (ctx.session.attempts >= 1) {
+      const most = Math.max(...counts);
+      plates.forEach(({ el }, i) => el.classList.toggle('hint', counts[i] === most));
+    }
+    markWrong(ctx, { message: 'Ils n’en ont pas tous autant. Touche la flèche pour en reprendre.', given: counts.join(', ') });
+  };
+  const give = (i) => {
+    if (ctx.session.locked || finished || !left) return;
+    if (counts[i] >= cap) {
+      plates[i].el.classList.add('shake');
+      setTimeout(() => plates[i].el.classList.remove('shake'), 400);
+      return;
+    }
+    left--;
+    counts[i]++;
+    selected = false;
+    playSound('tap');
+    render();
+    check(true);
+  };
+  const takeBack = (i) => {
+    if (ctx.session.locked || finished || !counts[i]) return;
+    counts[i]--;
+    left++;
+    render();
+    check(false);
+  };
+  // en paquets : le paquet ouvert se ferme quand il est plein ; un autre s'ouvre s'il reste de quoi le remplir
+  const fill = () => {
+    if (ctx.session.locked || finished || !left) return;
+    counts[counts.length - 1]++;
+    left--;
+    playSound('tap');
+    if (counts.at(-1) === size) {
+      if (left < size) return finish();
+      counts.push(0);
+    }
+    render();
+  };
+  render();
+  return { stage: h('div', { class: 'stage stage-share' }, h('div', { class: 'share-scene' }, pileEl, holders)), zone };
+}
+
+// ---- L'addition posée : le résultat chiffre par chiffre, de droite à gauche, et la retenue
+
+function columnZone(ctx) {
+  const { q } = ctx;
+  const { steps } = q.stage;
+  const grid = columnGrid(q.stage);
+  const cellOf = (s) => grid.querySelector(`[data-cell="${s.kind === 'carry' ? 'c' : 'r'}${s.col}"]`);
+  let current = 0;
+  let misses = 0;
+  const caption = h('p', { class: 'column-step' });
+  const keys = Array.from({ length: 10 }, (_, d) => h('button', { class: 'key', 'data-digit': d, onclick: () => press(d) }, d));
+  const show = () => {
+    grid.querySelectorAll('.active').forEach((el) => el.classList.remove('active'));
+    const s = steps[current];
+    if (!s) return;
+    cellOf(s).classList.add('active');
+    caption.textContent = s.label;
+  };
+  const press = (d) => {
+    const s = steps[current];
+    if (ctx.session.locked || !s) return;
+    const el = cellOf(s);
+    if (d === s.digit) {
+      el.textContent = d;
+      el.classList.add('filled');
+      keys.forEach((k) => k.classList.remove('hint'));
+      misses = 0;
+      current++;
+      playSound('tap');
+      show();
+      if (current === steps.length) {
+        zone.classList.add('answered');
+        markCorrect(ctx);
+      }
+      return;
+    }
+    misses++;
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 400);
+    const hint = misses >= 2;
+    if (hint) keys[s.digit].classList.add('hint');
+    markWrong(ctx, {
+      message: hint ? `C’est ${s.digit} !` : 'Essaie encore !',
+      speech: hint ? `C’est ${s.digit}. Tape ${s.digit} !` : 'Essaie encore !',
+      given: `${s.label} : ${d}`,
+    });
+  };
+  // pavé de chiffres : 1 à 5, puis 6 à 9 et 0
+  const zone = h('div', { class: 'choices column-zone' }, caption,
+    h('div', { class: 'column-keys' }, [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => keys[d])));
+  show();
+  return { stage: h('div', { class: 'stage stage-column' }, grid), zone };
 }
 
 // ---- Fin de partie
@@ -3529,7 +4282,13 @@ function finishSession(session) {
   let chronoLine = null;
   let chronoSpeech = [];
   let newRecord = false;
-  if (game.timed && session.chronoStart) {
+  if (game.timed && !session.chronoStart) {
+    // sans chrono (accessibilité) : ni temps ni record, mais le niveau suit les réussites comme d'habitude
+    const level = session.levelState.level;
+    const next = chronoLevelAfter(level, session.correct, session.total, session.min, session.max);
+    kid.games[game.id] = { ...kid.games[game.id], level: next, streak: 0, recent: [] };
+    if (next > level) chronoLine = h('div', { class: 'chrono-result' }, h('p', { class: 'chrono-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')));
+  } else if (game.timed) {
     const level = session.levelState.level;
     const seconds = Math.max(1, chronoNow(session));
     const record = recordAfter(kid.records, game.id, level, seconds);
@@ -3683,14 +4442,16 @@ function bubblesGame(back) {
       'aria-label': 'Bulle',
       style: { left: `${5 + Math.random() * 80}%`, animationDuration: `${4 + Math.random() * 3}s`, '--hue': Math.floor(Math.random() * 360) },
     }, pick(rng, ['⭐', '🐟', '🍎', '🌸', '🦋', '']));
-    b.addEventListener('pointerdown', () => {
+    const pop = () => {
       if (b.classList.contains('popped')) return;
       b.classList.add('popped');
       popped++;
       score.textContent = String(popped);
       playSound('tap');
       setTimeout(() => b.remove(), 250);
-    });
+    };
+    b.addEventListener('pointerdown', pop);
+    b.addEventListener('click', (e) => { if (e.detail === 0) pop(); }); // clavier
     b.addEventListener('animationend', () => b.remove());
     field.append(b);
   };
@@ -3774,9 +4535,10 @@ function coloringGame(back) {
   let color = PALETTE[0];
   const drawing = h('div', { class: 'coloring' });
   drawing.innerHTML = `<svg viewBox="0 0 120 120">${COLORING[name]}</svg>`;
-  drawing.querySelectorAll('[data-zone]').forEach((zone) => {
+  drawing.querySelectorAll('[data-zone]').forEach((zone, i) => {
     zone.setAttribute('fill', '#ffffff');
     zone.addEventListener('click', () => { zone.setAttribute('fill', color); playSound('tap'); });
+    keyButton(zone, `Zone ${i + 1}`); // au clavier : Tab jusqu'à la zone, puis Entrée
   });
   const palette = h('div', { class: 'palette' }, PALETTE.map((c, i) => {
     const btn = h('button', { class: i === 0 ? 'paint on' : 'paint', style: { background: c }, 'aria-label': `Couleur ${i + 1}`, 'data-color': c });
@@ -3855,7 +4617,7 @@ function parentsScreen({ tab = 'suivi', childId, message = '' } = {}) {
     onclick: () => parentsScreen({ tab: id, childId }),
   }, icon(id), h('span', {}, label))));
   const content = tab === 'enfants' ? childrenTab() : tab === 'reglages' ? settingsTab() : followTab(childId);
-  show(h('main', { class: 'screen parents' },
+  show(h('main', { class: 'screen parents', 'data-title': `Espace parents : ${PARENT_TABS.find(([id]) => id === tab)[1]}` },
     topBar({ onBack: leaveParents, title: 'Espace parents' }),
     tabs,
     message ? h('p', { class: 'toast', role: 'status' }, message) : null,
@@ -3975,7 +4737,7 @@ function photoRow(id) {
       status));
 }
 
-function childEditScreen(id, message = '') {
+function childEditScreen(id, message = '', { section } = {}) {
   const kid = store.profiles[id];
   if (!kid) return parentsScreen({ tab: 'enfants' });
   show(h('main', { class: 'screen parents child-edit' },
@@ -4006,6 +4768,7 @@ function childEditScreen(id, message = '') {
       choiceSetting('Temps maximum par jour', 'limit', [[0, 'Sans'], [10, '10 min'], [15, '15'], [20, '20'], [30, '30']], kid.goals?.limit || 0,
         (v) => { kid.goals = { ...(kid.goals || {}), limit: v }; save(); }),
       h('p', { class: 'muted small' }, 'Quand le temps est écoulé, la partie en cours se termine, puis une pause est proposée. Vous pouvez accorder 10 minutes de plus.')),
+    a11yCard(id),
     kidGamesCard(id),
     h('section', { class: 'card danger-zone' },
       h('h2', {}, 'Données'),
@@ -4031,6 +4794,62 @@ function childEditScreen(id, message = '') {
           }
         },
       }, 'Supprimer ce profil'))));
+  // raccourci depuis les Réglages : la section Accessibilité de l'enfant
+  if (section === 'a11y') app.querySelector('[data-a11y-card]')?.scrollIntoView({ block: 'start' });
+}
+
+// ---- Accessibilité : les réglages de chaque enfant (profil kid.a11y, voir a11y.js)
+
+/** Les réglages, rangés par besoin : [titre, [clé, libellé, explication]…]. */
+const A11Y_GROUPS = [
+  ['Lire', [
+    ['spacing', 'Texte espacé', 'Plus d’espace entre les lettres, les mots et les lignes.'],
+    ['syllables', 'Syllabes colorées', 'Dans les mots à lire, une syllabe sur deux change de couleur.'],
+  ]],
+  ['Voir', [
+    ['contrast', 'Fort contraste', 'Texte noir sur fond blanc, bordures épaisses, sans dégradés.'],
+    ['namedColors', 'Couleurs nommées (daltonisme)', 'Chaque couleur est aussi écrite ou marquée d’un motif.'],
+  ]],
+  ['Toucher', [
+    ['bigTargets', 'Grands boutons', 'Boutons et cases plus grands et plus espacés, plus faciles à toucher.'],
+    ['tapOnly', 'Toucher plutôt que glisser', 'Ce qui se fait en glissant le doigt ou en traçant se fait aussi en touchant.'],
+  ]],
+  ['Entendre', [
+    ['captions', 'Sous-titres', 'Tout ce que dit la voix est aussi écrit à l’écran.'],
+    ['skipListening', 'Écoute facultative (surdité)', 'Les questions qui se jouent seulement à l’oreille sont mises de côté.'],
+  ]],
+  ['Rester concentré', [
+    ['calm', 'Mode calme', 'Sans décor de saison, sans musique ni animations ; sons plus doux.'],
+    ['noTimer', 'Sans chrono', 'Les défis chronométrés se jouent sans le temps qui court, et sans record.'],
+  ]],
+];
+const TEXT_SIZE_CHOICES = [[1, 'Normale'], [1.15, 'Grande'], [1.3, 'Très grande']];
+
+/** Accessibilité : la taille du texte, puis un interrupteur expliqué par réglage. Enregistré tout de suite. */
+function a11yCard(id) {
+  const kid = store.profiles[id];
+  const set = (key, value) => {
+    kid.a11y = cleanA11y({ ...a11y(kid), [key]: value });
+    save();
+    // l'enfant actif voit tout de suite le changement (taille du texte, contraste…)
+    if (id === store.active) applyA11y(kid);
+  };
+  const switchRow = ([key, label, help]) => {
+    const helpId = `a11y-help-${key}`;
+    // nom court (le libellé) et description (l'explication), lus séparément par VoiceOver
+    const box = h('input', {
+      type: 'checkbox', role: 'switch', checked: a11y(kid)[key], 'data-a11y': key, 'aria-labelledby': `a11y-label-${key}`, 'aria-describedby': helpId,
+    });
+    box.addEventListener('change', () => set(key, box.checked));
+    return h('label', { class: 'setting a11y-setting' },
+      h('span', { class: 'a11y-setting-text' }, h('b', { id: `a11y-label-${key}` }, label), h('span', { class: 'muted small', id: helpId }, help)),
+      box);
+  };
+  return h('section', { class: 'card a11y-card', 'data-a11y-card': id, id: `accessibilite-${id}` },
+    h('h2', {}, 'Accessibilité'),
+    h('p', { class: 'muted small' }, `Pour adapter l’app aux besoins de ${kid.name} : chaque réglage ne concerne que son profil.`),
+    choiceSetting('Taille du texte', 'text-size', TEXT_SIZE_CHOICES, a11y(kid).textSize, (v) => set('textSize', v)),
+    A11Y_GROUPS.map(([title, rows]) => h('div', { class: 'a11y-group' }, h('h3', {}, title), rows.map(switchRow))));
 }
 
 /**
@@ -4088,13 +4907,13 @@ function kidGamesCard(id) {
               h('span', { class: 'kid-game-ctrls' },
                 h('button', {
                   class: hidden ? 'kid-toggle' : 'kid-toggle on', 'data-show-game': game.id, 'aria-pressed': String(!hidden),
-                  'aria-label': `Afficher ${game.title}`, disabled: domainHidden,
+                  'aria-label': `${hidden ? 'Masqué' : 'Affiché'} : ${game.title}`, disabled: domainHidden,
                   // un jeu masqué n'est plus conseillé
                   onclick: change(() => { setIn('hiddenGames', game.id, !hidden); if (!hidden) setIn('featured', game.id, false); }),
                 }, hidden ? '🚫 Masqué' : '👁 Affiché'),
                 h('button', {
                   class: star ? 'kid-toggle star on' : 'kid-toggle star', 'data-feature-game': game.id, 'aria-pressed': String(star),
-                  'aria-label': `Conseiller ${game.title}`, disabled: domainHidden || hidden || (!star && full),
+                  'aria-label': `${star ? 'Conseillé' : 'Conseiller'} : ${game.title}`, disabled: domainHidden || hidden || (!star && full),
                   onclick: change(() => setIn('featured', game.id, !star)),
                 }, star ? '⭐ Conseillé' : '☆ Conseiller')));
           }));
@@ -4159,6 +4978,36 @@ async function downloadBytes(url, size, onBytes) {
  * bien plus vite que des milliers de petits fichiers. Un paquet dont il manque peu de sons n'est
  * pas retéléchargé : ces sons sont demandés un par un (le service worker les prend dans le paquet).
  */
+/**
+ * Les sons déjà gardés sur l'appareil. Au-delà d'environ 20 000 sons, Chrome refuse de lister le
+ * cache d'un coup (cache.keys() : « Operation too large ») : on cherche alors les sons un par un,
+ * par lots.
+ */
+async function cachedVoiceFiles(cache, files) {
+  try {
+    return new Set((await cache.keys()).map((r) => new URL(r.url).pathname.split('/voix/')[1]));
+  } catch {
+    const have = new Set();
+    for (let i = 0; i < files.length; i += 200) {
+      const batch = files.slice(i, i + 200);
+      const hits = await Promise.all(batch.map((file) => cache.match(new Request(`voix/${file}`))));
+      batch.forEach((file, j) => { if (hits[j]) have.add(file); });
+    }
+    return have;
+  }
+}
+
+// Une fois tous les sons d'une version de la voix sur l'appareil, on le note : aux lancements
+// suivants, inutile de vérifier les milliers de sons un par un.
+const VOICE_COMPLETE_KEY = 'lire-et-compter:voix-complete';
+const voiceSignature = (packs, files) => `${files.length}:${packs.map((p) => p.nom).join(',')}`;
+function voiceMarkedComplete(signature) {
+  try { return localStorage.getItem(VOICE_COMPLETE_KEY) === signature; } catch { return false; }
+}
+function markVoiceComplete(signature) {
+  try { localStorage.setItem(VOICE_COMPLETE_KEY, signature); } catch { /* stockage indisponible : on revérifiera */ }
+}
+
 async function prefetchVoices() {
   const packs = naturalVoicePacks();
   // navigateur piloté par un test automatique : pas de téléchargement en arrière-plan (sauf si le test le demande)
@@ -4166,9 +5015,15 @@ async function prefetchVoices() {
   if ((navigator.webdriver && !window.__telechargerVoix) || !navigator.serviceWorker?.controller || navigator.onLine === false) return;
   voiceDownload.running = true;
   try {
+    const files = naturalVoiceFiles();
+    const signature = voiceSignature(packs, files);
+    const wanted = new Set(files);
+    if (voiceMarkedComplete(signature)) {
+      Object.assign(voiceDownload, { total: wanted.size, done: wanted.size, bytes: 0, received: 0 });
+      return;
+    }
     const cache = await caches.open(VOICE_CACHE);
-    const have = new Set((await cache.keys()).map((r) => new URL(r.url).pathname.split('/voix/')[1]));
-    const wanted = new Set(naturalVoiceFiles());
+    const have = await cachedVoiceFiles(cache, files);
     const plans = packs.map((pack) => {
       const size = pack.sons.reduce((sum, [, n]) => sum + n, 0);
       const missing = pack.sons.filter(([file]) => wanted.has(file) && !have.has(file));
@@ -4211,6 +5066,7 @@ async function prefetchVoices() {
       }
     };
     await Promise.all([worker(), worker()]);
+    if (voiceDownload.done >= voiceDownload.total) markVoiceComplete(signature);
   } catch {
     // réseau coupé, place insuffisante… : on reprendra plus tard (au retour du réseau, au prochain lancement)
   } finally {
@@ -4624,6 +5480,16 @@ function recordScreen(story) {
   setState('ready');
 }
 
+/** Réglages : un raccourci vers la section Accessibilité de chaque enfant. */
+function a11yShortcuts() {
+  return h('section', { class: 'card a11y-shortcuts' },
+    h('h2', {}, 'Accessibilité'),
+    h('p', { class: 'muted small' }, 'Taille du texte, contraste, grands boutons, sous-titres… se règlent pour chaque enfant.'),
+    h('div', { class: 'a11y-shortcut-list' }, store.order.map((id) => h('button', {
+      class: 'pill-btn a11y-shortcut', 'data-a11y-shortcut': id, onclick: () => childEditScreen(id, '', { section: 'a11y' }),
+    }, avatar(id, 'avatar-xs'), h('span', {}, store.profiles[id].name)))));
+}
+
 function settingsTab() {
   const lengthSelect = h('div', { class: 'segmented' }, [5, 10, 15].map((n) => {
     const btn = h('button', { class: store.settings.sessionLength === n ? 'seg on' : 'seg' }, n);
@@ -4647,6 +5513,7 @@ function settingsTab() {
       h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
       h('p', { class: 'muted small' }, 'Voix de l’appareil (phrases rares, ou voix naturelle coupée) : pour qu’elle soit plus naturelle, Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
     voicesCard(),
+    a11yShortcuts(),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),

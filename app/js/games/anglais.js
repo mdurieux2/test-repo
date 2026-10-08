@@ -134,6 +134,7 @@ export const ecoute = {
       short: { text: 'Écoute et touche.', speak: [sound] },
       replay: [sound],
       stage: { type: 'listen' },
+      listenOnly: true,
       choices: options.map((w) => ({ value: w.en, ...picture(w) })),
       choiceStyle: 'pictures',
       answer: target.en,
@@ -194,7 +195,7 @@ export const motAnglais = {
       text: `Comment dit-on en anglais ?${order}`,
       instruction: `Comment dit-on ${target.fr.replace(/^(le|la|les|l')\s?/, '')} en anglais ?${order}`,
       short: { text: 'En anglais ?', speak: `${target.fr.replace(/^(le|la|les|l')\s?/, '')}, en anglais ?` },
-      stage: pic.swatch ? { type: 'swatch', color: pic.swatch } : { type: 'picture', emoji: pic.label },
+      stage: pic.swatch ? { type: 'swatch', color: pic.swatch, name: pic.name } : { type: 'picture', emoji: pic.label },
       choices: options.map((w) => ({ value: w.en, label: w.en, lang: 'en' })),
       choiceStyle: 'words',
       answer: target.en,
@@ -276,6 +277,7 @@ function comptePlus(level, rng) {
       short: { text: 'Écoute et touche.', speak: [ask] },
       replay: [ask],
       stage: { type: 'listen' },
+      listenOnly: true,
       choices: numberChoices(rng, n, 4, 11, 20).map((v) => ({ value: v, label: String(v) })),
       choiceStyle: 'numbers',
       answer: n,
@@ -344,6 +346,7 @@ export const compteAnglais = {
         short: { text: 'Écoute et touche.', speak: [ask] },
         replay: [ask],
         stage: { type: 'listen' },
+        listenOnly: true,
         choices: numberChoices(rng, n, 3, 1, max).map((v) => ({ value: v, objects: { emoji: thing.emoji, count: v } })),
         choiceStyle: 'objects',
         answer: n,
@@ -390,7 +393,7 @@ function ouEstPlus(level, rng) {
   const sentence = `The ${pet.en} is ${place.en}.`;
   const choices = shuffle(rng, [scene(pet, place), scene(pet, otherPlace), scene(other, place), scene(other, otherPlace)]);
   const success = { speak: [{ text: sentence, lang: EN }, `${pet.fr[0].toUpperCase()}${pet.fr.slice(1)} est ${place.fr} !`] };
-  const common = { stage: { type: 'listen' }, choices, choiceStyle: 'scenes', answer: `${pet.en}:${place.key}`, success };
+  const common = { stage: { type: 'listen' }, listenOnly: true, choices, choiceStyle: 'scenes', answer: `${pet.en}:${place.key}`, success };
   if (level === 6) {
     // deux animaux, deux endroits : il faut retenir l'histoire, puis écouter la question
     const story = { text: shuffle(rng, [sentence, `The ${other.en} is ${otherPlace.en}.`]).join(' '), lang: EN, rate: 0.85 };
@@ -414,6 +417,7 @@ function ouEstPlus(level, rng) {
     short: read ? { key: 'ou-est:qui-lis', text: 'Quelle image ?' } : { key: 'ou-est:qui', text: 'Écoute et touche.', speak: [sound] },
     replay: [sound],
     stage: read ? { type: 'sentence', text: sentence, lang: 'en' } : { type: 'listen' },
+    listenOnly: !read,
   };
 }
 
@@ -442,6 +446,7 @@ function ouEstHistoire(level, rng) {
     short: { key: `ou-est:histoire${level}`, text: 'Écoute et touche.', speak: [story, question] },
     replay: [story, question],
     stage: { type: 'listen' },
+    listenOnly: true,
     success,
   };
   if (where) {
@@ -482,6 +487,7 @@ export const ouEst = {
       short: read ? { key: 'ou-est:lis', text: 'Quelle image ?' } : { key: 'ou-est', text: 'Écoute et touche.', speak: [sound] },
       replay: [sound],
       stage: read ? { type: 'sentence', text: sentence, lang: 'en' } : { type: 'listen' },
+      listenOnly: !read,
       choices: shuffle(rng, places).map((p) => ({ value: p.key, scene: { who: pet.emoji, where: p.key }, name: `${pet.fr} est ${p.fr}` })),
       choiceStyle: 'scenes',
       answer: target.key,
@@ -536,7 +542,7 @@ export const epelleAnglais = {
     // deux lettres pièges qui ressemblent à celles du mot se glissent parmi les lettres)
     const silent = level >= EXTRA;
     const traps = level === HARDEST ? trapLetters(rng, letters, 2) : [];
-    const pictureStage = pic.swatch ? { type: 'swatch', color: pic.swatch } : { type: 'picture', emoji: pic.label };
+    const pictureStage = pic.swatch ? { type: 'swatch', color: pic.swatch, name: pic.name } : { type: 'picture', emoji: pic.label };
     let silentText = 'Écris le mot anglais de cette image : touche les lettres dans l’ordre.';
     if (traps.length) silentText = `${silentText} Attention, il y a deux lettres en trop !`;
     const items = order.map((i) => ({ value: i, label: letters[i] }));
@@ -548,6 +554,7 @@ export const epelleAnglais = {
       short: silent ? { key: traps.length ? 'epelle-anglais:pieges' : 'epelle-anglais:image', text: 'Écris le mot.' } : { text: 'Écris le mot.', speak: [sound] },
       replay: silent ? undefined : [sound],
       stage: listen ? { type: 'listen' } : pictureStage,
+      listenOnly: listen, // sans image, le mot n'est qu'entendu
       items: withTraps(rng, items, traps),
       order: 'asc',
       sign: '',
@@ -650,7 +657,7 @@ function pictureTalk(rng) {
   };
   if (kind === 'colour') {
     const { target, options } = three(theme('Les couleurs').words);
-    return { q: 'What colour is it?', a: `It’s ${target.en}.`, options: options.map((w) => `It’s ${w.en}.`), stage: { type: 'swatch', color: target.swatch } };
+    return { q: 'What colour is it?', a: `It’s ${target.en}.`, options: options.map((w) => `It’s ${w.en}.`), stage: { type: 'swatch', color: target.swatch, name: target.fr } };
   }
   if (kind === 'animal') {
     const { target, options } = three(theme('Les animaux').words);
@@ -723,6 +730,7 @@ function parlePlus(level, rng, name) {
       short: { key: 'parle:consigne', text: 'Écoute et touche.', speak: [sound] },
       replay: [sound],
       stage: { type: 'listen' },
+      listenOnly: true,
       choices: options.map((c) => ({ value: c.en, label: c.emoji, name: c.fr })),
       choiceStyle: 'pictures',
       answer: target.en,
@@ -810,6 +818,7 @@ export const parleAnglais = {
         short: { key: 'parle:dialogue', text: 'Quelle réponse ?', speak: [{ text: talk.q, lang: EN, rate: 0.85 }] },
         replay: [{ text: talk.q, lang: EN, rate: 0.85 }],
         stage: talk.emoji ? { type: 'picture', emoji: talk.emoji } : { type: 'listen' },
+        listenOnly: !talk.emoji, // sans image, la question n'est qu'entendue
         choices: options.map((o) => ({ value: o, label: o, lang: 'en' })),
         choiceStyle: 'answers',
         answer: talk.a,

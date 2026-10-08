@@ -4,9 +4,53 @@ import { ACCESSORIES, avatarSvg } from './characters.js';
 import { PIECES } from './games/logique.js';
 import { FLAGS, flagMarkup } from './games/drapeaux.js';
 import { balanceSvg, describeBalance, describeFigure, figureSvg } from './games/logique-plus.js';
+import { fractionSvg, numberLineSvg } from './games/nombres-plus.js';
+import { drawingSvg } from './games/vivre.js';
+import { cielSvg } from './games/ciel.js';
+import { technoSvg } from './games/techno.js';
+import { barModelMarkup, chartMarkup, describeChart, describeModel, schemaMarkup } from './games/donnees.js';
 import {
   CONTINENTS, COUNTRIES, EUROPE_DRAWN, EUROPE_TARGETS, OCEANS, SEAS, VIEWS, WORLD_TARGETS, atIn, dotFor, mapPaths, toXY,
 } from './data/carte-data.js';
+import { decouperPhrase } from './syllabes.js';
+import { couleurEmoji, nomAffiche } from './couleurs.js';
+
+// Aides de la question en cours, d'après le profil d'accessibilité de l'enfant (main.js les règle
+// avant de dessiner chaque question) : syllabes colorées, couleurs nommées.
+let aides = { syllables: false, namedColors: false, domain: null };
+export function setAides(next) {
+  aides = { syllables: false, namedColors: false, domain: null, ...next };
+}
+
+/** Le nom d'une couleur, écrit sous sa pastille (réglage « couleurs nommées »). */
+export function colorName(name) {
+  return aides.namedColors && name ? h('span', { class: 'color-name', 'aria-hidden': 'true' }, nomAffiche(name, aides.domain)) : null;
+}
+
+/** Le nom d'un émoji de couleur (🟥 → rouge), écrit dessous avec les couleurs nommées. */
+export function emojiColorName(emoji) {
+  return aides.namedColors ? colorName(couleurEmoji(emoji, aides.domain)) : null;
+}
+
+/** Un émoji de couleur (🟥, 🔵…) et, avec les couleurs nommées, son nom dessous. */
+function withColorName(content, emoji) {
+  const name = aides.namedColors ? couleurEmoji(emoji, aides.domain) : null;
+  return name ? h('span', { class: 'color-named' }, content, colorName(name)) : content;
+}
+
+/** Les syllabes d'un morceau de texte (parties de decouperPhrase) : deux couleurs, lettres muettes en gris. */
+function syllableNodes(parts) {
+  return parts.flatMap((part) => (part.syllabes
+    ? part.syllabes.map((syl, i) => h('span', { class: `syl ${i % 2 ? 'syl-b' : 'syl-a'}` },
+      syl.map((m) => (m.muet ? h('span', { class: 'muet' }, m.text) : m.text))))
+    : [part.text]));
+}
+
+/** Un texte à lire (consigne, phrase, choix) : ses syllabes colorées si le réglage est actif, sinon le texte tel quel. */
+export function readable(text) {
+  if (!aides.syllables || typeof text !== 'string' || !/\p{L}/u.test(text)) return text;
+  return h('span', { class: 'syllabes' }, decouperPhrase(text).flatMap((parts, i) => (i ? [' ', ...syllableNodes(parts)] : syllableNodes(parts))));
+}
 
 /** h('div', {class: 'x', onclick}, enfant1, enfant2…) */
 export function h(tag, attrs = {}, ...children) {
@@ -180,7 +224,7 @@ export function shapeSvg(shape, color = '#7b61ff') {
 export function renderStage(stage, actions) {
   switch (stage.type) {
     case 'picture':
-      return h('button', { class: 'stage-picture', onclick: actions.replay, 'aria-label': 'Réécouter' }, stage.emoji);
+      return withColorName(h('button', { class: 'stage-picture', onclick: actions.replay, 'aria-label': 'Réécouter' }, stage.emoji), stage.emoji);
     case 'listen':
       return h('button', { class: 'stage-listen', onclick: actions.replay, 'aria-label': 'Réécouter' }, '🔊');
     case 'objects':
@@ -198,19 +242,23 @@ export function renderStage(stage, actions) {
     case 'pattern':
       // suite de motifs (algorithme) : le dernier élément est à trouver
       return h('div', { class: 'pattern' },
-        stage.items.map((it) => h('span', { class: it === null ? 'pattern-item gap' : 'pattern-item' }, it === null ? '?' : it)));
+        stage.items.map((it) => withColorName(h('span', { class: it === null ? 'pattern-item gap' : 'pattern-item' }, it === null ? '?' : it), it)));
     case 'shape':
       return shapeSvg(stage.shape, stage.color);
     case 'multiplication':
       return multiplicationStage(stage);
-    case 'swatch':
-      return h('span', { class: 'stage-swatch', style: { background: stage.color } });
+    case 'swatch': {
+      const swatch = h('span', { class: 'stage-swatch', style: { background: stage.color }, role: stage.name ? 'img' : undefined, 'aria-label': stage.name });
+      return aides.namedColors && stage.name ? h('span', { class: 'color-named' }, swatch, colorName(stage.name)) : swatch;
+    }
     case 'sentence':
-      return h('p', { class: 'stage-sentence', lang: stage.lang }, wordSpans(stage.text));
+      return h('p', { class: 'stage-sentence', lang: stage.lang }, wordSpans(stage.text, stage.lang));
+    case 'accord':
+      return accordStage(stage);
     case 'text':
       return textStage(stage, actions);
     case 'word':
-      return h('button', { class: 'stage-word', lang: stage.lang, onclick: actions.replay }, stage.text);
+      return h('button', { class: 'stage-word', lang: stage.lang, onclick: actions.replay }, stage.lang ? stage.text : readable(stage.text));
     case 'operation':
       return operationStage(stage);
     case 'story':
@@ -244,12 +292,42 @@ export function renderStage(stage, actions) {
       return matrixStage(stage);
     case 'scales':
       return scalesStage(stage);
+    case 'numberline':
+      return numberLineElement(stage);
+    case 'fraction':
+      return h('div', { class: 'stage-fraction' }, fractionElement(stage));
+    case 'drawing':
+      return drawingElement(stage.drawing, `stage-drawing drawing-${stage.drawing.kind}`, stage.label);
+    case 'chart':
+      return markupStage(`stage-chart chart-${stage.chart.kind}`, chartMarkup(stage.chart), describeChart(stage.chart));
+    case 'schema':
+      return markupStage(`stage-schema${stage.model ? ' with-model' : ''}`, schemaMarkup(stage), stage.model ? describeModel(stage.model) : null);
     case 'equation':
       return h('div', { class: 'equation big' },
         stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
+    case 'share':
+      return shareScene(stage);
+    case 'column':
+      return columnGrid(stage);
     default:
       return h('div', { class: 'stage-empty' });
   }
+}
+
+/** Accords : le mot (ou la phrase) de départ et ce qu'il devient (« un chat → des … »), avec son image. */
+function accordStage({ emoji, count = 1, from, to }) {
+  return h('div', { class: 'stage-accord' },
+    emoji ? objectsGrid(emoji, count, 5, 'small') : null,
+    h('p', { class: 'accord-line' },
+      from ? h('span', { class: 'accord-from' }, from) : null,
+      from ? h('span', { class: 'accord-arrow', 'aria-hidden': 'true' }, '→') : null,
+      h('span', { class: 'accord-to' }, to)));
+}
+/** Un dessin fabriqué en texte (HTML ou SVG) par le jeu : tableaux, graphiques, schémas en barres. */
+function markupStage(cls, markup, label) {
+  const el = h('div', { class: cls, 'aria-label': label || undefined });
+  el.innerHTML = markup;
+  return el;
 }
 
 /** Petit texte à lire ; le bouton 🔊 le lit à voix haute, en cas de besoin. */
@@ -393,6 +471,12 @@ function shadowContent(emoji, label, transform) {
 export function flagElement(code, hole = null, extraClass = '') {
   const el = h('span', { class: `flag ${extraClass}`.trim(), role: 'img', 'aria-label': `Drapeau : ${FLAGS[code].label}` });
   el.innerHTML = flagMarkup(code);
+  // couleurs nommées : les couleurs des bandes, dans l'ordre (« ? » pour la bande effacée)
+  const { bands } = FLAGS[code];
+  if (aides.namedColors && bands) {
+    el.append(h('span', { class: `flag-colors flag-colors-${bands.dir}`, 'aria-hidden': 'true' },
+      bands.colors.map((c, i) => h('span', {}, hole && hole.index === i ? '?' : c))));
+  }
   if (hole) {
     const size = (hole.dir === 'v' ? 30 : 20) / hole.count;
     const rect = hole.dir === 'v'
@@ -573,7 +657,43 @@ function zoneLabel(id) {
   return z.label;
 }
 
+// ---------------------------------------------------------------- La droite numérique et les fractions
+
+/** La droite graduée ; `options` (main.js) ajoute la flèche à placer. */
+export function numberLineElement(stage, options = {}) {
+  const el = h('div', { class: 'stage-numberline', role: 'img', 'aria-label': `Une droite graduée de ${stage.min} à ${stage.max}` });
+  el.innerHTML = numberLineSvg(stage, options);
+  return el;
+}
+
+// Chaque dessin de fraction a son propre motif de rayures, d'où un numéro unique.
+let fractionCount = 0;
+/** Une pizza ou une tablette coupée en parts (les parts coloriées sont rayées). */
+export function fractionElement(st, extraClass = '') {
+  const n = st.sizes.length;
+  const label = `${st.shape === 'disc' ? 'Une pizza' : 'Une tablette'} coupée en ${n} parts, ${st.shaded.length} coloriée${st.shaded.length > 1 ? 's' : ''}`;
+  // largeur / hauteur du dessin : la tablette est plus ou moins longue (voir fractionSvg)
+  const ratio = st.shape === 'disc' ? 1 : (st.sizes.reduce((x, y) => x + y, 0) * 20 + 6) / ((st.rows || 2) * 20 + 6);
+  const el = h('span', { class: `fraction-pic fraction-${st.shape} ${extraClass}`.trim(), role: 'img', 'aria-label': label, style: { '--ratio': ratio.toFixed(3) } });
+  el.innerHTML = fractionSvg(st, ++fractionCount);
+  return el;
+}
+
+/** 3/4 écrit en fraction (3 sur la barre, 4 dessous), et en mots : « trois quarts ». */
+function fractionLabel({ n, d, words }) {
+  return h('span', { class: 'frac-choice' },
+    h('span', { class: 'frac', 'aria-hidden': 'true' }, h('span', { class: 'frac-n' }, n), h('span', { class: 'frac-d' }, d)),
+    h('span', { class: 'frac-words' }, words));
+}
+
 export function renderChoiceContent(choice) {
+  if (choice.column) return columnGrid({ ...choice.column, mini: true });
+  if (choice.drawing) return drawingElement(choice.drawing, `drawing-choice drawing-${choice.drawing.kind}`, choice.name);
+  if (choice.fraction) {
+    return h('span', { class: 'fraction-option' }, fractionElement(choice.fraction, 'fraction-choice'),
+      choice.caption ? h('span', { class: 'fraction-caption' }, choice.caption) : null);
+  }
+  if (choice.frac) return fractionLabel(choice.frac);
   if (choice.figure) return figureElement(choice.figure, 'figure-choice');
   if (choice.flag) return flagElement(choice.flag, null, 'flag-choice');
   if (choice.scene) return sceneContent(choice.scene, choice.name);
@@ -582,17 +702,98 @@ export function renderChoiceContent(choice) {
   if (choice.bar) {
     return h('span', { class: 'pencil-choice', role: 'img', 'aria-label': choice.name, style: { width: `${choice.bar.length * 10}%`, '--pencil': choice.bar.color } });
   }
+  if (choice.model) {
+    const el = h('span', { class: 'bm-choice', role: 'img', 'aria-label': choice.name });
+    el.innerHTML = barModelMarkup(choice.model);
+    return el;
+  }
   if (choice.objects) return objectsGrid(choice.objects.emoji, choice.objects.count, 5, 'small');
   if (choice.shape) return shapeSvg(choice.shape, choice.color);
-  if (choice.swatch) return h('span', { class: 'swatch', style: { background: choice.swatch }, role: 'img', 'aria-label': choice.name });
-  return choice.lang ? h('span', { lang: choice.lang }, choice.label) : choice.label;
+  if (choice.swatch) {
+    const swatch = h('span', { class: 'swatch', style: { background: choice.swatch }, role: 'img', 'aria-label': choice.name });
+    return aides.namedColors && choice.name ? h('span', { class: 'color-named' }, swatch, colorName(choice.name)) : swatch;
+  }
+  // une image d'histoire et sa phrase écrite dessous
+  if (choice.caption) {
+    return [
+      h('span', { class: 'step-emoji', 'aria-hidden': 'true', style: { '--scale': choice.scale ?? 1 } }, choice.emoji),
+      h('span', { class: 'step-caption' }, readable(choice.caption)),
+    ];
+  }
+  if (choice.lang) return h('span', { lang: choice.lang }, choice.label);
+  if (aides.namedColors && couleurEmoji(choice.label, aides.domain)) return withColorName(h('span', {}, choice.label), choice.label);
+  return readable(choice.label);
+}
+// ---------------------------------------------------------------- Le partage et l'addition posée
+
+/** Le tas d'objets à partager, rangés par lignes de 5 (ou de 10). */
+export function sharePile(emoji, count, total, objectClass = 'share-object') {
+  return h('div', { class: `share-pile per-${total > 10 ? 10 : 5}`, role: 'img', 'aria-label': String(count) },
+    Array.from({ length: count }, () => h('span', { class: objectClass }, emoji)));
 }
 
-/** Le mot révélé après une bonne réponse, son initial en couleur. */
+/** « Combien chacun ? » : les objets (qu'on peut toucher pour les compter) et les enfants, assiettes vides. */
+function shareScene({ emoji, total, who }) {
+  return h('div', { class: 'share-scene' },
+    sharePile(emoji, total, total, 'object share-object'),
+    h('div', { class: `share-plates n${who.length}` }, who.map((kid) => h('div', { class: 'share-plate' },
+      h('span', { class: 'share-who', 'aria-hidden': 'true' }, kid), h('span', { class: 'share-dish' })))));
+}
+
+const PLACE_LETTERS = ['u', 'd', 'c', 'm'];
+
+/**
+ * Une opération posée en colonnes : en haut les lettres u, d, c et les cases des retenues, puis les
+ * nombres (unités sous les unités), le trait, et les cases du résultat. Les cases à remplir portent
+ * data-cell (« r0 » : résultat des unités, « c1 » : retenue au-dessus des dizaines). En petit
+ * (`mini`, réponses du niveau « Bien poser ») : les nombres seuls, décalés de `offsets` colonnes.
+ */
+export function columnGrid({ op, rows, width, steps = [], offsets = [], mini = false }) {
+  const cols = Array.from({ length: width }, (_, i) => width - 1 - i); // de gauche à droite
+  const targets = new Set(steps.map((s) => `${s.kind === 'carry' ? 'c' : 'r'}${s.col}`));
+  const digit = (n, r, c) => {
+    const s = String(n);
+    const k = c - (offsets[r] || 0);
+    return k >= 0 && k < s.length ? s[s.length - 1 - k] : '';
+  };
+  const box = (id, cls) => (targets.has(id) ? h('span', { class: cls, 'data-cell': id }) : h('span', { class: 'col-space' }));
+  const cells = [];
+  const row = (sign, list) => cells.push(h('span', { class: 'col-sign' }, sign), ...list);
+  if (!mini) {
+    row('', cols.map((c) => h('span', { class: 'col-head' }, PLACE_LETTERS[c])));
+    row('', cols.map((c) => box(`c${c}`, 'col-carry')));
+  }
+  rows.forEach((n, r) => row(r === rows.length - 1 ? op : '', cols.map((c) => h('span', { class: 'col-digit' }, digit(n, r, c)))));
+  cells.push(h('span', { class: 'col-line' }));
+  if (!mini) row('', cols.map((c) => box(`r${c}`, 'col-result')));
+  return h('div', {
+    class: `column-sum${mini ? ' mini' : ''} rows-${rows.length}`, style: { '--width': width }, role: 'img', 'aria-label': rows.join(` ${op} `),
+  }, cells);
+}
+
+/** Un dessin en SVG (feu des piétons, panneau, main, quadrillage…, Lune, thermomètre…), voir games/vivre.js et games/ciel.js. */
+function drawingElement(d, cls, label) {
+  const el = h('span', { class: cls, role: 'img', 'aria-label': label });
+  el.innerHTML = cielSvg(d) ?? technoSvg(d) ?? drawingSvg(d);
+  return el;
+}
+
+
+/**
+ * Le mot révélé après une bonne réponse, son initial souligné et en couleur (`highlight` : nombre
+ * de lettres du début), ou les lettres ajoutées d'un accord (liste de tranches [début, fin]).
+ */
 export function revealWord(word, highlight = 0) {
-  return h('div', { class: 'reveal' },
-    highlight ? h('span', { class: 'reveal-hl' }, word.slice(0, highlight)) : null,
-    word.slice(highlight));
+  const ranges = Array.isArray(highlight) ? highlight : highlight ? [[0, highlight]] : [];
+  const parts = [];
+  let pos = 0;
+  for (const [start, end] of ranges) {
+    if (start > pos) parts.push(word.slice(pos, start));
+    parts.push(h('span', { class: 'reveal-hl' }, word.slice(start, end)));
+    pos = end;
+  }
+  if (pos < word.length) parts.push(word.slice(pos));
+  return h('div', { class: word.length > 12 ? 'reveal long' : 'reveal' }, parts);
 }
 
 // Profils des enfants (prénom, dessin, photo) pour dessiner les portraits.
@@ -616,11 +817,15 @@ export function avatar(id, extraClass = '', override = null) {
   return el;
 }
 
-/** Les mots d'une phrase, chacun dans une étiquette (lecture facilitée, karaoké). */
-export function wordSpans(text) {
+/**
+ * Les mots d'une phrase, chacun dans une étiquette (lecture facilitée, karaoké) ; avec les
+ * syllabes colorées, chaque mot garde son étiquette et ses syllabes sont dedans.
+ */
+export function wordSpans(text, lang = null) {
   let pos = 0;
+  const syllables = aides.syllables && !lang ? decouperPhrase(text) : null;
   return text.split(' ').flatMap((word, i) => {
-    const span = h('span', { class: 'w', 'data-start': pos, 'data-end': pos + word.length }, word);
+    const span = h('span', { class: 'w', 'data-start': pos, 'data-end': pos + word.length }, syllables ? syllableNodes(syllables[i]) : word);
     pos += word.length + 1;
     return i ? [' ', span] : [span];
   });

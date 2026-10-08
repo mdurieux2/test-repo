@@ -1,0 +1,55 @@
+/* Accessibilité : sous-titres, « toucher plutôt que glisser » et clavier.
+   Rien ne change pour un enfant sans réglage, sauf le focus clavier (visible pour tous). */
+
+/* ---------- Sous-titres : ce que dit Estelle, écrit en bas de l'écran ----------
+   Le bandeau garde toujours sa place : l'écran de jeu est réduit d'autant (--captions-fit,
+   calculé par main.js), il ne cache donc jamais les réponses et rien ne défile. */
+:root { --captions-h: calc(2 * 1.25 * 1.15rem * var(--text-scale, 1) + 16px); }
+.caption-band {
+  position: fixed; z-index: 60; left: 0; right: 0; bottom: 0;
+  height: calc(var(--captions-h) + var(--safe-bottom));
+  padding: 6px 16px calc(6px + var(--safe-bottom));
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #1f2133; color: #ffffff; /* contraste 15:1 */
+  border-top: 3px solid #ffd23f;
+  pointer-events: none;
+}
+.caption-band[hidden] { display: none; }
+.caption-band-icon { flex: none; font-size: 1.1rem; }
+.caption-band-text {
+  margin: 0; max-width: 900px; max-height: 100%; overflow: hidden;
+  font-size: calc(1.15rem * var(--text-scale, 1)); line-height: 1.25; font-weight: 700; text-align: center;
+  overflow-wrap: break-word;
+}
+.caption-band.said .caption-band-text { color: #e4e6f0; } /* fini : toujours lisible (12:1), un peu plus pâle */
+body.a11y-captions .screen { zoom: calc(var(--zoom, 1) * var(--captions-fit, 1)); }
+/* téléphone en paysage : un bandeau réduit (texte plus petit), toujours en bas */
+@media (orientation: landscape) and (max-height: 520px) {
+  :root { --captions-h: calc(2 * 1.2 * 0.95rem * var(--text-scale, 1) + 8px); }
+  .caption-band { padding-top: 3px; padding-bottom: calc(3px + var(--safe-bottom)); border-top-width: 2px; }
+  .caption-band-icon { font-size: 0.9rem; }
+  .caption-band-text { font-size: calc(0.95rem * var(--text-scale, 1)); line-height: 1.2; }
+}
+
+/* ---------- Clavier : focus bien visible, aussi sur les dessins ---------- */
+svg [role='button']:focus { outline: none; }
+svg [role='button']:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+.magic-zone:focus-visible, [data-part]:focus-visible, .map-zone:focus-visible, .coloring [data-zone]:focus-visible {
+  stroke: var(--ink); stroke-width: 2.5px; paint-order: stroke;
+}
+.trace-drawing:focus-visible, .dots-key:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; border-radius: 12px; }
+.lasso-object:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 50%; }
+
+/* ---------- Écris au doigt : les points de passage à toucher dans l'ordre ---------- */
+.trace-stop { fill: #ffffff; stroke: #1b5fae; stroke-width: 1.4; }
+.trace-stop.next { fill: #ffd23f; stroke: #2b2d42; stroke-width: 1.6; }
+@media (prefers-reduced-motion: no-preference) {
+  body:not(.a11y-calm) .trace-stop.next { animation: trace-stop-pulse 1.1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+}
+@keyframes trace-stop-pulse { 50% { transform: scale(1.25); } }
+
+/* ---------- Labyrinthe rond : les boutons-flèches (toucher plutôt que glisser, ou clavier) ---------- */
+.rmaze-arrows { display: contents; }
+body:not(.a11y-tap-only) .rmaze-arrows:not(:focus-within) .maze-arrow {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; margin: -1px;
+}
