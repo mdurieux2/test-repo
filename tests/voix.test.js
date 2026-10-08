@@ -139,7 +139,10 @@ test('voix naturelle : tout ce que disent les jeux est dit par Estelle, presque 
   }
   assert.deepEqual([...missing].slice(0, 10), [], 'jamais la voix de l’appareil');
   const share = (q) => (counts[q] || 0) / total;
-  // ce qui est dit en entier ou coupé seulement à une virgule ou autour du prénom
-  assert.ok(share('entier') + share('virgule') + share('prenom') > 0.9, JSON.stringify(counts));
+  // ce qui est dit en entier ou coupé seulement à une virgule ou autour du prénom ; le reste est
+  // surtout dit autour des nombres (« Combien font » + 39 + « fois » + 100), propres à chaque question
+  // et nombreux depuis les jeux du CE2 (division, périmètres, grands nombres) : 88 % au moins
+  assert.ok(share('entier') + share('virgule') + share('prenom') > 0.88, JSON.stringify(counts));
+  // dit mot à mot : rare
   assert.ok(share('mot') < 0.03, JSON.stringify(counts));
 });
