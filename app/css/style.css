@@ -2084,6 +2084,8 @@ body[data-season="ete"] { background: #fffbea; }
   .stage-fraction .fraction-bar svg, .fraction-shade.fraction-bar svg { width: min(100%, calc(var(--ratio) * min(120px, 30dvh))); }
   .choices-parts .choice { min-height: 84px; }
   .fraction-choice.fraction-disc svg { width: min(72px, 17dvh); }
+  /* tablette dans un bouton de réponse (iPhone SE en paysage : 94 px de large, marges comprises) */
+  .fraction-choice.fraction-bar svg { width: min(84px, calc(var(--ratio) * 40px)); }
   .choices-fractions .choice { min-height: 80px; }
   .frac { font-size: 1.6rem; }
 }
