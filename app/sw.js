@@ -56,6 +56,7 @@ const PRECACHE = [
   './js/games/nombres-plus.js',
   './js/games/operations.js',
   './js/games/textes.js',
+  './js/games/vocabulaire.js',
   './js/games/vivre.js',
   './js/main.js',
   './js/photo.js',
