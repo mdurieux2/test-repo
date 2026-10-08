@@ -2168,6 +2168,7 @@ async function demoChecks() {
   if (await demoShown(1500) || await page.locator('.demo-btn').count()) fail('démonstration : une main sur un choix multiple simple');
   console.log('✔ démonstration : la main au premier lancement (pas au deuxième), « ? » la remontre, un toucher la fait partir, touchers seuls, sans mouvement en mode calme');
   await context.close();
+}
 
 // ---------------------------------------------------------------- Fiches à imprimer
 

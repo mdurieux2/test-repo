@@ -28,7 +28,9 @@ function checkExercise(ex, ctx) {
       assert.ok(Number.isInteger(ex.answer) && ex.answer >= 0, ctx);
       if (ex.kind === 'column') {
         const { op, rows } = ex.stage;
-        const expected = op === '+' ? rows.reduce((a, b) => a + b, 0) : rows.slice(1).reduce((a, b) => a - b, rows[0]);
+        const expected = op === '+' ? rows.reduce((a, b) => a + b, 0)
+          : op === '×' ? rows.reduce((a, b) => a * b, 1)
+            : rows.slice(1).reduce((a, b) => a - b, rows[0]);
         assert.equal(ex.answer, expected, ctx);
         assert.ok(String(ex.answer).length <= ex.stage.width, ctx);
       }
