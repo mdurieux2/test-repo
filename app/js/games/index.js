@@ -23,11 +23,12 @@ import { ecrire } from './ecriture.js';
 import { regleHorloge } from './horloge.js';
 import { tablesChrono } from './chrono.js';
 import { SCIENCES_GAMES } from './sciences.js';
+import { NOMBRES_PLUS_GAMES } from './nombres-plus.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
-  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES,
+  ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -45,7 +46,7 @@ const RUBRIQUES = [
     games: [
       'compter', 'vite-vu', 'panier', 'patates', 'dizaines', 'relier',
       'comparer', 'suite', 'calcul', 'trous', 'relie-calculs', 'faire-dix', 'tables', 'tables-chrono',
-      'ranger', 'problemes', 'doubles',
+      'ranger', 'problemes', 'doubles', 'droite-numerique', 'fractions',
     ],
   },
   {

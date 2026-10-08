@@ -4,6 +4,7 @@ import { findGame } from './games/index.js';
 import { CALC_PALIERS, equationHolds } from './games/maths.js';
 import { canMove, polarCell, ringOffsets, solveLinks, solveMaze } from './games/labyrinthes.js';
 import { clockLabel } from './games/maths-extra.js';
+import { lineValueAt, lineX } from './games/nombres-plus.js';
 import {
   clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
 } from './games/horloge.js';
@@ -25,7 +26,8 @@ import {
 } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
 import {
-  avatar, clockSvg, flagElement, h, mapElement, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles,
+  avatar, clockSvg, flagElement, fractionElement, h, mapElement, moneyItem, numberLineElement, renderChoiceContent, renderStage, revealWord,
+  setProfiles,
 } from './render.js';
 import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
@@ -1007,7 +1009,7 @@ function nextQuestion(session) {
     build: buildZone, maze: mazeZone, roundmaze: roundMazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
     swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
     picross: picrossZone,
-    map: mapZone,
+    map: mapZone, numberline: numberLineZone, shade: shadeZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -2795,6 +2797,122 @@ function setClockZone(ctx) {
     h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ C’est l’heure'));
   render();
   return { stage: h('div', { class: 'stage stage-setclock' }, dial), zone };
+}
+
+// ---- La droite numérique : toucher (ou glisser) pour poser la flèche, puis « C'est ici »
+
+function numberLineZone(ctx) {
+  const { q } = ctx;
+  const st = q.stage;
+  const wrap = numberLineElement(st, { place: true, target: q.target });
+  wrap.classList.add('nl-place');
+  const svg = wrap.querySelector('svg');
+  const cursor = svg.querySelector('.nl-cursor');
+  let value = null; // pas encore de flèche posée
+  const setValue = (v) => {
+    if (ctx.session.locked || v === value) return;
+    value = v;
+    playSound('tap');
+    cursor.setAttribute('transform', `translate(${lineX(st, value).toFixed(2)} 0)`);
+    wrap.classList.add('placed');
+    wrap.dataset.value = value;
+  };
+  // la flèche se cale sur la graduation la plus proche du doigt
+  const pointerValue = (e) => {
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    return lineValueAt(st, pt.matrixTransform(svg.getScreenCTM().inverse()).x);
+  };
+  let dragging = false;
+  svg.addEventListener('pointerdown', (e) => {
+    if (ctx.session.locked) return;
+    e.preventDefault();
+    dragging = true;
+    try {
+      svg.setPointerCapture(e.pointerId);
+    } catch {
+      // sans capture, le glisser marche tant que le doigt reste sur la droite
+    }
+    setValue(pointerValue(e));
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (dragging) setValue(pointerValue(e));
+  });
+  const release = () => { dragging = false; };
+  svg.addEventListener('pointerup', release);
+  svg.addEventListener('pointercancel', release);
+  // les boutons ◀ ▶ : une graduation de plus ou de moins (petits doigts, accessibilité)
+  const move = (dir) => setValue(value === null ? st.min : Math.min(st.max, Math.max(st.min, value + dir * st.snap)));
+
+  const validate = () => {
+    if (ctx.session.locked) return;
+    if (value === null) {
+      nudge(ctx, 'Touche la droite pour placer la flèche.');
+      return;
+    }
+    if (Math.abs(value - q.target) <= (q.tolerance || 0)) {
+      wrap.classList.add('right');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    wrap.classList.add('shake');
+    setTimeout(() => wrap.classList.remove('shake'), 400);
+    // après deux erreurs, la bonne place est montrée en pointillés
+    const hint = ctx.session.attempts >= 1;
+    if (hint) wrap.classList.add('show-hint');
+    const message = hint ? 'Mets la flèche sur les pointillés.'
+      : value < q.target ? 'C’est plus loin : va vers la droite.' : 'C’est moins loin : reviens vers la gauche.';
+    markWrong(ctx, { message, given: value });
+  };
+  const zone = h('div', { class: 'choices numberline-zone' },
+    h('button', { class: 'nl-btn', 'data-move': '-1', 'aria-label': 'Reculer la flèche', onclick: () => move(-1) }, '◀'),
+    h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ C’est ici'),
+    h('button', { class: 'nl-btn', 'data-move': '1', 'aria-label': 'Avancer la flèche', onclick: () => move(1) }, '▶'));
+  return { stage: h('div', { class: 'stage stage-nl' }, wrap), zone };
+}
+
+// ---- Les fractions : toucher les parts pour les colorier, puis « J'ai fini »
+
+function shadeZone(ctx) {
+  const { q } = ctx;
+  const parts = q.stage.sizes.length;
+  const pic = fractionElement(q.stage, 'fraction-shade');
+  const svg = pic.querySelector('svg');
+  const on = new Set();
+  svg.addEventListener('click', (e) => {
+    const part = e.target.closest('[data-part]');
+    if (!part || ctx.session.locked) return;
+    const i = Number(part.dataset.part);
+    if (on.has(i)) on.delete(i);
+    else on.add(i);
+    // la part coloriée est rayée (le motif, pas seulement la couleur)
+    part.classList.toggle('on', on.has(i));
+    part.setAttribute('fill', on.has(i) ? `url(#${svg.dataset.pattern})` : svg.dataset.base);
+    pic.dataset.count = on.size;
+    playSound('tap');
+  });
+  const validate = () => {
+    if (ctx.session.locked) return;
+    if (on.size === q.target) {
+      pic.classList.add('right');
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    if (!on.size) {
+      nudge(ctx, 'Touche les parts pour les colorier.');
+      return;
+    }
+    pic.classList.add('shake');
+    setTimeout(() => pic.classList.remove('shake'), 400);
+    const message = ctx.session.attempts >= 1 ? `Colorie ${q.target} part${q.target > 1 ? 's' : ''} sur ${parts}.`
+      : on.size > q.target ? 'Tu as colorié trop de parts.' : 'Il manque des parts à colorier.';
+    markWrong(ctx, { message, given: `${on.size}/${parts}` });
+  };
+  const zone = h('div', { class: 'choices shade-zone' }, h('button', { class: 'big-btn primary validate-btn', onclick: validate }, '✔ J’ai fini'));
+  return { stage: h('div', { class: 'stage stage-shade' }, pic), zone };
 }
 
 // ---- Payer le bon prix : toucher les pièces et les billets

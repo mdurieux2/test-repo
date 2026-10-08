@@ -1975,6 +1975,68 @@ body[data-season="ete"] { background: #fffbea; }
 .clock-btn-minute { color: #b94c05; }
 .setclock-zone .validate-btn { min-height: 56px; }
 
+/* ===================================================================== La droite numérique, les fractions */
+
+/* la droite graduée : le nombre à trouver dans une case « ? », la flèche au-dessus */
+.stage-numberline { width: min(100%, 560px); }
+.nl-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.nl-place .nl-svg { touch-action: none; cursor: pointer; }
+.nl-axis { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.nl-axis-head { fill: var(--ink); }
+.nl-tick { stroke: var(--ink); stroke-width: 1.8; }
+.nl-tick.major { stroke-width: 3; }
+.nl-label { font-size: 15px; font-weight: 700; text-anchor: middle; fill: var(--ink); font-family: inherit; }
+.nl-mark { fill: var(--ink); }
+.nl-ask rect { fill: var(--card); stroke: var(--accent-dark); stroke-width: 2.5; stroke-dasharray: 4 3; }
+.nl-ask text, .nl-reveal text { font-size: 16px; font-weight: 700; text-anchor: middle; font-family: inherit; }
+.nl-ask text { fill: var(--accent-dark); }
+.nl-frog { font-size: 22px; text-anchor: middle; font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
+/* placer : la flèche apparaît où on touche ; les pointillés (indice) et la réponse restent cachés */
+.nl-cursor { fill: var(--accent); stroke: var(--accent-dark); stroke-width: 1.5; visibility: hidden; transition: transform 0.08s; }
+.nl-place.placed .nl-cursor { visibility: visible; }
+.nl-ghost { fill: none; stroke: var(--good-dark); stroke-width: 2; stroke-dasharray: 4 3; visibility: hidden; }
+.nl-reveal { visibility: hidden; }
+.nl-reveal rect { fill: var(--good-dark); }
+.nl-reveal text { fill: #fff; }
+.nl-place.show-hint .nl-ghost, .nl-place.right .nl-ghost, .nl-place.right .nl-reveal { visibility: visible; }
+.nl-place.shake { animation: shake 0.4s; }
+.numberline-zone { grid-template-columns: 64px minmax(0, 1fr) 64px; gap: 10px; }
+.nl-btn {
+  min-height: 56px; border-radius: 16px; background: var(--card); font-size: 1.5rem; font-weight: 700;
+  box-shadow: 0 4px 0 var(--line), inset 0 0 0 3px var(--line);
+}
+.nl-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line), inset 0 0 0 3px var(--line); }
+.numberline-zone .validate-btn, .shade-zone .validate-btn { min-height: 56px; padding: 0 10px; }
+
+/* les fractions : une pizza ou une tablette ; les parts coloriées sont rayées */
+.fraction-pic { display: inline-block; line-height: 0; }
+.fraction-pic svg { display: block; height: auto; }
+.stage-fraction .fraction-disc svg, .fraction-shade.fraction-disc svg { width: min(220px, 58vw); }
+.stage-fraction .fraction-bar svg, .fraction-shade.fraction-bar svg { width: min(320px, 86vw, calc(var(--ratio) * 130px)); }
+.fraction-shade svg, .fraction-shade .fr-part { cursor: pointer; }
+.fraction-shade.shake { animation: shake 0.4s; }
+.fr-cut { stroke-width: 2.4; }
+.fraction-option { display: flex; flex-direction: column; align-items: center; gap: 4px; line-height: 1.1; }
+.fraction-choice.fraction-disc svg { width: min(84px, 21vw); }
+.fraction-choice.fraction-bar svg { width: min(96px, 24vw, calc(var(--ratio) * 46px)); }
+.fraction-caption { font-size: 1.1rem; }
+.choices-parts .choice { min-height: 104px; padding: 8px 4px; }
+/* 3/4 écrit en fraction, et en mots dessous */
+.frac-choice { display: flex; flex-direction: column; align-items: center; gap: 4px; line-height: 1.05; }
+.frac { display: inline-flex; flex-direction: column; align-items: center; font-size: min(2rem, 8vw); font-variant-numeric: tabular-nums; }
+.frac-n { border-bottom: 3px solid currentColor; padding: 0 6px 1px; }
+.frac-d { padding-top: 1px; }
+.frac-words { font-size: 0.95rem; text-align: center; }
+.choices-fractions .choice { min-height: 96px; padding: 6px 2px; }
+@media (orientation: landscape) and (max-height: 520px) {
+  .stage-fraction .fraction-disc svg, .fraction-shade.fraction-disc svg { width: min(220px, calc(100dvh - 130px)); }
+  .stage-fraction .fraction-bar svg, .fraction-shade.fraction-bar svg { width: min(100%, calc(var(--ratio) * min(120px, 30dvh))); }
+  .choices-parts .choice { min-height: 84px; }
+  .fraction-choice.fraction-disc svg { width: min(72px, 17dvh); }
+  .choices-fractions .choice { min-height: 80px; }
+  .frac { font-size: 1.6rem; }
+}
+
 /* défi chrono : le chronomètre sous le niveau, puis le temps et le record à la fin */
 .chrono-badge { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.15; padding: 2px 10px; border-radius: 14px; }
 .chrono-level { font-size: 0.75rem; }

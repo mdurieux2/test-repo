@@ -16,6 +16,7 @@ import { startServer } from './serve.mjs';
 import { DOMAINS, GAMES, findGame } from '../app/js/games/index.js';
 import { CALC_PALIERS } from '../app/js/games/maths.js';
 import { formatChrono } from '../app/js/games/chrono.js';
+import { lineX, NL } from '../app/js/games/nombres-plus.js';
 import { STORY_DATA } from '../app/js/games/histoires.js';
 import { PROGRAMS } from '../app/js/programs.js';
 import { starsFor } from '../app/js/progress.js';
@@ -296,6 +297,7 @@ async function testTrace(page, q) {
 
 // Règle l'horloge : l'heure montrée par le cadran (attributs data-h et data-m du cadran).
 let clockDragTested = false;
+let numberLineButtonsTested = false; // la droite numérique : les boutons ◀ ▶ (une fois)
 const clockMinutes = ({ h, m }) => (h % 12) * 60 + m;
 async function clockTime(page) {
   return page.$eval('.setclock-dial', (el) => ({ h: Number(el.dataset.h), m: Number(el.dataset.m) }));
@@ -646,6 +648,50 @@ async function answer(page, q, wrongFirst) {
       }
       await setClockWithButtons(page, q.target);
       await page.click('.setclock-zone .validate-btn');
+      break;
+    }
+    case 'numberline': {
+      // la droite numérique : toucher la droite à l'endroit du nombre (la flèche se cale sur la graduation)
+      const touch = async (v) => {
+        const box = await page.locator('.stage-nl .nl-svg').boundingBox();
+        await page.mouse.click(box.x + (lineX(q.stage, v) / NL.width) * box.width, box.y + box.height * 0.6);
+      };
+      const placed = async () => Number(await page.getAttribute('.nl-place', 'data-value'));
+      if (wrongFirst) {
+        // trop loin (au-delà de l'écart accepté) : un conseil, puis encore : les pointillés
+        const off = (q.tolerance || 0) + q.stage.snap;
+        await touch(q.target + off <= q.stage.max ? q.target + off : q.target - off);
+        await page.click('.numberline-zone .validate-btn');
+        await page.waitForSelector('.try-again');
+        if (!(await page.textContent('.try-again')).includes('C’est')) fail('droite numérique : pas de conseil après une erreur');
+        await page.click('.numberline-zone .validate-btn');
+        await page.waitForSelector('.nl-place.show-hint');
+      } else if (!numberLineButtonsTested) {
+        // les boutons ◀ ▶ déplacent la flèche d'une graduation
+        numberLineButtonsTested = true;
+        await touch(q.stage.min);
+        await page.click('[data-move="1"]');
+        if ((await placed()) !== q.stage.min + q.stage.snap) fail(`droite numérique : ▶ mène à ${await placed()}`);
+      }
+      await touch(q.target);
+      if (Math.abs((await placed()) - q.target) > (q.tolerance || 0)) fail(`droite numérique : flèche sur ${await placed()} au lieu de ${q.target}`);
+      await page.click('.numberline-zone .validate-btn');
+      break;
+    }
+    case 'shade': {
+      // colorier : une part de trop d'abord, puis exactement le bon nombre de parts
+      const part = (i) => page.locator(`.fraction-shade [data-part="${i}"]`).dispatchEvent('click');
+      if (wrongFirst) {
+        for (let i = 0; i <= q.target; i++) await part(i);
+        await page.click('.shade-zone .validate-btn');
+        await page.waitForSelector('.try-again');
+        await part(q.target);
+      } else {
+        for (let i = 0; i < q.target; i++) await part(i);
+      }
+      const count = Number(await page.getAttribute('.fraction-shade', 'data-count'));
+      if (count !== q.target) fail(`fractions : ${count} parts coloriées au lieu de ${q.target}`);
+      await page.click('.shade-zone .validate-btn');
       break;
     }
     default:

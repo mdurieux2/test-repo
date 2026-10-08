@@ -216,6 +216,22 @@ function checkQuestion(q, ctx) {
       assert.deepEqual(q.choices, [], ctx);
       break;
     }
+    case 'numberline': {
+      // placer un nombre sur la droite (détails dans tests/nombres-plus.test.js)
+      const { min, max, snap } = q.stage;
+      assert.ok(q.target >= min && q.target <= max && (q.target - min) % snap === 0, ctx);
+      assert.equal(q.answer, q.target, ctx);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
+    case 'shade': {
+      // colorier des parts égales (détails dans tests/nombres-plus.test.js)
+      const { sizes, shaded } = q.stage;
+      assert.ok(sizes.every((s) => s === sizes[0]) && shaded.length === 0, ctx);
+      assert.ok(q.target >= 1 && q.target < sizes.length, ctx);
+      assert.deepEqual(q.choices, [], ctx);
+      break;
+    }
     default: {
       const values = q.choices.map((c) => c.value);
       assert.ok(values.length >= 2, ctx);

@@ -4,6 +4,7 @@ import { ACCESSORIES, avatarSvg } from './characters.js';
 import { PIECES } from './games/logique.js';
 import { FLAGS, flagMarkup } from './games/drapeaux.js';
 import { balanceSvg, describeBalance, describeFigure, figureSvg } from './games/logique-plus.js';
+import { fractionSvg, numberLineSvg } from './games/nombres-plus.js';
 import {
   CONTINENTS, COUNTRIES, EUROPE_DRAWN, EUROPE_TARGETS, OCEANS, SEAS, VIEWS, WORLD_TARGETS, atIn, dotFor, mapPaths, toXY,
 } from './data/carte-data.js';
@@ -244,6 +245,10 @@ export function renderStage(stage, actions) {
       return matrixStage(stage);
     case 'scales':
       return scalesStage(stage);
+    case 'numberline':
+      return numberLineElement(stage);
+    case 'fraction':
+      return h('div', { class: 'stage-fraction' }, fractionElement(stage));
     case 'equation':
       return h('div', { class: 'equation big' },
         stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
@@ -573,7 +578,41 @@ function zoneLabel(id) {
   return z.label;
 }
 
+// ---------------------------------------------------------------- La droite numérique et les fractions
+
+/** La droite graduée ; `options` (main.js) ajoute la flèche à placer. */
+export function numberLineElement(stage, options = {}) {
+  const el = h('div', { class: 'stage-numberline', role: 'img', 'aria-label': `Une droite graduée de ${stage.min} à ${stage.max}` });
+  el.innerHTML = numberLineSvg(stage, options);
+  return el;
+}
+
+// Chaque dessin de fraction a son propre motif de rayures, d'où un numéro unique.
+let fractionCount = 0;
+/** Une pizza ou une tablette coupée en parts (les parts coloriées sont rayées). */
+export function fractionElement(st, extraClass = '') {
+  const n = st.sizes.length;
+  const label = `${st.shape === 'disc' ? 'Une pizza' : 'Une tablette'} coupée en ${n} parts, ${st.shaded.length} coloriée${st.shaded.length > 1 ? 's' : ''}`;
+  // largeur / hauteur du dessin : la tablette est plus ou moins longue (voir fractionSvg)
+  const ratio = st.shape === 'disc' ? 1 : (st.sizes.reduce((x, y) => x + y, 0) * 20 + 6) / ((st.rows || 2) * 20 + 6);
+  const el = h('span', { class: `fraction-pic fraction-${st.shape} ${extraClass}`.trim(), role: 'img', 'aria-label': label, style: { '--ratio': ratio.toFixed(3) } });
+  el.innerHTML = fractionSvg(st, ++fractionCount);
+  return el;
+}
+
+/** 3/4 écrit en fraction (3 sur la barre, 4 dessous), et en mots : « trois quarts ». */
+function fractionLabel({ n, d, words }) {
+  return h('span', { class: 'frac-choice' },
+    h('span', { class: 'frac', 'aria-hidden': 'true' }, h('span', { class: 'frac-n' }, n), h('span', { class: 'frac-d' }, d)),
+    h('span', { class: 'frac-words' }, words));
+}
+
 export function renderChoiceContent(choice) {
+  if (choice.fraction) {
+    return h('span', { class: 'fraction-option' }, fractionElement(choice.fraction, 'fraction-choice'),
+      choice.caption ? h('span', { class: 'fraction-caption' }, choice.caption) : null);
+  }
+  if (choice.frac) return fractionLabel(choice.frac);
   if (choice.figure) return figureElement(choice.figure, 'figure-choice');
   if (choice.flag) return flagElement(choice.flag, null, 'flag-choice');
   if (choice.scene) return sceneContent(choice.scene, choice.name);
