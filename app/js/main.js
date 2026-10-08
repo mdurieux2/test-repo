@@ -36,7 +36,7 @@ import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
 import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
-import { gameListenOnly, playableQuestion, tapQuestion, withoutListenOnly } from './a11y-jeux.js';
+import { CAPTION_HIDDEN, captionPart, gameListenOnly, playableQuestion, tapQuestion, withoutListenOnly } from './a11y-jeux.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
 import { STORY_DATA } from './games/histoires.js';
@@ -202,9 +202,15 @@ const captionBand = h('div', { class: 'caption-band', 'aria-hidden': 'true', hid
 document.body.append(captionBand);
 let caption = { id: 0, parts: [], long: false };
 
-function captionLine(parts) {
+// la question en cours (tant qu'elle n'est pas résolue) : ce qu'il faut trouver à l'oreille n'est pas écrit
+let captionSession = null;
+const captionQuestion = () => (captionSession && !captionSession.locked && app.querySelector('.screen.play') ? captionSession.question : null);
+
+function captionLine(rawParts) {
+  const q = captionQuestion();
+  const parts = rawParts.map((part) => ({ ...part, text: captionPart(part, q) }));
   // un mot à écouter seul (« écris : », « école »), suivi d'une phrase (« Touche les lettres… ») : un point après le mot
-  const glue = (i) => (i >= 2 && /:$/.test(parts[i - 2].text) && /^[\p{L}\p{N}’'-]+$/u.test(parts[i - 1].text)
+  const glue = (i) => (i >= 2 && /:$/.test(parts[i - 2].text) && (/^[\p{L}\p{N}’'-]+$/u.test(parts[i - 1].text) || parts[i - 1].text === CAPTION_HIDDEN)
     && /^\p{Lu}/u.test(parts[i].text) ? '. ' : ' ');
   return parts.map(({ text, lang }) => (lang && !lang.startsWith('fr') ? h('span', { lang: lang.slice(0, 2) }, text) : text))
     .flatMap((part, i) => (i ? [glue(i), part] : [part]));
@@ -1159,6 +1165,7 @@ function nextQuestion(session) {
   session.question = q;
   session.attempts = 0;
   session.locked = false;
+  captionSession = session;
   globalThis.__lc = { question: q }; // utilisé par les tests de bout en bout
 
   const { game } = session;

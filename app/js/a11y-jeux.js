@@ -116,3 +116,29 @@ export function withoutListenOnly(domains) {
     .map((domain) => ({ ...domain, games: domain.games.filter(({ game, min, max }) => !gameListenOnly(game, min, max)) }))
     .filter((domain) => domain.games.length);
 }
+
+// ---------------------------------------------------------------- Sous-titres sans la réponse
+
+/** Ce que le bandeau écrit à la place d'un mot à trouver à l'oreille. */
+export const CAPTION_HIDDEN = '🔊 …';
+
+const plain = (text) => String(text).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+/**
+ * Le texte d'un morceau dit, tel que les sous-titres l'écrivent pendant la question `q` : ce qu'il
+ * faut trouver en écoutant n'est pas écrit (sinon la dictée devient une copie). Le mot dit qui est la
+ * réponse (dictée, lettre ou mot anglais entendu, phrase à remettre dans l'ordre) est remplacé par
+ * « 🔊 … » ; pour une question qui ne se joue qu'à l'oreille, aussi les mots dits seuls et l'anglais ;
+ * pour la ponctuation à choisir d'après l'intonation, le signe de la fin.
+ */
+export function captionPart({ text, lang }, q) {
+  if (!q || typeof text !== 'string') return text;
+  const answer = typeof q.answer === 'string' || typeof q.answer === 'number' ? String(q.answer) : '';
+  if (/^[.?!]$/.test(answer)) return /[.?!…]\s*$/.test(text) && text.trim().split(/\s+/).length > 1 && !/^(Écoute|Quel|Touche)/.test(text) ? text.replace(/\s*[.?!…]+\s*$/, ' …') : text;
+  if (answer && plain(answer) && plain(text) === plain(answer)) return CAPTION_HIDDEN;
+  if (q.listenOnly) {
+    if (lang && !lang.startsWith('fr')) return CAPTION_HIDDEN;
+    if (!/\s/.test(text.trim()) && !/[.!?:]$/.test(text.trim())) return CAPTION_HIDDEN;
+  }
+  return text;
+}

@@ -8,7 +8,7 @@ import { GAMES, findGame } from '../app/js/games/index.js';
 import { PROGRAMS, programFor } from '../app/js/programs.js';
 import { createRng } from '../app/js/random.js';
 import {
-  DRAG_WORDS, gameListenOnly, isListenOnly, levelListenOnly, playableQuestion, tapQuestion, tapText, withoutListenOnly,
+  CAPTION_HIDDEN, DRAG_WORDS, captionPart, gameListenOnly, isListenOnly, levelListenOnly, playableQuestion, tapQuestion, tapText, withoutListenOnly,
 } from '../app/js/a11y-jeux.js';
 import { onCaption, setSpeechEnabled, speak } from '../app/js/speech.js';
 
@@ -175,4 +175,26 @@ test('sous-titres : ce que dit Estelle est annoncé, morceau par morceau, même 
   // sans abonné, rien n'est annoncé
   await speak('Bravo !');
   assert.equal(events.length, 2);
+});
+
+test('sous-titres : ce qu’il faut trouver à l’oreille n’est pas écrit (dictée, lettre, anglais, ponctuation)', () => {
+  const said = (q) => [].concat(q.instruction).map((p) => (typeof p === 'string' ? { text: p } : p));
+  for (const [id, level] of [['dictee', 1], ['lettres', 1], ['ecoute', 1], ['epelle-anglais', 1], ['phrase-anglais', 5], ['nombres-anglais', 1]]) {
+    for (let i = 0; i < 10; i++) {
+      const q = findGame(id).generate(level, createRng(i + 1), i, CONTEXT);
+      const parts = said(q).map((p) => captionPart(p, q));
+      assert.ok(parts.includes(CAPTION_HIDDEN), `${id} : ${parts.join(' / ')}`);
+      if (typeof q.answer === 'string') assert.ok(!parts.some((t) => t.trim() === q.answer), `${id} : la réponse « ${q.answer} » est écrite`);
+    }
+  }
+  // ponctuation : la phrase est écrite, sans le signe qu'il faut choisir
+  for (let i = 0; i < 10; i++) {
+    const q = findGame('ponctuation').generate(3, createRng(i + 1), i, CONTEXT);
+    const parts = said(q).map((p) => captionPart(p, q));
+    assert.ok(!parts.some((t) => /[a-zé] ?[.?!]$/.test(t) && !/^(Écoute|Quel)/.test(t)), parts.join(' / '));
+  }
+  // une consigne ordinaire, ou un mot à lire qui n'est pas la réponse, reste écrite
+  const q = findGame('vocabulaire').generate(4, createRng(3), 0, CONTEXT);
+  assert.deepEqual(said(q).map((p) => captionPart(p, q)), said(q).map((p) => p.text));
+  assert.equal(captionPart({ text: 'Bravo !' }, null), 'Bravo !');
 });
