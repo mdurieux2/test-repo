@@ -278,7 +278,7 @@ function finalSyllable(rng) {
     replay: [sound],
     stage: { type: 'word', text: `${stem}…` },
     choices: textChoices(choices),
-    choiceStyle: 'letters',
+    choiceStyle: 'words', // jusqu'à 4 lettres par syllabe : 2 × 2 cases, sinon ça déborde sur 360 px
     answer: end,
     success: { speak: sound, reveal: word },
   };
