@@ -1545,12 +1545,22 @@ function choiceZone(ctx) {
   // un mot très long (« l’éléphanteau ») doit tenir sur la largeur d'une colonne
   const longWord = q.choices.some((c) => typeof c.label === 'string' && c.label.split(/\s+/).some((w) => w.length > 9));
   const zone = h('div', { class: `choices choices-${q.choiceStyle} n${q.choices.length}${q.stage.type === 'none' ? ' center' : ''}${longWord ? ' long-words' : ''}` });
+  // cherche et trouve : les images éparpillées sur une carte (place en %, angle, taille)
+  if (q.seek) {
+    zone.style.setProperty('--cols', q.seek.cols);
+    zone.style.setProperty('--rows', q.seek.rows);
+  }
   for (const choice of q.choices) {
     const label = typeof choice.label === 'string' ? choice.label : '';
     const classes = ['choice'];
     if (label.length > 7 && q.choiceStyle !== 'sentences') classes.push('long');
     if (/^\d{3,}$/.test(label)) classes.push(label.length >= 4 ? 'digits-4' : 'digits-3'); // grands nombres : police plus petite
-    const btn = h('button', { class: classes.join(' '), 'data-value': String(choice.value) }, renderChoiceContent(choice));
+    const btn = choice.place
+      ? h('button', {
+        class: classes.join(' '), 'data-value': String(choice.value), 'aria-label': choice.name,
+        style: { '--x': choice.place.x, '--y': choice.place.y, '--r': `${choice.place.r}deg`, '--s': choice.place.s },
+      }, h('span', { 'aria-hidden': 'true' }, choice.label))
+      : h('button', { class: classes.join(' '), 'data-value': String(choice.value) }, renderChoiceContent(choice));
     btn.addEventListener('click', () => {
       if (ctx.session.locked || btn.disabled) return;
       if (choice.value === q.answer) {

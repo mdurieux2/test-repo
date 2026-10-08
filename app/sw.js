@@ -2,7 +2,7 @@
 // (en voiture, en vacances…). Changer VERSION à chaque mise à jour publiée.
 // Tout nouveau fichier de l'app doit être ajouté à PRECACHE (vérifié par les tests).
 
-const VERSION = 'v23';
+const VERSION = 'v24';
 const CACHE = `lire-et-compter-${VERSION}`;
 // Sons de la voix naturelle (voix/fr/…, voix/en/…) : leurs noms changent avec leur contenu, on les
 // garde donc d'une version à l'autre (seuls ceux qui ne sont plus dans voix/manifest.json sont retirés).
@@ -46,6 +46,8 @@ const PRECACHE = [
   './js/games/anglais.js',
   './js/games/carte.js',
   './js/games/ce2.js',
+  './js/games/emotions.js',
+  './js/games/cherche.js',
   './js/games/chrono.js',
   './js/games/comprendre.js',
   './js/games/dictee.js',

@@ -36,13 +36,15 @@ import { CORPS_GAMES } from './corps.js';
 import { TECHNO_GAMES } from './techno.js';
 import { PLANETE_GAMES } from './planete.js';
 import { CE2_GAMES } from './ce2.js';
+import { emotions } from './emotions.js';
+import { chercheTrouve } from './cherche.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, fluence, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES, ...GRAMMAIRE_GAMES,
   ...VIVRE_GAMES, ...OPERATIONS_GAMES, ...VOCABULAIRE_GAMES, ...DONNEES_GAMES, ...CIEL_GAMES, ...CORPS_GAMES, ...TECHNO_GAMES, ...PLANETE_GAMES,
-  ...CE2_GAMES,
+  ...CE2_GAMES, emotions, chercheTrouve,
 ];
 
 const RUBRIQUES = [
@@ -70,12 +72,12 @@ const RUBRIQUES = [
     icon: '🧩',
     games: [
       'puzzle', 'memory', 'coloriage-magique', 'points',
-      'formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross', 'symetrie', 'reproduire', 'tangram', 'cubes',
+      'formes', 'algorithmes', 'intrus', 'cherche-trouve', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross', 'symetrie', 'reproduire', 'tangram', 'cubes',
       'labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres',
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures', 'perimetres'] },
-  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'se-reperer'] },
+  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'emotions', 'se-reperer'] },
   { id: 'sciences', title: 'Sciences', icon: '🔬', games: ['vivant', 'corps', 'milieux', 'matiere', 'melanges', 'electricite', 'objets', 'ciel', 'meteo', 'planete'] },
   {
     id: 'anglais',
@@ -95,7 +97,7 @@ const SECTION_GAMES = {
   'L’heure et le calendrier': ['heure', 'regle-horloge', 'calendrier', 'saisons'],
   'Monnaie et mesures': ['monnaie', 'mesures', 'perimetres'],
   'Puzzles, memory et coloriages': ['puzzle', 'memory', 'coloriage-magique', 'points'],
-  'Logique': ['formes', 'algorithmes', 'intrus', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross'],
+  'Logique': ['formes', 'algorithmes', 'intrus', 'cherche-trouve', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross'],
   'Formes et espace': ['symetrie', 'reproduire', 'tangram', 'cubes'],
   'Labyrinthes': ['labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres'],
   'Animaux, pays et cartes': ['animaux-monde', 'pays', 'drapeaux', 'carte-monde'],
@@ -105,7 +107,7 @@ const SECTION_GAMES = {
   'La planète': ['planete'],
   'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
   'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
-  'Vivre ensemble et se repérer': ['vivre-ensemble', 'se-reperer'],
+  'Vivre ensemble et se repérer': ['vivre-ensemble', 'emotions', 'se-reperer'],
   'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais'],
 };
 const SECTIONS = Object.fromEntries(Object.entries(SECTION_GAMES).flatMap(([section, ids]) => ids.map((id) => [id, section])));

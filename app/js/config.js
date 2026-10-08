@@ -4,13 +4,21 @@
 
 export const APP = {
   name: 'Lire, compter et s’amuser\u00a0!',
-  version: '1.14.2',
+  version: '1.15.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.15.0',
+    date: '2026-10-08',
+    changes: [
+      'Nouveau jeu « Les émotions » (Le monde) : reconnaître six émotions sur un visage, les nommer, les relier à une situation et à ce que l’on sent dans son corps, petites ou grandes émotions, émotions plus fines (fier, jaloux, déçu…), savoir se calmer et aider un copain.',
+      'Nouveau jeu « Cherche et trouve » (Jeux et logique) : retrouver une image parmi beaucoup d’autres, de plus en plus petites, tournées et ressemblantes, un visage, ou celle qui n’est pas comme les autres.',
+    ],
+  },
   {
     version: '1.14.2',
     date: '2026-10-08',
