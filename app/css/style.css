@@ -2558,6 +2558,19 @@ body:has(main.play) .voice-progress-text { display: none; }
 }
 
 /* =====================================================================
+   L'électricité : le bon circuit parmi trois, les uns sous les autres et assez grands pour bien
+   voir les fils (games/techno.js)
+   ===================================================================== */
+.choices-circuits { grid-template-columns: minmax(0, 1fr) !important; gap: 10px; }
+.choices-circuits .choice { min-height: 0; padding: 4px 6px; }
+.choices-circuits .drawing-choice svg { height: clamp(70px, calc((100vh - 300px) / 3), 160px); height: clamp(70px, calc((100dvh - 300px) / 3), 160px); }
+@media (orientation: landscape) and (max-height: 520px) {
+  .choices-circuits { gap: 6px; }
+  .choices-circuits .choice { padding: 2px 6px; }
+  .choices-circuits .drawing-choice svg { height: calc((100dvh - 90px) / 3); }
+}
+
+/* =====================================================================
    Le partage : le tas d'objets, les enfants et leurs assiettes, les paquets
    (les tailles suivent la largeur du dessin : cqi, conteneur .share-scene)
    ===================================================================== */

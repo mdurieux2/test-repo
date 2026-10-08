@@ -32,12 +32,13 @@ import { VOCABULAIRE_GAMES } from './vocabulaire.js';
 import { DONNEES_GAMES } from './donnees.js';
 import { CIEL_GAMES } from './ciel.js';
 import { CORPS_GAMES } from './corps.js';
+import { TECHNO_GAMES } from './techno.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES, ...GRAMMAIRE_GAMES,
-  ...VIVRE_GAMES, ...OPERATIONS_GAMES, ...VOCABULAIRE_GAMES, ...DONNEES_GAMES, ...CIEL_GAMES, ...CORPS_GAMES,
+  ...VIVRE_GAMES, ...OPERATIONS_GAMES, ...VOCABULAIRE_GAMES, ...DONNEES_GAMES, ...CIEL_GAMES, ...CORPS_GAMES, ...TECHNO_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -70,7 +71,7 @@ const RUBRIQUES = [
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
   { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'se-reperer'] },
-  { id: 'sciences', title: 'Sciences', icon: '🔬', games: ['vivant', 'corps', 'milieux', 'matiere', 'ciel', 'meteo'] },
+  { id: 'sciences', title: 'Sciences', icon: '🔬', games: ['vivant', 'corps', 'milieux', 'matiere', 'electricite', 'objets', 'ciel', 'meteo'] },
   {
     id: 'anglais',
     title: 'Anglais',
@@ -94,7 +95,7 @@ const SECTION_GAMES = {
   'Labyrinthes': ['labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres'],
   'Animaux, pays et cartes': ['animaux-monde', 'pays', 'drapeaux', 'carte-monde'],
   'Le vivant': ['vivant', 'corps', 'milieux'],
-  'La matière et les objets': ['matiere'],
+  'La matière et les objets': ['matiere', 'electricite', 'objets'],
   'Le ciel et la Terre': ['ciel', 'meteo'],
   'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
   'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
