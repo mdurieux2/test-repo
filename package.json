@@ -1,6 +1,6 @@
 {
   "name": "lire-et-compter",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "private": true,
   "description": "Jeux de français, de maths et d'anglais, de la petite section au CE2 : web app installable sur téléphone, tablette et ordinateur",
   "type": "module",

@@ -3240,6 +3240,15 @@
   "file": "fr/b79cb01c43fb63a1.mp3"
  },
  {
+  "key": "fr|1|Autrefois, nous allions au marché le samedi.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Autrefois, nous allions au marché le samedi.",
+  "voice": "estelle",
+  "file": "fr/3befcb6d00f80555.mp3"
+ },
+ {
   "key": "fr|1|Regarde les images.",
   "lang": "fr",
   "rate": 1,
@@ -3256,6 +3265,15 @@
   "text": "Oui : le flocon, c'est la neige.",
   "voice": "estelle",
   "file": "fr/40356f8589f6d403.mp3"
+ },
+ {
+  "key": "fr|1|Avant, ils voyaient des loups dans la forêt.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Avant, ils voyaient des loups dans la forêt.",
+  "voice": "estelle",
+  "file": "fr/777829c084c191d2.mp3"
  },
  {
   "key": "fr|1|Trace un trait avec ton doigt, de chaque calcul jusqu'à son résultat.",
@@ -62928,24 +62946,6 @@
   "file": "fr/6d9eb4ee007c7146.mp3"
  },
  {
-  "key": "fr|0.9|Il prend des branches et une vieille couverture.",
-  "lang": "fr",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "Il prend des branches et une vieille couverture.",
-  "voice": "estelle",
-  "file": "fr/6df4b288dbcf3654.mp3"
- },
- {
-  "key": "fr|1|Oui, la bougie, c'est un objet d'autrefois.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Oui, la bougie, c'est un objet d'autrefois.",
-  "voice": "estelle",
-  "file": "fr/9a7f27f1d18c23a6.mp3"
- },
- {
   "key": "fr|1|À toi,",
   "lang": "fr",
   "rate": 1,
@@ -63135,15 +63135,6 @@
   "file": "fr/ba0d151718decef9.mp3"
  },
  {
-  "key": "fr|1|Autrefois,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Autrefois,",
-  "voice": "estelle",
-  "file": "fr/170e5dfe69fbf5db.mp3"
- },
- {
   "key": "fr|1|lapin,",
   "lang": "fr",
   "rate": 1,
@@ -63169,6 +63160,15 @@
   "text": "égale 100",
   "voice": "estelle",
   "file": "fr/a7e0e0f1af63c1c0.mp3"
+ },
+ {
+  "key": "fr|1|Autrefois,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Autrefois,",
+  "voice": "estelle",
+  "file": "fr/170e5dfe69fbf5db.mp3"
  },
  {
   "key": "fr|1|gâteau,",
@@ -63828,15 +63828,6 @@
   "file": "fr/33fe014a1ef50579.mp3"
  },
  {
-  "key": "fr|1|Avant,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Avant,",
-  "voice": "estelle",
-  "file": "fr/cd947840a80f9b3f.mp3"
- },
- {
   "key": "fr|1|Dans l'eau,",
   "lang": "fr",
   "rate": 1,
@@ -63970,6 +63961,15 @@
   "text": "1,",
   "voice": "estelle",
   "file": "fr/1a3c60f81baba7ef.mp3"
+ },
+ {
+  "key": "fr|1|Avant,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Avant,",
+  "voice": "estelle",
+  "file": "fr/cd947840a80f9b3f.mp3"
  },
  {
   "key": "fr|1|En hiver,",
@@ -67311,6 +67311,15 @@
   "file": "fr/264b6c110c94f1c5.mp3"
  },
  {
+  "key": "fr|1|c'est un objet d'autrefois.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est un objet d'autrefois.",
+  "voice": "estelle",
+  "file": "fr/b5bb5a5680e3108d.mp3"
+ },
+ {
   "key": "fr|1|À midi,",
   "lang": "fr",
   "rate": 1,
@@ -69964,15 +69973,6 @@
   "text": "zèbre,",
   "voice": "estelle",
   "file": "fr/7ce3bd29f013ab01.mp3"
- },
- {
-  "key": "fr|1|c'est un objet d'autrefois.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "c'est un objet d'autrefois.",
-  "voice": "estelle",
-  "file": "fr/b5bb5a5680e3108d.mp3"
  },
  {
   "key": "fr|1|ou dans la forêt ?",
@@ -75654,6 +75654,15 @@
   "file": "fr/aa3c575157f997b7.mp3"
  },
  {
+  "key": "fr|1|la bougie,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "la bougie,",
+  "voice": "estelle",
+  "file": "fr/05f56625e4180e6e.mp3"
+ },
+ {
   "key": "fr|1|Le deuxième samedi,",
   "lang": "fr",
   "rate": 1,
@@ -78759,6 +78768,15 @@
   "file": "fr/6235835c5f083ec9.mp3"
  },
  {
+  "key": "fr|0.9|Il prend des branches",
+  "lang": "fr",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Il prend des branches",
+  "voice": "estelle",
+  "file": "fr/3ee88aaa5e0d98d3.mp3"
+ },
+ {
   "key": "fr|1|74",
   "lang": "fr",
   "rate": 1,
@@ -81045,6 +81063,15 @@
   "file": "fr/3d4c21f1bdacbe5b.mp3"
  },
  {
+  "key": "fr|0.9|et une vieille couverture.",
+  "lang": "fr",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "et une vieille couverture.",
+  "voice": "estelle",
+  "file": "fr/efd4f23416306f0f.mp3"
+ },
+ {
   "key": "fr|1|et le lait.",
   "lang": "fr",
   "rate": 1,
@@ -82726,51 +82753,6 @@
   "text": "à 17 euros.",
   "voice": "estelle",
   "file": "fr/5fd0d83ab4b80198.mp3"
- },
- {
-  "key": "fr|1|Il bat jour",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Il bat jour",
-  "voice": "estelle",
-  "file": "fr/eb6574af2ad8effa.mp3"
- },
- {
-  "key": "fr|1|et solides.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et solides.",
-  "voice": "estelle",
-  "file": "fr/81efca6de3ba2e87.mp3"
- },
- {
-  "key": "fr|1|il sera 2 heures",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "il sera 2 heures",
-  "voice": "estelle",
-  "file": "fr/153d91044e6b376f.mp3"
- },
- {
-  "key": "fr|1|et encore.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "et encore.",
-  "voice": "estelle",
-  "file": "fr/7f466c88369b3b2d.mp3"
- },
- {
-  "key": "fr|1|ou le porcelet",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ou le porcelet",
-  "voice": "estelle",
-  "file": "fr/a2c832c2a1869caa.mp3"
  },
  {
   "key": "fr|1|Bravo",
@@ -86985,15 +86967,6 @@
   "file": "fr/9bafaca26458195a.mp3"
  },
  {
-  "key": "fr|1|Mets",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Mets",
-  "voice": "estelle",
-  "file": "fr/33a15ab283a3622d.mp3"
- },
- {
   "key": "fr|1|heures",
   "lang": "fr",
   "rate": 1,
@@ -87001,6 +86974,15 @@
   "text": "heures",
   "voice": "estelle",
   "file": "fr/367c0688d89b267a.mp3"
+ },
+ {
+  "key": "fr|1|Mets",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Mets",
+  "voice": "estelle",
+  "file": "fr/33a15ab283a3622d.mp3"
  },
  {
   "key": "fr|1|c'est",
@@ -87390,6 +87372,15 @@
   "file": "fr/76f8d6341622b587.mp3"
  },
  {
+  "key": "fr|1|il sera",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "il sera",
+  "voice": "estelle",
+  "file": "fr/2a335cfa7bfda6dc.mp3"
+ },
+ {
   "key": "fr|1|heures.",
   "lang": "fr",
   "rate": 1,
@@ -87406,15 +87397,6 @@
   "text": "bonbons.",
   "voice": "estelle",
   "file": "fr/e24bb47330671426.mp3"
- },
- {
-  "key": "fr|1|il sera",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "il sera",
-  "voice": "estelle",
-  "file": "fr/2a335cfa7bfda6dc.mp3"
  },
  {
   "key": "fr|1|Où est le nombre",
@@ -92439,6 +92421,42 @@
   "file": "fr/54b36ff5b497c175.mp3"
  },
  {
+  "key": "fr|1|Il bat jour",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Il bat jour",
+  "voice": "estelle",
+  "file": "fr/eb6574af2ad8effa.mp3"
+ },
+ {
+  "key": "fr|1|et solides.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "et solides.",
+  "voice": "estelle",
+  "file": "fr/81efca6de3ba2e87.mp3"
+ },
+ {
+  "key": "fr|1|et encore.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "et encore.",
+  "voice": "estelle",
+  "file": "fr/7f466c88369b3b2d.mp3"
+ },
+ {
+  "key": "fr|1|ou le porcelet",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "ou le porcelet",
+  "voice": "estelle",
+  "file": "fr/a2c832c2a1869caa.mp3"
+ },
+ {
   "key": "fr|1|ou une heure ?",
   "lang": "fr",
   "rate": 1,
@@ -92491,33 +92509,6 @@
   "text": "et des poussins.",
   "voice": "estelle",
   "file": "fr/9c2b6e3c07866d03.mp3"
- },
- {
-  "key": "fr|1|les Américains",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "les Américains",
-  "voice": "estelle",
-  "file": "fr/ef25707aca2c0897.mp3"
- },
- {
-  "key": "fr|1|et Lou jouent,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et Lou jouent,",
-  "voice": "estelle",
-  "file": "fr/73c088b41faa25dc.mp3"
- },
- {
-  "key": "fr|0.9|Sous le sapin,",
-  "lang": "fr",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "Sous le sapin,",
-  "voice": "estelle",
-  "file": "fr/030cca15f503f2cc.mp3"
  },
  {
   "key": "fr|1|frappe",
@@ -139248,6 +139239,33 @@
   "file": "fr/d74d3e908a4944f5.mp3"
  },
  {
+  "key": "fr|1|les Américains",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "les Américains",
+  "voice": "estelle",
+  "file": "fr/ef25707aca2c0897.mp3"
+ },
+ {
+  "key": "fr|1|et Lou jouent,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et Lou jouent,",
+  "voice": "estelle",
+  "file": "fr/73c088b41faa25dc.mp3"
+ },
+ {
+  "key": "fr|0.9|Sous le sapin,",
+  "lang": "fr",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Sous le sapin,",
+  "voice": "estelle",
+  "file": "fr/030cca15f503f2cc.mp3"
+ },
+ {
   "key": "fr|1|puis trouve le fromage.",
   "lang": "fr",
   "rate": 1,
@@ -146302,33 +146320,6 @@
   "text": "nine plus six?",
   "voice": "estelle",
   "file": "en/6ae62cc0731dca1f.mp3"
- },
- {
-  "key": "en|0.8|nine plus two?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "nine plus two?",
-  "voice": "estelle",
-  "file": "en/9115f8c7648d94ad.mp3"
- },
- {
-  "key": "en|0.8|four plus ten?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "four plus ten?",
-  "voice": "estelle",
-  "file": "en/905f37e2e55855b7.mp3"
- },
- {
-  "key": "fr|1|les deux fils sont sur la même borne de la pile.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "les deux fils sont sur la même borne de la pile.",
-  "voice": "estelle",
-  "file": "fr/cf73f561780e0173.mp3"
  },
  {
   "key": "fr|1|poisson : 2 syllabes !",
@@ -156400,6 +156391,15 @@
   "text": "Ils mettent une bougie dedans.",
   "voice": "estelle",
   "file": "fr/a52ac022dbf92036.mp3"
+ },
+ {
+  "key": "fr|0.9|Il prend des branches et une vieille couverture.",
+  "lang": "fr",
+  "rate": 0.9,
+  "type": "phrase",
+  "text": "Il prend des branches et une vieille couverture.",
+  "voice": "estelle",
+  "file": "fr/6df4b288dbcf3654.mp3"
  },
  {
   "key": "fr|0.9|Malo écrit une lettre au père Noël.",
@@ -179721,6 +179721,15 @@
   "file": "fr/15fa044940101d14.mp3"
  },
  {
+  "key": "fr|1|Oui, la bougie, c'est un objet d'autrefois.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Oui, la bougie, c'est un objet d'autrefois.",
+  "voice": "estelle",
+  "file": "fr/9a7f27f1d18c23a6.mp3"
+ },
+ {
   "key": "fr|1|En bois, en verre ou en papier ?",
   "lang": "fr",
   "rate": 1,
@@ -186615,6 +186624,15 @@
   "file": "en/1ed487bb8c0ce459.mp3"
  },
  {
+  "key": "en|0.8|nine plus two?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "nine plus two?",
+  "voice": "estelle",
+  "file": "en/9115f8c7648d94ad.mp3"
+ },
+ {
   "key": "en|0.8|three plus twelve?",
   "lang": "en",
   "rate": 0.8,
@@ -186676,6 +186694,15 @@
   "text": "seven plus eight is fifteen!",
   "voice": "estelle",
   "file": "en/eabfd80325d75a0c.mp3"
+ },
+ {
+  "key": "en|0.8|four plus ten?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "four plus ten?",
+  "voice": "estelle",
+  "file": "en/905f37e2e55855b7.mp3"
  },
  {
   "key": "en|0.8|seventeen plus two?",
@@ -202905,6 +202932,15 @@
   "file": "fr/956dc4f3825e6d9c.mp3"
  },
  {
+  "key": "fr|1|il sera 2 heures",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "il sera 2 heures",
+  "voice": "estelle",
+  "file": "fr/153d91044e6b376f.mp3"
+ },
+ {
   "key": "fr|1|il sera 9 heures",
   "lang": "fr",
   "rate": 1,
@@ -208942,6 +208978,15 @@
   "text": "Pour avoir de l'eau plus claire avec de l'eau boueuse,",
   "voice": "estelle",
   "file": "fr/19b8e054d4afe235.mp3"
+ },
+ {
+  "key": "fr|1|les deux fils sont sur la même borne de la pile.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "les deux fils sont sur la même borne de la pile.",
+  "voice": "estelle",
+  "file": "fr/cf73f561780e0173.mp3"
  },
  {
   "key": "fr|1|avec le marteau.",

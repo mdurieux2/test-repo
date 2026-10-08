@@ -4,13 +4,22 @@
 
 export const APP = {
   name: 'Lire, compter et s’amuser\u00a0!',
-  version: '1.14.0',
+  version: '1.14.1',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.14.1',
+    date: '2026-10-08',
+    changes: [
+      'Voix d’Estelle pour les nouveautés de la 1.14.0 : lecture à voix haute, correction expliquée, CE2 (imparfait, grands nombres) et petite section.',
+      'Points à relier : le point suivant ne s’allume plus à chaque fois, seulement au départ et après une erreur.',
+      'iPad mini en paysage : le pavé numérique et l’accueil tiennent dans l’écran, aussi avec le texte agrandi ou les grandes cibles.',
+    ],
+  },
   {
     version: '1.14.0',
     date: '2026-10-08',
