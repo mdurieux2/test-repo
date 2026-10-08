@@ -46,6 +46,7 @@ import { SEASON_LABELS, seasonOf } from './themes.js';
 import { STORY_DATA } from './games/histoires.js';
 import * as recordings from './recordings.js';
 import { formatDuration, MAX_SECONDS, pickMime, sentenceAt, sentenceTimeline } from './recordings.js';
+import { fichesScreen } from './fiches-ecran.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
@@ -4651,6 +4652,21 @@ function parentsScreen({ tab = 'suivi', childId, message = '' } = {}) {
     content));
 }
 
+/** Fiches à imprimer (fiches-ecran.js) : ouvertes depuis le Suivi d'un enfant ou les Réglages. */
+function openFiches(childId, tab = 'suivi') {
+  fichesScreen({ store, show, topBar, childId, onBack: () => parentsScreen({ tab, childId }) });
+}
+
+function fichesCard(childId, tab) {
+  const kid = store.profiles[childId];
+  return h('section', { class: 'card fiche-card' },
+    h('h2', {}, '🖨️ Fiches à imprimer'),
+    h('p', { class: 'muted small' }, kid && tab === 'suivi'
+      ? `Pour les jours sans écran : des exercices sur papier pour ${kid.name}, à son niveau, avec le corrigé.`
+      : 'Pour les jours sans écran : des exercices sur papier, au niveau de chaque enfant, avec le corrigé.'),
+    h('button', { class: 'big-btn fiche-open', 'data-fiches': tab, onclick: () => openFiches(childId, tab) }, 'Préparer une fiche'));
+}
+
 function followTab(childId) {
   const selected = store.profiles[childId] ? childId : store.profiles[store.active] ? store.active : store.order[0];
   const kid = store.profiles[selected];
@@ -4663,6 +4679,7 @@ function followTab(childId) {
     h('p', { class: 'muted follow-grade' }, `${kid.name} · ${GRADES[kid.grade]} · `,
       h('button', { class: 'link-action', onclick: () => childEditScreen(selected) }, 'Modifier')),
     dashboard({ kid, grade: kid.grade, onChange: save }),
+    fichesCard(selected, 'suivi'),
     h('details', { class: 'card tips' },
       h('summary', {}, 'Conseils'),
       h('ul', {},
@@ -5542,6 +5559,7 @@ function settingsTab() {
       h('p', { class: 'muted small' }, 'Voix de l’appareil (phrases rares, ou voix naturelle coupée) : pour qu’elle soit plus naturelle, Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
     voicesCard(),
     a11yShortcuts(),
+    fichesCard(store.active && store.profiles[store.active] ? store.active : store.order[0], 'reglages'),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),

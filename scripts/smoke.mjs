@@ -12,6 +12,7 @@
 //                  pour un échantillon de jeux de chaque rubrique ; A11Y=contrast,calm… ajoute d'autres réglages)
 //         ONLY=a11y   (seulement toucher sans glisser, clavier, sous-titres ; PARTS=a11y y ajoute contrastes et axe-core)
 //         ONLY=demo   (seulement la main qui montre le geste au premier lancement)
+//         ONLY=fiches   (seulement les fiches à imprimer : aperçu, impression A4 en PDF)
 //         A11Y=captions,textSize=1.15 DEVICES=375x667,667x375 PARTS=layout   (ces réglages en plus, sur ces écrans seulement)
 //         PORT=8124 pour lancer plusieurs tests en même temps
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
@@ -1812,6 +1813,11 @@ async function a11yPart() {
   await page.click('[data-tab="reglages"]');
   await page.waitForSelector('.settings');
   await audit('espace parents, réglages');
+  await page.click('[data-fiches="reglages"]');
+  await page.waitForSelector('.fiche-page');
+  await audit('espace parents, fiches à imprimer');
+  await page.click('[data-fiche-back]');
+  await page.waitForSelector('.settings');
   await page.click('[data-voices]');
   await page.waitForSelector('.voices');
   await audit('espace parents, vos voix');
@@ -2162,6 +2168,132 @@ async function demoChecks() {
   if (await demoShown(1500) || await page.locator('.demo-btn').count()) fail('démonstration : une main sur un choix multiple simple');
   console.log('✔ démonstration : la main au premier lancement (pas au deuxième), « ? » la remontre, un toucher la fait partir, touchers seuls, sans mouvement en mode calme');
   await context.close();
+
+// ---------------------------------------------------------------- Fiches à imprimer
+
+// Jeux dont on vérifie la fiche imprimée (une forme d'exercice chacun) : [jeu, classe]
+const FICHE_SAMPLE = [
+  ['calcul', 'CP'], ['trous', 'CP'], ['relie-calculs', 'CE1'], ['ranger', 'CP'], ['heure', 'CP'], ['regle-horloge', 'CE1'],
+  ['addition-posee', 'CE1'], ['sudoku', 'CE1'], ['labyrinthe', 'CE1'], ['ecrire', 'CP'], ['points', 'CE1'], ['symetrie', 'CP'],
+  ['picross', 'CE1'], ['petits-textes', 'CE1'], ['vivant', 'CP'], ['drapeaux', 'CE1'], ['graphiques', 'CE1'], ['bon-mot', 'CP'],
+];
+
+/** La fiche imprimée : deux feuilles A4, rien d'autre de l'écran, et rien qui dépasse. */
+async function checkPrintedFiche(page, label) {
+  // à l'impression, la « fenêtre » a la taille de la feuille A4 (794 × 1123 points) : les règles
+  // de l'écran pour les grandes tablettes (agrandissement) ne doivent rien changer
+  const viewport = page.viewportSize();
+  await page.setViewportSize({ width: 794, height: 1123 });
+  await page.emulateMedia({ media: 'print' });
+  const problem = await page.evaluate(() => {
+    const mm = 96 / 25.4;
+    const visible = (el) => el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 0;
+    if (visible(document.querySelector('.top-bar')) || visible(document.querySelector('.fiche-form'))) return 'les boutons de l’écran sont imprimés';
+    const pages = [...document.querySelectorAll('.fiche-page')];
+    if (pages.length !== 2) return `${pages.length} feuilles au lieu de 2`;
+    for (const [i, p] of pages.entries()) {
+      const r = p.getBoundingClientRect();
+      if (Math.abs(r.width - 210 * mm) > 2 || r.height > 297 * mm + 1) return `feuille ${i + 1} : ${Math.round(r.width / mm)} × ${Math.round(r.height / mm)} mm au lieu de 210 × 297 mm`;
+      if (p.scrollHeight > p.clientHeight + 1) return `feuille ${i + 1} : le contenu dépasse de ${Math.round((p.scrollHeight - p.clientHeight) / mm)} mm`;
+      if (r.left < -1 || r.left > 2) return `feuille ${i + 1} décalée (${Math.round(r.left)} px)`;
+      for (const el of p.querySelectorAll('.ex, .ans')) {
+        if (el.scrollWidth > el.clientWidth + 1) return `feuille ${i + 1} : exercice trop large (« ${el.textContent.trim().slice(0, 30)} »)`;
+        const box = el.getBoundingClientRect();
+        if (box.bottom > r.bottom - 4 * mm) return `feuille ${i + 1} : exercice sous la marge du bas`;
+      }
+    }
+    if (getComputedStyle(document.querySelector('.fiche-sheets')).transform !== 'none') return 'l’aperçu réduit est imprimé réduit';
+    return null;
+  });
+  // le vrai PDF A4 de Chromium : exactement deux pages
+  const pdf = await page.pdf({ format: 'A4', preferCSSPageSize: true, printBackground: true });
+  if (process.env.FICHE_PDF) writeFileSync(`${process.env.FICHE_PDF}/${label.replace(/\W+/g, '-')}.pdf`, pdf);
+  const pdfPages = (pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
+  await page.emulateMedia({ media: 'screen' });
+  await page.setViewportSize(viewport);
+  if (problem) fail(`fiche ${label} : ${problem}`);
+  if (pdfPages !== 2) fail(`fiche ${label} : le PDF A4 a ${pdfPages} pages au lieu de 2`);
+}
+
+async function checkFiches() {
+  const context = await newContext({ width: 390, height: 844 });
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`fiches : ${e.message}`));
+  await page.goto(BASE);
+  await page.waitForSelector('.welcome');
+  await setStore(page, "store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games = { heure: { level: 2 } }; store.profiles.matteo = store.profiles.matteo || { grade: 'MS', games: {} };");
+  await openParents(page);
+  // depuis le Suivi d'Eva-Rose
+  await page.click('[data-child="eva-rose"]');
+  await page.click('[data-fiches="suivi"]');
+  await page.waitForSelector('.fiches .fiche-page');
+  if ((await page.getAttribute('main.screen', 'data-title')) !== 'Fiches à imprimer') fail('fiches : titre de l’écran');
+  const info = async () => page.evaluate(() => ({
+    exercises: document.querySelectorAll('.fiche-exercices .fiche-list > li').length,
+    answers: document.querySelectorAll('.fiche-corrige .corrige-list > li').length,
+    name: document.querySelector('.fiche-name')?.textContent,
+    date: document.querySelector('.fiche-who')?.textContent,
+    consigne: document.querySelector('.fiche-consigne')?.textContent,
+    text: document.querySelector('.fiche-exercices')?.textContent,
+    game: document.querySelector('[data-fiche-game]').value,
+    level: document.querySelector('[data-fiche-level]').value,
+    scale: Number(getComputedStyle(document.querySelector('.fiche-scale')).getPropertyValue('--scale')),
+  }));
+  let sheet = await info();
+  if (sheet.exercises < 6 || sheet.exercises > 12) fail(`fiches : ${sheet.exercises} exercices au lieu de 6 à 12`);
+  if (sheet.answers !== sheet.exercises) fail(`fiches : ${sheet.answers} corrigés pour ${sheet.exercises} exercices`);
+  if (sheet.name !== 'Eva-Rose') fail(`fiches : prénom « ${sheet.name} » au lieu d’Eva-Rose`);
+  if (!/Date : \S+ \d+ \S+ \d{4}/.test(sheet.date)) fail(`fiches : date absente (${sheet.date})`);
+  if (!(sheet.consigne || '').replace('Consigne :', '').trim()) fail('fiches : consigne vide');
+  if (!(sheet.scale > 0.3 && sheet.scale < 0.6)) fail(`fiches : l’aperçu n’est pas réduit à la largeur de l’écran (${sheet.scale})`);
+  await checkLayout(page, 'fiches à imprimer (390×844)', { reachable: false });
+  // le niveau proposé est celui de l'enfant (le 2e niveau de « Quelle heure est-il ? » au CP)
+  await page.selectOption('[data-fiche-game]', 'heure');
+  await page.waitForFunction(() => document.querySelector('.fiche-exercices .ex-stage .stage-clock'));
+  sheet = await info();
+  const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'].games.heure.level, STORAGE_KEY);
+  if (sheet.level !== String(saved)) fail(`fiches : niveau ${sheet.level} proposé au lieu du niveau de l’enfant (${saved})`);
+  // « Autres exercices » : un nouveau tirage
+  const before = sheet.text;
+  await page.click('[data-fiche-new]');
+  await page.waitForFunction((t) => document.querySelector('.fiche-exercices').textContent !== t, before);
+  // « Imprimer » ouvre l'impression du navigateur
+  await page.evaluate(() => { window.print = () => { window.__printed = (window.__printed || 0) + 1; }; });
+  await page.click('[data-fiche-print]');
+  if ((await page.evaluate(() => window.__printed)) !== 1) fail('fiches : « Imprimer » n’ouvre pas l’impression');
+  await checkPrintedFiche(page, 'heure');
+  // une forme d'exercice par jeu, à l'impression (classe où le jeu est au programme)
+  const kinds = [];
+  for (const [gameId, grade] of FICHE_SAMPLE) {
+    await setStore(page, `store.profiles['eva-rose'].grade = '${grade}';`);
+    await page.goto(BASE);
+    await openParents(page);
+    await page.click('[data-child="eva-rose"]');
+    await page.click('[data-fiches="suivi"]');
+    await page.waitForSelector('.fiche-page');
+    await page.selectOption('[data-fiche-game]', gameId);
+    await page.waitForFunction((id) => document.querySelector('[data-fiche-game]').value === id && document.querySelector('.fiche-page'), gameId);
+    // le plus haut niveau proposé (le plus chargé)
+    const last = await page.$$eval('[data-fiche-level] option', (opts) => opts.at(-1).value);
+    await page.selectOption('[data-fiche-level]', last);
+    await page.waitForTimeout(50);
+    kinds.push(await page.$eval('.fiche-list > li', (li) => [...li.classList].find((c) => c.startsWith('exk-')).slice(4)));
+    await checkPrintedFiche(page, `${gameId} niveau ${last}`);
+  }
+  // « Retour » : l'espace parents
+  await page.click('[data-fiche-back]');
+  await page.waitForSelector('.parents');
+  // depuis les Réglages, sur un petit téléphone en paysage
+  await page.setViewportSize({ width: 667, height: 375 });
+  await page.click('[data-tab="reglages"]');
+  await page.click('[data-fiches="reglages"]');
+  await page.waitForSelector('.fiche-page');
+  await checkLayout(page, 'fiches à imprimer (667×375)', { reachable: false });
+  if ((await page.locator('[data-fiche-child]').count()) !== 2) fail('fiches : le choix de l’enfant manque');
+  await page.click('[data-fiche-child="matteo"]');
+  await page.waitForFunction(() => document.querySelector('.fiche-name')?.textContent === 'Matteo');
+  await context.close();
+  console.log(`✔ fiches à imprimer : aperçu, niveau de l’enfant, nouveau tirage, impression ; ${FICHE_SAMPLE.length + 1} fiches A4 de 2 pages (${[...new Set(kinds)].join(', ')})`);
 }
 
 if (!ONLY && PARTS.includes('scenario')) await scenario();
@@ -2172,6 +2304,7 @@ else if (ONLY?.includes('hors-ligne')) {
   await checkOffline(context, page);
   await context.close();
 }
+if ((!ONLY && PARTS.includes('scenario')) || ONLY?.includes('fiches')) await checkFiches();
 // accessibilité : avec le parcours complet (PARTS=scenario), ou seule (PARTS=a11y, ou ONLY=a11y)
 if ((!ONLY && (PARTS.includes('scenario') || PARTS.includes('a11y'))) || ONLY?.includes('a11y')) await a11yChecks();
 // la main qui montre le geste : avec le parcours complet, ou seule (ONLY=demo)
@@ -2416,7 +2549,12 @@ async function checkDevice(device, repeat, deviceIndex) {
   await page.click('[data-tab="reglages"]');
   await page.waitForSelector('.settings');
   await checkLayout(page, tag('réglages'), { reachable: false });
-  checked += 6;
+  await page.click('[data-fiches="reglages"]');
+  await page.waitForSelector('.fiche-page');
+  await checkLayout(page, tag('fiches à imprimer'), { reachable: false });
+  await page.click('[data-fiche-back]');
+  await page.waitForSelector('.settings');
+  checked += 7;
   checked += await checkVoicesLayout(page, tag);
   await ctx.close();
   return checked;
