@@ -19,6 +19,7 @@ import { GAMES } from '../../app/js/games/index.js';
 import { SPOKEN_SENTENCES } from '../../app/js/games/vocabulaire.js';
 import { voiciPartie } from '../../app/js/games/corps.js';
 import { tapText } from '../../app/js/a11y-jeux.js';
+import { EXPLAIN_SENTENCES } from '../../app/js/explications.js';
 import { createRng } from '../../app/js/random.js';
 import {
   autourDesPrenoms, cle, enMots, langue, morceaux, mots, normaliser, phrases, planLecture, propositions, qualitePlan, utile,
@@ -101,6 +102,8 @@ const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !',
   'Qu’est-ce qui fait tourner les ailes du moulin à vent ?', 'Les nuages sont faits de coton.',
   'Je remplis la baignoire jusqu’en haut tous les jours.', 'On recoud le trou de la chaussette.',
   'On attrape le papillon par les ailes.',
+  // correction expliquée (explications.js) : la phrase dite avec l'encart, après une première erreur
+  ...EXPLAIN_SENTENCES,
   // toucher plutôt que glisser (main.js) : écris au doigt, points à relier
   'Touche le point qui brille !', 'Regarde le point jaune, puis touche les points un par un !',
   // ponctuation : l'enfant choisit le signe d'après l'intonation, chaque phrase doit donc être dite d'un seul son

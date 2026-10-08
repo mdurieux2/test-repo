@@ -1,6 +1,6 @@
 # Lire, compter et s’amuser !
 
-Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la moyenne section au CE1.
+Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la petite section au CE2.
 
 - Sur **téléphone, tablette et ordinateur** : iPhone, iPad, Android, Windows, Mac.
 - **Sans compte ni publicité**, et **sans Internet** une fois installée.
@@ -77,10 +77,12 @@ officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/program
 
 | Classe | Français | Maths | Anglais | Le monde | Sciences |
 |---|---|---|---|---|---|
+| Petite section | Frapper les syllabes, les rimes en images, les mots du quotidien, les premiers traits au doigt, une histoire écoutée (rien à lire) | Compter les tout petits nombres, le panier, comparer, ranger par taille ; gros puzzles, memory, formes, motifs, l'intrus, les ombres, le premier labyrinthe | Écouter et toucher, compter, « Where is the cat? », comptines | Les animaux, les saisons, vivre ensemble, se repérer | Le corps, les objets, la météo, trier ses déchets |
 | Moyenne section | Syllabes, rimes, lettres capitales, chemin de A à E, **écrire au doigt** (traits, chiffres, capitales) | Compter jusqu'à 10, le panier, relier les quantités, ranger par taille, formes, motifs, l'intrus, les ombres, sudoku en images, cubes, labyrinthes, **puzzle**, **memory**, **coloriage magique**, **points à relier** | Écouter et toucher, compter en anglais, « Where is the cat? » | Où vivent les animaux, les saisons, les émotions et la politesse | Le corps et les sens, les objets de la maison, le temps qu'il fait, trier ses déchets |
 | Grande section | Syllabes, rimes, lettres (nom et son), premier son, alphabet, écrire au doigt (jusqu'aux lettres attachées et son prénom), **première dictée** | Compter jusqu'à 20, faire des paquets, petits problèmes, doubles, calcul ±5 et ±10, logique, symétrie, labyrinthes, puzzle, memory | Écouter et toucher, compter, in/on/under, les nombres, mélanger les couleurs, l'intrus, les contraires | Les bébés des animaux, les moments de la journée, **les drapeaux**, devant, derrière, sur, sous | Le squelette, les milieux, solide ou liquide, l'aimant, l'électricité qui peut être dangereuse, le jour et la nuit, la météo |
 | CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler, **dictée de mots**, écrire au doigt | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, **régler l'horloge**, la monnaie, sudoku, symétrie, cubes, coloriage magique avec des calculs | Écouter (10 thèmes), lire, relier, compter, les nombres jusqu'à 20, calculer en anglais, colorier, memory, petites phrases | Ce que mangent les animaux, les jours, les pays, les drapeaux, traverser la rue, les numéros d'urgence | Les organes, qui mange qui, l'eau dans tous ses états, dissoudre et filtrer, le circuit électrique, la roue et le levier, la Lune, économiser l'eau |
 | CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants, dictée (sons complexes, lettres pièges) | Nombres jusqu'à 1000, tables, **défi chrono des tables**, problèmes en deux étapes, l'heure, régler l'horloge, moitiés, **sudoku 9 × 9**, labyrinthes 9 × 9 et **ronds**, **tableau logique**, **balances**, **dessin caché**, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau, **la carte du monde** (pays, voisins, capitales), plans et quadrillages | La digestion, les chaînes alimentaires, conducteurs et isolants, poulies et engrenages, les planètes et les saisons, le thermomètre, protéger la nature |
+| CE2 | Textes plus longs, **lire à voix haute en une minute**, conjugaison (dont **l'imparfait**), accords, homophones, compréhension | **Les grands nombres** jusqu'à 10 000, **la multiplication** (de tête puis posée), **la division** (partage, groupements, reste), problèmes, durées, monnaie, **périmètres et longueurs**, fractions | Écouter, lire, épeler, phrases (niveau A1) | Cartes, pays et capitales, vivre ensemble | Les niveaux les plus hauts des dix jeux de sciences |
 
 Chaque jeu a de 7 à 10 niveaux de difficulté croissante (le calcul en a 36 paliers) ; le niveau s'adapte à
 l'enfant, et on peut aussi le choisir directement.
@@ -100,6 +102,11 @@ l'enfant, et on peut aussi le choisir directement.
   composé), **les accords** (pluriel en s ou x, féminin, l'adjectif et le verbe, la lettre ajoutée
   soulignée), **ponctuation et majuscules** (choisir . ? ou ! d'après l'intonation d'Estelle).
 - *Vocabulaire* : **les mots** (catégories, contraires, synonymes, familles de mots).
+- **Lire à voix haute** (CP, CE1, CE2) : l'enfant lit le plus de syllabes, de mots ou de texte possible
+  en une minute, comme aux évaluations nationales ; un adulte écoute et touche les mots ratés (barrés en
+  rouge), puis le dernier mot lu. Le score (mots correctement lus par minute) et son évolution sont dans le Suivi.
+- **Textes déchiffrables** (CP) : si les parents ont coché les sons déjà vus en classe, les jeux de
+  lecture n'utilisent que des mots lisibles avec ces sons et les mots-outils choisis.
 - *Labyrinthes* : le chemin des lettres (alphabet, épeler un mot).
 - *Écrire* : **écris au doigt** (suivre le modèle dans le bon sens : traits et boucles,
   chiffres, capitales, minuscules attachées, puis son prénom) et **la dictée de mots** (on entend le mot, on touche les lettres dans
@@ -119,6 +126,9 @@ l'enfant, et on peut aussi le choisir directement.
   **tableaux et graphiques** (pictogrammes, barres), **la droite numérique** (placer et lire un nombre),
   **les fractions** (moitié, tiers, quart d'une pizza ou d'une quantité), **le partage** (distribuer
   au doigt, le reste, faire des paquets) et **l'addition posée** (en colonnes, avec la retenue).
+- *Pour le CE2* : **les grands nombres** (lire, décomposer, comparer, encadrer jusqu'à 10 000),
+  **la multiplication** (par 10 et 100, décomposer, puis posée avec retenue), **la division** (partage,
+  groupements, quotient et reste) et **périmètres et longueurs** (unités, conversions, périmètre d'un polygone).
 - *Formes et logique* : les formes, les suites de motifs, l'intrus, les ombres, le **sudoku**
   (4 × 4 en images, puis en chiffres, 6 × 6, jusqu'au **9 × 9** avec de moins en moins d'indices), la **symétrie** sur quadrillage,
   **compte les cubes** (empilements en 3D, avec des cubes cachés).
@@ -163,7 +173,7 @@ météo, émotions, famille)
   rue, les dangers de la maison, les numéros d'urgence (15, 17, 18, 112).
 - **Se repérer** : sur, sous, devant, derrière, gauche, droite, puis quadrillages, plans et flèches.
 
-**Sciences** (questionner le monde, de la moyenne section au CE1)
+**Sciences** (questionner le monde, de la petite section au CE2)
 - *Le vivant* : **le vivant** (le corps, les cinq sens, les cycles de vie, l'hygiène, le sommeil, bien
   manger), **le corps humain** (toucher sur le dessin un os, une articulation, un organe, suivre le
   trajet des aliments), **les animaux et leur milieu** (classer, qui mange qui, l'hiver des animaux).
@@ -194,6 +204,11 @@ bonus et un jour de plus dans la série 🔥.
 - **Niveau adaptatif** pour viser environ 80 % de réussite : 5 bonnes réponses d'affilée font
   monter d'un niveau, 3 erreurs sur 5 font redescendre, dans la fourchette de la classe.
 - **Pas d'échec** : après une erreur, « Essaie encore ! » ; après deux, la bonne réponse brille.
+- **Corriger en expliquant** : après une première erreur (calcul, tables, doubles, comparer, dizaines,
+  monnaie, homophones, accords, conjugaison), une courte explication dessinée et dite aide à comprendre
+  avant de réessayer, par exemple « 7 + 5 : 7 + 3 = 10, puis 10 + 2 = 12 » avec des boîtes de 10.
+- **Une main montre le geste** la première fois qu'un enfant ouvre un jeu qui ne s'explique pas tout
+  seul (tracer, relier, entourer, glisser…) ; le bouton « ? » la remontre.
 - **Récompenses** : étoiles, autocollants à collectionner, étoiles de maîtrise des paliers.
 - Des parties courtes (5, 10 ou 15 questions) : 10 à 15 minutes par jour suffisent.
 
@@ -232,11 +247,14 @@ Il ouvre trois onglets :
 
 - **Suivi** : pour chaque enfant, l'activité de la semaine (parties, minutes, réussite, jours
   d'affilée), l'état de chaque compétence, le niveau de chaque jeu (réglable), ce qui est à
-  retravailler et les erreurs fréquentes.
+  retravailler et les erreurs fréquentes ; les attendus de fin d'année de sa classe ; les scores de
+  lecture à voix haute semaine par semaine. **Fiches à imprimer** : une feuille A4 d'exercices au niveau
+  de l'enfant (le jeu et le niveau au choix), avec son corrigé en page 2, pour les jours sans écran.
 - **Enfants** : ajouter un enfant, changer son prénom (jusqu'à 30 caractères), son personnage,
   sa classe ou sa photo (photothèque ou appareil photo, enregistrée automatiquement), effacer sa
   progression ou supprimer son profil. **Ses jeux** : masquer une rubrique ou un jeu, et
-  conseiller jusqu'à 3 jeux (en haut de son accueil). On y trouve aussi **Partager le lien**.
+  conseiller jusqu'à 3 jeux (en haut de son accueil). **Sons vus en classe** (CP) : les sons et les
+  mots-outils déjà étudiés, pour des textes déchiffrables. On y trouve aussi **Partager le lien**.
 - **Réglages** : consignes lues ou non, voix naturelle (et état du téléchargement des sons), choix
   de la voix de l'appareil avec un bouton d'essai, petits sons,
   musique douce, décors de saison, nombre de questions par partie, installation, version,
