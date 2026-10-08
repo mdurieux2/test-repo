@@ -51,9 +51,7 @@ const RUBRIQUES = [
     games: [
       'compter', 'vite-vu', 'panier', 'patates', 'dizaines', 'relier',
       'comparer', 'suite', 'calcul', 'trous', 'relie-calculs', 'faire-dix', 'tables', 'tables-chrono',
-      'ranger', 'problemes', 'doubles', 'droite-numerique', 'fractions',
-      'ranger', 'problemes', 'doubles',
-      'partage', 'addition-posee',
+      'ranger', 'problemes', 'doubles', 'droite-numerique', 'fractions', 'partage', 'addition-posee',
     ],
   },
   {
