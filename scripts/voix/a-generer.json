@@ -99,6 +99,15 @@
   "file": "fr/bdaf7dd0e2de64cf.mp3"
  },
  {
+  "key": "fr|1|Oui !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Oui !",
+  "voice": "estelle",
+  "file": "fr/51301a2d1f44ea9b.mp3"
+ },
+ {
   "key": "fr|1|Très bien !",
   "lang": "fr",
   "rate": 1,
@@ -124,15 +133,6 @@
   "text": "Tout est relié !",
   "voice": "estelle",
   "file": "fr/6589f4930ac6bf46.mp3"
- },
- {
-  "key": "fr|1|Oui !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Oui !",
-  "voice": "estelle",
-  "file": "fr/51301a2d1f44ea9b.mp3"
  },
  {
   "key": "fr|1|Anglais.",
@@ -1314,6 +1314,15 @@
   "file": "fr/f618b5f6212177a2.mp3"
  },
  {
+  "key": "fr|1|Sa capitale est Buenos Aires.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Sa capitale est Buenos Aires.",
+  "voice": "estelle",
+  "file": "fr/22d6354bfa9d1fbb.mp3"
+ },
+ {
   "key": "fr|0.8|mo",
   "lang": "fr",
   "rate": 0.8,
@@ -1728,6 +1737,15 @@
   "file": "fr/a95fe46a992cdc50.mp3"
  },
  {
+  "key": "fr|1|Buenos Aires est la capitale de l'Argentine.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Buenos Aires est la capitale de l'Argentine.",
+  "voice": "estelle",
+  "file": "fr/024d5a78d032ce1c.mp3"
+ },
+ {
   "key": "fr|1|Glisse les nombres dans les cases, pour que les calculs soient justes.",
   "lang": "fr",
   "rate": 1,
@@ -1843,6 +1861,15 @@
   "text": "dog",
   "voice": "estelle",
   "file": "en/2c2bcc3610b05d46.mp3"
+ },
+ {
+  "key": "fr|1|Touche Buenos Aires, la capitale de l'Argentine.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Touche Buenos Aires, la capitale de l'Argentine.",
+  "voice": "estelle",
+  "file": "fr/ed2ecd2e4033c2a4.mp3"
  },
  {
   "key": "fr|1|Écoute le calcul en anglais, et touche la réponse.",
@@ -67473,42 +67500,6 @@
   "file": "fr/0bb91bca9036a426.mp3"
  },
  {
-  "key": "fr|1|la nuit, le matin ou le soir",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "la nuit, le matin ou le soir",
-  "voice": "estelle",
-  "file": "fr/b6e41aabc577b69f.mp3"
- },
- {
-  "key": "fr|1|le matin, le midi ou le soir",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "le matin, le midi ou le soir",
-  "voice": "estelle",
-  "file": "fr/1333756552c27911.mp3"
- },
- {
-  "key": "fr|1|le matin, la nuit ou le midi",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "le matin, la nuit ou le midi",
-  "voice": "estelle",
-  "file": "fr/07e2b5c30eafc4b6.mp3"
- },
- {
-  "key": "fr|1|Quel mois vient avant décembre ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Quel mois vient avant décembre ?",
-  "voice": "estelle",
-  "file": "fr/4afb6b0eb2db9abf.mp3"
- },
- {
   "key": "fr|1|À toi,",
   "lang": "fr",
   "rate": 1,
@@ -70407,6 +70398,15 @@
   "file": "fr/bee5af8455b2b479.mp3"
  },
  {
+  "key": "fr|1|le matin",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "le matin",
+  "voice": "estelle",
+  "file": "fr/ff501d2d4ab89eaa.mp3"
+ },
+ {
   "key": "fr|1|28,",
   "lang": "fr",
   "rate": 1,
@@ -70747,6 +70747,15 @@
   "text": "ruler,",
   "voice": "estelle",
   "file": "en/9945b864a3632938.mp3"
+ },
+ {
+  "key": "fr|1|le midi",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "le midi",
+  "voice": "estelle",
+  "file": "fr/8085ee0fd996f6a6.mp3"
  },
  {
   "key": "fr|1|le soir",
@@ -71199,6 +71208,15 @@
   "file": "fr/c2e421c99ddfb998.mp3"
  },
  {
+  "key": "fr|1|la nuit",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "la nuit",
+  "voice": "estelle",
+  "file": "fr/60b26e0d7cb0ece1.mp3"
+ },
+ {
   "key": "en|0.8|school,",
   "lang": "en",
   "rate": 0.8,
@@ -71622,6 +71640,15 @@
   "file": "fr/43a3c99fe338a4d3.mp3"
  },
  {
+  "key": "fr|1|le matin,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "le matin,",
+  "voice": "estelle",
+  "file": "fr/0aec19a39292e9d3.mp3"
+ },
+ {
   "key": "fr|1|6 paquets de 5",
   "lang": "fr",
   "rate": 1,
@@ -71746,15 +71773,6 @@
   "text": "96,",
   "voice": "estelle",
   "file": "fr/3a24bde7e55e107c.mp3"
- },
- {
-  "key": "fr|1|le matin",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "le matin",
-  "voice": "estelle",
-  "file": "fr/ff501d2d4ab89eaa.mp3"
  },
  {
   "key": "fr|1|bleu,",
@@ -72405,15 +72423,6 @@
   "file": "fr/98905baf187c52c4.mp3"
  },
  {
-  "key": "fr|1|le midi",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "le midi",
-  "voice": "estelle",
-  "file": "fr/8085ee0fd996f6a6.mp3"
- },
- {
   "key": "en|0.8|gloves,",
   "lang": "en",
   "rate": 0.8,
@@ -72943,15 +72952,6 @@
   "text": "ça fait 8.",
   "voice": "estelle",
   "file": "fr/9542319e8e1a03ec.mp3"
- },
- {
-  "key": "fr|1|la nuit",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "la nuit",
-  "voice": "estelle",
-  "file": "fr/60b26e0d7cb0ece1.mp3"
  },
  {
   "key": "fr|1|et 6 kilos de plus.",
@@ -73672,6 +73672,15 @@
   "text": "égale 20.",
   "voice": "estelle",
   "file": "fr/670ce94ca7b7e816.mp3"
+ },
+ {
+  "key": "fr|1|ou le midi",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou le midi",
+  "voice": "estelle",
+  "file": "fr/c17f03174bb57a4d.mp3"
  },
  {
   "key": "fr|1|le veau",
@@ -75888,6 +75897,15 @@
   "file": "fr/8f9342f5502c39fd.mp3"
  },
  {
+  "key": "fr|1|ou le soir",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou le soir",
+  "voice": "estelle",
+  "file": "fr/14d9c52e4f970a5f.mp3"
+ },
+ {
   "key": "en|0.8|one,",
   "lang": "en",
   "rate": 0.8,
@@ -75922,15 +75940,6 @@
   "text": "e",
   "voice": "estelle",
   "file": "fr/b4de41c4bee932b5.mp3"
- },
- {
-  "key": "fr|1|le matin,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "le matin,",
-  "voice": "estelle",
-  "file": "fr/0aec19a39292e9d3.mp3"
  },
  {
   "key": "fr|0.9|bé,",
@@ -76462,15 +76471,6 @@
   "text": "ou la nuit",
   "voice": "estelle",
   "file": "fr/1b2bfcb94c911bb7.mp3"
- },
- {
-  "key": "fr|1|ou le midi",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ou le midi",
-  "voice": "estelle",
-  "file": "fr/c17f03174bb57a4d.mp3"
  },
  {
   "key": "fr|1|ou un jour",
@@ -77875,6 +77875,15 @@
   "text": "86",
   "voice": "estelle",
   "file": "fr/4f8ba9b21f806729.mp3"
+ },
+ {
+  "key": "fr|1|la nuit,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "la nuit,",
+  "voice": "estelle",
+  "file": "fr/710d37a75a0d5d42.mp3"
  },
  {
   "key": "fr|1|ou école",
@@ -87750,24 +87759,6 @@
   "file": "fr/12e3e6ee7fcb2c03.mp3"
  },
  {
-  "key": "fr|1|600",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "600",
-  "voice": "estelle",
-  "file": "fr/b5d38f5d415107fa.mp3"
- },
- {
-  "key": "fr|1|Le lion a des poils :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Le lion a des poils :",
-  "voice": "estelle",
-  "file": "fr/03db83a937046634.mp3"
- },
- {
   "key": "fr|1|Bravo",
   "lang": "fr",
   "rate": 1,
@@ -95715,6 +95706,15 @@
   "file": "fr/47819d7740a91b66.mp3"
  },
  {
+  "key": "fr|1|Le lion a des poils :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Le lion a des poils :",
+  "voice": "estelle",
+  "file": "fr/03db83a937046634.mp3"
+ },
+ {
   "key": "fr|1|étoiles de moins.",
   "lang": "fr",
   "rate": 1,
@@ -96118,15 +96118,6 @@
   "text": "Touche New Delhi,",
   "voice": "estelle",
   "file": "fr/542c9faca500d12d.mp3"
- },
- {
-  "key": "fr|1|la nuit,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "la nuit,",
-  "voice": "estelle",
-  "file": "fr/710d37a75a0d5d42.mp3"
  },
  {
   "key": "fr|1|c'est le drapeau de le Mali :",
@@ -97407,6 +97398,15 @@
   "file": "fr/5cb475d45ff69211.mp3"
  },
  {
+  "key": "fr|1|Quel mois vient avant décembre ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Quel mois vient avant décembre ?",
+  "voice": "estelle",
+  "file": "fr/4afb6b0eb2db9abf.mp3"
+ },
+ {
   "key": "fr|1|Le chien mange de la viande.",
   "lang": "fr",
   "rate": 1,
@@ -97477,42 +97477,6 @@
   "text": "Three plus five?",
   "voice": "estelle",
   "file": "en/49d2747eccc7db6e.mp3"
- },
- {
-  "key": "en|0.9|Seven minus two?",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "Seven minus two?",
-  "voice": "estelle",
-  "file": "en/995fe255d870f5b5.mp3"
- },
- {
-  "key": "en|0.9|Six minus three?",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "Six minus three?",
-  "voice": "estelle",
-  "file": "en/af7a0696a30f9643.mp3"
- },
- {
-  "key": "en|0.9|crayons!",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "morceau",
-  "text": "crayons!",
-  "voice": "estelle",
-  "file": "en/9b1219ab0927808f.mp3"
- },
- {
-  "key": "fr|1|crayon ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "crayon ?",
-  "voice": "estelle",
-  "file": "fr/0f2b87232cf4cd8f.mp3"
  },
  {
   "key": "fr|1|frappe",
@@ -110509,6 +110473,15 @@
   "text": "906",
   "voice": "estelle",
   "file": "fr/a4564a33514c3f43.mp3"
+ },
+ {
+  "key": "fr|1|600",
+  "lang": "fr",
+  "rate": 1,
+  "type": "nombre",
+  "text": "600",
+  "voice": "estelle",
+  "file": "fr/b5d38f5d415107fa.mp3"
  },
  {
   "key": "fr|1|310",
@@ -129177,6 +129150,24 @@
   "file": "fr/d74d3e908a4944f5.mp3"
  },
  {
+  "key": "en|0.9|Seven minus two?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Seven minus two?",
+  "voice": "estelle",
+  "file": "en/995fe255d870f5b5.mp3"
+ },
+ {
+  "key": "en|0.9|Six minus three?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "Six minus three?",
+  "voice": "estelle",
+  "file": "en/af7a0696a30f9643.mp3"
+ },
+ {
   "key": "fr|1|mon chat",
   "lang": "fr",
   "rate": 1,
@@ -132462,15 +132453,6 @@
   "file": "fr/ee15dca2a4b26833.mp3"
  },
  {
-  "key": "fr|1|ou le soir",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "ou le soir",
-  "voice": "estelle",
-  "file": "fr/14d9c52e4f970a5f.mp3"
- },
- {
   "key": "fr|1|la capitale du Brésil.",
   "lang": "fr",
   "rate": 1,
@@ -135297,15 +135279,6 @@
   "file": "fr/0fca6fa4a50d9cf9.mp3"
  },
  {
-  "key": "fr|1|Regarde le joli livre !",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Regarde le joli livre !",
-  "voice": "estelle",
-  "file": "fr/18f9984df703d4dc.mp3"
- },
- {
   "key": "fr|1|cadeau : 2 syllabes !",
   "lang": "fr",
   "rate": 1,
@@ -135889,6 +135862,15 @@
   "text": "dé, bébé : ça rime !",
   "voice": "estelle",
   "file": "fr/56729f38d06d928f.mp3"
+ },
+ {
+  "key": "fr|1|crayon ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "crayon ?",
+  "voice": "estelle",
+  "file": "fr/0f2b87232cf4cd8f.mp3"
  },
  {
   "key": "fr|1|Quel mot rime avec : train ?",
@@ -137635,6 +137617,15 @@
   "text": "Regarde les grandes abeilles !",
   "voice": "estelle",
   "file": "fr/e94d427a40ced1f6.mp3"
+ },
+ {
+  "key": "fr|1|Regarde le joli livre !",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Regarde le joli livre !",
+  "voice": "estelle",
+  "file": "fr/18f9984df703d4dc.mp3"
  },
  {
   "key": "fr|1|Regarde la petite étoile !",
@@ -143424,6 +143415,15 @@
   "file": "fr/afe16bd33ea7ee28.mp3"
  },
  {
+  "key": "fr|1|la nuit, le matin ou le soir",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "la nuit, le matin ou le soir",
+  "voice": "estelle",
+  "file": "fr/b6e41aabc577b69f.mp3"
+ },
+ {
   "key": "fr|1|Le matin, le soir ou le midi ?",
   "lang": "fr",
   "rate": 1,
@@ -143496,6 +143496,15 @@
   "file": "fr/9f47c1a154d05294.mp3"
  },
  {
+  "key": "fr|1|le matin, le midi ou le soir",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "le matin, le midi ou le soir",
+  "voice": "estelle",
+  "file": "fr/1333756552c27911.mp3"
+ },
+ {
   "key": "fr|1|Le matin, la nuit ou le midi ?",
   "lang": "fr",
   "rate": 1,
@@ -143503,6 +143512,15 @@
   "text": "Le matin, la nuit ou le midi ?",
   "voice": "estelle",
   "file": "fr/af77f3ec68734517.mp3"
+ },
+ {
+  "key": "fr|1|le matin, la nuit ou le midi",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "le matin, la nuit ou le midi",
+  "voice": "estelle",
+  "file": "fr/07e2b5c30eafc4b6.mp3"
  },
  {
   "key": "fr|1|La nuit, le midi ou le soir ?",
@@ -151036,6 +151054,15 @@
   "text": "trousers!",
   "voice": "estelle",
   "file": "en/184a0746fdef4d55.mp3"
+ },
+ {
+  "key": "en|0.9|crayons!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "phrase",
+  "text": "crayons!",
+  "voice": "estelle",
+  "file": "en/9b1219ab0927808f.mp3"
  },
  {
   "key": "en|0.9|four!",

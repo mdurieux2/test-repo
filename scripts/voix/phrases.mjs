@@ -76,7 +76,10 @@ export function gameUtterances(seeds = SEEDS, offset = 0) {
 const LOG = `${HERE}parole-e2e.json`;
 const SCENARIO_NAMES = ['Eva-Rose', 'Éva-Rose', 'Matteo', 'Lou', 'Zoé', 'Paris Saint-Germain Féminines'];
 // phrases fixes toujours enregistrées (dont celle du bouton d'essai des Réglages, vérifiée par le test)
-const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !', 'Bravo !', 'Choisis un jeu !', 'Choisis ton niveau !'];
+const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !', 'Bravo !', 'Choisis un jeu !', 'Choisis ton niveau !',
+  // « Buenos Aires » se dit avec son « s » : seul, le mot « buenos » est refusé par le contrôle des phonèmes
+  // (qui l'attend muet, comme en français) ; les phrases de la carte du monde sont donc enregistrées entières
+  'Touche Buenos Aires, la capitale de l’Argentine.', 'Oui ! Buenos Aires est la capitale de l’Argentine.', 'Sa capitale est Buenos Aires.'];
 
 export function allUtterances() {
   const list = gameUtterances();
