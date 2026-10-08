@@ -16,6 +16,8 @@ export const CHANGELOG = [
     date: '2026-10-08',
     changes: [
       'Voix d’Estelle pour les nouveautés de la 1.14.0 : lecture à voix haute, correction expliquée, CE2 (imparfait, grands nombres) et petite section.',
+      'Points à relier : le point suivant ne s’allume plus à chaque fois, seulement au départ et après une erreur.',
+      'iPad mini en paysage : le pavé numérique et l’accueil tiennent dans l’écran, aussi avec le texte agrandi ou les grandes cibles.',
     ],
   },
   {

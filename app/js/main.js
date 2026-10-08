@@ -2601,6 +2601,8 @@ function dotsZone(ctx) {
   });
   let next = 0;
   let drawing = false;
+  // le point suivant ne brille qu'au départ (le 1) et après une erreur, jusqu'à ce qu'il soit relié
+  let hint = false;
   const linked = [];
   const { tapOnly } = access();
   // au clavier : un bouton transparent posé sur le dessin (sans texte : les nombres visibles du dessin
@@ -2609,7 +2611,7 @@ function dotsZone(ctx) {
   const refresh = () => {
     line.setAttribute('points', linked.map((i) => points[i].join(',')).join(' '));
     dots.forEach((g, i) => {
-      g.classList.toggle('next', i === next);
+      g.classList.toggle('next', i === next && (next === 0 || hint));
       g.classList.toggle('done', linked.includes(i));
     });
     key.setAttribute('aria-label', next < points.length
@@ -2627,6 +2629,7 @@ function dotsZone(ctx) {
   const link = (i) => {
     linked.push(i);
     next++;
+    hint = false;
     playSound('tap');
     if (next === points.length) {
       if (close) linked.push(linked[0]);
@@ -2672,6 +2675,8 @@ function dotsZone(ctx) {
     if (wrong >= 0) {
       dots[wrong].classList.add('shake');
       setTimeout(() => dots[wrong].classList.remove('shake'), 400);
+      hint = true;
+      refresh();
       markWrong(ctx, { message: `Cherche le ${labels[next]} !`, given: `${labels[wrong]} au lieu de ${labels[next]}` });
     }
   });
