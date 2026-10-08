@@ -2110,7 +2110,11 @@ async function checkLayout(page, label, { reachable = true } = {}) {
     return null;
   }, reachable);
   // on note tous les problèmes de mise en page, et on échoue à la fin avec la liste complète
-  if (problem) layoutProblems.push(`${label} : ${problem}`);
+  if (problem) {
+    layoutProblems.push(`${label} : ${problem}`);
+    // SCREENSHOTS=dossier : une capture de chaque écran fautif
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/probleme-${layoutProblems.length}-${label.replace(/[^\p{L}\d]+/gu, '-')}.png` });
+  }
 }
 const layoutProblems = [];
 

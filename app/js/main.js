@@ -203,8 +203,11 @@ document.body.append(captionBand);
 let caption = { id: 0, parts: [], long: false };
 
 function captionLine(parts) {
+  // un mot à écouter seul (« écris : », « école »), suivi d'une phrase (« Touche les lettres… ») : un point après le mot
+  const glue = (i) => (i >= 2 && /:$/.test(parts[i - 2].text) && /^[\p{L}\p{N}’'-]+$/u.test(parts[i - 1].text)
+    && /^\p{Lu}/u.test(parts[i].text) ? '. ' : ' ');
   return parts.map(({ text, lang }) => (lang && !lang.startsWith('fr') ? h('span', { lang: lang.slice(0, 2) }, text) : text))
-    .flatMap((part, i) => (i ? [' ', part] : [part]));
+    .flatMap((part, i) => (i ? [glue(i), part] : [part]));
 }
 
 /** Un nouvel écran : le bandeau est vide jusqu'à la prochaine parole. */

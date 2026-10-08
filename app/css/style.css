@@ -2942,6 +2942,9 @@ html { font-size: calc(100% * var(--text-scale, 1)); }
   .a11y-text-large .home-bottom .pill { font-size: 0.7rem; padding: 1px 6px; }
   .a11y-text-large .home.has-featured .home-top .domain-btn, .a11y-text-large .home.has-featured .home-bottom .domain-btn,
   .a11y-big-targets .home.has-featured .home-top .domain-btn, .a11y-big-targets .home.has-featured .home-bottom .domain-btn { min-height: 64px; }
+  /* épeler un mot sous une image (consigne longue au premier mot) : l'image et les cases un peu moins hautes */
+  .a11y-text-large .play-order .stage-picture { font-size: min(110px, 15dvh); }
+  .a11y-text-large .play-order .order-slot, .a11y-big-targets .play-order .order-slot { height: 64px; }
 }
 
 /* téléphone en paysage avec grandes cibles : le pavé numérique occupe toute la hauteur de droite,
@@ -2951,6 +2954,27 @@ html { font-size: calc(100% * var(--text-scale, 1)); }
     grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: "top top" "instr zone" "stage zone";
   }
   .a11y-big-targets .play-keypad .keypad { gap: 8px 12px; }
+  /* accueil avec des jeux conseillés : le défi du jour, l'album et le personnage sur une même ligne,
+     le bonjour sur une ligne, et le nom des rubriques sur deux lignes au plus */
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured > .home-menu {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px;
+  }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-featured { grid-row: 1; grid-column: 1 / -1; }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-top { grid-row: 2; grid-column: 1; }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-bottom { grid-row: 2; grid-column: 2; }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-grid { grid-row: 3; grid-column: 1 / -1; }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-title { font-size: 1.05rem; line-height: 1.15; }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured > .home-hero { min-width: 0; }
+  /* « Conseillé pour toi » : seulement l'étoile à l'écran (le titre reste lu par les lecteurs d'écran) */
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .featured-label { font-size: 0; }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .featured-label::before { content: '⭐'; font-size: 1.4rem; }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-bottom .domain-btn { font-size: 0.8rem; padding: 4px 6px; gap: 4px; }
+  :is(.a11y-text-large, .a11y-big-targets) .home.has-featured .home-bottom .pill { font-size: 0.7rem; padding: 1px 6px; }
+  .a11y-text-large .home.has-featured .domain-tile { font-size: 0.8rem; line-height: 1.1; }
+  /* mettre dans l'ordre sous une image (épeler un mot) : la consigne, souvent longue, sur toute la largeur */
+  .a11y-text-large .screen.play.play-order:has(> .stage) { grid-template-areas: "top top" "instr instr" "stage zone"; }
+  .a11y-text-large .play-order .order-slot, .a11y-big-targets .play-order .order-slot { height: 56px; }
+  .a11y-text-large .play-order .order { gap: 10px; }
   .a11y-big-targets .top-bar, .a11y-text-large .top-bar { min-height: 0; }
   .a11y-text-large .play .instruction .avatar-sm { width: 44px; height: 44px; }
   /* le texte reste plus grand que d'habitude, mais un peu moins agrandi qu'en portrait */
@@ -3078,6 +3102,17 @@ body.a11y-contrast { background: #fff !important; color: #000; }
 .a11y-big-targets .match-col, .a11y-big-targets .result-actions { gap: 18px; }
 .a11y-big-targets .bar-actions { gap: 8px; }
 .a11y-big-targets .setting input[type="checkbox"] { width: 64px; height: 40px; }
+/* téléphone en paysage (peu de hauteur) : les cibles des jeux les plus chargés restent grandes (52 px,
+   au-delà des 44 px recommandés), un peu moins que 64 px, pour que tout tienne sans défiler */
+@media (orientation: landscape) and (max-height: 520px) {
+  .a11y-big-targets .order-item { min-height: 52px !important; line-height: 1.1; }
+  .a11y-big-targets .order-items { gap: 10px; }
+  /* dictée de mots longs : 7 à 9 lettres sur deux lignes */
+  .a11y-big-targets .order-items.n7, .a11y-big-targets .order-items.n8, .a11y-big-targets .order-items.n9 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .a11y-big-targets .fill.rows-5 .fill-rows { gap: 4px; }
+  .a11y-big-targets .fill.rows-5 .fill-row { padding: 1px 10px; }
+  .a11y-big-targets .fill.rows-5 .fill-box { height: 44px; }
+}
 .a11y-big-targets .setting input[type="checkbox"]::after { width: 34px; height: 34px; }
 .a11y-big-targets .setting input[type="checkbox"]:checked::after { transform: translateX(24px); }
 
