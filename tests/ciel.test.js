@@ -49,7 +49,10 @@ test('ciel et météo : rubrique « Sciences », section « Le ciel et la Terre 
     assert.equal(new Set(game.levels).size, game.levels.length, `${id} : libellé en double`);
     for (const label of game.levels) assert.ok([...label].length <= 26, `${id} : « ${label} » trop long`);
   }
-  assert.deepEqual(sciences.games.map((g) => g.section), ['Le vivant', 'La matière et les objets', 'Le ciel et la Terre', 'Le ciel et la Terre']);
+  // les sections se suivent (une section ne revient pas plus loin), et le ciel vient après la matière
+  const sections = sciences.games.map((g) => g.section).filter((s, i, all) => s !== all[i - 1]);
+  assert.equal(new Set(sections).size, sections.length, sections.join(' / '));
+  assert.ok(sections.indexOf('Le ciel et la Terre') > sections.indexOf('La matière et les objets'), sections.join(' / '));
 });
 
 test('ciel et météo : bonne réponse présente une seule fois, choix tous différents', () => {

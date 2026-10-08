@@ -32,7 +32,9 @@ const names = (list) => list.map((it) => it.name);
 
 test('techno : rubrique Sciences, section « La matière et les objets », après « La matière », 10 niveaux', () => {
   const sciences = DOMAINS.find((d) => d.id === 'sciences');
-  assert.deepEqual(sciences.games.map((g) => g.id), ['vivant', 'matiere', 'electricite', 'objets']);
+  const ids = sciences.games.map((g) => g.id);
+  // dans la section « La matière et les objets », après « La matière »
+  assert.ok(ids.indexOf('electricite') > ids.indexOf('matiere') && ids.indexOf('objets') > ids.indexOf('electricite'), ids.join(', '));
   for (const id of IDS) {
     const game = findGame(id);
     assert.equal(game.domain, 'sciences');

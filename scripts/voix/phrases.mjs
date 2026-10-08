@@ -51,6 +51,11 @@ export function spoken(q) {
   if (q.karaoke) push((q.stage?.sentences || []).map((text) => ({ text, rate: 0.85 })));
   for (const pair of q.pairs || []) push(pair.say);
   for (const card of q.cards || []) push(card.say);
+  // le dessin du corps (main.js, bodyZone) : une partie touchée par erreur est nommée
+  if (q.interaction === 'body') {
+    push((q.choices || []).map((c) => `Ça, c’est ${c.name}.`));
+    push('Touche la partie qui brille !');
+  }
   return out;
 }
 

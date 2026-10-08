@@ -42,7 +42,7 @@ export const PROGRAMS = {
       ['vivre-ensemble', 1, 4],
     ],
     sciences: [
-      ['vivant', 1, 3],
+      ['vivant', 1, 3], ['objets', 1, 3], ['meteo', 1, 2], ['planete', 1, 4],
     ],
     anglais: [
       ['ecoute', 1, 2], ['compte-anglais', 1, 1], ['ou-est', 1, 1],
@@ -77,7 +77,8 @@ export const PROGRAMS = {
       ['vivre-ensemble', 1, 6], ['se-reperer', 1, 5],
     ],
     sciences: [
-      ['vivant', 1, 6], ['matiere', 1, 5],
+      ['vivant', 1, 6], ['corps', 1, 4], ['milieux', 1, 4], ['matiere', 1, 5], ['melanges', 1, 3],
+      ['electricite', 1, 4], ['objets', 1, 5], ['ciel', 1, 4], ['meteo', 1, 6], ['planete', 1, 5],
     ],
     anglais: [
       ['ecoute', 1, 4], ['compte-anglais', 1, 2], ['ou-est', 1, 2], ['parle-anglais', 1, 1],
@@ -114,7 +115,8 @@ export const PROGRAMS = {
       ['vivre-ensemble', 3, 9], ['se-reperer', 2, 8],
     ],
     sciences: [
-      ['vivant', 2, 9], ['matiere', 1, 8],
+      ['vivant', 2, 9], ['corps', 1, 8], ['milieux', 1, 8], ['matiere', 1, 8], ['melanges', 1, 7],
+      ['electricite', 1, 8], ['objets', 3, 8], ['ciel', 1, 7], ['meteo', 2, 9], ['planete', 1, 8],
     ],
     anglais: [
       ['ecoute', 1, 6], ['lis-anglais', 1, 3], ['relie-anglais', 1, 3], ['compte-anglais', 1, 3],
@@ -154,7 +156,8 @@ export const PROGRAMS = {
       ['vivre-ensemble', 5, 10], ['se-reperer', 4, 10],
     ],
     sciences: [
-      ['vivant', 4, 10], ['matiere', 2, 10],
+      ['vivant', 4, 10], ['corps', 3, 10], ['milieux', 3, 10], ['matiere', 2, 10], ['melanges', 1, 10],
+      ['electricite', 3, 10], ['objets', 5, 10], ['ciel', 3, 10], ['meteo', 4, 10], ['planete', 2, 10],
     ],
     anglais: [
       ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],
