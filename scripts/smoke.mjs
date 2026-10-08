@@ -35,6 +35,7 @@ import { APP } from '../app/js/config.js';
 import { seasonOf } from '../app/js/themes.js';
 import { cle, planLecture } from '../app/js/voix-cles.js';
 import { DRAG_WORDS } from '../app/js/a11y-jeux.js';
+import { explain } from '../app/js/explications.js';
 
 const PORT = Number(process.env.PORT) || 8123;
 const BASE = `http://localhost:${PORT}/`;
@@ -1874,6 +1875,18 @@ async function a11yPart() {
     const kind = await page.evaluate(() => globalThis.__lc?.question?.interaction || 'choix');
     await audit(`jeu ${id} (${kind})`);
   }
+  // corriger en expliquant : l'encart affiché après une première erreur (boîtes de 10, phrase à tester)
+  for (const [id, level] of [['faire-dix', 4], ['homophones', 5]]) {
+    await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor(id, level) || 'CE1'}'; store.profiles['eva-rose'].games['${id}'] = { level: ${level} };`);
+    await openGame(page, findGame(id));
+    await page.waitForSelector('.choices');
+    await page.evaluate(() => {
+      const q = globalThis.__lc.question;
+      [...document.querySelectorAll('.choice')].find((b) => b.dataset.value !== String(q.answer)).click();
+    });
+    await page.waitForSelector('.explain');
+    await audit(`jeu ${id}, explication après une erreur`);
+  }
   // une mauvaise réponse (message « Essaie encore ! », bouton barré), puis la partie jusqu'au bout
   const compter = findGame('compter');
   await setStore(page, `store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games.compter = { level: 1 };`);
@@ -2528,6 +2541,28 @@ async function checkLayout(page, label, { reachable = true } = {}) {
 }
 const layoutProblems = [];
 
+/**
+ * Corriger en expliquant : après une première erreur, l'encart d'explication (s'il y en a un pour
+ * cette question) est dans l'écran, et les réponses restent visibles. Renvoie vrai si vérifié.
+ */
+async function checkExplanation(page, label) {
+  const q = await page.evaluate(() => globalThis.__lc?.question);
+  if (!q || !explain(q)) return false;
+  if (q.interaction === 'keypad') {
+    await typeNumber(page, q.answer + 1);
+  } else {
+    await page.evaluate((answer) => [...document.querySelectorAll('.choice')].find((b) => b.dataset.value !== String(answer))?.click(), q.answer);
+  }
+  await page.waitForSelector('.explain');
+  await checkLayout(page, label);
+  const problem = await page.evaluate(() => {
+    const r = document.querySelector('.explain').getBoundingClientRect();
+    return r.top < 0 || r.bottom > window.innerHeight + 1 ? `explication hors de l'écran (${Math.round(r.top)}–${Math.round(r.bottom)})` : null;
+  });
+  if (problem) layoutProblems.push(`${label} : ${problem}`);
+  return true;
+}
+
 /** Les boutons de l'écran d'enregistrement restent visibles sans faire défiler. */
 async function checkRecordButtons(page, label) {
   const problem = await page.evaluate(() => {
@@ -2646,6 +2681,7 @@ async function checkDevice(device, repeat, deviceIndex) {
           await checkLayout(page, tag(`${game.id} niveau ${level} (dernier mot lu)`));
           checked += 2;
         }
+        if (k === 0 && await checkExplanation(page, tag(`${game.id} niveau ${level}, explication`))) checked++;
       }
     }
   }
@@ -2661,6 +2697,7 @@ async function checkDevice(device, repeat, deviceIndex) {
       await openGame(page, findGame('calcul'), { palier: palier.id, format });
       await page.waitForSelector('.choices');
       await checkLayout(page, tag(`calcul ${palier.id} format ${format}`));
+      if (format === 0 && await checkExplanation(page, tag(`calcul ${palier.id}, explication`))) checked++;
       if (SHOTS && palier.max === 20 && format === 0) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-calcul.png` });
       checked++;
     }

@@ -43,6 +43,8 @@ import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
 import { contexteSons } from './graphemes.js';
 import { sonsCard } from './sons-vus.js';
+import { explain } from './explications.js';
+import { explanationBox, fitExplanation } from './explications-rendu.js';
 import { CAPTION_HIDDEN, captionPart, gameListenOnly, playableQuestion, tapQuestion, withoutListenOnly } from './a11y-jeux.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
@@ -1466,10 +1468,14 @@ function enableCounting(stageEl, guide) {
 
 function markWrong(ctx, { message = 'Essaie encore !', speech, given } = {}) {
   const { session, q, feedback } = ctx;
+  // corriger en expliquant : après la première erreur, une courte explication (explications.js) ;
+  // après la deuxième, la bonne réponse brille, comme avant (pas pendant un défi chrono)
+  const ex = session.attempts === 0 && message === 'Essaie encore !' && !session.chrono ? explain(q) : null;
   session.attempts++;
   playSound('error');
-  feedback.replaceChildren(h('p', { class: 'try-again' }, message));
-  say(session.guide, speech || message);
+  feedback.replaceChildren(ex ? explanationBox(ex) : h('p', { class: 'try-again' }, message));
+  if (ex) fitExplanation(feedback.firstChild);
+  say(session.guide, ex ? ['Essaie encore !', ex.say, ...(q.replay || [])] : speech || message);
   if (given !== undefined) {
     logMistake(child(), { at: new Date().toISOString(), game: q.from || session.game.id, question: q.text, expected: q.answer, given });
   }
