@@ -2539,6 +2539,24 @@ body:has(main.play) .voice-progress-text { display: none; }
   .choices-drawings.n2 .drawing-choice svg { height: min(110px, calc(100dvh - 170px)); }
 }
 
+/* Le ciel et la météo (games/ciel.js) : les dessins en largeur (phases de la Lune, planètes,
+   bulletin de la semaine…) prennent toute la largeur, sans dépasser la hauteur des autres dessins */
+.stage-drawing.drawing-phases svg, .stage-drawing.drawing-systeme svg, .stage-drawing.drawing-semaine svg,
+.stage-drawing.drawing-terre svg, .stage-drawing.drawing-chemin-soleil svg, .stage-drawing.drawing-constellation svg,
+.stage-drawing.drawing-ombre svg {
+  width: min(100%, 420px); height: auto; max-height: min(210px, 30vh); max-height: min(210px, 30dvh);
+}
+.stage-drawing.drawing-semaine svg { width: min(100%, 460px); }
+.stage-drawing.drawing-thermo svg { height: min(240px, 34vh); height: min(240px, 34dvh); }
+.drawing-choice.drawing-thermo svg, .drawing-choice.drawing-manche svg, .drawing-choice.drawing-eolienne svg { height: min(100px, 15vh); height: min(100px, 15dvh); }
+@media (orientation: landscape) and (max-height: 520px) {
+  .stage-drawing.drawing-phases svg, .stage-drawing.drawing-systeme svg, .stage-drawing.drawing-semaine svg,
+  .stage-drawing.drawing-terre svg, .stage-drawing.drawing-chemin-soleil svg, .stage-drawing.drawing-constellation svg,
+  .stage-drawing.drawing-ombre svg { width: 100%; max-height: calc(100dvh - 96px); }
+  .stage-drawing.drawing-thermo svg { height: min(260px, calc(100dvh - 96px)); }
+  .drawing-choice.drawing-thermo svg, .drawing-choice.drawing-manche svg, .drawing-choice.drawing-eolienne svg { height: min(84px, calc((100dvh - 150px) / 2)); }
+}
+
 /* =====================================================================
    Le partage : le tas d'objets, les enfants et leurs assiettes, les paquets
    (les tailles suivent la largeur du dessin : cqi, conteneur .share-scene)
