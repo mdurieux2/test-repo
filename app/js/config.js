@@ -4,13 +4,24 @@
 
 export const APP = {
   name: 'Lire, compter et s’amuser\u00a0!',
-  version: '1.12.0',
+  version: '1.13.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.13.0',
+    date: '2026-10-08',
+    changes: [
+      'Français : nouveaux jeux « Conjugaison » (être, avoir, verbes en -er au présent, futur, passé composé), « Les accords » (pluriel, féminin, le verbe s’accorde, la lettre ajoutée soulignée), « Ponctuation et majuscules » (choisir . ? ou ! d’après l’intonation d’Estelle) et « Les mots » (catégories, contraires, synonymes, familles de mots).',
+      'Histoires : nouveau jeu « Dans l’ordre » (remettre 3 à 5 images d’une histoire dans l’ordre, avant, ensuite), et deux niveaux de plus dans les petits textes : « Pourquoi ? » et « Ce que pense le personnage ».',
+      'Maths : nouveaux jeux « La droite numérique » (placer et lire un nombre sur une ligne graduée), « Les fractions » (moitié, tiers, quart d’une pizza ou d’une quantité), « Tableaux et graphiques », « Problèmes en schémas » (le schéma en barres avant le calcul), « Le partage » (distribuer au doigt, restes, paquets) et « L’addition posée » (en colonnes, avec la retenue).',
+      'Le monde : nouveaux jeux « Le vivant » (corps, cinq sens, cycles de vie, besoins des plantes, hygiène, sommeil, bien manger), « La matière » (solide ou liquide, glace, eau, vapeur, flotte ou coule, aimant, matériaux), « Sécurité et vivre ensemble » (émotions, politesse, traverser la rue, numéros d’urgence 15, 17, 18, 112) et « Se repérer » (devant, derrière, gauche, droite, plan, flèches).',
+      'La rubrique « Le monde » est rangée en sections : le vivant et la matière ; pays, drapeaux et cartes ; vivre ensemble et se repérer.',
+    ],
+  },
   {
     version: '1.12.0',
     date: '2026-10-08',

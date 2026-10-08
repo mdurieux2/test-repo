@@ -19,7 +19,7 @@ export const PROGRAMS = {
   MS: {
     francais: [
       ['syllabes-rythme', 1, 2], ['rimes', 1, 1], ['lettres', 1, 2],
-      ['ecrire', 1, 3],
+      ['vocabulaire', 1, 2], ['ecrire', 1, 3],
     ],
     histoires: [
       ['histoires', 1, 1],
@@ -38,7 +38,8 @@ export const PROGRAMS = {
       ['saisons', 1, 1],
     ],
     monde: [
-      ['animaux-monde', 1, 1],
+      ['animaux-monde', 1, 1], ['vivant', 1, 3],
+      ['vivre-ensemble', 1, 4],
     ],
     anglais: [
       ['ecoute', 1, 2], ['compte-anglais', 1, 1], ['ou-est', 1, 1],
@@ -47,16 +48,16 @@ export const PROGRAMS = {
   GS: {
     francais: [
       ['syllabes-rythme', 1, 8], ['rimes', 1, 8], ['lettres', 2, 7], ['premier-son', 1, 2],
-      ['syllabes', 1, 1], ['ecrire', 1, 6],
+      ['syllabes', 1, 1], ['vocabulaire', 1, 3], ['ponctuation', 1, 3], ['ecrire', 1, 6],
       ['dictee', 1, 1],
     ],
     histoires: [
-      ['histoires', 1, 1],
+      ['histoires', 1, 1], ['ordre-histoire', 1, 4],
     ],
     maths: [
       ['compter', 1, 4], ['vite-vu', 1, 2], ['panier', 1, 4], ['patates', 1, 2], ['relier', 1, 8],
       ['comparer', 1, 2], ['suite', 1, 2], ['calcul', 1, 6], ['relie-calculs', 1, 1], ['faire-dix', 1, 2],
-      ['ranger', 1, 3], ['problemes', 1, 3], ['doubles', 1, 1],
+      ['ranger', 1, 3], ['problemes', 1, 3], ['doubles', 1, 1], ['droite-numerique', 1, 2], ['partage', 1, 2],
     ],
     jeux: [
       ['formes', 2, 8], ['algorithmes', 2, 7], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2], ['tableau-logique', 1, 3], ['balances', 1, 2], ['picross', 1, 1],
@@ -68,8 +69,9 @@ export const PROGRAMS = {
       ['saisons', 1, 2], ['mesures', 1, 1],
     ],
     monde: [
-      ['animaux-monde', 1, 2],
+      ['animaux-monde', 1, 2], ['vivant', 1, 6], ['matiere', 1, 5],
       ['drapeaux', 1, 1], ['carte-monde', 1, 3],
+      ['vivre-ensemble', 1, 6], ['se-reperer', 1, 5],
     ],
     anglais: [
       ['ecoute', 1, 4], ['compte-anglais', 1, 2], ['ou-est', 1, 2], ['parle-anglais', 1, 1],
@@ -78,17 +80,18 @@ export const PROGRAMS = {
   },
   CP: {
     francais: [
-      ['premier-son', 1, 8], ['syllabes', 1, 8], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['genre', 1, 1],
+      ['premier-son', 1, 8], ['syllabes', 1, 8], ['bon-mot', 1, 3], ['petits-mots', 1, 3], ['vocabulaire', 2, 7], ['ponctuation', 1, 7], ['genre', 1, 1], ['conjugaison', 1, 3], ['accords', 1, 7],
       ['ecrire', 2, 8],
       ['dictee', 1, 5],
     ],
     histoires: [
-      ['histoires', 1, 2], ['petits-textes', 1, 2],
+      ['histoires', 1, 2], ['petits-textes', 1, 2], ['ordre-histoire', 3, 8],
     ],
     maths: [
       ['compter', 1, 9], ['vite-vu', 1, 7], ['panier', 1, 10], ['patates', 2, 4], ['dizaines', 1, 4],
       ['comparer', 1, 3], ['suite', 1, 4], ['calcul', 1, 36], ['trous', 1, 4], ['relie-calculs', 1, 5],
-      ['faire-dix', 1, 3], ['ranger', 3, 5], ['problemes', 1, 5], ['doubles', 1, 3],
+      ['faire-dix', 1, 3], ['ranger', 3, 5], ['problemes', 1, 5], ['schemas', 1, 5], ['doubles', 1, 3],
+      ['graphiques', 1, 7], ['droite-numerique', 1, 6], ['fractions', 1, 2], ['partage', 1, 7], ['addition-posee', 1, 3],
     ],
     jeux: [
       ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['tableau-logique', 1, 6], ['balances', 1, 5], ['picross', 1, 3], ['symetrie', 1, 3], ['reproduire', 1, 2],
@@ -100,8 +103,9 @@ export const PROGRAMS = {
       ['heure', 1, 2], ['regle-horloge', 1, 4], ['calendrier', 1, 2], ['saisons', 1, 3], ['monnaie', 1, 3], ['mesures', 1, 4],
     ],
     monde: [
-      ['animaux-monde', 1, 3], ['pays', 1, 2],
-      ['drapeaux', 1, 4], ['carte-monde', 1, 7],
+      ['animaux-monde', 1, 3], ['vivant', 2, 9], ['matiere', 1, 8],
+      ['pays', 1, 2], ['drapeaux', 1, 4], ['carte-monde', 1, 7],
+      ['vivre-ensemble', 3, 9], ['se-reperer', 2, 8],
     ],
     anglais: [
       ['ecoute', 1, 6], ['lis-anglais', 1, 3], ['relie-anglais', 1, 3], ['compte-anglais', 1, 3],
@@ -112,17 +116,19 @@ export const PROGRAMS = {
   },
   CE1: {
     francais: [
-      ['bon-mot', 2, 8], ['petits-mots', 2, 8], ['phrase', 1, 8], ['homophones', 1, 8], ['genre', 1, 8],
+      ['bon-mot', 2, 8], ['petits-mots', 2, 8], ['phrase', 1, 8], ['vocabulaire', 4, 10], ['ponctuation', 3, 10], ['homophones', 1, 8], ['genre', 1, 8],
+      ['conjugaison', 1, 10], ['accords', 2, 10],
       ['ecrire', 4, 8],
       ['dictee', 2, 8],
     ],
     histoires: [
-      ['histoires', 2, 8], ['petits-textes', 2, 8],
+      ['histoires', 2, 8], ['petits-textes', 2, 10], ['ordre-histoire', 5, 10],
     ],
     maths: [
       ['patates', 4, 8], ['dizaines', 2, 8], ['comparer', 2, 7], ['suite', 3, 8], ['calcul', 4, 36],
       ['trous', 3, 9], ['relie-calculs', 3, 9], ['faire-dix', 2, 8], ['tables', 1, 9], ['tables-chrono', 1, 8],
-      ['ranger', 5, 10], ['problemes', 4, 10], ['doubles', 2, 7],
+      ['ranger', 5, 10], ['problemes', 4, 10], ['schemas', 3, 10], ['doubles', 2, 7],
+      ['graphiques', 2, 10], ['droite-numerique', 3, 10], ['fractions', 1, 10], ['partage', 4, 10], ['addition-posee', 1, 10],
     ],
     jeux: [
       ['intrus', 2, 8], ['ombres', 3, 8], ['sudoku', 3, 10], ['tableau-logique', 3, 9], ['balances', 3, 8], ['picross', 2, 8], ['symetrie', 2, 7], ['reproduire', 2, 8],
@@ -134,8 +140,9 @@ export const PROGRAMS = {
       ['heure', 2, 7], ['regle-horloge', 1, 8], ['calendrier', 2, 7], ['saisons', 2, 7], ['monnaie', 2, 7], ['mesures', 2, 8],
     ],
     monde: [
-      ['animaux-monde', 2, 7], ['pays', 1, 8],
-      ['drapeaux', 1, 8], ['carte-monde', 2, 10],
+      ['animaux-monde', 2, 7], ['vivant', 4, 10], ['matiere', 2, 10],
+      ['pays', 1, 8], ['drapeaux', 1, 8], ['carte-monde', 2, 10],
+      ['vivre-ensemble', 5, 10], ['se-reperer', 4, 10],
     ],
     anglais: [
       ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],

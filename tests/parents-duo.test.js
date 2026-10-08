@@ -119,7 +119,7 @@ test('programme de l’enfant : sans réglage, c’est celui de sa classe', () =
 });
 
 test('programme de l’enfant : rubriques et jeux masqués retirés, rubrique vide retirée aussi', () => {
-  const kid = { grade: 'CP', hiddenDomains: ['anglais'], hiddenGames: ['tables', 'compter', 'histoires', 'petits-textes'] };
+  const kid = { grade: 'CP', hiddenDomains: ['anglais'], hiddenGames: ['tables', 'compter', 'histoires', 'petits-textes', 'ordre-histoire'] };
   const program = programForChild(kid);
   const domains = program.map((d) => d.id);
   assert.ok(!domains.includes('anglais'), 'rubrique masquée');

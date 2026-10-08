@@ -16,6 +16,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { GAMES } from '../../app/js/games/index.js';
+import { SPOKEN_SENTENCES } from '../../app/js/games/vocabulaire.js';
 import { createRng } from '../../app/js/random.js';
 import {
   autourDesPrenoms, cle, enMots, langue, morceaux, mots, normaliser, phrases, planLecture, propositions, qualitePlan, utile,
@@ -79,7 +80,11 @@ const SCENARIO_NAMES = ['Eva-Rose', 'Éva-Rose', 'Matteo', 'Lou', 'Zoé', 'Paris
 const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !', 'Bravo !', 'Choisis un jeu !', 'Choisis ton niveau !',
   // « Buenos Aires » se dit avec son « s » : seul, le mot « buenos » est refusé par le contrôle des phonèmes
   // (qui l'attend muet, comme en français) ; les phrases de la carte du monde sont donc enregistrées entières
-  'Touche Buenos Aires, la capitale de l’Argentine.', 'Oui ! Buenos Aires est la capitale de l’Argentine.', 'Sa capitale est Buenos Aires.'];
+  'Touche Buenos Aires, la capitale de l’Argentine.', 'Oui ! Buenos Aires est la capitale de l’Argentine.', 'Sa capitale est Buenos Aires.',
+  // le partage : dit par main.js quand les parts ne sont pas égales
+  'Ils n’en ont pas tous autant. Touche la flèche pour en reprendre.',
+  // ponctuation : l'enfant choisit le signe d'après l'intonation, chaque phrase doit donc être dite d'un seul son
+  ...SPOKEN_SENTENCES.flatMap(({ text, marks }) => [...marks].map((m) => (m === '.' ? `${text}.` : `${text} ${m}`)))];
 
 export function allUtterances() {
   const list = gameUtterances();
