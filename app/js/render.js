@@ -5,6 +5,7 @@ import { PIECES } from './games/logique.js';
 import { FLAGS, flagMarkup } from './games/drapeaux.js';
 import { balanceSvg, describeBalance, describeFigure, figureSvg } from './games/logique-plus.js';
 import { fractionSvg, numberLineSvg } from './games/nombres-plus.js';
+import { drawingSvg } from './games/vivre.js';
 import {
   CONTINENTS, COUNTRIES, EUROPE_DRAWN, EUROPE_TARGETS, OCEANS, SEAS, VIEWS, WORLD_TARGETS, atIn, dotFor, mapPaths, toXY,
 } from './data/carte-data.js';
@@ -251,6 +252,8 @@ export function renderStage(stage, actions) {
       return numberLineElement(stage);
     case 'fraction':
       return h('div', { class: 'stage-fraction' }, fractionElement(stage));
+    case 'drawing':
+      return drawingElement(stage.drawing, `stage-drawing drawing-${stage.drawing.kind}`, stage.label);
     case 'equation':
       return h('div', { class: 'equation big' },
         stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
@@ -620,6 +623,7 @@ function fractionLabel({ n, d, words }) {
 }
 
 export function renderChoiceContent(choice) {
+  if (choice.drawing) return drawingElement(choice.drawing, `drawing-choice drawing-${choice.drawing.kind}`, choice.name);
   if (choice.fraction) {
     return h('span', { class: 'fraction-option' }, fractionElement(choice.fraction, 'fraction-choice'),
       choice.caption ? h('span', { class: 'fraction-caption' }, choice.caption) : null);
@@ -645,6 +649,13 @@ export function renderChoiceContent(choice) {
   }
   return choice.lang ? h('span', { lang: choice.lang }, choice.label) : choice.label;
 }
+/** Un dessin en SVG (feu des piétons, panneau, main, quadrillage…), voir games/vivre.js. */
+function drawingElement(d, cls, label) {
+  const el = h('span', { class: cls, role: 'img', 'aria-label': label });
+  el.innerHTML = drawingSvg(d);
+  return el;
+}
+
 
 /**
  * Le mot révélé après une bonne réponse, son initial souligné et en couleur (`highlight` : nombre

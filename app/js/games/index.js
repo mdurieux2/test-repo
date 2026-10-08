@@ -26,11 +26,13 @@ import { tablesChrono } from './chrono.js';
 import { SCIENCES_GAMES } from './sciences.js';
 import { NOMBRES_PLUS_GAMES } from './nombres-plus.js';
 import { GRAMMAIRE_GAMES } from './grammaire.js';
+import { VIVRE_GAMES } from './vivre.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES, ...GRAMMAIRE_GAMES,
+  ...VIVRE_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -62,7 +64,7 @@ const RUBRIQUES = [
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
-  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'vivant', 'matiere', 'pays', 'drapeaux', 'carte-monde'] },
+  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'vivant', 'matiere', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'se-reperer'] },
   {
     id: 'anglais',
     title: 'Anglais',
@@ -88,6 +90,7 @@ const SECTION_GAMES = {
   'Pays, drapeaux et cartes': ['pays', 'drapeaux', 'carte-monde'],
   'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
   'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
+  'Vivre ensemble et se repérer': ['vivre-ensemble', 'se-reperer'],
   'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais'],
 };
 const SECTIONS = Object.fromEntries(Object.entries(SECTION_GAMES).flatMap(([section, ids]) => ids.map((id) => [id, section])));
