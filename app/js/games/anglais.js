@@ -194,7 +194,7 @@ export const motAnglais = {
       text: `Comment dit-on en anglais ?${order}`,
       instruction: `Comment dit-on ${target.fr.replace(/^(le|la|les|l')\s?/, '')} en anglais ?${order}`,
       short: { text: 'En anglais ?', speak: `${target.fr.replace(/^(le|la|les|l')\s?/, '')}, en anglais ?` },
-      stage: pic.swatch ? { type: 'swatch', color: pic.swatch } : { type: 'picture', emoji: pic.label },
+      stage: pic.swatch ? { type: 'swatch', color: pic.swatch, name: pic.name } : { type: 'picture', emoji: pic.label },
       choices: options.map((w) => ({ value: w.en, label: w.en, lang: 'en' })),
       choiceStyle: 'words',
       answer: target.en,
@@ -536,7 +536,7 @@ export const epelleAnglais = {
     // deux lettres pièges qui ressemblent à celles du mot se glissent parmi les lettres)
     const silent = level >= EXTRA;
     const traps = level === HARDEST ? trapLetters(rng, letters, 2) : [];
-    const pictureStage = pic.swatch ? { type: 'swatch', color: pic.swatch } : { type: 'picture', emoji: pic.label };
+    const pictureStage = pic.swatch ? { type: 'swatch', color: pic.swatch, name: pic.name } : { type: 'picture', emoji: pic.label };
     let silentText = 'Écris le mot anglais de cette image : touche les lettres dans l’ordre.';
     if (traps.length) silentText = `${silentText} Attention, il y a deux lettres en trop !`;
     const items = order.map((i) => ({ value: i, label: letters[i] }));
@@ -650,7 +650,7 @@ function pictureTalk(rng) {
   };
   if (kind === 'colour') {
     const { target, options } = three(theme('Les couleurs').words);
-    return { q: 'What colour is it?', a: `It’s ${target.en}.`, options: options.map((w) => `It’s ${w.en}.`), stage: { type: 'swatch', color: target.swatch } };
+    return { q: 'What colour is it?', a: `It’s ${target.en}.`, options: options.map((w) => `It’s ${w.en}.`), stage: { type: 'swatch', color: target.swatch, name: target.fr } };
   }
   if (kind === 'animal') {
     const { target, options } = three(theme('Les animaux').words);

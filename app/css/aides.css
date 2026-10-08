@@ -1,0 +1,60 @@
+/* Aides à la lecture et aux couleurs (profil d'accessibilité de l'enfant, voir js/a11y.js) :
+   syllabes colorées (js/syllabes.js) et couleurs nommées (js/couleurs.js). Les éléments ci-dessous
+   n'existent que si le réglage est actif ; seuls les retours juste / faux concernent tout le monde. */
+
+/* ---- Syllabes colorées : deux couleurs qui alternent (contraste ≥ 4,5:1 sur le blanc, la crème et le
+   surlignage jaune du karaoké) et un arc sous chaque syllabe, pour ne pas compter sur la couleur seule. */
+.syl {
+  border-bottom: 2px solid currentColor;
+  border-radius: 0 0 0.55em 0.55em / 0 0 0.32em 0.32em;
+  padding-bottom: 1px;
+}
+.syl-a { color: #1d4ed8; }
+.syl-b { color: #b91c1c; }
+/* lettres muettes : en gris et plus fines */
+.syl .muet { color: #5f6372; font-weight: 400; }
+/* sur un fond coloré (bonne réponse, paire trouvée) : la couleur du texte du bouton */
+.choice.correct .syl, .choice.correct .muet, .match-item.matched .syl, .match-item.matched .muet { color: inherit; }
+
+/* ---- Couleurs nommées : le nom sous la pastille (ou l'émoji), dans la police de l'app */
+.color-named { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; max-width: 100%; }
+.color-name {
+  display: block; font-family: 'Andika', system-ui, sans-serif; font-size: 0.85rem; font-weight: 700; line-height: 1.1;
+  letter-spacing: 0; color: var(--ink); white-space: nowrap; text-shadow: none;
+}
+.choice .color-named .swatch { width: 52px; height: 52px; }
+.stage .color-name { font-size: 1.15rem; }
+.pattern .color-named { gap: 1px; }
+.pattern .color-name { font-size: 0.7rem; }
+.choices-pictures .color-name { font-size: 0.8rem; }
+.match-item .color-named .swatch { width: 40px; height: 40px; }
+.match-item.matched .color-name { color: inherit; }
+.memory-face .color-name { font-size: calc(13cqi / var(--cols)); margin-top: 2px; }
+.magic-color .color-name { font-size: 0.7rem; }
+.choice.correct .color-name { color: inherit; }
+/* les couleurs des bandes d'un drapeau, dans l'ordre (de gauche à droite, ou de haut en bas) */
+.flag-colors {
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 0 4px; margin-top: 3px;
+  font-size: 0.75rem; font-weight: 700; line-height: 1.15; color: var(--ink);
+}
+.flag-colors-v > span + span::before { content: '· '; }
+.flag-colors-h { flex-direction: column; align-items: center; }
+.stage-flag .flag-colors { font-size: 0.95rem; }
+/* l'ombre du drapeau reste sous le dessin, pas sous les noms */
+.stage-flag .flag:has(.flag-colors), .map-clue .map-clue-flag:has(.flag-colors) { filter: none; }
+.stage-flag .flag:has(.flag-colors) svg { filter: drop-shadow(0 5px 0 var(--line)); }
+.map-clue .map-clue-flag:has(.flag-colors) svg { filter: drop-shadow(0 3px 0 var(--line)); }
+.map-clue .flag-colors { font-size: 0.65rem; }
+
+/* ---- Retours juste / faux : un signe en plus de la couleur (pour tous) */
+.choice { position: relative; }
+.choice.correct::after, .choice.wrong::after {
+  position: absolute; top: 3px; right: 6px; font-family: 'Andika', system-ui, sans-serif; font-size: 1.1rem; font-weight: 700;
+  line-height: 1; pointer-events: none;
+}
+.choice.correct::after { content: '✓'; color: #fff; }
+.choice.wrong::after { content: '✗'; color: #c43d3d; }
+.memory-card { position: relative; }
+.memory-card.found::after {
+  content: '✓'; position: absolute; top: 2px; right: 4px; font-size: 0.9rem; font-weight: 700; line-height: 1; color: var(--good-dark);
+}

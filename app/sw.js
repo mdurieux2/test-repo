@@ -15,6 +15,7 @@ const isVoicePack = (url) => /\/voix\/paquet-[0-9a-f]+\.mp3$/.test(url.pathname)
 
 const PRECACHE = [
   './',
+  './css/aides.css',
   './css/style.css',
   './fonts/andika-400.woff2',
   './fonts/andika-700.woff2',
@@ -25,6 +26,7 @@ const PRECACHE = [
   './js/characters.js',
   './js/a11y.js',
   './js/config.js',
+  './js/couleurs.js',
   './js/dashboard.js',
   './js/data/anglais-data.js',
   './js/data/carte-data.js',
@@ -77,6 +79,7 @@ const PRECACHE = [
   './js/speech.js',
   './js/voix-cles.js',
   './js/storage.js',
+  './js/syllabes.js',
   './js/themes.js',
   './manifest.webmanifest',
   './voix/manifest.json',

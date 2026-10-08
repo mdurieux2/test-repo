@@ -27,14 +27,15 @@ import {
 } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
 import {
-  avatar, clockSvg, columnGrid, flagElement, fractionElement, h, mapElement, moneyItem, numberLineElement, renderChoiceContent, renderStage,
-  revealWord, setProfiles,
+  avatar, clockSvg, colorName, columnGrid, emojiColorName, flagElement, fractionElement, h, mapElement, moneyItem, numberLineElement, readable, renderChoiceContent,
+  renderStage, revealWord, setAides, setProfiles,
 } from './render.js';
 import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
-import { applyA11y } from './a11y.js';
+import { a11y, applyA11y } from './a11y.js';
+import { syllabesPermises } from './syllabes.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
 import { STORY_DATA } from './games/histoires.js';
@@ -991,6 +992,12 @@ function nextQuestion(session) {
   globalThis.__lc = { question: q }; // utilisé par les tests de bout en bout
 
   const { game } = session;
+  // aides de lecture de l'enfant qui joue : syllabes colorées (sauf dans les jeux de sons et de
+  // syllabes, où elles donneraient la réponse) et couleurs nommées ; la question d'une révision
+  // suit les règles de son jeu d'origine
+  const aids = a11y(child());
+  const origin = (q.from && findGame(q.from)) || game;
+  setAides({ syllables: aids.syllables && syllabesPermises(origin.id, origin.domain), namedColors: aids.namedColors, domain: origin.domain });
   const guide = me(); // seul l'enfant qui joue apparaît, avec sa photo ou son dessin et sa voix
   session.guide = guide;
   // La consigne complète est dite la première fois ; ensuite, une version courte
@@ -1044,7 +1051,7 @@ function nextQuestion(session) {
     h('div', { class: 'instruction' },
       h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
         avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')),
-      h('button', { class: 'bubble bubble-left', onclick: replay }, frenchSpacing(brief ? q.short.text : q.text))),
+      h('button', { class: 'bubble bubble-left', onclick: replay }, readable(frenchSpacing(brief ? q.short.text : q.text)))),
     stage,
     zone,
     feedback));
@@ -1426,7 +1433,7 @@ function matchZone(ctx) {
   // à gauche : un calcul, un mot… ou une collection d'objets à compter
   const lefts = q.pairs.map((p, i) => h('button', { class: `match-item left${p.objects ? ' has-objects' : ''}${p.emoji ? ' has-emoji' : ''}`, 'data-left': i, 'aria-label': p.objects ? String(p.left) : undefined },
     p.objects ? renderChoiceContent({ objects: p.objects })
-      : p.swatch ? h('span', { class: 'swatch', style: { background: p.swatch }, role: 'img', 'aria-label': p.left })
+      : p.swatch ? h('span', { class: 'color-named' }, h('span', { class: 'swatch', style: { background: p.swatch }, role: 'img', 'aria-label': p.left }), colorName(p.left))
         : p.emoji || p.left));
   const rightLang = q.rightLang ? { lang: q.rightLang } : {};
   const rights = q.rights.map((v) => h('button', { class: `match-item right${typeof v === 'string' ? ' is-word' : ''}`, 'data-right': v, ...rightLang }, v));
@@ -2072,7 +2079,8 @@ function memoryZone(ctx) {
   const count = h('span', { class: 'memory-count', 'aria-live': 'polite' }, `0 / ${n / 2}`);
   const cards = q.cards.map((card, i) => {
     const el = h('button', { class: 'memory-card', 'data-card': i, 'aria-label': 'Carte retournée' },
-      h('span', { class: `memory-face${card.small ? ' small' : ''}${card.word ? ' word' : ''}`, lang: card.lang }, card.label));
+      h('span', { class: `memory-face${card.small ? ' small' : ''}${card.word ? ' word' : ''}`, lang: card.lang },
+        card.label, card.word ? null : emojiColorName(card.label)));
     el.addEventListener('click', () => {
       if (ctx.session.locked || busy || found.has(i) || open.includes(i)) return;
       open.push(i);
@@ -2182,7 +2190,7 @@ function colorbyZone(ctx) {
     const btn = h('button', {
       class: 'magic-color', 'data-color': i, style: { '--paint': c.hex },
       'aria-label': words ? c.name : `${c.n} : ${c.name}`, 'aria-pressed': 'false',
-    }, h('span', { class: 'magic-swatch', 'aria-hidden': 'true' }), words ? null : h('span', { class: 'magic-n' }, c.n));
+    }, h('span', { class: 'magic-swatch', 'aria-hidden': 'true' }), words ? null : h('span', { class: 'magic-n' }, c.n), colorName(c.name));
     btn.addEventListener('click', () => {
       color = i;
       buttons.forEach((b, k) => {
