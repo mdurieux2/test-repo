@@ -21,6 +21,8 @@ import {
   addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
   resetChild, saveStore,
 } from './storage.js';
+import { demoSeen, markDemoSeen } from './storage.js';
+import { hasDemo, playDemo, stillDemo, stopDemo } from './demo.js';
 import {
   isNaturalVoiceOn, listFrenchVoices, loadNaturalVoice, naturalVoiceFiles, naturalVoicePacks, setNaturalVoice, setSpeechEnabled, setSpeechNames,
   onCaption, setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
@@ -83,6 +85,7 @@ function save() {
 function show(...children) {
   stopSpeaking();
   stopStoryAudio();
+  stopDemo(); // la main qui montre le geste (demo.js) ne reste pas sur l'écran suivant
   if (leaveScreen) {
     const leave = leaveScreen;
     leaveScreen = null;
@@ -1217,6 +1220,15 @@ function nextQuestion(session) {
   }
   if (stage) enableCounting(stage, guide);
 
+  // démonstration du geste (demo.js) : d'elle-même la première fois que l'enfant ouvre le jeu, puis
+  // avec le bouton « ? » (pas pour les choix multiples simples ni pendant un défi chrono)
+  const runDemo = () => playDemo(app.querySelector('.screen.play'), q, { tapOnly: access().tapOnly, still: stillDemo(access().calm) });
+  const demoBtn = hasDemo(q) && !session.chrono
+    ? h('button', { class: 'demo-btn', type: 'button', onclick: runDemo, 'aria-label': 'Montre-moi comment jouer', title: 'Montre-moi' }, '?')
+    : null;
+  // le bouton « ? » est posé dans le coin du personnage, sans rien déplacer
+  const withDemoButton = (guideBtn, btn) => (btn ? h('span', { class: 'guide-wrap' }, guideBtn, btn) : guideBtn);
+
   const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
   // défi chrono : le chronomètre (mm:ss) s'affiche sous le niveau, en haut à droite
   const clock = session.chrono ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
@@ -1231,13 +1243,19 @@ function nextQuestion(session) {
       ? topBar({ onBack: session.back, backLabel: 'Quitter', title: duoScoreboard(session, progress) })
       : topBar({ onBack: session.back, backLabel: 'Quitter', title: progress, right: badge }),
     h('div', { class: 'instruction' },
-      h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
-        avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')),
+      withDemoButton(h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
+        avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')), demoBtn),
       h('button', { class: 'bubble bubble-left', onclick: replay }, readable(frenchSpacing(brief ? q.short.text : q.text)))),
     stage,
     zone,
     feedback));
   if (clock) runChrono(session, clock);
+  const demoKey = q.from || game.id; // une révision : la démonstration de son jeu d'origine
+  if (demoBtn && !demoSeen(child(), demoKey)) {
+    markDemoSeen(child(), demoKey);
+    save();
+    setTimeout(() => { if (demoBtn.isConnected) runDemo(); }, 700);
+  }
   // histoire en karaoké : la voix d'un parent (si l'histoire est enregistrée) ou la voix de
   // synthèse lit l'histoire pendant que le texte s'allume, puis la question est posée
   const readAlong = (before = []) => (q.karaoke ? readStory(stage, guide, q, before) : null);

@@ -138,6 +138,7 @@ function mergeChild(id, saved) {
     review: saved.review && typeof saved.review === 'object' ? saved.review : {},
     ...keptSettings(saved),
     easyRead: saved.easyRead === true,
+    demos: idList(saved.demos),
   };
 }
 
@@ -220,7 +221,8 @@ export function logMistake(child, entry) {
 }
 
 /**
- * Efface la progression d'un enfant : étoiles, niveaux, paliers, records des défis chrono, historique.
+ * Efface la progression d'un enfant : étoiles, niveaux, paliers, records des défis chrono, historique
+ * (et les démonstrations déjà vues : la main remontre chaque geste).
  * Prénom, dessin, classe et photo sont conservés, ainsi que les réglages des parents (objectifs,
  * lecture facilitée, jeux masqués ou conseillés) et son personnage.
  */
@@ -232,6 +234,21 @@ export function resetChild(store, id) {
     ...(spoken ? { spoken } : {}),
   };
   return store;
+}
+
+// ---------------------------------------------------------------- Démonstrations (demo.js)
+
+/**
+ * La main qui montre le geste d'un jeu n'apparaît d'elle-même qu'une fois par jeu et par enfant :
+ * les jeux déjà montrés sont dans `child.demos` (remis à zéro par « effacer la progression »).
+ */
+export function demoSeen(child, gameId) {
+  return Array.isArray(child?.demos) && child.demos.includes(gameId);
+}
+
+export function markDemoSeen(child, gameId) {
+  if (!child || !gameId || demoSeen(child, gameId)) return;
+  child.demos = [...(Array.isArray(child.demos) ? child.demos : []), gameId];
 }
 
 // ---------------------------------------------------------------- Jouer à deux

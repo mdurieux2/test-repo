@@ -11,6 +11,7 @@
 //                  grandes cibles, texte espacé ; sur iPhone SE, Android 360 points et iPhone SE en paysage,
 //                  pour un échantillon de jeux de chaque rubrique ; A11Y=contrast,calm… ajoute d'autres réglages)
 //         ONLY=a11y   (seulement toucher sans glisser, clavier, sous-titres ; PARTS=a11y y ajoute contrastes et axe-core)
+//         ONLY=demo   (seulement la main qui montre le geste au premier lancement)
 //         A11Y=captions,textSize=1.15 DEVICES=375x667,667x375 PARTS=layout   (ces réglages en plus, sur ces écrans seulement)
 //         PORT=8124 pour lancer plusieurs tests en même temps
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
@@ -2021,6 +2022,120 @@ async function a11yChecks() {
   await context.close();
 }
 
+// ---------------------------------------------------------------- Démonstration au premier lancement (demo.js)
+
+/**
+ * La main qui montre le geste : elle apparaît la première fois qu'un enfant ouvre un jeu au geste
+ * pas évident, pas la deuxième ; le bouton « ? » la remontre ; le moindre toucher la fait partir
+ * (et sert au jeu) ; des touchers seulement avec « toucher plutôt que glisser » ; sans mouvement en
+ * mode calme ou avec « réduire les animations » ; rien pour un choix multiple simple.
+ * (Le parcours de tous les jeux, PARTS=scenario, se joue aussi avec la main au premier lancement.)
+ */
+async function demoChecks() {
+  const context = await newContext({ width: 375, height: 667 });
+  // ce que la main a dessiné (touchers, glissés, étapes numérotées), noté au fil de l'eau
+  await context.addInitScript(() => {
+    window.__demo = [];
+    new MutationObserver((records) => {
+      for (const r of records) {
+        for (const n of r.addedNodes) {
+          const cls = n.getAttribute?.('class') || '';
+          if (/\bdemo-(layer|trail|ring|step|path)\b/.test(cls)) window.__demo.push(cls);
+        }
+      }
+    }).observe(document, { childList: true, subtree: true });
+  });
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(`démonstration : ${e.message}`));
+  await page.goto(BASE);
+  await page.waitForSelector('.welcome');
+  const profile = (a11y, games = '{}') => setStore(page, `store.settings = { sessionLength: 5 };
+    const kid = store.profiles['eva-rose']; kid.grade = 'CP'; kid.a11y = ${JSON.stringify(a11y)}; kid.games = ${games}; kid.demos = [];`);
+  const demoShown = (timeout = 2500) => page.waitForSelector('.demo-layer', { timeout }).then(() => true).catch(() => false);
+  const demoGone = (timeout = 5000) => page.waitForSelector('.demo-layer', { state: 'detached', timeout }).then(() => true).catch(() => false);
+  const handAt = () => page.$eval('.demo-hand', (el) => el.style.transform).catch(() => null);
+  const drawn = () => page.evaluate(() => window.__demo.join(' '));
+  const seen = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key)).profiles['eva-rose'].demos || [], STORAGE_KEY);
+
+  // 1. Premier lancement du labyrinthe : la main glisse sur le chemin, puis s'en va d'elle-même
+  await profile({}, '{ labyrinthe: { level: 1 } }');
+  await openGame(page, findGame('labyrinthe'));
+  await page.waitForSelector('.choices:not(.answered)');
+  if (!(await demoShown())) fail('démonstration : la main n’apparaît pas au premier lancement du labyrinthe');
+  if (!(await page.locator('.demo-btn').count())) fail('démonstration : pas de bouton « ? » pour la revoir');
+  const pointer = await page.$eval('.demo-layer', (el) => getComputedStyle(el).pointerEvents);
+  if (pointer !== 'none') fail(`démonstration : la main capte le doigt (pointer-events ${pointer})`);
+  const a = await handAt();
+  await page.waitForTimeout(700);
+  const b = await handAt();
+  if (!a || a === b) fail('démonstration : la main ne bouge pas (labyrinthe)');
+  if (!(await demoGone())) fail('démonstration : la main ne disparaît pas d’elle-même');
+  if (!(await drawn()).includes('demo-trail')) fail('démonstration : le labyrinthe n’est pas montré en glissant');
+  if (!(await seen()).includes('labyrinthe')) fail('démonstration : « déjà vue » n’est pas retenu avec l’enfant');
+  // la consigne n'est pas cachée par le bouton « ? » (il est dans le coin du personnage)
+  const overlap = await page.evaluate(() => {
+    const btn = document.querySelector('.demo-btn').getBoundingClientRect();
+    const bubble = document.querySelector('.instruction .bubble').getBoundingClientRect();
+    return btn.right > bubble.left + 1 && btn.bottom > bubble.top && btn.top < bubble.bottom;
+  });
+  if (overlap) fail('démonstration : le bouton « ? » cache la consigne');
+  // 2. La deuxième fois : pas de main ; le bouton « ? » la remontre ; un toucher la fait partir et joue
+  await openGame(page, findGame('labyrinthe'));
+  let zone = await page.waitForSelector('.choices:not(.answered)');
+  if (await demoShown(1800)) fail('démonstration : la main revient au deuxième lancement');
+  await page.click('.demo-btn');
+  if (!(await demoShown(1000))) fail('démonstration : le bouton « ? » ne remontre pas la main');
+  let q = await page.evaluate(() => globalThis.__lc.question);
+  await answer(page, q, false); // on joue pendant que la main montre : elle s'en va, la question est réussie
+  if (!(await demoGone(300))) fail('démonstration : la main reste après un toucher');
+  await page.waitForFunction((el) => !el.isConnected, zone, { timeout: 15000 })
+    .catch(() => fail('démonstration : la main empêche de jouer (labyrinthe)'));
+  // au clavier : le bouton « ? » est atteint avec Tab et a un nom ; une touche fait partir la main
+  zone = await page.waitForSelector('.choices:not(.answered)');
+  await tabTo(page, '.demo-btn', 'bouton « ? »');
+  await assertFocusVisible(page, 'bouton « ? »');
+  if (!(await page.getAttribute('.demo-btn', 'aria-label'))?.includes('Montre-moi')) fail('démonstration : le bouton « ? » n’a pas de nom');
+  await page.keyboard.press('Enter');
+  if (!(await demoShown(1000))) fail('démonstration : le bouton « ? » ne marche pas au clavier');
+  if (!(await page.textContent('.demo-layer [role="status"]').catch(() => '')).length) await page.waitForTimeout(150);
+  if (!/Regarde/.test(await page.textContent('.demo-layer [role="status"]'))) fail('démonstration : rien n’est dit aux lecteurs d’écran');
+  await page.keyboard.press('ArrowRight');
+  if (!(await demoGone(300))) fail('démonstration : la main reste après une touche du clavier');
+
+  // 3. Toucher plutôt que glisser : relier, des touchers seulement (pas de trait qui glisse)
+  await profile({ tapOnly: true }, "{ 'relie-calculs': { level: 1 } }");
+  await openGame(page, findGame('relie-calculs'));
+  await page.waitForSelector('.choices:not(.answered)');
+  if (!(await demoShown())) fail('démonstration : pas de main avec « toucher plutôt que glisser »');
+  await demoGone();
+  const tapDrawn = await drawn();
+  if (tapDrawn.includes('demo-trail') || !tapDrawn.includes('demo-ring')) fail(`démonstration : toucher plutôt que glisser, la main glisse (${tapDrawn})`);
+
+  // 4. Mode calme, puis « réduire les animations » : la main ne bouge pas, les étapes sont numérotées
+  for (const [label, a11y, motion] of [['mode calme', { calm: true }, 'no-preference'], ['réduire les animations', {}, 'reduce']]) {
+    await page.emulateMedia({ reducedMotion: motion });
+    await profile(a11y, '{ patates: { level: 1 } }');
+    await openGame(page, findGame('patates'));
+    await page.waitForSelector('.choices:not(.answered)');
+    if (!(await demoShown())) fail(`démonstration : pas de main en ${label}`);
+    const still = await page.locator('.demo-layer.still').count();
+    const steps = await page.locator('.demo-step').count();
+    const h1 = await handAt();
+    await page.waitForTimeout(800);
+    if (!still || !steps || h1 !== (await handAt())) fail(`démonstration : en ${label}, la main bouge ou les étapes ne sont pas numérotées`);
+    if (!(await demoGone())) fail(`démonstration : en ${label}, la main ne disparaît pas`);
+  }
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+  // 5. Un choix multiple simple : ni main ni bouton
+  await profile({}, '{ compter: { level: 1 } }');
+  await openGame(page, findGame('compter'));
+  await page.waitForSelector('.choices:not(.answered)');
+  if (await demoShown(1500) || await page.locator('.demo-btn').count()) fail('démonstration : une main sur un choix multiple simple');
+  console.log('✔ démonstration : la main au premier lancement (pas au deuxième), « ? » la remontre, un toucher la fait partir, touchers seuls, sans mouvement en mode calme');
+  await context.close();
+}
+
 if (!ONLY && PARTS.includes('scenario')) await scenario();
 else if (ONLY?.includes('hors-ligne')) {
   const context = await newContext({ width: 390, height: 844 });
@@ -2031,6 +2146,8 @@ else if (ONLY?.includes('hors-ligne')) {
 }
 // accessibilité : avec le parcours complet (PARTS=scenario), ou seule (PARTS=a11y, ou ONLY=a11y)
 if ((!ONLY && (PARTS.includes('scenario') || PARTS.includes('a11y'))) || ONLY?.includes('a11y')) await a11yChecks();
+// la main qui montre le geste : avec le parcours complet, ou seule (ONLY=demo)
+if ((!ONLY && !PLAY && PARTS.includes('scenario')) || ONLY?.includes('demo')) await demoChecks();
 
 // ---------------------------------------------------------------- Mise en page : tous les iPhone
 

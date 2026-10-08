@@ -1,0 +1,74 @@
+/* Démonstration au premier lancement (app/js/demo.js) : une main montre le geste sur la question,
+   puis disparaît. Elle ne capte pas le doigt (pointer-events: none) : on peut jouer tout de suite.
+   Le bouton « ? », dans le coin du personnage, la remontre. */
+
+/* ---------- Le bouton « ? » ---------- */
+.guide-wrap { position: relative; flex: none; display: inline-flex; }
+.demo-btn {
+  position: absolute; z-index: 2; right: -6px; bottom: -8px; /* sans déborder sur la bulle */
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: #1b5fae; color: #ffffff; /* contraste 6,4:1 */
+  border: 2px solid #ffffff; box-shadow: 0 2px 0 var(--line);
+  font-size: 1.05rem; font-weight: 700; line-height: 1;
+}
+.demo-btn:active { transform: translateY(1px); box-shadow: none; }
+.a11y-big-targets .demo-btn { width: 36px; height: 36px; bottom: -6px; font-size: 1.15rem; }
+.a11y-contrast .demo-btn { background: #000000; border-color: #ffffff; }
+
+/* ---------- La main et ce qu'elle dessine ---------- */
+.demo-layer {
+  position: fixed; inset: 0; z-index: 80;
+  overflow: hidden; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.demo-layer.leaving { opacity: 0; }
+.demo-art { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.demo-hand {
+  position: absolute; left: 0; top: 0;
+  /* le bout du doigt est au point montré */
+  margin-left: -0.42em; margin-top: -0.06em;
+  font-size: 54px; line-height: 1;
+  color: #2b2d42;
+  transform-origin: 42% 6%;
+  opacity: 0;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+  transition: opacity 0.2s ease, scale 0.12s ease;
+  will-change: transform;
+}
+.demo-hand.shown { opacity: 1; }
+.demo-hand.pressed { scale: 0.86; }
+
+/* un toucher : un rond qui s'élargit */
+.demo-ring {
+  fill: rgba(255, 210, 63, 0.4); stroke: #2b2d42; stroke-width: 3;
+  transform-box: fill-box; transform-origin: center;
+  animation: demo-ring 0.5s ease-out forwards;
+}
+/* « regarde ici » : un rond en pointillés qui reste */
+.demo-ring.look { fill: none; stroke: #1b5fae; stroke-width: 4; stroke-dasharray: 7 6; animation: none; }
+@keyframes demo-ring { from { transform: scale(0.4); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+
+/* un glissé : un trait suit le doigt */
+.demo-trail {
+  fill: none; stroke: #1b5fae; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1 13; opacity: 0.9;
+}
+
+/* sans mouvement (mode calme, « réduire les animations ») : étapes numérotées et flèche */
+.demo-path {
+  fill: none; stroke: #1b5fae; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 10 8;
+}
+.demo-arrow-head { fill: #1b5fae; }
+.demo-step circle { fill: #1b5fae; stroke: #ffffff; stroke-width: 3; }
+.demo-step.look circle { fill: #2b2d42; }
+.demo-step text {
+  fill: #ffffff; /* contraste 6,4:1 (et 14:1 sur le rond foncé) */
+  font-family: 'Andika', sans-serif; font-size: 16px; font-weight: 700;
+  text-anchor: middle; dominant-baseline: middle;
+}
+
+/* « regarde ici » : un cadre en pointillés ; « cherche par là » : la main passe sans toucher */
+.demo-box { fill: none; stroke: #1b5fae; stroke-width: 4; stroke-dasharray: 9 7; }
+.demo-trail.hover, .demo-path.hover { stroke-width: 4; stroke-dasharray: 2 10; opacity: 0.75; }
