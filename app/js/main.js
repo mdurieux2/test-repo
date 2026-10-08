@@ -4523,6 +4523,36 @@ async function downloadBytes(url, size, onBytes) {
  * bien plus vite que des milliers de petits fichiers. Un paquet dont il manque peu de sons n'est
  * pas retéléchargé : ces sons sont demandés un par un (le service worker les prend dans le paquet).
  */
+/**
+ * Les sons déjà gardés sur l'appareil. Au-delà d'environ 20 000 sons, Chrome refuse de lister le
+ * cache d'un coup (cache.keys() : « Operation too large ») : on cherche alors les sons un par un,
+ * par lots.
+ */
+async function cachedVoiceFiles(cache, files) {
+  try {
+    return new Set((await cache.keys()).map((r) => new URL(r.url).pathname.split('/voix/')[1]));
+  } catch {
+    const have = new Set();
+    for (let i = 0; i < files.length; i += 200) {
+      const batch = files.slice(i, i + 200);
+      const hits = await Promise.all(batch.map((file) => cache.match(new Request(`voix/${file}`))));
+      batch.forEach((file, j) => { if (hits[j]) have.add(file); });
+    }
+    return have;
+  }
+}
+
+// Une fois tous les sons d'une version de la voix sur l'appareil, on le note : aux lancements
+// suivants, inutile de vérifier les milliers de sons un par un.
+const VOICE_COMPLETE_KEY = 'lire-et-compter:voix-complete';
+const voiceSignature = (packs, files) => `${files.length}:${packs.map((p) => p.nom).join(',')}`;
+function voiceMarkedComplete(signature) {
+  try { return localStorage.getItem(VOICE_COMPLETE_KEY) === signature; } catch { return false; }
+}
+function markVoiceComplete(signature) {
+  try { localStorage.setItem(VOICE_COMPLETE_KEY, signature); } catch { /* stockage indisponible : on revérifiera */ }
+}
+
 async function prefetchVoices() {
   const packs = naturalVoicePacks();
   // navigateur piloté par un test automatique : pas de téléchargement en arrière-plan (sauf si le test le demande)
@@ -4530,9 +4560,15 @@ async function prefetchVoices() {
   if ((navigator.webdriver && !window.__telechargerVoix) || !navigator.serviceWorker?.controller || navigator.onLine === false) return;
   voiceDownload.running = true;
   try {
+    const files = naturalVoiceFiles();
+    const signature = voiceSignature(packs, files);
+    const wanted = new Set(files);
+    if (voiceMarkedComplete(signature)) {
+      Object.assign(voiceDownload, { total: wanted.size, done: wanted.size, bytes: 0, received: 0 });
+      return;
+    }
     const cache = await caches.open(VOICE_CACHE);
-    const have = new Set((await cache.keys()).map((r) => new URL(r.url).pathname.split('/voix/')[1]));
-    const wanted = new Set(naturalVoiceFiles());
+    const have = await cachedVoiceFiles(cache, files);
     const plans = packs.map((pack) => {
       const size = pack.sons.reduce((sum, [, n]) => sum + n, 0);
       const missing = pack.sons.filter(([file]) => wanted.has(file) && !have.has(file));
@@ -4575,6 +4611,7 @@ async function prefetchVoices() {
       }
     };
     await Promise.all([worker(), worker()]);
+    if (voiceDownload.done >= voiceDownload.total) markVoiceComplete(signature);
   } catch {
     // réseau coupé, place insuffisante… : on reprendra plus tard (au retour du réseau, au prochain lancement)
   } finally {

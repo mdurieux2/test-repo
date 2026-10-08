@@ -85,7 +85,11 @@ self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()));
 });
 
-/** Retire du cache des voix les sons qui ne sont plus dans le manifeste de cette version. */
+/**
+ * Retire du cache des voix les sons qui ne sont plus dans le manifeste de cette version. Au-delà
+ * d'environ 20 000 sons, Chrome refuse de lister le cache (cache.keys()) : le nettoyage est alors
+ * sauté (l'erreur est ignorée à l'activation) ; les anciens sons restent, sans gêner.
+ */
 async function pruneVoices() {
   const manifest = await caches.match('./voix/manifest.json');
   if (!manifest) return;

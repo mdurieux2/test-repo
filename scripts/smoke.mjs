@@ -1422,10 +1422,23 @@ if (voiceManifest.paquets?.length) {
   if (after !== 'Voix d’Estelle prête ✓') fail(`barre de téléchargement à la fin : « ${after} »`);
   await page.waitForSelector('.voice-progress', { state: 'detached', timeout: 5000 });
   const files = new Set(Object.values(voiceManifest.clips));
-  const cached = await page.evaluate(async () => (await (await caches.open('lire-et-compter-voix')).keys())
-    .map((r) => new URL(r.url).pathname.split('/voix/')[1]));
-  const missing = [...files].filter((f) => !cached.includes(f));
+  // son par son (cache.keys() refuse au-delà d'environ 20 000 sons sur Chrome)
+  const missing = await page.evaluate(async (list) => {
+    const cache = await caches.open('lire-et-compter-voix');
+    const out = [];
+    for (let i = 0; i < list.length; i += 200) {
+      const batch = list.slice(i, i + 200);
+      const hits = await Promise.all(batch.map((f) => cache.match(new Request(`voix/${f}`))));
+      batch.forEach((f, j) => { if (!hits[j]) out.push(f); });
+    }
+    return out;
+  }, [...files]);
   if (missing.length) fail(`téléchargement des sons : ${missing.length} manquants (${missing.slice(0, 3).join(', ')})`);
+  // lancement suivant : tous les sons sont là, rien à retélécharger, même quand le cache est trop
+  // grand pour être listé d'un coup ; une fois vérifié, c'est noté pour cette version de la voix
+  await page.evaluate(() => { localStorage.removeItem('lire-et-compter:voix-complete'); window.dispatchEvent(new Event('online')); });
+  await page.waitForFunction(() => localStorage.getItem('lire-et-compter:voix-complete'), null, { timeout: 120000 });
+  if (await page.locator('.voice-progress').count()) fail('voix : des sons retéléchargés alors qu’ils sont déjà là');
   // un son gardé est bien un MP3 (redécoupé au bon endroit dans son paquet)
   const head = await page.evaluate(async (file) => [...new Uint8Array(await (await fetch(`voix/${file}`)).arrayBuffer()).slice(0, 2)], [...files][5]);
   if (head[0] !== 0xff || (head[1] & 0xe0) !== 0xe0) fail(`son mal découpé : ${head}`);
