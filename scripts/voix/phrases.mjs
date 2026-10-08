@@ -96,6 +96,11 @@ const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !',
   'Touche Buenos Aires, la capitale de l’Argentine.', 'Oui ! Buenos Aires est la capitale de l’Argentine.', 'Sa capitale est Buenos Aires.',
   // le partage : dit par main.js quand les parts ne sont pas égales
   'Ils n’en ont pas tous autant. Touche la flèche pour en reprendre.',
+  // sciences : des mots seuls (« ailes », « faits », « remplis », « recoud ») refusés par les contrôles ;
+  // ces phrases sont donc enregistrées entières
+  'Qu’est-ce qui fait tourner les ailes du moulin à vent ?', 'Les nuages sont faits de coton.',
+  'Je remplis la baignoire jusqu’en haut tous les jours.', 'On recoud le trou de la chaussette.',
+  'On attrape le papillon par les ailes.',
   // toucher plutôt que glisser (main.js) : écris au doigt, points à relier
   'Touche le point qui brille !', 'Regarde le point jaune, puis touche les points un par un !',
   // ponctuation : l'enfant choisit le signe d'après l'intonation, chaque phrase doit donc être dite d'un seul son

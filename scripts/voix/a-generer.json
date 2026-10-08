@@ -2358,6 +2358,15 @@
   "file": "fr/11d9bee18c406bac.mp3"
  },
  {
+  "key": "fr|1|Les nuages sont faits de coton.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Les nuages sont faits de coton.",
+  "voice": "estelle",
+  "file": "fr/ebc6e0d91cca0dd2.mp3"
+ },
+ {
   "key": "fr|1|Bravo, tu as bien écouté l'histoire !",
   "lang": "fr",
   "rate": 1,
@@ -2520,6 +2529,15 @@
   "file": "en/b6a07e8733e969ca.mp3"
  },
  {
+  "key": "fr|1|On recoud le trou de la chaussette.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "On recoud le trou de la chaussette.",
+  "voice": "estelle",
+  "file": "fr/589d62ae1cd784b7.mp3"
+ },
+ {
   "key": "en|0.9|seven",
   "lang": "en",
   "rate": 0.9,
@@ -2563,6 +2581,15 @@
   "text": "olive",
   "voice": "estelle",
   "file": "fr/b834e99db83f3b6c.mp3"
+ },
+ {
+  "key": "fr|1|On attrape le papillon par les ailes.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "On attrape le papillon par les ailes.",
+  "voice": "estelle",
+  "file": "fr/d393bd4719e6b0df.mp3"
  },
  {
   "key": "fr|1|La petite aiguille montre les heures, la grande aiguille montre les minutes.",
@@ -3051,6 +3078,15 @@
   "file": "fr/d883dd49a1c468eb.mp3"
  },
  {
+  "key": "fr|1|Je remplis la baignoire jusqu'en haut tous les jours.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Je remplis la baignoire jusqu'en haut tous les jours.",
+  "voice": "estelle",
+  "file": "fr/86ce9028aec9dc15.mp3"
+ },
+ {
   "key": "fr|1|Bravo, c'est la maison !",
   "lang": "fr",
   "rate": 1,
@@ -3175,6 +3211,15 @@
   "text": "train",
   "voice": "estelle",
   "file": "fr/a43149f8b64d0738.mp3"
+ },
+ {
+  "key": "fr|1|Qu'est-ce qui fait tourner les ailes du moulin à vent ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Qu'est-ce qui fait tourner les ailes du moulin à vent ?",
+  "voice": "estelle",
+  "file": "fr/bd8cdca57084ac36.mp3"
  },
  {
   "key": "fr|1|Bravo, c'est une maison !",
@@ -63855,96 +63900,6 @@
   "file": "fr/9c38c688d132d0d5.mp3"
  },
  {
-  "key": "en|0.9|mum!",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "mum!",
-  "voice": "estelle",
-  "file": "en/ace2bc4e2061d763.mp3"
- },
- {
-  "key": "en|0.9|one!",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "one!",
-  "voice": "estelle",
-  "file": "en/2acfd2c96bdc798d.mp3"
- },
- {
-  "key": "fr|1|Après jeudi, c'est vendredi.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Après jeudi, c'est vendredi.",
-  "voice": "estelle",
-  "file": "fr/1163ea17f65fa279.mp3"
- },
- {
-  "key": "fr|1|Quel mois vient après mars ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Quel mois vient après mars ?",
-  "voice": "estelle",
-  "file": "fr/bb01a8f98fa6dcd4.mp3"
- },
- {
-  "key": "fr|1|Je ne vois pas la mer.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Je ne vois pas la mer.",
-  "voice": "estelle",
-  "file": "fr/d5e8597612b68c48.mp3"
- },
- {
-  "key": "fr|1|Le lapin pèse 3 kilos.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Le lapin pèse 3 kilos.",
-  "voice": "estelle",
-  "file": "fr/3b0d9879f6360e0c.mp3"
- },
- {
-  "key": "en|0.9|one plus two is three!",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "one plus two is three!",
-  "voice": "estelle",
-  "file": "en/616af00a4a412e79.mp3"
- },
- {
-  "key": "fr|1|Bandes horizontales : rouge, blanc et bleu.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Bandes horizontales : rouge, blanc et bleu.",
-  "voice": "estelle",
-  "file": "fr/328ee80ca7dd3990.mp3"
- },
- {
-  "key": "fr|1|Quand le hérisson se promène-t-il ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Quand le hérisson se promène-t-il ?",
-  "voice": "estelle",
-  "file": "fr/b8dfb91c3c6043a4.mp3"
- },
- {
-  "key": "fr|1|Il lui faut des centaines d'années.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Il lui faut des centaines d'années.",
-  "voice": "estelle",
-  "file": "fr/c719d629e1aaf052.mp3"
- },
- {
   "key": "fr|1|À toi,",
   "lang": "fr",
   "rate": 1,
@@ -65646,6 +65601,15 @@
   "file": "fr/4cbf966b11718089.mp3"
  },
  {
+  "key": "fr|1|rouge,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "rouge,",
+  "voice": "estelle",
+  "file": "fr/1268b2baf29771a4.mp3"
+ },
+ {
   "key": "fr|1|Dans la nature,",
   "lang": "fr",
   "rate": 1,
@@ -66265,15 +66229,6 @@
   "text": "cé,",
   "voice": "estelle",
   "file": "fr/5d572df690b56dcf.mp3"
- },
- {
-  "key": "fr|1|rouge,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "rouge,",
-  "voice": "estelle",
-  "file": "fr/1268b2baf29771a4.mp3"
  },
  {
   "key": "fr|0.9|erre,",
@@ -67147,6 +67102,15 @@
   "text": "et 7 :",
   "voice": "estelle",
   "file": "fr/96ff742952bd27e0.mp3"
+ },
+ {
+  "key": "fr|1|Bandes horizontales :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Bandes horizontales :",
+  "voice": "estelle",
+  "file": "fr/bc50719e06817f63.mp3"
  },
  {
   "key": "fr|1|ce n'est pas pour l'école.",
@@ -68875,15 +68839,6 @@
   "text": "et lit ?",
   "voice": "estelle",
   "file": "fr/4af3accf647e85d2.mp3"
- },
- {
-  "key": "fr|1|Bandes horizontales :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Bandes horizontales :",
-  "voice": "estelle",
-  "file": "fr/bc50719e06817f63.mp3"
  },
  {
   "key": "en|0.8|paint,",
@@ -74934,6 +74889,15 @@
   "file": "fr/9eab5baea1af53b9.mp3"
  },
  {
+  "key": "fr|1|c'est vendredi.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "c'est vendredi.",
+  "voice": "estelle",
+  "file": "fr/53fbcd17500bc772.mp3"
+ },
+ {
   "key": "fr|1|Pars de la Tchéquie",
   "lang": "fr",
   "rate": 1,
@@ -75850,6 +75814,15 @@
   "text": "et bleu,",
   "voice": "estelle",
   "file": "fr/fa0caf370c92a923.mp3"
+ },
+ {
+  "key": "fr|1|et bleu.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et bleu.",
+  "voice": "estelle",
+  "file": "fr/ee31fbfb888279fd.mp3"
  },
  {
   "key": "fr|1|90",
@@ -81666,6 +81639,15 @@
   "file": "fr/c2e457da8259b886.mp3"
  },
  {
+  "key": "fr|1|Après jeudi,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Après jeudi,",
+  "voice": "estelle",
+  "file": "fr/41a8936497f5cfea.mp3"
+ },
+ {
   "key": "fr|1|une semaine,",
   "lang": "fr",
   "rate": 1,
@@ -83824,15 +83806,6 @@
   "text": "Islande,",
   "voice": "estelle",
   "file": "fr/fc88e24b581126ba.mp3"
- },
- {
-  "key": "fr|1|il envoie plus de sang aux muscles.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "il envoie plus de sang aux muscles.",
-  "voice": "estelle",
-  "file": "fr/3e94d9fac8711620.mp3"
  },
  {
   "key": "fr|1|Bravo",
@@ -88119,6 +88092,15 @@
   "file": "fr/47190979fbd3f925.mp3"
  },
  {
+  "key": "fr|1|partage 15 os entre ses 5 chiens,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "segment",
+  "text": "partage 15 os entre ses 5 chiens,",
+  "voice": "estelle",
+  "file": "fr/acd5784725a31a08.mp3"
+ },
+ {
   "key": "fr|1|plus",
   "lang": "fr",
   "rate": 1,
@@ -89055,15 +89037,6 @@
   "file": "fr/a808eb3d2eb1fc8d.mp3"
  },
  {
-  "key": "fr|1|chiens,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "chiens,",
-  "voice": "estelle",
-  "file": "fr/9cd95c5bdce9c267.mp3"
- },
- {
   "key": "fr|1|Le groupe de",
   "lang": "fr",
   "rate": 1,
@@ -89134,6 +89107,15 @@
   "text": "Tu as",
   "voice": "estelle",
   "file": "fr/c78084c3db4f1eef.mp3"
+ },
+ {
+  "key": "fr|1|chiens,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "chiens,",
+  "voice": "estelle",
+  "file": "fr/9cd95c5bdce9c267.mp3"
  },
  {
   "key": "fr|1|chats,",
@@ -89235,15 +89217,6 @@
   "file": "fr/50c85c212f53a5fc.mp3"
  },
  {
-  "key": "fr|1|os entre ses",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "os entre ses",
-  "voice": "estelle",
-  "file": "fr/6d21c909b763e438.mp3"
- },
- {
   "key": "fr|1|est exactement ici.",
   "lang": "fr",
   "rate": 1,
@@ -89343,6 +89316,15 @@
   "file": "fr/9e790aead3839135.mp3"
  },
  {
+  "key": "fr|1|os entre ses",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "os entre ses",
+  "voice": "estelle",
+  "file": "fr/6d21c909b763e438.mp3"
+ },
+ {
   "key": "fr|1|avril.",
   "lang": "fr",
   "rate": 1,
@@ -89395,6 +89377,15 @@
   "text": "poissons !",
   "voice": "estelle",
   "file": "fr/1472eaa8a9c052e7.mp3"
+ },
+ {
+  "key": "fr|1|Le lapin pèse",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Le lapin pèse",
+  "voice": "estelle",
+  "file": "fr/3fa5be37e93dfc22.mp3"
  },
  {
   "key": "fr|1|poussins !",
@@ -89674,15 +89665,6 @@
   "text": "enfants",
   "voice": "estelle",
   "file": "fr/df5e09257e3b4101.mp3"
- },
- {
-  "key": "fr|1|Le lapin pèse",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Le lapin pèse",
-  "voice": "estelle",
-  "file": "fr/3fa5be37e93dfc22.mp3"
  },
  {
   "key": "fr|1|novembre.",
@@ -92736,6 +92718,15 @@
   "file": "fr/27067b83bc0ddb50.mp3"
  },
  {
+  "key": "fr|1|il envoie plus de sang aux muscles.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "il envoie plus de sang aux muscles.",
+  "voice": "estelle",
+  "file": "fr/3e94d9fac8711620.mp3"
+ },
+ {
   "key": "fr|1|Le cheval,",
   "lang": "fr",
   "rate": 1,
@@ -93508,24 +93499,6 @@
   "text": "Le dernier vendredi,",
   "voice": "estelle",
   "file": "fr/5bc745c785aae539.mp3"
- },
- {
-  "key": "fr|1|ou Washington ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "ou Washington ?",
-  "voice": "estelle",
-  "file": "fr/6e9de15827c1337b.mp3"
- },
- {
-  "key": "fr|1|Le chat est petit,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Le chat est petit,",
-  "voice": "estelle",
-  "file": "fr/1b586edfc533c3b1.mp3"
  },
  {
   "key": "fr|1|frappe",
@@ -138726,6 +138699,24 @@
   "file": "fr/d74d3e908a4944f5.mp3"
  },
  {
+  "key": "fr|1|ou Washington ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "ou Washington ?",
+  "voice": "estelle",
+  "file": "fr/6e9de15827c1337b.mp3"
+ },
+ {
+  "key": "fr|1|Le chat est petit,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le chat est petit,",
+  "voice": "estelle",
+  "file": "fr/1b586edfc533c3b1.mp3"
+ },
+ {
   "key": "fr|1|car ils sont amis.",
   "lang": "fr",
   "rate": 1,
@@ -141894,15 +141885,6 @@
   "file": "fr/939981cc2b0b2979.mp3"
  },
  {
-  "key": "fr|1|c'est vendredi.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "c'est vendredi.",
-  "voice": "estelle",
-  "file": "fr/53fbcd17500bc772.mp3"
- },
- {
   "key": "fr|1|l'ours blanc a…",
   "lang": "fr",
   "rate": 1,
@@ -142884,6 +142866,15 @@
   "file": "fr/32ac7e473ce73c1d.mp3"
  },
  {
+  "key": "fr|1|Quel mois vient après mars ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Quel mois vient après mars ?",
+  "voice": "estelle",
+  "file": "fr/bb01a8f98fa6dcd4.mp3"
+ },
+ {
   "key": "fr|1|il manquait l'orange !",
   "lang": "fr",
   "rate": 1,
@@ -142902,6 +142893,33 @@
   "file": "fr/a6c820cc534fa2e6.mp3"
  },
  {
+  "key": "fr|1|Je ne vois pas la mer.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Je ne vois pas la mer.",
+  "voice": "estelle",
+  "file": "fr/d5e8597612b68c48.mp3"
+ },
+ {
+  "key": "en|0.9|one plus two is three!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "proposition",
+  "text": "one plus two is three!",
+  "voice": "estelle",
+  "file": "en/616af00a4a412e79.mp3"
+ },
+ {
+  "key": "fr|1|Quand le hérisson se promène-t-il ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Quand le hérisson se promène-t-il ?",
+  "voice": "estelle",
+  "file": "fr/b8dfb91c3c6043a4.mp3"
+ },
+ {
   "key": "fr|1|le poussin est à droite de l'arbre.",
   "lang": "fr",
   "rate": 1,
@@ -142909,6 +142927,15 @@
   "text": "le poussin est à droite de l'arbre.",
   "voice": "estelle",
   "file": "fr/a7f94f48ee7eea28.mp3"
+ },
+ {
+  "key": "fr|1|Il lui faut des centaines d'années.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Il lui faut des centaines d'années.",
+  "voice": "estelle",
+  "file": "fr/c719d629e1aaf052.mp3"
  },
  {
   "key": "fr|1|On change le pneu crevé du vélo.",
@@ -145627,69 +145654,6 @@
   "text": "five plus eleven?",
   "voice": "estelle",
   "file": "en/6a3263ed2460c818.mp3"
- },
- {
-  "key": "en|0.8|fifteen plus one?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "fifteen plus one?",
-  "voice": "estelle",
-  "file": "en/4f8934ee68c0d697.mp3"
- },
- {
-  "key": "en|0.8|one plus sixteen?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "one plus sixteen?",
-  "voice": "estelle",
-  "file": "en/9618f56a45329e57.mp3"
- },
- {
-  "key": "en|0.8|eleven minus two?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "eleven minus two?",
-  "voice": "estelle",
-  "file": "en/88776b22493356fe.mp3"
- },
- {
-  "key": "en|0.8|twelve minus one?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "twelve minus one?",
-  "voice": "estelle",
-  "file": "en/c1636c5064338321.mp3"
- },
- {
-  "key": "en|0.8|twelve minus two?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "twelve minus two?",
-  "voice": "estelle",
-  "file": "en/6a62ad0191b6aaeb.mp3"
- },
- {
-  "key": "fr|1|Pour avoir de l'eau plus claire avec de l'eau boueuse,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Pour avoir de l'eau plus claire avec de l'eau boueuse,",
-  "voice": "estelle",
-  "file": "fr/19b8e054d4afe235.mp3"
- },
- {
-  "key": "fr|1|Le serpent a des écailles :",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Le serpent a des écailles :",
-  "voice": "estelle",
-  "file": "fr/430472ab0021c810.mp3"
  },
  {
   "key": "fr|1|cadeau : 2 syllabes !",
@@ -165177,6 +165141,15 @@
   "file": "fr/520c0b39fc3319d1.mp3"
  },
  {
+  "key": "fr|1|Le lapin pèse 3 kilos.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Le lapin pèse 3 kilos.",
+  "voice": "estelle",
+  "file": "fr/3b0d9879f6360e0c.mp3"
+ },
+ {
   "key": "fr|1|La poule pèse 6 kilos.",
   "lang": "fr",
   "rate": 1,
@@ -168451,6 +168424,15 @@
   "text": "Avant samedi, c'est vendredi.",
   "voice": "estelle",
   "file": "fr/c61579e3b4ab9499.mp3"
+ },
+ {
+  "key": "fr|1|Après jeudi, c'est vendredi.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Après jeudi, c'est vendredi.",
+  "voice": "estelle",
+  "file": "fr/1163ea17f65fa279.mp3"
  },
  {
   "key": "fr|1|Avant lundi, c'est dimanche.",
@@ -174400,6 +174382,15 @@
   "text": "Touche le drapeau aux bandes horizontales : rouge, blanc et bleu, de haut en bas.",
   "voice": "estelle",
   "file": "fr/2ff58f85f47a4571.mp3"
+ },
+ {
+  "key": "fr|1|Bandes horizontales : rouge, blanc et bleu.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Bandes horizontales : rouge, blanc et bleu.",
+  "voice": "estelle",
+  "file": "fr/328ee80ca7dd3990.mp3"
  },
  {
   "key": "fr|1|Touche le drapeau aux bandes verticales : vert, jaune et rouge, de gauche à droite.",
@@ -182313,6 +182304,15 @@
   "file": "en/7b84ced1c34bb142.mp3"
  },
  {
+  "key": "en|0.8|fifteen plus one?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "fifteen plus one?",
+  "voice": "estelle",
+  "file": "en/4f8934ee68c0d697.mp3"
+ },
+ {
   "key": "en|0.8|seventeen plus one?",
   "lang": "en",
   "rate": 0.8,
@@ -182320,6 +182320,15 @@
   "text": "seventeen plus one?",
   "voice": "estelle",
   "file": "en/fd1f12d7e64daa17.mp3"
+ },
+ {
+  "key": "en|0.8|one plus sixteen?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "one plus sixteen?",
+  "voice": "estelle",
+  "file": "en/9618f56a45329e57.mp3"
  },
  {
   "key": "en|0.8|six plus nine?",
@@ -182871,6 +182880,15 @@
   "file": "en/ffd7f06920879e3b.mp3"
  },
  {
+  "key": "en|0.8|eleven minus two?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "eleven minus two?",
+  "voice": "estelle",
+  "file": "en/88776b22493356fe.mp3"
+ },
+ {
   "key": "en|0.8|thirteen minus ten?",
   "lang": "en",
   "rate": 0.8,
@@ -183040,6 +183058,15 @@
   "text": "sixteen minus one?",
   "voice": "estelle",
   "file": "en/dfc4cd638cadae1f.mp3"
+ },
+ {
+  "key": "en|0.8|twelve minus one?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "twelve minus one?",
+  "voice": "estelle",
+  "file": "en/c1636c5064338321.mp3"
  },
  {
   "key": "en|0.8|eleven minus eight?",
@@ -183355,6 +183382,15 @@
   "text": "twenty minus eight?",
   "voice": "estelle",
   "file": "en/37467e30ac4a109c.mp3"
+ },
+ {
+  "key": "en|0.8|twelve minus two?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "twelve minus two?",
+  "voice": "estelle",
+  "file": "en/6a62ad0191b6aaeb.mp3"
  },
  {
   "key": "en|0.8|seventeen minus eleven?",
@@ -186264,6 +186300,15 @@
   "file": "en/ce86e222630e0e12.mp3"
  },
  {
+  "key": "en|0.9|mum!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "phrase",
+  "text": "mum!",
+  "voice": "estelle",
+  "file": "en/ace2bc4e2061d763.mp3"
+ },
+ {
   "key": "en|0.9|rabbit!",
   "lang": "en",
   "rate": 0.9,
@@ -186334,6 +186379,15 @@
   "text": "horse!",
   "voice": "estelle",
   "file": "en/f08536a47f534dc5.mp3"
+ },
+ {
+  "key": "en|0.9|one!",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "phrase",
+  "text": "one!",
+  "voice": "estelle",
+  "file": "en/2acfd2c96bdc798d.mp3"
  },
  {
   "key": "en|0.9|carrot!",
@@ -200340,6 +200394,15 @@
   "file": "fr/1848bfc2c93791a2.mp3"
  },
  {
+  "key": "fr|1|Le serpent a des écailles :",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Le serpent a des écailles :",
+  "voice": "estelle",
+  "file": "fr/430472ab0021c810.mp3"
+ },
+ {
   "key": "fr|1|la chouette a…",
   "lang": "fr",
   "rate": 1,
@@ -202993,6 +203056,15 @@
   "text": "Pour savoir si un objet est en fer,",
   "voice": "estelle",
   "file": "fr/b37da3ebba8a61c5.mp3"
+ },
+ {
+  "key": "fr|1|Pour avoir de l'eau plus claire avec de l'eau boueuse,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Pour avoir de l'eau plus claire avec de l'eau boueuse,",
+  "voice": "estelle",
+  "file": "fr/19b8e054d4afe235.mp3"
  },
  {
   "key": "fr|1|casquette,",
