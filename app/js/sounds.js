@@ -2,9 +2,22 @@
 
 let ctx = null;
 let enabled = true;
+let soft = false; // mode calme (accessibilité) : petits sons plus bas, fanfares raccourcies
 
 export function setSoundsEnabled(value) {
   enabled = value;
+}
+
+/** Mode calme : sons plus doux (volume au tiers, pas de longue fanfare). */
+export function setSoundsSoft(value) {
+  soft = Boolean(value);
+}
+
+/** Les notes d'un son : en mode calme, au plus trois notes, au tiers du volume. */
+export function soundNotes(name, calm = soft) {
+  const notes = MELODIES[name];
+  if (!notes || !calm) return notes || null;
+  return notes.slice(0, 3).map(([freq, start, duration, opts = {}]) => [freq, start, duration, { ...opts, volume: (opts.volume ?? 0.18) / 3 }]);
 }
 
 /** À appeler lors d'un premier toucher : iOS n'autorise le son qu'après un geste. */
@@ -42,7 +55,7 @@ const MELODIES = {
 export function playSound(name) {
   if (!enabled || !ctx || !MELODIES[name]) return;
   try {
-    for (const [freq, start, duration, opts] of MELODIES[name]) tone(freq, start, duration, opts);
+    for (const [freq, start, duration, opts] of soundNotes(name)) tone(freq, start, duration, opts);
   } catch {
     // le son est un bonus : on ignore toute erreur audio
   }
@@ -53,7 +66,7 @@ const MELODY = [523, 659, 784, 659, 587, 698, 880, 698, 523, 659, 784, 1047, 880
 let musicTimer = null;
 
 export function startMusic() {
-  if (musicTimer || !ctx) return;
+  if (musicTimer || !ctx || soft) return; // mode calme : jamais de musique
   let step = 0;
   musicTimer = setInterval(() => {
     if (!ctx || ctx.state !== 'running') return;

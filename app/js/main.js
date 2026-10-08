@@ -10,7 +10,7 @@ import {
   clockAdvice, dragHourHand, dragMinuteHand, fromClockMinutes, handAngles, pickHand, pointerAngle, shiftClock, toClockMinutes,
 } from './games/horloge.js';
 import {
-  chronoLevelAfter, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono,
+  chronoLevelAfter, chronoOn, elapsedSeconds, formatChrono, questionsPerSession, recordAfter, spokenChrono, untimedQuestion,
 } from './games/chrono.js';
 import { featuredGames, levelRange, MAX_FEATURED, programFor, programForChild } from './programs.js';
 import { dailyPicks, dueReviews as reviewsDue, duoPlan, drawPool } from './picks.js';
@@ -25,7 +25,7 @@ import {
   isNaturalVoiceOn, listFrenchVoices, loadNaturalVoice, naturalVoiceFiles, naturalVoicePacks, setNaturalVoice, setSpeechEnabled, setSpeechNames,
   setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
 } from './speech.js';
-import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
+import { playSound, setSoundsEnabled, setSoundsSoft, startMusic, stopMusic, unlockAudio } from './sounds.js';
 import {
   avatar, clockSvg, colorName, columnGrid, emojiColorName, flagElement, fractionElement, h, mapElement, moneyItem, numberLineElement, readable, renderChoiceContent,
   renderStage, revealWord, setAides, setProfiles,
@@ -34,7 +34,7 @@ import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
-import { a11y, applyA11y } from './a11y.js';
+import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
 import { APP, CHANGELOG } from './config.js';
 import { SEASON_LABELS, seasonOf } from './themes.js';
@@ -87,7 +87,10 @@ function show(...children) {
   }
   document.body.classList.toggle('easy-read', Boolean(child()?.easyRead));
   applyA11y(child());
-  document.body.dataset.season = store.settings.seasonal === false ? '' : currentSeason().id;
+  // réglage du système « augmenter le contraste » : le fort contraste, même sans réglage du profil
+  if (globalThis.matchMedia?.('(prefers-contrast: more)').matches) document.body.classList.add('a11y-contrast');
+  setSoundsSoft(a11y(child()).calm); // mode calme : petits sons plus doux
+  document.body.dataset.season = seasonsShown() ? currentSeason().id : '';
   app.replaceChildren(...children.filter(Boolean));
   screenAccess();
   window.scrollTo(0, 0);
@@ -119,8 +122,13 @@ function currentSeason() {
   return seasonOf(new Date());
 }
 
+/** Décors de saison : coupés par les parents, ou par le mode calme de l'enfant. */
+function seasonsShown() {
+  return store.settings.seasonal !== false && !a11y(child()).calm;
+}
+
 function seasonDecor() {
-  if (store.settings.seasonal === false) return null;
+  if (!seasonsShown()) return null;
   return h('div', { class: 'season-decor', 'aria-hidden': 'true' }, currentSeason().deco.map((e) => h('span', {}, e)));
 }
 
@@ -149,7 +157,7 @@ function starCounter() {
 
 /** La musique douce joue sur l'accueil et les menus, jamais pendant un jeu ni chez les parents. */
 function musicForScreen() {
-  const calm = app.querySelector('.screen.play, .screen.parents, .screen.gate');
+  const calm = app.querySelector('.screen.play, .screen.parents, .screen.gate') || a11y(child()).calm; // mode calme : jamais de musique
   if (store.settings.music && !calm) startMusic();
   else stopMusic();
 }
@@ -988,6 +996,8 @@ function startSession(game, { level, back, total, duo } = {}) {
     levelState: { level: startLevel, streak: game.paliers || level ? 0 : stats.streak, recent: game.paliers || level ? [] : stats.recent },
     formatOffset: Number(new URLSearchParams(location.search).get('format') || 0),
     duo, // partie à deux : { players, plan, scores }
+    // défi chrono : le temps compte, sauf pour un enfant qui joue « sans chrono » (accessibilité)
+    chrono: chronoOn(game, a11y(child())),
   };
   nextQuestion(session);
 }
@@ -1007,7 +1017,8 @@ function nextQuestion(session) {
   if (session.index >= session.total) return finishSession(session);
   // à deux : la question est celle de l'enfant dont c'est le tour (son prénom, son personnage, sa voix)
   if (session.duo) store.active = session.duo.plan[session.index].player;
-  const q = newQuestion(session);
+  // sans chrono : la consigne d'un défi chrono ne parle plus de vitesse
+  const q = session.game.timed && !session.chrono ? untimedQuestion(newQuestion(session)) : newQuestion(session);
   session.question = q;
   session.attempts = 0;
   session.locked = false;
@@ -1062,7 +1073,7 @@ function nextQuestion(session) {
 
   const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
   // défi chrono : le chronomètre (mm:ss) s'affiche sous le niveau, en haut à droite
-  const clock = game.timed ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
+  const clock = session.chrono ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
   const badge = clock
     ? h('span', { class: 'level-badge chrono-badge' }, h('span', { class: 'chrono-level' }, levelText), clock)
     : h('span', { class: 'level-badge' }, levelText);
@@ -1326,7 +1337,7 @@ async function markCorrect(ctx) {
   };
   save();
   session.index++;
-  if (game.timed && session.index >= session.total) session.chronoEnd = Date.now(); // dernière bonne réponse : le chrono s'arrête
+  if (session.chrono && session.index >= session.total) session.chronoEnd = Date.now(); // dernière bonne réponse : le chrono s'arrête
 
   const name = me().name;
   const praise = firstTry ? (rng() < 0.3 ? `Bravo ${name} !` : pick(rng, PRAISES)) : 'Oui, c’est ça !';
@@ -1342,7 +1353,7 @@ async function markCorrect(ctx) {
     toSay.push('Tu passes au niveau suivant !');
     setTimeout(() => playSound('levelUp'), 300);
   }
-  if (game.timed) {
+  if (session.chrono) {
     // défi chrono : on enchaîne vite, le temps tourne
     say(session.guide, praise);
     await sleep(800);
@@ -3987,7 +3998,13 @@ function finishSession(session) {
   let chronoLine = null;
   let chronoSpeech = [];
   let newRecord = false;
-  if (game.timed && session.chronoStart) {
+  if (game.timed && !session.chronoStart) {
+    // sans chrono (accessibilité) : ni temps ni record, mais le niveau suit les réussites comme d'habitude
+    const level = session.levelState.level;
+    const next = chronoLevelAfter(level, session.correct, session.total, session.min, session.max);
+    kid.games[game.id] = { ...kid.games[game.id], level: next, streak: 0, recent: [] };
+    if (next > level) chronoLine = h('div', { class: 'chrono-result' }, h('p', { class: 'chrono-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')));
+  } else if (game.timed) {
     const level = session.levelState.level;
     const seconds = Math.max(1, chronoNow(session));
     const record = recordAfter(kid.records, game.id, level, seconds);
@@ -4433,7 +4450,7 @@ function photoRow(id) {
       status));
 }
 
-function childEditScreen(id, message = '') {
+function childEditScreen(id, message = '', { section } = {}) {
   const kid = store.profiles[id];
   if (!kid) return parentsScreen({ tab: 'enfants' });
   show(h('main', { class: 'screen parents child-edit' },
@@ -4464,6 +4481,7 @@ function childEditScreen(id, message = '') {
       choiceSetting('Temps maximum par jour', 'limit', [[0, 'Sans'], [10, '10 min'], [15, '15'], [20, '20'], [30, '30']], kid.goals?.limit || 0,
         (v) => { kid.goals = { ...(kid.goals || {}), limit: v }; save(); }),
       h('p', { class: 'muted small' }, 'Quand le temps est écoulé, la partie en cours se termine, puis une pause est proposée. Vous pouvez accorder 10 minutes de plus.')),
+    a11yCard(id),
     kidGamesCard(id),
     h('section', { class: 'card danger-zone' },
       h('h2', {}, 'Données'),
@@ -4489,6 +4507,62 @@ function childEditScreen(id, message = '') {
           }
         },
       }, 'Supprimer ce profil'))));
+  // raccourci depuis les Réglages : la section Accessibilité de l'enfant
+  if (section === 'a11y') app.querySelector('[data-a11y-card]')?.scrollIntoView({ block: 'start' });
+}
+
+// ---- Accessibilité : les réglages de chaque enfant (profil kid.a11y, voir a11y.js)
+
+/** Les réglages, rangés par besoin : [titre, [clé, libellé, explication]…]. */
+const A11Y_GROUPS = [
+  ['Lire', [
+    ['spacing', 'Texte espacé', 'Plus d’espace entre les lettres, les mots et les lignes.'],
+    ['syllables', 'Syllabes colorées', 'Dans les mots à lire, une syllabe sur deux change de couleur.'],
+  ]],
+  ['Voir', [
+    ['contrast', 'Fort contraste', 'Texte noir sur fond blanc, bordures épaisses, sans dégradés.'],
+    ['namedColors', 'Couleurs nommées (daltonisme)', 'Chaque couleur est aussi écrite ou marquée d’un motif.'],
+  ]],
+  ['Toucher', [
+    ['bigTargets', 'Grands boutons', 'Boutons et cases plus grands et plus espacés, plus faciles à toucher.'],
+    ['tapOnly', 'Toucher plutôt que glisser', 'Ce qui se fait en glissant le doigt ou en traçant se fait aussi en touchant.'],
+  ]],
+  ['Entendre', [
+    ['captions', 'Sous-titres', 'Tout ce que dit la voix est aussi écrit à l’écran.'],
+    ['skipListening', 'Écoute facultative (surdité)', 'Les questions qui se jouent seulement à l’oreille sont mises de côté.'],
+  ]],
+  ['Rester concentré', [
+    ['calm', 'Mode calme', 'Sans décor de saison, sans musique ni animations ; sons plus doux.'],
+    ['noTimer', 'Sans chrono', 'Les défis chronométrés se jouent sans le temps qui court, et sans record.'],
+  ]],
+];
+const TEXT_SIZE_CHOICES = [[1, 'Normale'], [1.15, 'Grande'], [1.3, 'Très grande']];
+
+/** Accessibilité : la taille du texte, puis un interrupteur expliqué par réglage. Enregistré tout de suite. */
+function a11yCard(id) {
+  const kid = store.profiles[id];
+  const set = (key, value) => {
+    kid.a11y = cleanA11y({ ...a11y(kid), [key]: value });
+    save();
+    // l'enfant actif voit tout de suite le changement (taille du texte, contraste…)
+    if (id === store.active) applyA11y(kid);
+  };
+  const switchRow = ([key, label, help]) => {
+    const helpId = `a11y-help-${key}`;
+    // nom court (le libellé) et description (l'explication), lus séparément par VoiceOver
+    const box = h('input', {
+      type: 'checkbox', role: 'switch', checked: a11y(kid)[key], 'data-a11y': key, 'aria-labelledby': `a11y-label-${key}`, 'aria-describedby': helpId,
+    });
+    box.addEventListener('change', () => set(key, box.checked));
+    return h('label', { class: 'setting a11y-setting' },
+      h('span', { class: 'a11y-setting-text' }, h('b', { id: `a11y-label-${key}` }, label), h('span', { class: 'muted small', id: helpId }, help)),
+      box);
+  };
+  return h('section', { class: 'card a11y-card', 'data-a11y-card': id, id: `accessibilite-${id}` },
+    h('h2', {}, 'Accessibilité'),
+    h('p', { class: 'muted small' }, `Pour adapter l’app aux besoins de ${kid.name} : chaque réglage ne concerne que son profil.`),
+    choiceSetting('Taille du texte', 'text-size', TEXT_SIZE_CHOICES, a11y(kid).textSize, (v) => set('textSize', v)),
+    A11Y_GROUPS.map(([title, rows]) => h('div', { class: 'a11y-group' }, h('h3', {}, title), rows.map(switchRow))));
 }
 
 /**
@@ -5119,6 +5193,16 @@ function recordScreen(story) {
   setState('ready');
 }
 
+/** Réglages : un raccourci vers la section Accessibilité de chaque enfant. */
+function a11yShortcuts() {
+  return h('section', { class: 'card a11y-shortcuts' },
+    h('h2', {}, 'Accessibilité'),
+    h('p', { class: 'muted small' }, 'Taille du texte, contraste, grands boutons, sous-titres… se règlent pour chaque enfant.'),
+    h('div', { class: 'a11y-shortcut-list' }, store.order.map((id) => h('button', {
+      class: 'pill-btn a11y-shortcut', 'data-a11y-shortcut': id, onclick: () => childEditScreen(id, '', { section: 'a11y' }),
+    }, avatar(id, 'avatar-xs'), h('span', {}, store.profiles[id].name)))));
+}
+
 function settingsTab() {
   const lengthSelect = h('div', { class: 'segmented' }, [5, 10, 15].map((n) => {
     const btn = h('button', { class: store.settings.sessionLength === n ? 'seg on' : 'seg' }, n);
@@ -5142,6 +5226,7 @@ function settingsTab() {
       h('div', { class: 'setting' }, h('span', {}, 'Questions par partie'), lengthSelect),
       h('p', { class: 'muted small' }, 'Voix de l’appareil (phrases rares, ou voix naturelle coupée) : pour qu’elle soit plus naturelle, Réglages de l’iPhone → Accessibilité → Contenu énoncé → Voix → Français, puis téléchargez une voix « Premium » ou « améliorée ».')),
     voicesCard(),
+    a11yShortcuts(),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),

@@ -44,4 +44,7 @@ export function applyA11y(child, root = globalThis.document?.body) {
   }
   root.style.setProperty('--text-scale', String(settings.textSize));
   root.classList.toggle('a11y-text-large', settings.textSize > 1);
+  // les tailles en rem suivent la police de <html> : la taille du texte y est aussi posée (style.css)
+  const html = root.ownerDocument?.documentElement;
+  if (html && html !== root) html.style.setProperty('--text-scale', String(settings.textSize));
 }

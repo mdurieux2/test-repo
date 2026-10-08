@@ -7,6 +7,9 @@
 //         ONLY=ecrans npm run test:e2e          (seulement la mise en page des écrans fixes : accueil, listes, duo, parents)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
 //         PARTS=scenario | PARTS=layout SHARD=1/4 | PARTS=a11y   (une partie du test, comme dans la CI)
+//         A11Y=1 PARTS=layout npm run test:e2e   (mise en page avec un profil d'accessibilité : texte très grand,
+//                  grandes cibles, texte espacé ; sur iPhone SE, Android 360 points et iPhone SE en paysage,
+//                  pour un échantillon de jeux de chaque rubrique ; A11Y=contrast,calm… ajoute d'autres réglages)
 //         PORT=8124 pour lancer plusieurs tests en même temps
 //         CHROMIUM_PATH=/chemin/vers/chrome pour un Chromium déjà installé
 
@@ -35,12 +38,30 @@ const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const PLAY = process.env.PLAY ? process.env.PLAY.split(',') : null;
 // En CI, le test est découpé : PARTS=scenario (le parcours complet), PARTS=layout avec SHARD=2/4
 // (la mise en page sur un quart des appareils) ou PARTS=a11y (accessibilité). Sans rien, tout est fait.
-const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : ['scenario', 'layout', 'a11y'];
+const PARTS = process.env.PARTS ? process.env.PARTS.split(',') : process.env.A11Y ? ['layout'] : ['scenario', 'layout', 'a11y'];
 const SHARD = process.env.SHARD ? process.env.SHARD.split('/').map(Number) : null;
 // SPEECH_LOG=fichier.json : tout ce que l'application dit est noté (avec le nombre de fois et les
 // écrans où c'est dit), pour choisir les phrases de la voix naturelle (scripts/voix/phrases.mjs) et
 // vérifier écran par écran comment elles sont dites (scripts/voix/rapport.mjs)
 const SPEECH_LOG = process.env.SPEECH_LOG;
+// A11Y : chaque profil reçoit un profil d'accessibilité exigeant pour la mise en page (voir app/js/a11y.js)
+const A11Y = process.env.A11Y
+  ? {
+    textSize: 1.3, bigTargets: true, spacing: true,
+    ...Object.fromEntries(process.env.A11Y.split(',').filter((k) => k && k !== '1').map((k) => [k, true])),
+  }
+  : null;
+// A11Y : un échantillon de jeux de chaque rubrique (les plus chargés en texte, et chaque façon de répondre)
+const A11Y_SAMPLE = [
+  'lettres', 'bon-mot', 'phrase', 'conjugaison', 'dictee', 'ecrire',
+  'histoires', 'petits-textes', 'ordre-histoire',
+  'compter', 'trous', 'relie-calculs', 'tables-chrono', 'problemes', 'schemas', 'droite-numerique',
+  'memory', 'sudoku', 'labyrinthe', 'intrus', 'picross',
+  'heure', 'regle-horloge', 'monnaie',
+  'pays', 'drapeaux', 'vivre-ensemble',
+  'vivant', 'matiere',
+  'ecoute', 'mot-anglais', 'relie-anglais', 'epelle-anglais', 'phrase-anglais',
+];
 const spokenLog = new Map();
 const spokenScreens = new Map();
 if (SPEECH_LOG) {
@@ -126,15 +147,17 @@ function gradeFor(gameId, level = null) {
 
 /** Modifie les données enregistrées de l'app (le code reçoit l'objet `store`). */
 async function setStore(page, code) {
-  await page.evaluate(([key, body]) => {
+  await page.evaluate(([key, body, a11y]) => {
     const store = JSON.parse(localStorage.getItem(key) || '{}');
     store.profiles = store.profiles || {};
     store.profiles['eva-rose'] = store.profiles['eva-rose'] || {};
     store.profiles['eva-rose'].games = store.profiles['eva-rose'].games || {};
     // eslint-disable-next-line no-new-func
     new Function('store', body)(store);
+    // A11Y : le profil d'accessibilité est posé sur chaque enfant avant chaque vérification
+    if (a11y) for (const kid of Object.values(store.profiles)) kid.a11y = a11y;
     localStorage.setItem(key, JSON.stringify(store));
-  }, [STORAGE_KEY, code]);
+  }, [STORAGE_KEY, code, A11Y]);
 }
 
 /** Ouvre l'app sur l'écran « Qui joue ? ». */
@@ -1923,6 +1946,15 @@ async function checkDevice(device, repeat, deviceIndex) {
   await checkLayout(page, tag('choix du duo'));
   await goProfile(page);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/devices/${device.width}x${device.height}-accueil.png` });
+  if (A11Y?.noTimer) {
+    // défi chrono joué « sans chrono » (A11Y=noTimer) : pas de chronomètre affiché
+    await setStore(page, `store.profiles['eva-rose'].grade = '${gradeFor('tables-chrono')}';`);
+    await openGame(page, findGame('tables-chrono'));
+    await page.waitForSelector('.choices');
+    if (await page.locator('.chrono-clock').count()) layoutProblems.push(tag('sans chrono : le chronomètre est affiché'));
+    await setStore(page, "store.profiles['eva-rose'].grade = 'CP';");
+    await goProfile(page);
+  }
   await page.click('[data-domain="maths"]');
   await page.click('[data-levels="calcul"], [data-levels="compter"]');
   await page.waitForSelector('.level-list');
@@ -1936,7 +1968,11 @@ async function checkDevice(device, repeat, deviceIndex) {
   // chaque niveau de chaque jeu
   for (const [gameIndex, game] of GAMES.entries()) {
     if (game.paliers || ONLY && !ONLY.includes(game.id) || !mine(gameIndex + deviceIndex)) continue;
-    for (let level = 1; level <= game.levels.length; level++) {
+    if (A11Y && !ONLY && !A11Y_SAMPLE.includes(game.id)) continue;
+    // A11Y : le premier niveau, celui du milieu et le dernier
+    const n = game.levels.length;
+    const levels = A11Y ? [...new Set([1, Math.ceil(n / 2), n])] : Array.from({ length: n }, (_, i) => i + 1);
+    for (const level of levels) {
       const grade = gradeFor(game.id, level);
       await setStore(page, `store.profiles['eva-rose'].grade = '${grade}'; store.profiles['eva-rose'].games['${game.id}'] = { level: ${level} };`);
       // un jeu qui alterne deux formes de questions (game.formats) : chacune est vérifiée
@@ -1993,7 +2029,9 @@ async function checkDevice(device, repeat, deviceIndex) {
 
 if (SHOTS) mkdirSync(`${SHOTS}/devices`, { recursive: true });
 // 6 appareils à la fois, pour ne pas saturer la machine de test
-const devices = PLAY || !PARTS.includes('layout') ? [] : DEVICES;
+// A11Y : les écrans les plus petits seulement (iPhone SE en portrait et en paysage, Android 360 points)
+const A11Y_DEVICES = (d) => (d.width === 375 && d.height === 667) || (d.width === 360 && d.height === 740) || (d.width === 667 && d.height === 375);
+const devices = PLAY || !PARTS.includes('layout') ? [] : DEVICES.filter((d) => !A11Y || A11Y_DEVICES(d));
 // plus de tirages sur les deux écrans les plus petits (iPhone SE, Android 360 points)
 const smallest = (d) => (d.width === 375 && d.height === 667) || (d.width === 360 && d.height === 740);
 const counts = [];

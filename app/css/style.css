@@ -2847,3 +2847,258 @@ button.share-give:active { transform: translateY(3px); }
 @media (orientation: landscape) and (max-height: 520px) {
   .body-svg { height: min(380px, calc(100dvh - 76px)); }
 }
+
+/* =====================================================================
+   Accessibilité : le profil de chaque enfant (app/js/a11y.js), posé sur <body>
+   par des classes a11y-… et la variable --text-scale ; réglé dans l'espace parents.
+   Sans réglage, rien ne change.
+   ===================================================================== */
+
+/* taille du texte : 1 (normale), 1.15 (grande), 1.3 (très grande). Les tailles en rem suivent la
+   police de <html> ; les tailles bornées par la largeur (min(…, 8vw)) le restent, rien ne déborde */
+html { font-size: calc(100% * var(--text-scale, 1)); }
+/* très grand texte sur un téléphone : moins de colonnes de réponses, pour que les mots tiennent */
+@media (max-width: 500px) {
+  .a11y-text-large .choices-words.n4, .a11y-text-large .choices-answers.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .a11y-text-large .choices-words.n3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .a11y-text-large .choices-words.n3 .choice:last-child { grid-column: 1 / -1; }
+}
+.a11y-text-large .choice, .a11y-text-large .order-item, .a11y-text-large .match-item { overflow-wrap: anywhere; hyphens: auto; }
+
+/* les dessins (emoji) en réponse ne grandissent pas au-delà de leur case */
+.a11y-text-large .choices-pictures .choice { font-size: min(2.8rem, 12vw); }
+
+/* texte espacé : lettres, mots et lignes, partout où l'enfant lit (pas dans les dessins) */
+.a11y-spacing .screen { letter-spacing: 0.08em; word-spacing: 0.2em; }
+.a11y-spacing .screen svg, .a11y-spacing .choices-pictures .choice, .a11y-spacing .object, .a11y-spacing .stage-picture,
+.a11y-spacing .order-emoji, .a11y-spacing .game-icon, .a11y-spacing .domain-icon { letter-spacing: normal; word-spacing: normal; }
+.a11y-spacing .bubble, .a11y-spacing .instruction .bubble, .a11y-spacing .text-body, .a11y-spacing .karaoke-text,
+.a11y-spacing .stage-sentence, .a11y-spacing .story-text, .a11y-spacing .accord-line, .a11y-spacing .schema-text,
+.a11y-spacing .choices-sentences .choice, .a11y-spacing .choices-answers .choice, .a11y-spacing .feedback p,
+.a11y-spacing .card p, .a11y-spacing .card li, .a11y-spacing .setting, .a11y-spacing .album-info {
+  line-height: 1.6;
+}
+
+/* très grand texte ou grandes cibles sur un téléphone peu haut (iPhone SE, Android 360 points) :
+   les marges et les dessins se resserrent pour que les réponses restent dans l'écran */
+@media (orientation: portrait) and (max-height: 760px) {
+  .a11y-text-large .screen.play, .a11y-big-targets .screen.play { padding-top: calc(var(--safe-top) + 4px); }
+  .a11y-text-large .play .instruction, .a11y-big-targets .play .instruction { margin: 2px 0 2px; gap: 8px; }
+  .a11y-text-large .play .instruction .avatar-sm { width: 44px; height: 44px; }
+  .a11y-text-large .play .instruction .bubble { padding: 6px 12px; }
+  .a11y-text-large .play .stage, .a11y-big-targets .play .stage { min-height: 0; padding: 4px 0; }
+  .a11y-text-large .play .choices, .a11y-big-targets .play .choices { margin-top: 4px; }
+  .a11y-text-large .sudoku, .a11y-big-targets .sudoku { width: min(100%, 380px, calc(100dvh / var(--zoom, 1) - 410px)); }
+  .a11y-text-large .picross, .a11y-big-targets .picross {
+    --cell: min(46px,
+      calc((min(100vw / var(--zoom, 1), 600px) - 36px) / (var(--cols) + var(--rw) * var(--k))),
+      calc((100dvh / var(--zoom, 1) - 380px) / (var(--rows) + var(--ch) * var(--k))));
+  }
+  .a11y-big-targets .play .keypad { gap: 10px 12px; }
+  /* schéma et pavé numérique ensemble : le pavé sur quatre colonnes (trois rangées au lieu de quatre) */
+  .a11y-big-targets .play[data-game="schemas"] .keypad, .a11y-text-large .play[data-game="schemas"] .keypad { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* problèmes en schémas : l'histoire et les trois schémas, un peu moins agrandis */
+  .a11y-text-large .stage-schema .schema-text { font-size: 0.95rem; padding: 6px 12px; }
+  .a11y-text-large .choices-schemas .choice { font-size: 0.75rem; padding: 4px 10px; }
+  .a11y-text-large .bm-choice .bm-seg { height: 1.6em; }
+  .a11y-text-large .choices-schemas, .a11y-big-targets .choices-schemas { gap: 8px; }
+  /* textes à lire (histoires, petits textes) : plus grands que d'habitude, sans pousser les réponses hors de l'écran */
+  .a11y-text-large .text-body, .a11y-text-large .karaoke-text { font-size: 0.95rem; }
+  .a11y-text-large .stage-text, .a11y-text-large .stage-karaoke { padding: 6px 12px; gap: 2px; }
+  .a11y-text-large .karaoke-emoji { font-size: 1.6rem; }
+  .a11y-text-large .story-text { font-size: 1.1rem; padding: 10px 14px; }
+  .a11y-text-large .choices-sentences .choice { font-size: 1.1rem; padding: 6px 12px; }
+  /* accueil : les rubriques en tuiles basses, le dessin à côté du nom */
+  .a11y-text-large .home-title, .a11y-big-targets .home-title { font-size: 1.45rem; margin-top: 0; }
+  .a11y-text-large .home-hero, .a11y-big-targets .home-hero { margin-bottom: 4px; }
+  .a11y-text-large .domain-tile, .a11y-big-targets .domain-tile {
+    flex-direction: row; justify-content: flex-start; gap: 6px; min-height: 64px; padding: 4px 8px; text-align: left; font-size: 1rem;
+  }
+  .a11y-text-large .domain-tile .domain-icon, .a11y-big-targets .domain-tile .domain-icon { font-size: 1.5rem; }
+  .a11y-text-large .domain-tile { font-size: 0.9rem; line-height: 1.12; overflow-wrap: anywhere; }
+  .a11y-text-large .domain-tile > span:last-child { min-width: 0; }
+  /* jeux conseillés en plus : le bonjour et les marges se resserrent encore */
+  .a11y-text-large .home.has-featured .home-title { font-size: 1.15rem; }
+  .a11y-text-large .home.has-featured .home-hero { margin-bottom: 0; }
+  .a11y-text-large .home.has-featured .home-menu, .a11y-text-large .home.has-featured .home-grid { gap: 6px; }
+  .a11y-text-large .home-featured { gap: 2px; }
+  .a11y-text-large .featured-label { font-size: 0.85rem; }
+  .a11y-text-large .featured-list.n3 .featured-game { flex-direction: row; gap: 4px; padding: 4px; font-size: 0.7rem; text-align: left; }
+  .a11y-text-large .featured-list.n3 .featured-icon { font-size: 1.2rem; }
+  .a11y-text-large .home.has-featured .domain-tile, .a11y-big-targets .home.has-featured .domain-tile { min-height: 64px; padding: 4px 8px; font-size: 0.9rem; }
+  .a11y-text-large .home-top .domain-btn, .a11y-big-targets .home-top .domain-btn { min-height: 64px; font-size: 1.15rem; }
+  .a11y-text-large .home-menu, .a11y-text-large .home-grid { gap: 8px; }
+  /* album et personnage : le nom passe sur deux lignes plutôt que d'être coupé */
+  .a11y-text-large .home-bottom .domain-btn span:nth-child(2) { white-space: normal; overflow-wrap: normal; line-height: 1.1; }
+  .a11y-text-large .home-bottom .domain-btn { font-size: 0.85rem; padding: 4px 6px; gap: 4px; letter-spacing: 0.02em; }
+  .a11y-text-large .home-bottom .domain-icon { font-size: 1.3rem; }
+  .a11y-text-large .home-bottom .pill { font-size: 0.7rem; padding: 1px 6px; }
+  .a11y-text-large .home.has-featured .home-top .domain-btn, .a11y-text-large .home.has-featured .home-bottom .domain-btn,
+  .a11y-big-targets .home.has-featured .home-top .domain-btn, .a11y-big-targets .home.has-featured .home-bottom .domain-btn { min-height: 64px; }
+}
+
+/* téléphone en paysage avec grandes cibles : le pavé numérique occupe toute la hauteur de droite,
+   la consigne passe à gauche, au-dessus du calcul */
+@media (orientation: landscape) and (max-height: 520px) {
+  .a11y-big-targets .screen.play.play-keypad:has(> .stage), .a11y-text-large .screen.play.play-keypad:has(> .stage) {
+    grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: "top top" "instr zone" "stage zone";
+  }
+  .a11y-big-targets .play-keypad .keypad { gap: 8px 12px; }
+  .a11y-big-targets .top-bar, .a11y-text-large .top-bar { min-height: 0; }
+  .a11y-text-large .play .instruction .avatar-sm { width: 44px; height: 44px; }
+  /* le texte reste plus grand que d'habitude, mais un peu moins agrandi qu'en portrait */
+  .a11y-text-large .play .instruction .bubble { font-size: 0.9rem; }
+  .a11y-text-large .choices-sentences .choice { font-size: 1rem; padding: 6px 12px; }
+  .a11y-text-large .stage-schema .schema-text { font-size: 0.85rem; padding: 4px 10px; }
+  .a11y-text-large .choices-schemas .choice { font-size: 0.75rem; padding: 4px 10px; }
+  .a11y-text-large .story-text, .a11y-text-large .stage-sentence { font-size: 1.05rem; }
+  .a11y-text-large .karaoke-text { font-size: 0.9rem; }
+  .a11y-text-large .choices-pictures .choice { font-size: min(2.2rem, 6vw); }
+  .a11y-text-large .sudoku, .a11y-big-targets .sudoku { width: min(100%, calc(100dvh - 92px)); }
+  .a11y-text-large .home-title, .a11y-big-targets .home-title { font-size: 1.2rem; margin: 0; }
+  .a11y-text-large .home-hero, .a11y-big-targets .home-hero { margin-bottom: 2px; }
+  .a11y-text-large .domain-tile, .a11y-big-targets .domain-tile { font-size: 0.85rem; padding: 4px 6px; gap: 4px; }
+  .a11y-text-large .home-menu, .a11y-text-large .home-grid, .a11y-big-targets .home-menu, .a11y-big-targets .home-grid { gap: 6px; }
+  .a11y-big-targets .home-top .domain-btn, .a11y-big-targets .home-bottom .domain-btn { min-height: 64px; padding: 4px 10px; }
+  .a11y-text-large .home-top .domain-btn, .a11y-text-large .home-bottom .domain-btn { font-size: 1rem; }
+  .a11y-text-large .home-top .domain-icon, .a11y-text-large .home-bottom .domain-icon { font-size: 1.4rem; }
+  .a11y-big-targets .duo-pick .avatar-xl { width: min(64px, 17dvh); height: min(64px, 17dvh); }
+  .a11y-big-targets .duo-go { margin-top: 4px; }
+  .a11y-text-large .stage-karaoke { padding: 6px 12px; gap: 2px; }
+  .a11y-text-large .karaoke-head { font-size: 0.85rem; }
+  .a11y-text-large .karaoke-emoji { font-size: 1.5rem; }
+  /* histoire à lire : plus de place pour le texte, moins pour les réponses */
+  .a11y-text-large .text-body { font-size: 0.86rem; }
+  .a11y-text-large .stage-text { padding: 6px 12px 4px; }
+  .a11y-text-large .screen.play:has(.stage-karaoke), .a11y-spacing .screen.play:has(.stage-karaoke),
+  .a11y-text-large .screen.play:has(.stage-text), .a11y-spacing .screen.play:has(.stage-text) {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); column-gap: 16px;
+  }
+  .a11y-text-large .bm-choice .bm-seg { height: 1.5em; }
+  .a11y-text-large .choices-schemas, .a11y-big-targets .choices-schemas { gap: 8px; }
+  /* réponses en phrases : la consigne passe à gauche, au-dessus du dessin */
+  .a11y-text-large .screen.play:has(> .choices-sentences):has(> .stage),
+  .a11y-text-large .screen.play:has(> .choices-schemas):has(> .stage) {
+    grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: "top top" "instr zone" "stage zone";
+  }
+}
+
+/* fort contraste : texte noir sur blanc (ou blanc sur noir), bordures épaisses, ni dégradés ni ombres */
+.a11y-contrast, .a11y-contrast [class*="domain-theme-"] {
+  --bg: #fff; --ink: #000; --muted: #1f1f1f; --card: #fff; --line: #000;
+  --accent: var(--accent-dark); --accent-soft: #fff; --lecture: var(--lecture-dark); --good: #0b5d3b; --good-dark: #000;
+}
+body.a11y-contrast { background: #fff !important; color: #000; }
+.a11y-contrast .bubble, .a11y-contrast .card, .a11y-contrast .choice, .a11y-contrast .key, .a11y-contrast .match-item:not(.matched),
+.a11y-contrast .fill-row, .a11y-contrast .fill-box, .a11y-contrast .tile, .a11y-contrast .big-btn, .a11y-contrast .add-btn,
+.a11y-contrast .game-card, .a11y-contrast .profile-card, .a11y-contrast .profile-chip, .a11y-contrast .stage-sentence,
+.a11y-contrast .stage-word, .a11y-contrast .stage-text, .a11y-contrast .stage-karaoke, .a11y-contrast .story-text,
+.a11y-contrast .accord-line, .a11y-contrast .seq-item, .a11y-contrast .pattern-item, .a11y-contrast .order-item,
+.a11y-contrast .order-slot, .a11y-contrast .level-badge, .a11y-contrast .star-counter, .a11y-contrast .icon-btn,
+.a11y-contrast .sound-toggle, .a11y-contrast .parent-btn, .a11y-contrast .pill-btn, .a11y-contrast .kid-toggle,
+.a11y-contrast .level-pick, .a11y-contrast .featured-game, .a11y-contrast .new-sticker, .a11y-contrast .shopping-item,
+.a11y-contrast .palier-head span, .a11y-contrast .speak-badge, .a11y-contrast .seg, .a11y-contrast .level-text,
+.a11y-contrast .stage-picture, .a11y-contrast .stage-chart, .a11y-contrast .text-listen, .a11y-contrast .again-btn {
+  background: #fff !important; color: #000 !important; background-image: none !important;
+  box-shadow: none !important; text-shadow: none !important; border: 3px solid #000;
+}
+/* rubriques, boutons principaux, paliers : blanc sur noir (le dessin de la rubrique reste) */
+.a11y-contrast .domain-btn, .a11y-contrast .domain-tile, .a11y-contrast .big-btn.primary, .a11y-contrast .key-ok,
+.a11y-contrast .palier-tile, .a11y-contrast .seg.on, .a11y-contrast .profile-grade, .a11y-contrast .palier-flag {
+  background: #000 !important; color: #fff !important; background-image: none !important;
+  box-shadow: none !important; text-shadow: none !important; border: 3px solid #000;
+}
+.a11y-contrast .palier-tile::before { display: none; }
+.a11y-contrast .bubble-left::before { display: none; }
+/* bonne réponse : fond noir et texte blanc ; erreur : barrée, en pointillés (pas seulement une couleur) */
+.a11y-contrast .choice.correct, .a11y-contrast .order-item.correct { background: #000 !important; color: #fff !important; }
+.a11y-contrast .choice.wrong { border-style: dashed; text-decoration: line-through; text-decoration-thickness: 4px; }
+.a11y-contrast .choices.answered .choice:not(.correct), .a11y-contrast .keypad.answered .key { opacity: 0.55; }
+.a11y-contrast .muted, .a11y-contrast .small, .a11y-contrast .result-detail, .a11y-contrast .best { color: #000; }
+.a11y-contrast .setting { border-top: 2px solid #000; }
+.a11y-contrast .gap { border-color: #000; color: #000; background: #fff; }
+.a11y-contrast .step { background: #fff; box-shadow: inset 0 0 0 2px #000; }
+.a11y-contrast .step.done { background: #000; }
+.a11y-contrast .step.current { box-shadow: inset 0 0 0 4px #000; }
+.a11y-contrast .season-decor { display: none; }
+/* interrupteurs des réglages : le rond et le fond se voient nettement, allumé (noir) ou éteint (blanc) */
+.a11y-contrast .setting input[type="checkbox"] { background: #fff; box-shadow: inset 0 0 0 3px #000; }
+.a11y-contrast .setting input[type="checkbox"]::after { background: #000; box-shadow: none; }
+.a11y-contrast .setting input[type="checkbox"]:checked { background: #000; }
+.a11y-contrast .setting input[type="checkbox"]:checked::after { background: #fff; }
+.a11y-contrast :focus-visible { outline: 5px solid #000 !important; outline-offset: 3px; box-shadow: 0 0 0 9px #ffd400 !important; }
+
+/* grandes cibles : au moins 64 × 64 px, et plus d'espace entre elles */
+.a11y-big-targets .choice, .a11y-big-targets .key, .a11y-big-targets .tile,
+.a11y-big-targets .big-btn, .a11y-big-targets .add-btn, .a11y-big-targets .order-item, .a11y-big-targets .level-pick,
+.a11y-big-targets .again-btn, .a11y-big-targets .pill-btn {
+  min-height: 64px !important; min-width: 64px; /* !important : plus fort que les réglages de chaque jeu */
+}
+/* relier : 64 px tant que les paires tiennent dans l'écran (six ou huit paires : un peu moins) */
+.a11y-big-targets .match-item { min-height: 64px; min-width: 64px; }
+.a11y-big-targets .icon-btn, .a11y-big-targets .sound-toggle { width: 64px; height: 64px; }
+.a11y-big-targets .top-bar { grid-template-columns: 68px 1fr auto; }
+.a11y-big-targets .home .top-bar, .a11y-big-targets .pause .top-bar { grid-template-columns: minmax(0, auto) 1fr auto; }
+/* téléphone en portrait : la barre n'a plus la place du milieu ; le titre ou les points de progression
+   passent sous les boutons, sur toute la largeur */
+@media (max-width: 500px) {
+  .a11y-big-targets .top-bar, .a11y-text-large .top-bar {
+    grid-template-columns: minmax(0, auto) 1fr auto; grid-template-areas: "back . actions" "title title title"; row-gap: 4px;
+  }
+  .a11y-big-targets .top-bar > :first-child, .a11y-text-large .top-bar > :first-child { grid-area: back; }
+  .a11y-big-targets .top-bar > :nth-child(2), .a11y-text-large .top-bar > :nth-child(2) { grid-area: title; }
+  .a11y-big-targets .top-bar > :last-child, .a11y-text-large .top-bar > :last-child { grid-area: actions; }
+  .a11y-big-targets .top-bar > span:nth-child(2):empty, .a11y-text-large .top-bar > span:nth-child(2):empty { display: none; }
+  /* les boutons de droite gardent leur taille ; c'est le prénom (accueil) qui se raccourcit en « … » */
+  .a11y-big-targets .top-bar > .bar-actions, .a11y-text-large .top-bar > .bar-actions { min-width: max-content; }
+}
+.a11y-big-targets .count-reset { width: 64px; height: 64px; }
+.a11y-big-targets .fill-box { width: min(72px, 18vw); height: 64px; }
+.a11y-big-targets .seg { min-height: 52px; }
+.a11y-big-targets .kid-toggle { min-height: 52px; }
+.a11y-big-targets .choices, .a11y-big-targets .keypad, .a11y-big-targets .tile-tray, .a11y-big-targets .order-items { gap: 16px; }
+/* beaucoup de nombres ou de lettres à placer : moins de colonnes, pour que chacun garde 64 px */
+.a11y-big-targets .tile-tray.tiles-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.a11y-big-targets .tile-tray.tiles-10 { gap: 6px; }
+.a11y-big-targets .tile-tray.tiles-10 .tile { min-width: 0; }
+/* cinq calculs à compléter : les cases restent grandes, un peu moins hautes, pour que tout tienne */
+.a11y-big-targets .fill.rows-5 .fill-rows { gap: 8px; }
+.a11y-big-targets .fill.rows-5 .fill-row { padding: 4px 10px; }
+.a11y-big-targets .fill.rows-5 .fill-box { height: 48px; }
+.a11y-text-large .fill.rows-5 .fill-row, .a11y-big-targets .fill.rows-5 .fill-row { line-height: 1.15; }
+.a11y-big-targets .order-items.n6 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.a11y-big-targets .order-items.n7, .a11y-big-targets .order-items.n8, .a11y-big-targets .order-items.n9 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.a11y-big-targets .match-col, .a11y-big-targets .result-actions { gap: 18px; }
+.a11y-big-targets .bar-actions { gap: 8px; }
+.a11y-big-targets .setting input[type="checkbox"] { width: 64px; height: 40px; }
+.a11y-big-targets .setting input[type="checkbox"]::after { width: 34px; height: 34px; }
+.a11y-big-targets .setting input[type="checkbox"]:checked::after { transform: translateX(24px); }
+
+/* mode calme (et réglage du système « réduire les animations ») : ni décor de saison, ni confettis,
+   ni animations ; les bulles du jeu bonus montent quand même (c'est le jeu), lentement */
+.a11y-calm .season-decor, .a11y-calm .confetti { display: none !important; }
+.a11y-calm *:not(.pop-bubble), .a11y-calm *::before, .a11y-calm *::after {
+  animation: none !important; transition: none !important; scroll-behavior: auto !important;
+}
+.a11y-calm .pop-bubble:not(.popped) { animation-duration: 7s !important; }
+@media (prefers-reduced-motion: reduce) {
+  .confetti { display: none; }
+  .season-decor span { animation: none; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+  .pop-bubble:not(.popped) { animation-duration: 7s !important; }
+}
+
+/* sans chrono : le défi se joue sans temps (le chronomètre n'est pas créé ; ceci au cas où) */
+.a11y-no-timer .chrono-clock { display: none; }
+
+/* espace parents : la section Accessibilité */
+.a11y-card h3 { margin: 14px 0 0; font-size: 1.05rem; }
+.a11y-group .setting:first-of-type { border-top: 0; }
+.a11y-setting { align-items: center; }
+.a11y-setting-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.a11y-setting-text .muted { margin: 0; }
+.a11y-card .setting-choice { flex-wrap: wrap; }
+.a11y-card .segmented { flex-wrap: wrap; }
+.a11y-shortcut-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.a11y-shortcut { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px 0 6px; max-width: 100%; }
+.a11y-shortcut > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

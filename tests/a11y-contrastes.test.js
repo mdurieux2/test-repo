@@ -29,7 +29,8 @@ function resolve(value, local = {}) {
 function rule(selector) {
   const out = {};
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  for (const [, body] of CSS.matchAll(new RegExp(`(?:^|[}\\s])${escaped}\\s*{([^}]*)}`, 'g'))) {
+  // le sélecteur seul en début de règle (pas « .a11y-contrast .setting … », qui le contient aussi)
+  for (const [, body] of CSS.matchAll(new RegExp(`(?:^|})\\s*${escaped}\\s*{([^}]*)}`, 'gm'))) {
     for (const [, name, value] of body.matchAll(/([\w-]+)\s*:\s*([^;]+);?/g)) out[name] = value.trim();
   }
   return out;
