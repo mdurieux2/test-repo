@@ -16,6 +16,7 @@ import { MONDE_GAMES } from './monde.js';
 import { MESURES_GAMES } from './mesures.js';
 import { JEUX_GAMES } from './jeux.js';
 import { drapeaux } from './drapeaux.js';
+import { carteMonde } from './carte.js';
 import { dictee } from './dictee.js';
 import { ANGLAIS_PLUS_GAMES } from './anglais-plus.js';
 import { ecrire } from './ecriture.js';
@@ -24,7 +25,7 @@ import { tablesChrono } from './chrono.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
-  ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, ...ANGLAIS_GAMES,
+  ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono,
 ];
 
@@ -57,7 +58,7 @@ const RUBRIQUES = [
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures'] },
-  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux'] },
+  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde'] },
   {
     id: 'anglais',
     title: 'Anglais',

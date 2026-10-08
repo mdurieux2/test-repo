@@ -596,6 +596,16 @@ async function answer(page, q, wrongFirst) {
       }
       break;
     }
+    case 'map': {
+      // la carte du monde : une autre zone d'abord (son nom s'affiche), puis la bonne
+      const zone = (id) => page.locator(`.world-map [data-zone="${id}"] >> nth=0`);
+      if (wrongFirst) {
+        await zone(q.choices.find((c) => c.value !== q.answer).value).dispatchEvent('click');
+        await page.waitForSelector('.try-again');
+      }
+      await zone(q.answer).dispatchEvent('click');
+      break;
+    }
     case 'dots': {
       const centers = await page.$$eval('.dot .dot-point', (els) => els.map((el) => {
         const r = el.getBoundingClientRect();

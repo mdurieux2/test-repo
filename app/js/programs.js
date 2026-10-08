@@ -69,7 +69,7 @@ export const PROGRAMS = {
     ],
     monde: [
       ['animaux-monde', 1, 2],
-      ['drapeaux', 1, 1],
+      ['drapeaux', 1, 1], ['carte-monde', 1, 3],
     ],
     anglais: [
       ['ecoute', 1, 4], ['compte-anglais', 1, 2], ['ou-est', 1, 2], ['parle-anglais', 1, 1],
@@ -101,7 +101,7 @@ export const PROGRAMS = {
     ],
     monde: [
       ['animaux-monde', 1, 3], ['pays', 1, 2],
-      ['drapeaux', 1, 4],
+      ['drapeaux', 1, 4], ['carte-monde', 1, 7],
     ],
     anglais: [
       ['ecoute', 1, 6], ['lis-anglais', 1, 3], ['relie-anglais', 1, 3], ['compte-anglais', 1, 3],
@@ -135,7 +135,7 @@ export const PROGRAMS = {
     ],
     monde: [
       ['animaux-monde', 2, 7], ['pays', 1, 8],
-      ['drapeaux', 1, 8],
+      ['drapeaux', 1, 8], ['carte-monde', 2, 10],
     ],
     anglais: [
       ['ecoute', 2, 10], ['lis-anglais', 1, 10], ['mot-anglais', 1, 10], ['relie-anglais', 1, 10],

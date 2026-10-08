@@ -24,7 +24,10 @@ import {
   setVoicePreferences, speak, stopSpeaking, unlockNaturalVoice,
 } from './speech.js';
 import { playSound, setSoundsEnabled, startMusic, stopMusic, unlockAudio } from './sounds.js';
-import { avatar, clockSvg, h, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles } from './render.js';
+import {
+  avatar, clockSvg, flagElement, h, mapElement, moneyItem, renderChoiceContent, renderStage, revealWord, setProfiles,
+} from './render.js';
+import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { squarePhoto } from './photo.js';
@@ -1004,6 +1007,7 @@ function nextQuestion(session) {
     build: buildZone, maze: mazeZone, roundmaze: roundMazeZone, path: pathZone, lasso: lassoZone, sudoku: sudokuZone, symmetry: symmetryZone,
     swap: swapZone, memory: memoryZone, colorby: colorbyZone, dots: dotsZone, trace: traceZone, setclock: setClockZone,
     picross: picrossZone,
+    map: mapZone,
   }[q.interaction];
   if (custom) {
     ({ stage, zone } = custom(ctx));
@@ -2185,6 +2189,71 @@ function colorbyZone(ctx) {
     words ? h('div', { class: 'magic-legend' }, legend.map((c) => h('span', { class: 'magic-key' }, h('b', {}, c.n), ' ', h('span', { lang: 'en' }, c.word)))) : null,
     h('div', { class: 'magic-buttons', style: { '--n': legend.length } }, words ? shuffle(rng, buttons) : buttons));
   return { stage: h('div', { class: 'stage stage-magic' }, svg), zone };
+}
+
+// ---- La carte du monde : toucher un continent, un océan, un pays, une capitale
+
+/** Ce que montre la carte sous la consigne : le nom à trouver, le drapeau, l'animal, le voyage. */
+function mapClue(clue) {
+  if (clue.flag) return [flagElement(clue.flag, null, 'map-clue-flag'), h('span', { class: 'map-clue-text' }, '?')];
+  if (clue.trip) {
+    return [h('span', { class: 'map-clue-text' }, `🚩 ${clue.trip.from}`), h('span', { class: 'map-clue-arrow', 'aria-hidden': 'true' }, clue.trip.arrow),
+      h('span', { class: 'map-clue-text' }, clue.trip.dir)];
+  }
+  return [h('span', { class: 'map-clue-emoji', 'aria-hidden': 'true' }, clue.emoji || clue.icon),
+    h('span', { class: 'map-clue-text' }, clue.text, clue.sub ? h('small', {}, clue.sub) : null)];
+}
+
+function mapZone(ctx) {
+  const { q } = ctx;
+  const st = q.stage;
+  const map = mapElement(st);
+  const named = new Set(q.choices.map((c) => c.value));
+  const parts = (id) => [...map.querySelectorAll(`[data-zone="${CSS.escape(id)}"]`)];
+  const labels = (id) => [...map.querySelectorAll(`.map-label[data-for="${CSS.escape(id)}"]`)];
+  const water = st.layer === 'oceans' || st.layer === 'seas';
+  const zone = h('div', { class: 'choices map-clue' }, mapClue(q.clue));
+  map.addEventListener('click', (e) => {
+    if (ctx.session.locked) return;
+    const target = e.target.closest('[data-zone], [data-kind]');
+    const id = target?.dataset.zone;
+    if (id === q.answer) {
+      parts(id).forEach((el) => { el.classList.remove('hint'); el.classList.add('found'); });
+      labels(id).forEach((el) => el.classList.add('show'));
+      zone.classList.add('answered');
+      markCorrect(ctx);
+      return;
+    }
+    if (id && id === st.start) {
+      nudge(ctx, 'C’est le pays de départ. Touche son voisin !');
+      return;
+    }
+    if (id && named.has(id)) {
+      // une autre zone : son nom s'affiche un instant
+      parts(id).forEach((el) => {
+        el.classList.remove('missed');
+        el.getBoundingClientRect(); // relance l'animation
+        el.classList.add('missed');
+      });
+      labels(id).forEach((el) => el.classList.add('show'));
+      setTimeout(() => labels(id).forEach((el) => el.classList.remove('show')), 1800);
+      const name = zoneName(id);
+      if (ctx.session.attempts >= 1) {
+        parts(q.answer).forEach((el) => el.classList.add('hint'));
+        markWrong(ctx, { message: `Ça, c’est ${name}. Touche celle qui brille !`, given: id });
+      } else {
+        markWrong(ctx, { message: `Ça, c’est ${name}. Essaie encore !`, given: id });
+      }
+      return;
+    }
+    // ailleurs : la mer, ou une terre sans nom sur cette carte
+    const kind = target?.dataset.kind;
+    if (st.layer === 'capitals') nudge(ctx, 'Touche une étoile sur la carte !');
+    else if (water) nudge(ctx, kind === 'land' ? 'Là, c’est la terre. Touche la mer !' : 'Essaie encore !');
+    else if (kind === 'sea') nudge(ctx, st.layer === 'continents' ? 'Là, c’est la mer. Touche un continent !' : 'Là, c’est la mer. Touche un pays !');
+    else markWrong(ctx, { message: 'Ce n’est pas ce pays. Essaie encore !', given: 'autre pays' });
+  });
+  return { stage: h('div', { class: 'stage stage-map' }, map), zone };
 }
 
 /** Message court sous l'exercice, sans compter d'erreur. */
