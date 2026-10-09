@@ -717,6 +717,28 @@ input { -webkit-user-select: text; user-select: text; }
 .swatch { display: block; width: 64px; height: 64px; border-radius: 50%; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.1); }
 .stage-swatch { width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 6px 0 var(--line), inset 0 0 0 4px rgba(0, 0, 0, 0.08); }
 .choices-pictures .choice { font-size: 2.8rem; min-height: 96px; }
+
+/* cherche et trouve (cherche.js) : les images éparpillées sur une carte, chacune dans sa case de la
+   grille (--cols × --rows), décalée (--x, --y en %), tournée (--r) et plus ou moins grande (--s) */
+.choices-seek {
+  display: block; position: relative; flex: none; container-type: size;
+  width: min(100%, 560px, calc((100dvh / var(--zoom, 1) - 290px) * var(--cols) / var(--rows)));
+  aspect-ratio: var(--cols) / var(--rows); margin: 8px auto 0;
+  background: var(--card); border-radius: 20px; box-shadow: 0 0 0 3px var(--line) inset;
+}
+.choices-seek .choice {
+  position: absolute; width: calc(100% / var(--cols)); height: calc(100% / var(--rows));
+  left: calc(var(--x) * 1% - 50% / var(--cols)); top: calc(var(--y) * 1% - 50% / var(--rows));
+  min-height: 0; padding: 0; border-radius: 50%; background: none; box-shadow: none; line-height: 1;
+  font-size: min(calc(100cqw / var(--cols) * 0.56), calc(100cqh / var(--rows) * 0.56));
+  transform: rotate(var(--r)) scale(var(--s));
+}
+.choices-seek .choice:active { transform: rotate(var(--r)) scale(calc(var(--s) * 0.9)); box-shadow: none; }
+.choices-seek .choice.correct { box-shadow: 0 0 0 4px var(--good-dark); }
+.choices-seek .choice.wrong { box-shadow: 0 0 0 3px #f3b4b4; }
+.choices-seek .choice.hint { box-shadow: 0 0 0 4px var(--hint); }
+/* grandes cibles : la carte garde ses cases (une image par case), elle prend plus de place */
+.a11y-big-targets .choices-seek .choice { min-height: 0 !important; min-width: 0; }
 .choices-claps { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 .choices-claps .choice { font-size: min(1.8rem, 7vw); letter-spacing: -0.05em; }
 .choices-sentences { grid-template-columns: 1fr !important; }
@@ -1268,6 +1290,7 @@ input { -webkit-user-select: text; user-select: text; }
    à droite ; « Bravo ! » s'affiche en bulle flottante en haut.
    ===================================================================== */
 @media (orientation: landscape) and (max-height: 520px) {
+  .choices-seek { width: min(100%, calc((100dvh - 120px) * var(--cols) / var(--rows))); margin-top: 4px; }
   .screen {
     max-width: 1000px;
     padding: calc(var(--safe-top) + 2px) max(16px, env(safe-area-inset-right)) calc(var(--safe-bottom) + 6px) max(16px, env(safe-area-inset-left));
@@ -2084,6 +2107,8 @@ body[data-season="ete"] { background: #fffbea; }
   .stage-fraction .fraction-bar svg, .fraction-shade.fraction-bar svg { width: min(100%, calc(var(--ratio) * min(120px, 30dvh))); }
   .choices-parts .choice { min-height: 84px; }
   .fraction-choice.fraction-disc svg { width: min(72px, 17dvh); }
+  /* tablette dans un bouton de réponse (iPhone SE en paysage : 94 px de large, marges comprises) */
+  .fraction-choice.fraction-bar svg { width: min(84px, calc(var(--ratio) * 40px)); }
   .choices-fractions .choice { min-height: 80px; }
   .frac { font-size: 1.6rem; }
 }

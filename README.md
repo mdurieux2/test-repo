@@ -129,7 +129,9 @@ l'enfant, et on peut aussi le choisir directement.
 - *Pour le CE2* : **les grands nombres** (lire, décomposer, comparer, encadrer jusqu'à 10 000),
   **la multiplication** (par 10 et 100, décomposer, puis posée avec retenue), **la division** (partage,
   groupements, quotient et reste) et **périmètres et longueurs** (unités, conversions, périmètre d'un polygone).
-- *Formes et logique* : les formes, les suites de motifs, l'intrus, les ombres, le **sudoku**
+- *Formes et logique* : les formes, les suites de motifs, l'intrus, **cherche et trouve** (retrouver une image parmi
+  6 à 27 autres, de plus en plus petites, tournées et ressemblantes ; un visage ; celle qui n'est pas comme les autres),
+  les ombres, le **sudoku**
   (4 × 4 en images, puis en chiffres, 6 × 6, jusqu'au **9 × 9** avec de moins en moins d'indices), la **symétrie** sur quadrillage,
   **compte les cubes** (empilements en 3D, avec des cubes cachés).
 - *Logique pour aller plus loin* : **le tableau logique** (la case vide d'un tableau de formes,
@@ -171,6 +173,10 @@ météo, émotions, famille)
   les pays, le pays d'un drapeau ou d'un animal, les capitales, et voyager d'un pays à son voisin.
 - **Sécurité et vivre ensemble** : les émotions, la politesse, les règles de la classe, traverser la
   rue, les dangers de la maison, les numéros d'urgence (15, 17, 18, 112).
+- **Les émotions** : reconnaître six émotions sur un visage (joie, tristesse, colère, peur, surprise, dégoût), les
+  nommer, les relier à une situation et à ce que l'on sent dans son corps, dire si elles sont petites ou grandes
+  (agacé, en colère, furieux), découvrir des émotions plus fines (fier, jaloux, déçu, timide, soulagé…), savoir se
+  calmer et aider un copain.
 - **Se repérer** : sur, sous, devant, derrière, gauche, droite, puis quadrillages, plans et flèches.
 
 **Sciences** (questionner le monde, de la petite section au CE2)

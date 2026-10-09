@@ -34,13 +34,13 @@ export const PROGRAMS = {
     ],
     jeux: [
       ['puzzle', 1, 2], ['memory', 1, 2], ['coloriage-magique', 1, 1], ['points', 1, 1],
-      ['formes', 1, 1], ['algorithmes', 1, 1], ['intrus', 1, 2], ['ombres', 1, 1], ['labyrinthe', 1, 1],
+      ['formes', 1, 1], ['algorithmes', 1, 1], ['intrus', 1, 2], ['cherche-trouve', 1, 2], ['ombres', 1, 1], ['labyrinthe', 1, 1],
     ],
     temps: [
       ['saisons', 1, 1], ['mesures', 1, 1],
     ],
     monde: [
-      ['animaux-monde', 1, 1], ['vivre-ensemble', 1, 1], ['se-reperer', 1, 1],
+      ['animaux-monde', 1, 1], ['vivre-ensemble', 1, 1], ['emotions', 1, 2], ['se-reperer', 1, 1],
     ],
     sciences: [
       ['vivant', 1, 2], ['objets', 1, 2], ['meteo', 1, 2], ['planete', 1, 1],
@@ -62,7 +62,7 @@ export const PROGRAMS = {
       ['suite', 1, 1], ['faire-dix', 1, 1], ['ranger', 1, 2],
     ],
     jeux: [
-      ['formes', 1, 2], ['algorithmes', 1, 3], ['intrus', 1, 1], ['ombres', 1, 2], ['sudoku', 1, 1],
+      ['formes', 1, 2], ['algorithmes', 1, 3], ['intrus', 1, 1], ['cherche-trouve', 1, 5], ['ombres', 1, 2], ['sudoku', 1, 1],
       ['tangram', 1, 1], ['cubes', 1, 1], ['labyrinthe', 1, 2], ['chemin-nombres', 1, 1],
       ['chemin-lettres', 1, 1],
       ['puzzle', 1, 3], ['memory', 1, 3], ['coloriage-magique', 1, 2], ['points', 1, 2],
@@ -72,7 +72,7 @@ export const PROGRAMS = {
     ],
     monde: [
       ['animaux-monde', 1, 1],
-      ['vivre-ensemble', 1, 4],
+      ['vivre-ensemble', 1, 4], ['emotions', 1, 4],
     ],
     sciences: [
       ['vivant', 1, 3], ['objets', 1, 3], ['meteo', 1, 2], ['planete', 1, 4],
@@ -96,7 +96,7 @@ export const PROGRAMS = {
       ['ranger', 1, 3], ['problemes', 1, 3], ['doubles', 1, 1], ['droite-numerique', 1, 2], ['partage', 1, 2],
     ],
     jeux: [
-      ['formes', 2, 8], ['algorithmes', 2, 7], ['intrus', 1, 2], ['ombres', 1, 3], ['sudoku', 1, 2], ['tableau-logique', 1, 3], ['balances', 1, 2], ['picross', 1, 1],
+      ['formes', 2, 8], ['algorithmes', 2, 7], ['intrus', 1, 2], ['cherche-trouve', 2, 7], ['ombres', 1, 3], ['sudoku', 1, 2], ['tableau-logique', 1, 3], ['balances', 1, 2], ['picross', 1, 1],
       ['symetrie', 1, 1], ['reproduire', 1, 1], ['tangram', 1, 2], ['cubes', 1, 2], ['labyrinthe', 1, 3], ['labyrinthe-rond', 1, 2],
       ['chemin-nombres', 1, 2], ['chemin-lettres', 1, 2],
       ['puzzle', 1, 4], ['memory', 1, 5], ['coloriage-magique', 1, 3], ['points', 1, 3],
@@ -107,7 +107,7 @@ export const PROGRAMS = {
     monde: [
       ['animaux-monde', 1, 2],
       ['drapeaux', 1, 1], ['carte-monde', 1, 3],
-      ['vivre-ensemble', 1, 6], ['se-reperer', 1, 5],
+      ['vivre-ensemble', 1, 6], ['emotions', 2, 6], ['se-reperer', 1, 5],
     ],
     sciences: [
       ['vivant', 1, 6], ['corps', 1, 4], ['milieux', 1, 4], ['matiere', 1, 5], ['melanges', 1, 3],
@@ -134,7 +134,7 @@ export const PROGRAMS = {
       ['graphiques', 1, 7], ['droite-numerique', 1, 6], ['fractions', 1, 2], ['partage', 1, 7], ['addition-posee', 1, 3],
     ],
     jeux: [
-      ['intrus', 1, 3], ['ombres', 2, 3], ['sudoku', 2, 4], ['tableau-logique', 1, 6], ['balances', 1, 5], ['picross', 1, 3], ['symetrie', 1, 3], ['reproduire', 1, 2],
+      ['intrus', 1, 3], ['cherche-trouve', 3, 9], ['ombres', 2, 3], ['sudoku', 2, 4], ['tableau-logique', 1, 6], ['balances', 1, 5], ['picross', 1, 3], ['symetrie', 1, 3], ['reproduire', 1, 2],
       ['tangram', 1, 2], ['cubes', 1, 3], ['labyrinthe', 2, 4], ['labyrinthe-rond', 1, 5], ['chemin-nombres', 2, 7],
       ['chemin-lettres', 2, 3],
       ['puzzle', 2, 5], ['memory', 3, 6], ['coloriage-magique', 2, 5], ['points', 2, 5],
@@ -145,7 +145,7 @@ export const PROGRAMS = {
     monde: [
       ['animaux-monde', 1, 3],
       ['pays', 1, 2], ['drapeaux', 1, 4], ['carte-monde', 1, 7],
-      ['vivre-ensemble', 3, 9], ['se-reperer', 2, 8],
+      ['vivre-ensemble', 3, 9], ['emotions', 3, 9], ['se-reperer', 2, 8],
     ],
     sciences: [
       ['vivant', 2, 9], ['corps', 1, 8], ['milieux', 1, 8], ['matiere', 1, 8], ['melanges', 1, 7],
@@ -175,7 +175,7 @@ export const PROGRAMS = {
       ['graphiques', 2, 10], ['droite-numerique', 3, 10], ['fractions', 1, 10], ['partage', 4, 10], ['addition-posee', 1, 10],
     ],
     jeux: [
-      ['intrus', 2, 8], ['ombres', 3, 8], ['sudoku', 3, 10], ['tableau-logique', 3, 9], ['balances', 3, 8], ['picross', 2, 8], ['symetrie', 2, 7], ['reproduire', 2, 8],
+      ['intrus', 2, 8], ['cherche-trouve', 4, 10], ['ombres', 3, 8], ['sudoku', 3, 10], ['tableau-logique', 3, 9], ['balances', 3, 8], ['picross', 2, 8], ['symetrie', 2, 7], ['reproduire', 2, 8],
       ['tangram', 2, 8], ['cubes', 2, 7], ['labyrinthe', 3, 10], ['labyrinthe-rond', 1, 9], ['chemin-nombres', 5, 10],
       ['chemin-lettres', 3, 7],
       ['puzzle', 3, 8], ['memory', 4, 7], ['coloriage-magique', 3, 7], ['points', 3, 7],
@@ -186,7 +186,7 @@ export const PROGRAMS = {
     monde: [
       ['animaux-monde', 2, 7],
       ['pays', 1, 8], ['drapeaux', 1, 8], ['carte-monde', 2, 10],
-      ['vivre-ensemble', 5, 10], ['se-reperer', 4, 10],
+      ['vivre-ensemble', 5, 10], ['emotions', 4, 10], ['se-reperer', 4, 10],
     ],
     sciences: [
       ['vivant', 4, 10], ['corps', 3, 10], ['milieux', 3, 10], ['matiere', 2, 10], ['melanges', 1, 10],
@@ -217,7 +217,7 @@ export const PROGRAMS = {
       ['graphiques', 5, 10], ['droite-numerique', 5, 10], ['fractions', 3, 10], ['partage', 7, 10], ['addition-posee', 4, 10],
     ],
     jeux: [
-      ['intrus', 4, 8], ['ombres', 4, 8], ['sudoku', 5, 10], ['tableau-logique', 4, 9], ['balances', 4, 8], ['picross', 3, 8], ['symetrie', 3, 7], ['reproduire', 3, 8],
+      ['intrus', 4, 8], ['cherche-trouve', 5, 10], ['ombres', 4, 8], ['sudoku', 5, 10], ['tableau-logique', 4, 9], ['balances', 4, 8], ['picross', 3, 8], ['symetrie', 3, 7], ['reproduire', 3, 8],
       ['tangram', 3, 8], ['cubes', 3, 7], ['labyrinthe', 5, 10], ['labyrinthe-rond', 3, 9], ['chemin-nombres', 6, 10],
       ['chemin-lettres', 4, 7],
       ['puzzle', 4, 8], ['memory', 4, 7], ['coloriage-magique', 5, 7], ['points', 4, 7],
@@ -229,7 +229,7 @@ export const PROGRAMS = {
     monde: [
       ['animaux-monde', 3, 7],
       ['pays', 2, 8], ['drapeaux', 2, 8], ['carte-monde', 3, 10],
-      ['vivre-ensemble', 6, 10], ['se-reperer', 5, 10],
+      ['vivre-ensemble', 6, 10], ['emotions', 5, 10], ['se-reperer', 5, 10],
     ],
     sciences: [
       ['vivant', 5, 10], ['corps', 4, 10], ['milieux', 4, 10], ['matiere', 3, 10], ['melanges', 3, 10],
