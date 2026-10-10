@@ -1,0 +1,12 @@
+[
+ {
+  "key": "fr|1|20 !",
+  "text": "vingt !",
+  "erreur": "silence de 1.0 s au milieu"
+ },
+ {
+  "key": "fr|1|matelas",
+  "text": "matelas",
+  "erreur": "meilleur essai : {'hauteur': 245, 'duree': 0.96, 'essai': 'matelas', 'entendu': 'matelas', 'ressemblance': 1.0, 'phonemes_attendus': 'matla', 'phonemes_entendus': 'metilas', 'fautes': ['« s » final prononcé'], 'ecart_phonemes': 1.6}"
+ }
+]

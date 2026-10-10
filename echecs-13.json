@@ -1,0 +1,17 @@
+[
+ {
+  "key": "fr|1|iras",
+  "text": "iras",
+  "erreur": "meilleur essai : {'hauteur': 248, 'duree': 0.66, 'essai': 'Écoute bien. Iras.', 'phonemes_attendus': 'iʁa', 'phonemes_entendus': 'iʁas', 'fautes': ['« s » final prononcé'], 'ecart_phonemes': 1.33}"
+ },
+ {
+  "key": "fr|1|restos",
+  "text": "restos",
+  "erreur": "meilleur essai : {'hauteur': 238, 'duree': 0.63, 'essai': 'Écoute bien. Restos.', 'entendu': 'restos', 'ressemblance': 1.0, 'phonemes_attendus': 'ʁɛsto', 'phonemes_entendus': 'xestus', 'fautes': ['« s » final prononcé'], 'ecart_phonemes': 1.4}"
+ },
+ {
+  "key": "en|1|aunt's",
+  "text": "aunt's",
+  "erreur": "meilleur essai : {'hauteur': 250, 'duree': 1.44, 'essai': \"Aunt's !\", 'entendu': 'answer', 'ressemblance': 0.5, 'phonemes_attendus': 'ants', 'phonemes_entendus': 'ɑns', 'fautes': [], 'ecart_phonemes': 0.25}"
+ }
+]

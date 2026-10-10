@@ -1,0 +1,12 @@
+[
+ {
+  "key": "fr|1|étais",
+  "text": "étais",
+  "erreur": "meilleur essai : {'hauteur': 255, 'duree': 1.12, 'essai': 'Étais !', 'entendu': 'ete', 'ressemblance': 0.5, 'phonemes_attendus': 'etɛ', 'phonemes_entendus': 'pete', 'fautes': [], 'ecart_phonemes': 0.33}"
+ },
+ {
+  "key": "fr|1|coulent",
+  "text": "coulent",
+  "erreur": "meilleur essai : {'hauteur': 255, 'duree': 0.88, 'essai': 'coulent', 'entendu': 'cool', 'ressemblance': 0.55, 'phonemes_attendus': 'kulɑ̃', 'phonemes_entendus': 'kul', 'fautes': [], 'ecart_phonemes': 0.25}"
+ }
+]

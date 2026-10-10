@@ -1,0 +1,17 @@
+[
+ {
+  "key": "fr|1|ronds.",
+  "text": "ronds.",
+  "erreur": "meilleur essai : {'hauteur': 235, 'duree': 0.77, 'essai': 'Écoute bien. Ronds.', 'entendu': 'bronze', 'ressemblance': 0.55, 'phonemes_attendus': 'ʁɔ̃', 'phonemes_entendus': 'ʁuʃ', 'fautes': [], 'ecart_phonemes': 1.0}"
+ },
+ {
+  "key": "fr|1|eûmes",
+  "text": "eûmes",
+  "erreur": "silence de 1.1 s au milieu"
+ },
+ {
+  "key": "fr|1|vingt",
+  "text": "vingt",
+  "erreur": "meilleur essai : {'hauteur': 258, 'duree': 0.88, 'essai': 'vingt', 'entendu': 'vente', 'ressemblance': 0.6, 'phonemes_attendus': 'vɛ̃', 'phonemes_entendus': 'van', 'fautes': [], 'ecart_phonemes': 1.0}"
+ }
+]

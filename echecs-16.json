@@ -1,0 +1,7 @@
+[
+ {
+  "key": "fr|1|Au lit !",
+  "text": "Au lit !",
+  "erreur": "meilleur essai : {'hauteur': 254, 'duree': 0.57, 'essai': 'Écoute bien. Au lit.', 'entendu': 'poli', 'ressemblance': 0.4, 'phonemes_attendus': 'oli', 'phonemes_entendus': 'poli', 'fautes': [], 'ecart_phonemes': 0.33}"
+ }
+]

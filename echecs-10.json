@@ -1,0 +1,12 @@
+[
+ {
+  "key": "fr|1|d'œufs",
+  "text": "d'œufs",
+  "erreur": "meilleur essai : {'hauteur': 267, 'duree': 0.88, 'essai': \"« d'œufs »\", 'entendu': 'de', 'ressemblance': 0.25, 'phonemes_attendus': 'dø', 'phonemes_entendus': 'ðø', 'fautes': [], 'ecart_phonemes': 0.0}"
+ },
+ {
+  "key": "fr|1|bâilles",
+  "text": "bâilles",
+  "erreur": "meilleur essai : {'hauteur': 231, 'duree': 0.88, 'essai': '« bâilles »', 'entendu': 'bye', 'ressemblance': 0.4, 'phonemes_attendus': 'baj', 'phonemes_entendus': 'baj', 'fautes': [], 'ecart_phonemes': 0.0}"
+ }
+]

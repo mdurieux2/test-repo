@@ -1,0 +1,22 @@
+[
+ {
+  "key": "fr|1|voyais",
+  "text": "voyais",
+  "erreur": "meilleur essai : {'hauteur': 255, 'duree': 0.88, 'essai': 'voyais.', 'entendu': 'voyez', 'ressemblance': 0.55, 'phonemes_attendus': 'vwajɛ', 'phonemes_entendus': 'voje', 'fautes': [], 'ecart_phonemes': 0.4}"
+ },
+ {
+  "key": "fr|1|obtus",
+  "text": "obtus",
+  "erreur": "meilleur essai : {'hauteur': 224, 'duree': 0.82, 'essai': 'Écoute bien. Obtus.', 'entendu': 'obtus', 'ressemblance': 1.0, 'phonemes_attendus': 'ɔbty', 'phonemes_entendus': 'optys', 'fautes': ['« s » final prononcé'], 'ecart_phonemes': 1.5}"
+ },
+ {
+  "key": "fr|1|mailles",
+  "text": "mailles",
+  "erreur": "meilleur essai : {'hauteur': 233, 'duree': 0.67, 'essai': 'Écoute bien. Mailles.', 'entendu': 'mae', 'ressemblance': 0.6, 'phonemes_attendus': 'maj', 'phonemes_entendus': 'ma', 'fautes': [], 'ecart_phonemes': 0.33}"
+ },
+ {
+  "key": "fr|1|Que mange le cerf ?",
+  "text": "Que mange le cerf ?",
+  "erreur": "meilleur essai : {'hauteur': 264, 'duree': 1.12, 'essai': 'Que mange le cerf ?', 'entendu': 'Comment je le sers ?', 'ressemblance': 0.51, 'phonemes_attendus': 'kəmɑ̃ʒləsɛʁ', 'phonemes_entendus': 'kəmɑ̃ʒvəsɛʁ', 'fautes': [], 'ecart_phonemes': 0.1}"
+ }
+]

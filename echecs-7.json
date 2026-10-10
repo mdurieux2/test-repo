@@ -1,0 +1,12 @@
+[
+ {
+  "key": "fr|1|égaux",
+  "text": "égaux",
+  "erreur": "meilleur essai : {'hauteur': 222, 'duree': 0.62, 'essai': 'Écoute bien. Égaux.', 'entendu': 'ego', 'ressemblance': 0.5, 'phonemes_attendus': 'ego', 'phonemes_entendus': 'egu', 'fautes': [], 'ecart_phonemes': 0.33}"
+ },
+ {
+  "key": "fr|1|effet",
+  "text": "effet",
+  "erreur": "meilleur essai : {'hauteur': 229, 'duree': 0.65, 'essai': 'Écoute bien. Effet.', 'entendu': 'effet', 'ressemblance': 1.0, 'phonemes_attendus': 'efɛ', 'phonemes_entendus': 'efɛt', 'fautes': ['« t » final prononcé'], 'ecart_phonemes': 1.33}"
+ }
+]

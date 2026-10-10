@@ -1,0 +1,12 @@
+[
+ {
+  "key": "fr|1|riz,",
+  "text": "riz,",
+  "erreur": "meilleur essai : {'hauteur': 258, 'duree': 0.71, 'essai': 'Écoute bien. Riz.', 'phonemes_attendus': 'ʁi', 'phonemes_entendus': 'piz', 'fautes': ['« z » final prononcé'], 'ecart_phonemes': 2.0}"
+ },
+ {
+  "key": "fr|1|put",
+  "text": "put",
+  "erreur": "meilleur essai : {'hauteur': 210, 'duree': 0.47, 'essai': 'Voici le mot. Put.', 'phonemes_attendus': 'py', 'phonemes_entendus': 'pyt', 'fautes': ['« t » final prononcé'], 'ecart_phonemes': 1.5}"
+ }
+]

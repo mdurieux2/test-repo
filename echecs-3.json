@@ -1,0 +1,17 @@
+[
+ {
+  "key": "fr|1|canaux",
+  "text": "canaux",
+  "erreur": "meilleur essai : {'hauteur': 270, 'duree': 0.88, 'essai': 'canaux.', 'entendu': 'canot', 'ressemblance': 0.55, 'phonemes_attendus': 'kano', 'phonemes_entendus': 'kanu', 'fautes': [], 'ecart_phonemes': 0.25}"
+ },
+ {
+  "key": "fr|1|champs",
+  "text": "champs",
+  "erreur": "meilleur essai : {'hauteur': 231, 'duree': 0.54, 'essai': 'Voici le mot. Champs.', 'entendu': 'chant', 'ressemblance': 0.55, 'phonemes_attendus': 'ʃɑ̃', 'phonemes_entendus': 's.ong5', 'fautes': [], 'ecart_phonemes': 0.5}"
+ },
+ {
+  "key": "fr|1|mairies",
+  "text": "mairies",
+  "erreur": "meilleur essai : {'hauteur': 250, 'duree': 0.88, 'essai': 'mairies…', 'entendu': 'meris', 'ressemblance': 0.67, 'phonemes_attendus': 'mɛʁi', 'phonemes_entendus': 'meʁis', 'fautes': ['« s » final prononcé'], 'ecart_phonemes': 1.25}"
+ }
+]

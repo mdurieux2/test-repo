@@ -1,0 +1,12 @@
+[
+ {
+  "key": "fr|1|eurent",
+  "text": "eurent",
+  "erreur": "meilleur essai : {'hauteur': 223, 'duree': 0.7, 'essai': 'Écoute bien. Eurent.', 'entendu': 'heure', 'ressemblance': 0.73, 'phonemes_attendus': 'yʁ', 'phonemes_entendus': 'øʁ', 'fautes': [], 'ecart_phonemes': 0.5}"
+ },
+ {
+  "key": "fr|1|frais",
+  "text": "frais",
+  "erreur": "meilleur essai : {'hauteur': 231, 'duree': 0.53, 'essai': 'Écoute bien. Frais.', 'entendu': 'tres', 'ressemblance': 0.44, 'phonemes_attendus': 'fʁɛ', 'phonemes_entendus': 'fxe', 'fautes': [], 'ecart_phonemes': 0.0}"
+ }
+]

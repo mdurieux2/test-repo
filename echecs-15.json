@@ -1,0 +1,7 @@
+[
+ {
+  "key": "fr|0.8|froid",
+  "text": "froid",
+  "erreur": "meilleur essai : {'hauteur': 288, 'duree': 0.96, 'essai': 'Froid !', 'entendu': 'froide', 'ressemblance': 0.91, 'phonemes_attendus': 'fʁwa', 'phonemes_entendus': 'fad', 'fautes': ['« d » final prononcé'], 'ecart_phonemes': 1.75}"
+ }
+]
