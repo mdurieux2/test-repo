@@ -2621,6 +2621,9 @@ async function checkExplanation(page, label) {
     await page.evaluate((answer) => [...document.querySelectorAll('.choice')].find((b) => b.dataset.value !== String(answer))?.click(), q.answer);
   }
   await page.waitForSelector('.explain');
+  // après une erreur au pavé, le « ? » tremble 0,4 s (±8 px) : la mise en page se mesure une fois
+  // l'égalité immobile (sinon « 22−12=? » paraît trop large, le temps d'un tremblement)
+  await page.waitForFunction(() => !document.querySelector('.shake'), null, { timeout: 2000 }).catch(() => {});
   await checkLayout(page, label);
   const problem = await page.evaluate(() => {
     const r = document.querySelector('.explain').getBoundingClientRect();
