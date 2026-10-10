@@ -368,6 +368,14 @@ parcours complet ou la mise en page seulement), `SHARD=2/4` (un quart de la mise
 Sur GitHub, le test tourne en 5 morceaux en même temps : le parcours complet et 4 quarts de la
 mise en page.
 
+Ces tests utilisent Chromium à la taille de chaque appareil. Pour voir l'app dans le vrai Safari
+d'iOS, `npm run test:ios` (sur un Mac avec Xcode, après `sudo safaridriver --enable`) l'ouvre dans
+un simulateur iOS, parcourt une vingtaine d'écrans et enregistre des captures avec un rapport
+(`ios-sortie/index.html`) : `IOS_APPAREIL="iPad mini (A17 Pro)" IOS_VERSION=26.2 IOS_PAYSAGE=1`
+pour choisir l'appareil. Sans Mac : le workflow « Simulateur iOS » (onglet Actions, « Run
+workflow ») le fait sur les Mac de GitHub, sur iPhone SE (iOS 18.5), iPhone 17 et iPad mini
+(iOS 26.2) ; les captures sont dans les artefacts de l'exécution.
+
 | Fichier | Rôle |
 |---|---|
 | `app/js/games/*.js` | Les jeux : chacun génère des questions décrites par des données |

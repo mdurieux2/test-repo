@@ -1,0 +1,61 @@
+name: Simulateur iOS
+
+# Ouvre l'app dans Safari sur de vrais simulateurs iOS (Xcode, sur les Mac de GitHub, gratuits pour un
+# dépôt public) et parcourt les écrans de scripts/ios.mjs, piloté par safaridriver (le WebDriver
+# d'Apple) : premier lancement, accueil, un jeu de chaque rubrique, jeux du CM, explication d'une
+# erreur, réglages des parents ; l'iPad aussi en paysage. Les captures et le rapport (index.html,
+# rapport.md) sont dans les artefacts « ios-… » ; le résumé s'affiche sur la page de l'exécution.
+# Se lance à la main (onglet Actions → Simulateur iOS → Run workflow) et quand ce test change.
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**', 'claude_mdu/**']
+    paths: ['scripts/ios.mjs', '.github/workflows/ios.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    name: ${{ matrix.nom }}
+    runs-on: macos-15
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - nom: iPhone SE, iOS 18.5
+            appareil: iPhone SE (3rd generation)
+            version: '18.5'
+            xcode: '16.4'
+            dossier: iphone-se
+          - nom: iPhone 17, iOS 26.2
+            appareil: iPhone 17
+            version: '26.2'
+            xcode: '26.2'
+            dossier: iphone-17
+          - nom: iPad mini, iOS 26.2
+            appareil: iPad mini (A17 Pro)
+            version: '26.2'
+            xcode: '26.2'
+            paysage: '1'
+            dossier: ipad-mini
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+      # une fois par Mac : autoriser safaridriver à piloter Safari (et les simulateurs)
+      - run: sudo safaridriver --enable
+      - run: node scripts/ios.mjs
+        env:
+          IOS_APPAREIL: ${{ matrix.appareil }}
+          IOS_VERSION: ${{ matrix.version }}
+          IOS_PAYSAGE: ${{ matrix.paysage }}
+          SORTIE: ios-sortie/${{ matrix.dossier }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-${{ matrix.dossier }}
+          path: ios-sortie
