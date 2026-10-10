@@ -94,12 +94,12 @@ const POLYSEMIE = [
 ];
 // [définition, mot, deux mots qui lui ressemblent] : éléments savants
 const SAVANTS = [
-  ['un animal qui mange des insectes', 'insectivore', ['insecticide', 'un insectarium']],
-  ['un produit qui tue les insectes', 'un insecticide', ['insectivore', 'un insectarium']],
-  ['un animal qui mange de la viande', 'carnivore', ['un carnage', 'un carnaval']],
-  ['un animal qui mange des plantes', 'herbivore', ['un herbicide', 'un herbier']],
-  ['un produit qui tue les mauvaises herbes', 'un herbicide', ['herbivore', 'un herbier']],
-  ['un animal qui mange de tout', 'omnivore', ['omniprésent', 'omnisport']],
+  ['un animal qui mange des insectes', 'un insectivore', ['un insecticide', 'un insectarium']],
+  ['un produit qui tue les insectes', 'un insecticide', ['un insectivore', 'un insectarium']],
+  ['un animal qui mange de la viande', 'un carnivore', ['un carnage', 'un carnaval']],
+  ['un animal qui mange des plantes', 'un herbivore', ['un herbicide', 'un herbier']],
+  ['un produit qui tue les mauvaises herbes', 'un herbicide', ['un herbivore', 'un herbier']],
+  ['un animal qui mange de tout', 'un omnivore', ['un omnibus', 'l’omniprésence']],
   ['un appareil pour parler à distance', 'un téléphone', ['une télévision', 'un microphone']],
   ['un appareil pour voir très loin', 'un télescope', ['un microscope', 'une télévision']],
   ['un appareil pour voir les choses minuscules', 'un microscope', ['un télescope', 'un périscope']],

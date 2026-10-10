@@ -217,7 +217,7 @@ const IRREGULIERS_FUTUR_COMPOSE = [
   ['faire', 'compose', 'Hier, nous _ une randonnée.'], ['dire', 'compose', 'Ce matin, le directeur _ bonjour à tout le monde.'],
   ['voir', 'compose', 'Hier soir, je _ la Grande Ourse.'], ['prendre', 'compose', 'Hier, tu _ le bus.'],
   ['pouvoir', 'compose', 'La semaine dernière, nous _ visiter la caserne des pompiers.'], ['vouloir', 'compose', 'Hier, vous _ rester au chaud.'],
-  ['aller', 'compose', 'Hier, la classe _ au zoo.'], ['venir', 'compose', 'Ce matin, ma tante _ en vélo.'],
+  ['aller', 'compose', 'Hier, la classe _ au zoo.'], ['venir', 'compose', 'Ce matin, ma tante _ à vélo.'],
   ['aller', 'compose', 'La semaine dernière, mes parents _ au marché.'], ['venir', 'compose', 'Hier, les filles _ à la fête.'],
   ['faire', 'compose', 'Ce matin, ils _ du bruit.'], ['voir', 'compose', 'Hier, elles _ un écureuil.'],
 ];
