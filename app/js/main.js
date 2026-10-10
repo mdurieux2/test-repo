@@ -56,6 +56,7 @@ import * as recordings from './recordings.js';
 import { formatDuration, MAX_SECONDS, pickMime, sentenceAt, sentenceTimeline } from './recordings.js';
 import { fichesScreen } from './fiches-ecran.js';
 import { creerSauvegarde, dateEnClair, exporterEnregistrements, importerEnregistrements, lireSauvegarde, nomFichier } from './sauvegarde.js';
+import { cetAppareil, ecransAVerifier, mesurerEcran, rapportTexte } from './verif-affichage.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
@@ -1261,6 +1262,8 @@ function nextQuestion(session) {
     stage,
     zone,
     feedback));
+  // vérification de l'affichage (espace parents) : l'écran seulement, sans voix, chrono ni démonstration
+  if (session.verif) return;
   if (clock) runChrono(session, clock);
   const demoKey = q.from || game.id; // une révision : la démonstration de son jeu d'origine
   if (demoBtn && !demoSeen(child(), demoKey)) {
@@ -5873,6 +5876,135 @@ function restoreCard() {
     status);
 }
 
+// ---------------------------------------------------------------- Vérifier l'affichage sur cet appareil
+
+/** Deux images affichées : l'écran est mis en page. */
+const apresAffichage = () => new Promise((resolve) => { requestAnimationFrame(() => requestAnimationFrame(resolve)); });
+
+/** Les réglages de l'enfant qui changent la mise en page (pour le rapport, sans son prénom). */
+function aidesAffichage(kid) {
+  const s = a11y(kid);
+  return [
+    s.textSize > 1 ? (s.textSize > 1.2 ? 'texte très grand' : 'texte grand') : '', s.spacing ? 'texte espacé' : '',
+    s.bigTargets ? 'grandes cibles' : '', s.captions ? 'sous-titres' : '', s.tapOnly ? 'toucher plutôt que glisser' : '',
+    kid?.easyRead ? 'lecture facilitée' : '',
+  ].filter(Boolean);
+}
+
+/**
+ * Fait défiler chaque niveau des jeux de ces classes sur cet écran et note ce qui dépasse
+ * (verif-affichage.js). Les questions s'affichent comme dans une partie, avec le prénom et les
+ * réglages d'affichage d'un enfant, mais rien n'est dit ni enregistré (session.verif).
+ */
+async function verifierAffichage(classes) {
+  const liste = ecransAVerifier(classes);
+  const avant = store.active;
+  store.active = store.profiles[avant] ? avant : store.order[0];
+  const aides = aidesAffichage(child());
+  const etat = { arret: false };
+  const avancement = h('span', {}, 'Vérification…');
+  // un voile transparent sur l'écran : un toucher pendant la vérification ne répond à aucune question
+  const arreter = h('button', { class: 'verif-stop', type: 'button', onclick: () => { etat.arret = true; } }, 'Arrêter');
+  const voile = h('div', { class: 'verif-shield' }, h('div', { class: 'verif-band' }, avancement, arreter));
+  document.body.append(voile);
+  app.inert = true;
+  arreter.focus(); // au clavier, « Arrêter » est à portée (le reste de l'écran est inerte)
+  const debut = Date.now();
+  const parNiveau = new Map(); // « jeu:niveau » → le problème, ses phrases réunies
+  let ecrans = 0;
+  try {
+    for (const [i, e] of liste.entries()) {
+      if (etat.arret) break;
+      avancement.textContent = `Vérification : ${i + 1} / ${liste.length}`;
+      const game = findGame(e.jeu);
+      const { min, max, levels } = levelRange(e.classe, game.id);
+      for (let k = 0; k < e.questions && !etat.arret; k++) {
+        let trouve;
+        try {
+          nextQuestion({
+            game, min, max, levels, back: () => {}, index: k, total: 10, correct: 0, recentKeys: [], briefed: new Set(), startedAt: Date.now(),
+            levelState: { level: e.niveau, streak: 0, recent: [] }, formatOffset: 0, chrono: false, verif: true,
+          });
+          await apresAffichage();
+          trouve = mesurerEcran();
+        } catch (err) {
+          trouve = [`erreur : ${err.message}`];
+        }
+        ecrans++;
+        if (!trouve.length) continue;
+        const cle = `${e.jeu}:${e.niveau}`;
+        const deja = parNiveau.get(cle) || { ...e, titre: game.title, problemes: [] };
+        for (const p of trouve) if (!deja.problemes.includes(p)) deja.problemes.push(p);
+        parNiveau.set(cle, deja);
+      }
+    }
+  } finally {
+    voile.remove();
+    app.inert = false;
+    store.active = avant;
+  }
+  verifScreen({
+    classes, ecrans, secondes: Math.round((Date.now() - debut) / 1000), interrompu: etat.arret,
+    problemes: [...parNiveau.values()], appareil: cetAppareil(), aides,
+  });
+}
+
+/** Réglages : lancer la vérification, pour les classes des enfants ou pour toutes. */
+function verifCard() {
+  const classesEnfants = [...new Set(store.order.map((id) => store.profiles[id].grade))];
+  return h('section', { class: 'card verif-card' },
+    h('h2', {}, 'Vérifier l’affichage sur cet appareil'),
+    h('p', { class: 'muted small' }, 'L’app fait défiler chaque niveau des jeux sur cet écran et signale ce qui dépasse (un texte trop large, une réponse sous le bas de l’écran). Rien n’est dit ni enregistré. Tournez l’appareil puis recommencez pour vérifier l’autre sens.'),
+    h('div', { class: 'backup-actions' },
+      h('button', { class: 'big-btn primary', type: 'button', 'data-verif': 'enfants', onclick: () => verifierAffichage(classesEnfants) },
+        `Classes des enfants (${classesEnfants.map((c) => GRADES[c]).join(', ')})`),
+      h('button', { class: 'big-btn', type: 'button', 'data-verif': 'toutes', onclick: () => verifierAffichage(Object.keys(GRADES)) }, 'Toutes les classes')));
+}
+
+/** Le résultat de la vérification, et le rapport à partager (sans aucun prénom). */
+function verifScreen(resultat) {
+  const texte = rapportTexte({ version: APP.version, ...resultat });
+  const { appareil, problemes } = resultat;
+  const statut = h('p', { class: 'backup-status', role: 'status' });
+  const rapport = h('textarea', { class: 'verif-report', readonly: true, rows: 6, 'aria-label': 'Rapport de la vérification' }, texte);
+  const copier = async () => {
+    try {
+      await navigator.clipboard.writeText(texte);
+      statut.textContent = 'Rapport copié : collez-le dans un message.';
+    } catch {
+      rapport.focus();
+      rapport.select();
+      statut.textContent = 'Le rapport est sélectionné ci-dessous : copiez-le.';
+    }
+  };
+  const partager = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Vérification de l’affichage', text: texte });
+        return;
+      } catch (error) {
+        if (error?.name === 'AbortError') return;
+      }
+    }
+    copier();
+  };
+  show(h('main', { class: 'screen parents verif', 'data-title': 'Vérifier l’affichage' },
+    topBar({ onBack: () => parentsScreen({ tab: 'reglages' }), title: 'Vérifier l’affichage' }),
+    h('section', { class: 'card verif-result', 'data-problemes': String(problemes.length) },
+      h('h2', {}, problemes.length ? `⚠ ${problemes.length} niveau${problemes.length > 1 ? 'x' : ''} à revoir` : '✓ Tout tient dans l’écran'),
+      h('p', {}, `${resultat.ecrans} écrans vérifiés en ${resultat.secondes} s${resultat.interrompu ? ' (arrêtée avant la fin)' : ''} : ${appareil.appareil}, ${appareil.navigateur}, ${appareil.ecran}, ${appareil.sens}.`),
+      appareil.installee ? null : h('p', { class: 'muted small' }, 'Dans le navigateur, ses barres prennent une partie de l’écran : une réponse « sous le bas de l’écran » peut tenir dans l’app installée sur l’écran d’accueil.'),
+      problemes.length ? h('ul', { class: 'verif-list' }, problemes.map((p) => h('li', {},
+        h('b', {}, `${p.titre}, niveau ${p.niveau}`), ` (${GRADES[p.classe]}) : ${p.problemes.join(' ; ')}`))) : null,
+      h('div', { class: 'backup-actions' },
+        h('button', { class: 'big-btn primary', type: 'button', onclick: partager }, 'Partager le rapport'),
+        h('button', { class: 'big-btn', type: 'button', onclick: copier }, 'Copier'),
+        h('a', { class: 'big-btn', href: `mailto:${APP.contact}?subject=${encodeURIComponent(`Affichage : ${appareil.appareil}`)}&body=${encodeURIComponent(texte.slice(0, 1800))}` }, 'Envoyer par e-mail')),
+      statut,
+      rapport,
+      h('p', { class: 'muted small' }, 'Le rapport ne contient aucun prénom : l’appareil, les classes, les jeux et les niveaux.'))));
+}
+
 /** Réglages : un raccourci vers la section Accessibilité de chaque enfant. */
 function a11yShortcuts() {
   return h('section', { class: 'card a11y-shortcuts' },
@@ -5909,6 +6041,7 @@ function settingsTab() {
     a11yShortcuts(),
     fichesCard(store.active && store.profiles[store.active] ? store.active : store.order[0], 'reglages'),
     backupCard(),
+    verifCard(),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),

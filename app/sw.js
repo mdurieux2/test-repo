@@ -111,6 +111,7 @@ const PRECACHE = [
   './js/storage.js',
   './js/syllabes.js',
   './js/themes.js',
+  './js/verif-affichage.js',
   './manifest.webmanifest',
   './voix/manifest.json',
   './voix/silence.mp3',

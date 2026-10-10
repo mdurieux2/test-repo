@@ -294,6 +294,11 @@ Il ouvre trois onglets :
   et histoires enregistrées dans un fichier (sur iPhone et iPad : « Enregistrer dans Fichiers », par
   e-mail…), à restaurer dans un autre navigateur, sur un autre appareil ou dans l'app installée sur
   l'écran d'accueil. Au premier lancement, « Déjà une sauvegarde ? » évite de recréer les enfants.
+- **Vérifier l'affichage sur cet appareil** (dans Réglages) : l'app fait défiler chaque niveau des jeux
+  des classes des enfants (ou de toutes les classes) sur ce téléphone, cette tablette ou cet ordinateur,
+  dans le sens où on le tient, et signale ce qui dépasse (texte plus large que sa case, réponses sous le
+  bas de l'écran). Rien n'est dit ni enregistré pendant la vérification ; le rapport (appareil,
+  classes, jeux, niveaux, sans aucun prénom) se partage ou s'envoie par e-mail.
 - **Vos voix pour les histoires** (dans Réglages) : enregistrez-vous en lisant une histoire
   (le texte s'affiche en gros, 3 minutes au plus) ; dans « Histoires », l'enfant entend votre
   voix pendant que les phrases s'allument, puis la question est posée. On peut réécouter,
@@ -386,10 +391,12 @@ workflow ») le fait sur les Mac de GitHub, sur iPhone SE (iOS 18.5), iPhone 17 
 | `app/js/characters.js` | Personnages fille et garçon (SVG), prénom sur le tee-shirt |
 | `app/js/storage.js` | Profils et progression, enregistrés sur l'appareil |
 | `app/js/sauvegarde.js` | Sauvegarde de la progression dans un fichier, et sa restauration |
+| `app/js/verif-affichage.js` | « Vérifier l'affichage sur cet appareil » : écrans à faire défiler, mesures, rapport |
 | `app/js/config.js` | Version, journal des modifications, crédits |
 | `app/sw.js` | Mode hors ligne : tout nouveau fichier doit être ajouté à `PRECACHE` |
 | `app/js/speech.js`, `app/js/voix-cles.js` | Voix naturelle (sons de `app/voix/`), sinon voix de l'appareil |
 | `scripts/voix/` | Fabrication des sons de la voix naturelle (voir ci-dessous) |
+| `scripts/smoke.mjs`, `scripts/ios.mjs` | Test de bout en bout (Chromium), parcours dans Safari sur simulateur iOS |
 
 **Voix naturelle.** `node scripts/voix/phrases.mjs` choisit les sons à enregistrer, d'après ce que
 disent les jeux à tous les niveaux et ce que dit l'app pendant le parcours complet

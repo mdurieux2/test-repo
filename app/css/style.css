@@ -1316,6 +1316,19 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
 .backup-actions .icon { width: 24px; height: 24px; }
 .backup-status { margin: 4px 0 0; font-weight: 700; }
 .backup-status:empty { display: none; }
+/* Vérifier l'affichage : un voile transparent (aucun toucher n'arrive au jeu) et l'avancement en bas,
+   par-dessus l'écran vérifié, sans rien changer à sa mise en page */
+.verif-shield { position: fixed; inset: 0; z-index: 1000; }
+.verif-band {
+  position: absolute; left: 50%; bottom: calc(var(--safe-bottom, 0px) + 10px); transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 16px; border-radius: 999px; white-space: nowrap;
+  background: #1f2430; color: #fff; font-weight: 700; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.verif-stop { min-height: 44px; padding: 0 16px; border-radius: 999px; background: #fff; color: #1f2430; font-weight: 700; }
+.verif-list { margin: 10px 0; padding-left: 1.2em; }
+.verif-list li { margin: 6px 0; line-height: 1.35; }
+.verif-report { width: 100%; margin-top: 10px; font: 0.8rem/1.4 ui-monospace, monospace; border: 2px solid var(--field-line); border-radius: 10px; padding: 8px; }
+.verif-result a.big-btn { text-decoration: none; color: var(--ink); } /* « Envoyer par e-mail » : un lien qui a l'air d'un bouton */
 
 /* interrupteurs façon iOS (la position du rond indique l'état, pas seulement la couleur) */
 .setting input[type="checkbox"] {
@@ -1569,6 +1582,9 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
 @media (orientation: landscape) and (max-height: 520px) {
   .sym-grid { width: min(100%, calc((100dvh - 90px) * var(--cols) / var(--rows))); }
   .choices-answers .choice { font-size: 1.05rem; }
+  /* trois réponses côte à côte (94 points chacune sur iPhone SE) : un mot de 9 lettres (« Amsterdam »,
+     « mammifère ») y tient ; un mot plus long n'y est pas agrandi */
+  .choices-answers.n3 .choice, .choices-answers.long-words .choice { font-size: 0.95rem; }
   .stage-cubes svg { height: calc(100dvh - 110px); }
 }
 

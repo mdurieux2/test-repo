@@ -7,6 +7,7 @@
 //         ONLY=ecrans npm run test:e2e          (seulement la mise en page des écrans fixes : accueil, listes, duo, parents)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
 //         PLAY=compter,sauvegarde npm run test:e2e   (… puis la sauvegarde : fichier, effacement, restauration)
+//         PLAY=compter,verif npm run test:e2e   (… puis « Vérifier l'affichage » de l'espace parents, sur iPhone)
 //         PARTS=scenario | PARTS=layout SHARD=1/4 | PARTS=a11y   (une partie du test, comme dans la CI)
 //         A11Y=1 PARTS=layout npm run test:e2e   (mise en page avec un profil d'accessibilité : texte très grand,
 //                  grandes cibles, texte espacé ; sur iPhone SE, Android 360 points et iPhone SE en paysage,
@@ -198,6 +199,36 @@ async function openParents(page) {
     await page.click('.gate-form button');
     await page.waitForSelector('.parents');
   }
+}
+
+/**
+ * Vérifier l'affichage (Espace parents → Réglages) : l'app fait défiler chaque niveau des jeux des
+ * classes des enfants sur cet écran. Tout doit tenir ; rien n'est dit ni enregistré, un toucher
+ * pendant la vérification ne répond à aucune question, et le rapport ne contient aucun prénom.
+ */
+async function checkVerif(page) {
+  await openParents(page);
+  await page.click('[data-tab="reglages"]');
+  await page.waitForSelector('[data-verif="enfants"]');
+  const before = await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY);
+  const spoken = await page.evaluate(() => (window.__spoken || []).length);
+  await page.click('[data-verif="enfants"]');
+  await page.waitForSelector('.verif-band');
+  const { width, height } = page.viewportSize();
+  await page.mouse.click(width / 2, height * 0.7); // un toucher sur l'écran vérifié
+  await page.waitForSelector('.verif-result', { timeout: 10 * 60 * 1000 });
+  const count = Number(await page.getAttribute('.verif-result', 'data-problemes'));
+  if (count) fail(`vérifier l’affichage : ${count} niveaux à revoir : ${(await page.$$eval('.verif-list li', (els) => els.map((e) => e.textContent))).join(' ; ')}`);
+  if ((await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)) !== before) fail('vérifier l’affichage : les données de l’app ont changé');
+  if ((await page.evaluate(() => (window.__spoken || []).length)) !== spoken) fail('vérifier l’affichage : la voix a parlé pendant la vérification');
+  const report = await page.inputValue('.verif-report');
+  const names = await page.evaluate((key) => Object.values(JSON.parse(localStorage.getItem(key)).profiles).map((p) => p.name), STORAGE_KEY);
+  if (names.some((name) => report.includes(name))) fail('vérifier l’affichage : un prénom est dans le rapport');
+  const screens = /(\d+) écrans vérifiés/.exec(report)?.[1];
+  if (!screens || Number(screens) < 100) fail(`vérifier l’affichage : trop peu d’écrans vérifiés (${screens})`);
+  await page.click('.top-bar .icon-btn');
+  await page.waitForSelector('.settings');
+  console.log(`✔ vérifier l’affichage : ${screens} écrans des classes des enfants, tout tient ; rien n’est dit ni enregistré, rapport sans prénom`);
 }
 
 /**
@@ -1241,6 +1272,7 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
 if (PLAY) {
   if (PLAY.includes('histoires')) await checkRecordings(page);
   if (PLAY.includes('sauvegarde')) await checkBackup(page);
+  if (PLAY.includes('verif')) await checkVerif(page);
   return;
 }
 
@@ -1721,6 +1753,9 @@ await checkRecordings(page);
 // sauvegarde de la progression : un fichier, puis tout retrouvé après un effacement complet
 await checkBackup(page);
 
+// vérifier l'affichage : chaque niveau des jeux des enfants sur cet écran
+await checkVerif(page);
+
 // hors ligne (mode avion) : le service worker doit servir l'app et tous les jeux sans réseau
 await checkOffline(context, page);
 await context.close();
@@ -2019,6 +2054,15 @@ async function a11yPart() {
   await page.click('[data-tab="reglages"]');
   await page.waitForSelector('.settings');
   await audit('espace parents, réglages');
+  // vérifier l'affichage, arrêtée aussitôt lancée : l'écran du résultat et son rapport
+  await page.click('[data-verif="enfants"]');
+  await page.waitForSelector('.verif-band');
+  if (!(await page.evaluate(() => document.activeElement?.matches('.verif-stop')))) problems.push('vérifier l’affichage : « Arrêter » n’a pas le focus');
+  await page.keyboard.press('Enter');
+  await page.waitForSelector('.verif-result');
+  await audit('espace parents, vérifier l’affichage');
+  await page.click('.top-bar .icon-btn');
+  await page.waitForSelector('.settings');
   await page.click('[data-fiches="reglages"]');
   await page.waitForSelector('.fiche-page');
   await audit('espace parents, fiches à imprimer');
