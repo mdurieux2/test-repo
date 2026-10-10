@@ -6,6 +6,7 @@
 //         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
 //         ONLY=ecrans npm run test:e2e          (seulement la mise en page des écrans fixes : accueil, listes, duo, parents)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
+//         PLAY=compter,sauvegarde npm run test:e2e   (… puis la sauvegarde : fichier, effacement, restauration)
 //         PARTS=scenario | PARTS=layout SHARD=1/4 | PARTS=a11y   (une partie du test, comme dans la CI)
 //         A11Y=1 PARTS=layout npm run test:e2e   (mise en page avec un profil d'accessibilité : texte très grand,
 //                  grandes cibles, texte espacé ; sur iPhone SE, Android 360 points et iPhone SE en paysage,
@@ -224,7 +225,6 @@ async function checkBackup(page) {
   if (file.app !== 'lire-et-compter' || JSON.stringify(file.donnees.order) !== JSON.stringify(before.order)) fail('sauvegarde : les enfants ne sont pas dans le fichier');
   if (!file.enregistrements?.some((e) => e.id === storyId)) fail('sauvegarde : l’histoire enregistrée n’est pas dans le fichier');
   await page.waitForFunction(() => document.querySelector('.backup-status')?.textContent.includes('téléchargée'));
-  await shot('07b-sauvegarde');
   // tout est perdu (données effacées, autre navigateur…) : au premier lancement, on restaure
   await page.evaluate(async (key) => {
     localStorage.removeItem(key);
@@ -1240,6 +1240,7 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
 
 if (PLAY) {
   if (PLAY.includes('histoires')) await checkRecordings(page);
+  if (PLAY.includes('sauvegarde')) await checkBackup(page);
   return;
 }
 
@@ -1254,7 +1255,9 @@ if ((await page.locator('.level-row').count()) !== compterMax - compterMin + 1) 
 await shot('19-niveaux');
 await page.click('.level-row[data-level="4"]');
 await page.waitForSelector('.choices');
-if ((await page.textContent('.level-badge')) !== 'Niv. 4') fail('le niveau choisi n’est pas celui de la partie');
+// les niveaux sont numérotés dans la classe : le niveau 4 du jeu est le 2e du CP (qui commence au 3)
+const chosenBadge = `Niv. ${4 - compterMin + 1}`;
+if ((await page.textContent('.level-badge')) !== chosenBadge) fail(`le niveau choisi n’est pas celui de la partie (« ${await page.textContent('.level-badge')} » au lieu de « ${chosenBadge} »)`);
 if ((await page.evaluate(() => globalThis.__lc.question.stage.count)) < 10) fail('compter niveau 4 : moins de 10 objets');
 console.log('✔ choix direct du niveau');
 
@@ -2378,7 +2381,7 @@ async function demoChecks() {
 // Jeux dont on vérifie la fiche imprimée (une forme d'exercice chacun) : [jeu, classe]
 const FICHE_SAMPLE = [
   ['calcul', 'CP'], ['trous', 'CP'], ['relie-calculs', 'CE1'], ['ranger', 'CP'], ['heure', 'CP'], ['regle-horloge', 'CE1'],
-  ['addition-posee', 'CE1'], ['sudoku', 'CE1'], ['labyrinthe', 'CE1'], ['ecrire', 'CP'], ['points', 'CE1'], ['symetrie', 'CP'],
+  ['addition-posee', 'CE1'], ['sudoku', 'CE1'], ['labyrinthe', 'CE1'], ['ecrire', 'CP'], ['points', 'CP'], ['symetrie', 'CE2'],
   ['picross', 'CE1'], ['petits-textes', 'CE1'], ['vivant', 'CP'], ['drapeaux', 'CE1'], ['graphiques', 'CE1'], ['bon-mot', 'CP'],
 ];
 
@@ -2425,7 +2428,8 @@ async function checkFiches() {
   page.on('pageerror', (e) => errors.push(`fiches : ${e.message}`));
   await page.goto(BASE);
   await page.waitForSelector('.welcome');
-  await setStore(page, "store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games = { heure: { level: 2 } }; store.profiles.matteo = store.profiles.matteo || { grade: 'MS', games: {} };");
+  // au CE1 (au CP, « Quelle heure est-il ? » n'a que l'heure pile, son 1er niveau)
+  await setStore(page, "store.profiles['eva-rose'].grade = 'CE1'; store.profiles['eva-rose'].games = { heure: { level: 2 } }; store.profiles.matteo = store.profiles.matteo || { grade: 'MS', games: {} };");
   await openParents(page);
   // depuis le Suivi d'Eva-Rose
   await page.click('[data-child="eva-rose"]');
@@ -2451,7 +2455,7 @@ async function checkFiches() {
   if (!(sheet.consigne || '').replace('Consigne :', '').trim()) fail('fiches : consigne vide');
   if (!(sheet.scale > 0.3 && sheet.scale < 0.6)) fail(`fiches : l’aperçu n’est pas réduit à la largeur de l’écran (${sheet.scale})`);
   await checkLayout(page, 'fiches à imprimer (390×844)', { reachable: false });
-  // le niveau proposé est celui de l'enfant (le 2e niveau de « Quelle heure est-il ? » au CP)
+  // le niveau proposé est celui de l'enfant (le 2e niveau de « Quelle heure est-il ? » au CE1)
   await page.selectOption('[data-fiche-game]', 'heure');
   await page.waitForFunction(() => document.querySelector('.fiche-exercices .ex-stage .stage-clock'));
   sheet = await info();

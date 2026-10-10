@@ -373,6 +373,21 @@ input { -webkit-user-select: text; user-select: text; }
 .reveal-hl { color: var(--accent); text-decoration: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; }
 /* le mot ou le groupe dont on parle (grammaire du CM) : souligné et en gras, pas seulement en couleur */
 .stage-text.long .text-body { font-size: 1.05rem; line-height: 1.4; font-weight: 600; }
+@media (orientation: portrait) {
+  /* un long texte du CM sur un petit téléphone : l'écran ne défile pas, c'est le texte qui défile
+     dans sa boîte (le titre et « Écouter le texte » restent visibles), les réponses en dessous */
+  .screen.play:has(.stage-text.long) { height: calc(100vh / var(--zoom, 1)); height: calc(100dvh / var(--zoom, 1)); }
+  .play > .stage:has(> .stage-text.long) { flex: 1 1 0; min-height: 170px; align-items: stretch; }
+  .stage-text.long { max-height: 100%; min-height: 0; }
+  .stage-text.long .text-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+  .screen.play:has(.stage-text.long) .feedback { min-height: 60px; }
+}
+@media (orientation: portrait) and (max-height: 760px) {
+  /* cinq réponses en phrases (« Quel genre de texte ? ») sur un petit téléphone : deux colonnes */
+  .choices-sentences.n5, .choices-sentences.n6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .choices-sentences.n5 .choice:last-child { grid-column: 1 / -1; }
+}
+.stage-text .text-body:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; border-radius: 6px; }
 .text-lines .text-line { display: block; }
 .text-lines .text-line + .text-line { margin-top: 2px; }
 mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 700; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 5px; }
@@ -1395,7 +1410,8 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
   .text-body { font-size: 1.05rem; line-height: 1.4; }
   .stage-text { padding: 8px 14px 6px; gap: 4px; }
   /* un long texte (lecture du CM) : la boîte tient dans l'écran, le texte défile dedans */
-  .stage-text { max-height: calc(100dvh - 92px); overflow-y: auto; overscroll-behavior: contain; }
+  .stage-text { max-height: calc(100dvh - 92px); min-height: 0; }
+  .stage-text .text-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .stage-text.long .text-body { font-size: 0.98rem; line-height: 1.38; }
   /* réponses en phrases (jeux du CM) : plus serrées, et sur deux colonnes à partir de quatre */
   .choices-sentences .choice { min-height: 46px; padding: 6px 12px; font-size: 1.05rem; }

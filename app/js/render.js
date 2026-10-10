@@ -360,14 +360,17 @@ function equationPart(p) {
 
 /** Petit texte à lire ; le bouton 🔊 le lit à voix haute, en cas de besoin. */
 function textStage({ title, text, lines, say }, actions) {
-  // un texte du CM (plus de 280 signes) : en plus petit, pour tenir avec ses réponses sur un téléphone
-  const long = (text || lines.join(' ')).length > 280;
+  // un texte du CM (plus de 280 signes, ou un poème de 6 vers et plus) : en plus petit, pour tenir
+  // avec ses réponses sur un téléphone
+  const long = (text || lines.join(' ')).length > 280 || (lines?.length ?? 0) >= 6;
+  // un long texte peut défiler dans sa boîte (petit téléphone, style.css) : il se fait aussi défiler au clavier
+  const scroll = long ? { tabindex: '0' } : {};
   return h('div', { class: long ? 'stage-text long' : 'stage-text' },
     title ? h('h2', { class: 'text-title' }, title) : null,
     // un poème, une scène de théâtre, une lettre : chaque ligne à la ligne
     lines
-      ? h('p', { class: 'text-body text-lines' }, lines.map((line) => h('span', { class: 'text-line' }, wordSpans(line))))
-      : h('p', { class: 'text-body' }, wordSpans(text)),
+      ? h('p', { class: 'text-body text-lines', ...scroll }, lines.map((line) => h('span', { class: 'text-line' }, wordSpans(line))))
+      : h('p', { class: 'text-body', ...scroll }, wordSpans(text)),
     // `say` : le texte tel que la voix doit le dire (les grands nombres en morceaux : « mille 924 »)
     h('button', { class: 'text-listen', onclick: () => actions.speak?.([{ text: `${title ? `${title}. ` : ''}${say || text || lines.join(' ')}`, rate: 0.9 }]) }, '🔊 Écouter le texte'));
 }
