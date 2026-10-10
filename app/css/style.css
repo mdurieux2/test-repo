@@ -1368,6 +1368,11 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
 @media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) {
   .operation-visual .objects.small .object { font-size: min(32px, calc(480px / var(--cols, 11) / 1.2)); }
 }
+/* téléphone peu haut (iPhone SE, Android 740 px) : une erreur expliquée sous le pavé, avec son
+   propre dessin ; celui de la question se fait petit pour lui laisser la place */
+@media (orientation: portrait) and (max-height: 760px) {
+  .play:has(.explain) .operation-visual .objects.small .object { font-size: min(24px, 5.4vw); }
+}
 
 /* =====================================================================
    Téléphone en paysage : le dessin à gauche, la consigne et les réponses
