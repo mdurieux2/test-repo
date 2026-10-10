@@ -64,6 +64,8 @@ export function h(tag, attrs = {}, ...children) {
     else if (key === 'class') el.className = value;
     else if (key === 'style' && typeof value === 'object') {
       for (const [prop, v] of Object.entries(value)) {
+        // une valeur absente ne doit pas devenir « undefined » : var(--scale, 1) n'utiliserait plus son 1
+        if (v === undefined || v === null) continue;
         if (prop.startsWith('--')) el.style.setProperty(prop, v); // variables CSS (--cols…)
         else el.style[prop] = v;
       }

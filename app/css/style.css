@@ -354,7 +354,10 @@ input { -webkit-user-select: text; user-select: text; }
 .choices-words .choice.long { font-size: min(1.6rem, 6.4vw); }
 .choices-big-numbers .choice { font-size: 3.6rem; min-height: 130px; }
 .choices-objects .choice { min-height: 150px; padding: 12px 4px; }
-.choices-objects .objects .object { font-size: min(30px, 6.4vw); }
+/* des groupes d'objets à toucher, rangés par 5 : aussi grands que la carte le permet (un emoji est
+   un peu plus large que haut : 5 font 6,25 fois leur taille, plus les écarts) */
+.choices-objects .objects { width: 100%; container-type: inline-size; }
+.choices-objects .objects .object { font-size: min(30px, 6.4vw); font-size: min(44px, calc((100cqw - 10px) / 6.4)); }
 
 .choice.correct { background: var(--good); color: #fff; box-shadow: 0 6px 0 var(--good-dark); animation: pop 0.35s ease-out; }
 .choice.wrong { background: #ffe3e3; color: #c43d3d; box-shadow: 0 6px 0 #f3b4b4; animation: shake 0.4s; opacity: 0.6; }
@@ -938,8 +941,14 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
 .order-item.order-picture { min-height: 112px; }
 .order-item.placed { opacity: 0.25; transform: scale(0.92); }
 .order-item.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 6px 0 #e6b800, 0 0 0 4px var(--hint) inset; }
-.order-emoji { font-size: calc(var(--scale, 1) * min(44px, 10vw)); line-height: 1; }
-.order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(30px, 7vw)); }
+/* les images à ranger : grandes (trois cases font la largeur de l'écran), un peu moins à 4 ou 5 ;
+   deux emoji côte à côte (« 🐔🥚 », --scale de 0,9 à 0,6 : voir comprendre.js) tiennent dans la case */
+.order-emoji { font-size: calc(var(--scale, 1) * min(56px, 11.8vw)); line-height: 1; }
+.order-items.n4 .order-emoji { font-size: calc(var(--scale, 1) * min(50px, 10.5vw)); }
+.order-items.n5 .order-emoji { font-size: calc(var(--scale, 1) * min(44px, 9.6vw)); }
+.order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(44px, 10vw)); }
+.order-slots.n4 .order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(34px, 8vw)); }
+.order-slots.n5 .order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(30px, 6.4vw)); }
 
 /* labyrinthe */
 .stage-maze { padding: 4px 0; min-height: 0; }
@@ -1283,7 +1292,6 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
 .setting input[type="checkbox"]:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 
 /* compléments de mise en page (petits écrans) */
-.choices-objects.n3 .objects .object { font-size: min(20px, 4.6vw); }
 .order-items.n6 { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .order-items.n6 .order-item { font-size: min(1.6rem, 6vw); min-height: 64px; }
 .order-slots.n6 .order-slot { height: 60px; font-size: min(1.5rem, 6vw); }
@@ -1298,7 +1306,20 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
   .text-listen { min-height: 40px; }
 }
 .choices-objects.n3 .choice { padding: 8px 2px; }
-.choices-objects.n3 .objects .object { font-size: min(17px, 3.8vw); }
+@media (orientation: portrait) {
+  /* trois groupes côte à côte seraient minuscules : l'un sous l'autre, chacun sur une ligne (les
+     rangées de 5 côte à côte : 7, c'est 5 et 2), d'autant plus grands que le plus grand groupe est
+     petit (--most, voir choiceZone) */
+  .choices-objects.n3 { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .choices-objects.n3 .choice { min-height: 0; padding: 8px; }
+  .choices-objects.n3 .objects { flex-flow: row wrap; justify-content: center; column-gap: 16px; }
+  .choices-objects.n3 .objects .object { font-size: min(40px, calc((100cqw - 24px) / var(--most, 10) / 1.35)); }
+}
+@media (orientation: portrait) and (min-height: 780px) {
+  /* écran haut : les rangées de 5 l'une sous l'autre, les objets encore plus grands */
+  .choices-objects.n3 .objects { flex-direction: column; }
+  .choices-objects.n3 .objects .object { font-size: min(40px, calc((100cqw - 10px) / 6.4)); }
+}
 /* illustration d'un calcul (5 + 5 objets) : toujours dans la largeur de l'écran, d'autant plus grande
    qu'il y a peu d'objets sur la ligne la plus large (--cols, voir operationStage) */
 .operation-visual { flex-wrap: wrap; justify-content: center; max-width: 100%; }
@@ -1405,6 +1426,8 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
   .order { gap: 14px; width: 100%; }
   .order-item.order-picture { min-height: 92px; }
   /* deux emoji côte à côte (« 🐔🥚 ») tiennent dans une case de la colonne de droite */
+  .order-emoji { font-size: calc(var(--scale, 1) * min(44px, 11dvh)); }
+  .order-slots .order-slot .order-emoji { font-size: calc(var(--scale, 1) * 30px); }
   .order-items.n4 .order-emoji { font-size: calc(var(--scale, 1) * 28px); }
   .order-items.n5 .order-emoji { font-size: calc(var(--scale, 1) * 24px); }
   /* une phrase à remettre dans l'ordre : 5 mots tiennent dans la colonne de droite */
@@ -1434,9 +1457,12 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
   .choices-words .choice { font-size: 1.45rem; min-height: 60px; }
   .choices-words .choice.long { font-size: 1.15rem; }
   .choices-pictures .choice { font-size: 2.1rem; }
-  .choices-objects .objects .object, .choices-objects.n3 .objects .object { font-size: 18px; }
+  .choices-objects .objects .object { font-size: min(30px, 7dvh, calc((100cqw - 10px) / 6.4)); }
+  /* trois groupes l'un sous l'autre, chacun sur une ligne (rangées de 5 côte à côte) */
   .choices-objects.n3 { grid-template-columns: minmax(0, 1fr); }
-  .choices-objects.n3 .choice { min-height: 52px; padding: 4px; }
+  .choices-objects.n3 .choice { min-height: 44px; padding: 4px; }
+  .choices-objects.n3 .objects { flex-flow: row wrap; justify-content: center; column-gap: 14px; }
+  .choices-objects.n3 .objects .object { font-size: min(34px, 9dvh, calc((100cqw - 24px) / var(--most, 10) / 1.35)); }
   .choice .swatch { width: 44px; height: 44px; }
   .choices-scenes.n4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .choices-scenes .scene, .choices-scenes.n4 .scene { max-width: 96px; }

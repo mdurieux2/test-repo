@@ -1544,6 +1544,8 @@ function choiceZone(ctx) {
   // un mot très long (« l’éléphanteau ») doit tenir sur la largeur d'une colonne
   const longWord = q.choices.some((c) => typeof c.label === 'string' && c.label.split(/\s+/).some((w) => w.length > 9));
   const zone = h('div', { class: `choices choices-${q.choiceStyle} n${q.choices.length}${q.stage.type === 'none' ? ' center' : ''}${longWord ? ' long-words' : ''}` });
+  // des groupes d'objets : le plus grand groupe règle la taille des objets (la même pour tous)
+  if (q.choiceStyle === 'objects') zone.style.setProperty('--most', Math.max(1, ...q.choices.map((c) => c.objects?.count ?? 0)));
   // cherche et trouve : les images éparpillées sur une carte (place en %, angle, taille)
   if (q.seek) {
     zone.style.setProperty('--cols', q.seek.cols);

@@ -20,7 +20,7 @@ export const CHANGELOG = [
       'Nouveau jeu « Gauche ou droite ? » (Le monde), de la moyenne section au CE2 : l’image de gauche ou de droite, lire de gauche à droite, sa main gauche, les flèches, le robot qui tourne, la voiture au carrefour, la droite d’une personne de face.',
       'Mettre l’icône sur l’écran d’accueil : les étapes suivent le navigateur (Safari et iOS 26, Chrome, Samsung Internet, Firefox, Brave, Edge…), et le bouton « Installer l’app » apparaît même quand le navigateur le propose après l’ouverture.',
       'Emoji en couleur sur les navigateurs qui ne les montrent qu’en noir et blanc (écran des voitures Tesla, Chromium sous Linux).',
-      'Pictogrammes plus grands dans les suites, les dessins à toucher, les calculs illustrés et les balances.',
+      'Pictogrammes plus grands : les images à remettre dans l’ordre (deux fois plus grandes sur téléphone), les groupes d’objets à compter (l’un sous l’autre, chacun sur sa ligne), les suites, les dessins à toucher, les calculs illustrés et les balances.',
     ],
   },
   {
