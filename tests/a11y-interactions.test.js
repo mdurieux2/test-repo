@@ -47,6 +47,9 @@ const LISTEN_ONLY = {
   'ou-est': { 1: 40, 2: 40, 4: 40, 6: 40, 7: 40, 8: 40 },
   'phrase-anglais': { 5: 40 },
   'parle-anglais': { 2: 19, 4: 40 }, // la question sans image ; la consigne entendue
+  // l'anglais du CM : la lettre, le mot épelé, la date, l'heure, la phrase entendus (les autres
+  // questions du niveau sont écrites)
+  'anglais-cm': { 1: 20, 2: 12, 3: 10, 4: 8, 5: 16, 6: 8, 7: 7, 8: 8, 9: 8, 10: 13 },
 };
 
 test('écoute : nombre de questions qui ne se jouent qu’à l’oreille, jeu par jeu et niveau par niveau', () => {

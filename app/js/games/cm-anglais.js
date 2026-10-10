@@ -61,18 +61,18 @@ const SPELL_SETS = [
   ['game', 'gym', 'jam'], ['red', 'read', 'road'], ['tree', 'three', 'there'], ['bike', 'bake', 'book'], ['week', 'weak', 'wake'],
   ['blue', 'glue', 'clue'], ['ball', 'bell', 'bill'], ['rain', 'ran', 'run'], ['hand', 'head', 'had'],
 ];
-// Le mot de l'image, et deux façons de l'écrire « comme on l'entend » (à la française).
+// Un mot (en français, avec son image), et deux façons de l'écrire en anglais « comme on l'entend ».
 const SPELLINGS = [
-  { en: 'house', emoji: '🏠', wrong: ['hause', 'hous'] }, { en: 'school', emoji: '🏫', wrong: ['scool', 'skool'] },
-  { en: 'chair', emoji: '🪑', wrong: ['cher', 'chaire'] }, { en: 'tree', emoji: '🌳', wrong: ['tri', 'trea'] },
-  { en: 'mouse', emoji: '🐭', wrong: ['maus', 'mause'] }, { en: 'horse', emoji: '🐴', wrong: ['hors', 'horce'] },
-  { en: 'bird', emoji: '🐦', wrong: ['berd', 'beurd'] }, { en: 'water', emoji: '💧', wrong: ['woter', 'watter'] },
-  { en: 'cheese', emoji: '🧀', wrong: ['chiz', 'cheeze'] }, { en: 'apple', emoji: '🍎', wrong: ['aple', 'appel'] },
-  { en: 'pencil', emoji: '✏️', wrong: ['pensil', 'pencel'] }, { en: 'juice', emoji: '🧃', wrong: ['jus', 'juce'] },
-  { en: 'eye', emoji: '👁️', wrong: ['ai', 'ey'] }, { en: 'clock', emoji: '⏰', wrong: ['klok', 'clok'] },
-  { en: 'girl', emoji: '👧', wrong: ['gerl', 'girle'] }, { en: 'bike', emoji: '🚲', wrong: ['baik', 'bik'] },
-  { en: 'key', emoji: '🔑', wrong: ['ki', 'kee'] }, { en: 'fish', emoji: '🐟', wrong: ['fich', 'fishe'] },
-  { en: 'shoe', emoji: '👟', wrong: ['chou', 'shou'] }, { en: 'nose', emoji: '👃', wrong: ['noze', 'nos'] },
+  { en: 'house', fr: 'la maison', emoji: '🏠', wrong: ['hause', 'hous'] }, { en: 'school', fr: 'l’école', emoji: '🏫', wrong: ['scool', 'skool'] },
+  { en: 'chair', fr: 'la chaise', emoji: '🪑', wrong: ['cher', 'chaire'] }, { en: 'tree', fr: 'l’arbre', emoji: '🌳', wrong: ['tri', 'trea'] },
+  { en: 'mouse', fr: 'la souris', emoji: '🐭', wrong: ['maus', 'mause'] }, { en: 'horse', fr: 'le cheval', emoji: '🐴', wrong: ['hors', 'horce'] },
+  { en: 'bird', fr: 'l’oiseau', emoji: '🐦', wrong: ['berd', 'beurd'] }, { en: 'water', fr: 'l’eau', emoji: '💧', wrong: ['woter', 'watter'] },
+  { en: 'cheese', fr: 'le fromage', emoji: '🧀', wrong: ['chiz', 'cheeze'] }, { en: 'apple', fr: 'la pomme', emoji: '🍎', wrong: ['aple', 'appel'] },
+  { en: 'pencil', fr: 'le crayon', emoji: '✏️', wrong: ['pensil', 'pencel'] }, { en: 'juice', fr: 'le jus de fruits', emoji: '🧃', wrong: ['jus', 'juce'] },
+  { en: 'eye', fr: 'l’œil', emoji: '👁️', wrong: ['ai', 'ey'] }, { en: 'clock', fr: 'l’horloge', emoji: '🕰️', wrong: ['klok', 'clok'] },
+  { en: 'girl', fr: 'la fille', emoji: '👧', wrong: ['gerl', 'girle'] }, { en: 'bike', fr: 'le vélo', emoji: '🚲', wrong: ['baik', 'bik'] },
+  { en: 'key', fr: 'la clé', emoji: '🔑', wrong: ['ki', 'kee'] }, { en: 'fish', fr: 'le poisson', emoji: '🐟', wrong: ['fich', 'fishe'] },
+  { en: 'shoe', fr: 'la chaussure', emoji: '👟', wrong: ['chou', 'shou'] }, { en: 'nose', fr: 'le nez', emoji: '👃', wrong: ['noze', 'nos'] },
 ];
 
 // Des mots anglais qui se disent comme une lettre (you → U, why → Y, see → C…) : on trouve la lettre
@@ -143,10 +143,10 @@ function orthographe(rng) {
   return question(rng, {
     key: `anglais-cm:orthographe:${item.en}`,
     text: 'Quel mot anglais est bien écrit ?',
-    instruction: ['Regarde l’image, et écoute le mot anglais. Lequel est bien écrit ?', word],
+    instruction: ['Écoute le mot anglais. Lequel est bien écrit ?', word],
     short: { key: 'anglais-cm:orthographe', text: 'Bien écrit ?', speak: [word] },
     replay: [word],
-    stage: { type: 'picture', emoji: item.emoji },
+    stage: { type: 'sentence', text: `${item.emoji} ${item.fr}` },
     options: [item.en, ...item.wrong],
     style: 'words',
     answer: item.en,
@@ -569,16 +569,19 @@ function twoLikes(rng) {
   return [item, pick(rng, LIKES.filter((i) => i !== item && Boolean(i.food) === Boolean(item.food)))];
 }
 
-/** L'image, ✅ j’aime ou ❌ je n’aime pas (le symbole et les mots, jamais la couleur seule) : quelle phrase ? */
-function aimeImage(rng) {
+/**
+ * L'image avec ✅ ou ❌ et la phrase française (le symbole et les mots, jamais la couleur seule) :
+ * quelle phrase anglaise ? Les pièges : l'autre réponse (like, don’t like), une autre chose aimée.
+ */
+function aimeFrancais(rng) {
   const [item, other] = twoLikes(rng);
   const like = rng() < 0.5;
   return question(rng, {
-    key: `anglais-cm:aime-image:${item.en}:${like ? 'oui' : 'non'}`,
-    text: 'Quelle phrase anglaise va avec l’image ?',
-    instruction: 'Regarde l’image, et touche la phrase anglaise qui va avec.',
-    short: { key: 'anglais-cm:aime-image', text: 'Quelle phrase ?' },
-    stage: { type: 'sentence', text: `${item.emoji} ${like ? '✅ j’aime' : '❌ je n’aime pas'}` },
+    key: `anglais-cm:aime-fr:${item.en}:${like ? 'oui' : 'non'}`,
+    text: 'Comment dit-on cette phrase en anglais ?',
+    instruction: 'Lis la phrase. Comment la dit-on en anglais ?',
+    short: { key: 'anglais-cm:aime-fr', text: 'En anglais ?' },
+    stage: { type: 'sentence', text: `${item.emoji} ${like ? '✅' : '❌'} ${likeFr(item, like)}` },
     options: [likeEn(item, like), likeEn(item, !like), likeEn(other, like), likeEn(other, !like)],
     style: 'sentences',
     answer: likeEn(item, like),
@@ -842,14 +845,13 @@ function streetOptions(rng, [a, prep, b]) {
   return [[a, prep, b], ...sample(rng, others, 3).map((p) => [a, p, b])];
 }
 
-function lieuImage(rng) {
+function lieuFrancais(rng) {
   const place = pick(rng, PLACE_WORDS);
   return question(rng, {
-    key: `anglais-cm:lieu-image:${place}`,
+    key: `anglais-cm:lieu-fr:${place}`,
     text: 'Comment dit-on ce lieu en anglais ?',
-    instruction: 'Regarde l’image. Comment dit-on ce lieu en anglais ?',
-    short: { key: 'anglais-cm:lieu-image', text: 'En anglais ?' },
-    stage: { type: 'picture', emoji: PLACES[place].emoji },
+    short: { key: 'anglais-cm:lieu-fr', text: 'En anglais ?' },
+    stage: { type: 'sentence', text: `${PLACES[place].emoji} ${PLACES[place].fr}` },
     options: [place, ...sample(rng, PLACE_WORDS.filter((p) => p !== place), 3)],
     style: 'words',
     answer: place,
@@ -913,7 +915,7 @@ function rueSens(rng, listen) {
   });
 }
 
-/** Trois lieux côte à côte : lequel est « between » les deux autres ? */
+/** Trois lieux côte à côte, écrits dans l'ordre de la rue : lequel est « between » les deux autres ? */
 function entre(rng) {
   const row = rng() < 0.5 ? pick(rng, ROWS) : [...pick(rng, ROWS)].reverse();
   const [left, middle, right] = row;
@@ -921,10 +923,10 @@ function entre(rng) {
   const answer = between(middle, left, right);
   return question(rng, {
     key: `anglais-cm:entre:${row.join(':')}`,
-    text: 'Regarde la rue. Quelle phrase est vraie ?',
-    instruction: 'Regarde la rue, et touche la phrase qui est vraie.',
+    text: 'Ces trois lieux sont côte à côte, dans cet ordre. Quelle phrase est vraie ?',
+    instruction: 'Ces trois lieux sont côte à côte, dans cet ordre. Touche la phrase qui est vraie.',
     short: { key: 'anglais-cm:entre', text: 'Quelle phrase est vraie ?' },
-    stage: { type: 'pattern', items: row.map((p) => PLACES[p].emoji) },
+    stage: { type: 'sentence', text: row.map((p) => `${PLACES[p].emoji} ${PLACES[p].fr}`).join(', ') },
     options: [answer, between(left, middle, right), between(right, left, middle)],
     style: 'sentences',
     answer,
@@ -1242,9 +1244,9 @@ const KINDS = [
   [(rng) => jour(rng, false), dateEntendue, moisSuivant, jourOuMois, (rng) => jour(rng, true), dateEcrite, fete],
   [(rng) => heurePhrase(rng, false), (rng) => heureChiffres(rng, true), (rng) => heurePhrase(rng, true), (rng) => heureChiffres(rng, false)],
   [familleFrancais, familleEntendue, lien, familleAnglais, hisHer],
-  [aimeImage, (rng) => aimeSens(rng, true), tuAimes, (rng) => aimeSens(rng, false), prefere],
+  [aimeFrancais, (rng) => aimeSens(rng, true), tuAimes, (rng) => aimeSens(rng, false), prefere],
   [decrireFrancais, (rng) => decrireSens(rng, true), verbeDecrire, (rng) => decrireSens(rng, false), corps],
-  [lieuImage, (rng) => rueSens(rng, true), rueFrancais, lieuAnglais, entre, (rng) => rueSens(rng, false)],
+  [lieuFrancais, (rng) => rueSens(rng, true), rueFrancais, lieuAnglais, entre, (rng) => rueSens(rng, false)],
   [motQuestion, (rng) => bonneReponse(rng, true), quelleQuestion, motQuestionFrancais, (rng) => bonneReponse(rng, false)],
   [formeVerbe, presentEntendu, negation, questionDoes, reponseCourte],
 ];
