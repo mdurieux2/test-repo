@@ -841,11 +841,14 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
 @media (min-width: 1000px) and (min-height: 1300px) { :root { --zoom: 1.5; } }
 @media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) { :root { --zoom: 1.12; } }
 @media (orientation: landscape) and (min-width: 1300px) and (min-height: 1000px) { :root { --zoom: 1.3; } }
-/* iPad mini en paysage (744 px de haut) : pavé un peu moins haut, pour que la zone de retour
-   (et l'encart de correction expliquée) reste dans l'écran sous le pavé */
-@media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) and (max-height: 780px) {
+/* tablette en paysage peu haute (iPad mini, Galaxy Tab, iPad 10,2" et 11") : pavé un peu moins haut,
+   pour que la zone de retour (et l'encart de correction expliquée) reste dans l'écran sous le pavé */
+@media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) and (max-height: 860px) {
   .play-keypad .keypad { gap: 6px 10px; }
   .play-keypad .key { min-height: 50px; }
+}
+/* iPad mini en paysage (744 px de haut) */
+@media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) and (max-height: 780px) {
   /* texte agrandi ou grandes cibles (a11y.js) : déjà plus grand, sans l'agrandissement de l'iPad */
   body.a11y-text-large, body.a11y-big-targets { --zoom: 1; }
   /* accueil avec des jeux conseillés : l'icône au-dessus du nom (« Histoires » ne tient pas à côté) */
@@ -1355,6 +1358,11 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
    qu'il y a peu d'objets sur la ligne la plus large (--cols, voir operationStage) */
 .operation-visual { flex-wrap: wrap; justify-content: center; max-width: 100%; }
 .operation-visual .objects.small .object { font-size: min(48px, calc((100vw - 120px) / var(--cols, 11) / 1.2)); }
+/* tablette en paysage : l'écran, agrandi, est peu haut ; les objets un peu moins grands, pour que
+   l'explication après une erreur reste dans l'écran sous le pavé */
+@media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) {
+  .operation-visual .objects.small .object { font-size: min(32px, calc(480px / var(--cols, 11) / 1.2)); }
+}
 
 /* =====================================================================
    Téléphone en paysage : le dessin à gauche, la consigne et les réponses
