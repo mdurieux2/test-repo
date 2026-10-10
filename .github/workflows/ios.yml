@@ -3,7 +3,8 @@ name: Simulateur iOS
 # Ouvre l'app dans Safari sur de vrais simulateurs iOS (Xcode, sur les Mac de GitHub, gratuits pour un
 # dépôt public) et parcourt les écrans de scripts/ios.mjs, piloté par safaridriver (le WebDriver
 # d'Apple) : premier lancement, accueil, un jeu de chaque rubrique, jeux du CM, explication d'une
-# erreur, réglages des parents ; l'iPad aussi en paysage. Les captures et le rapport (index.html,
+# erreur, réglages des parents, puis « Vérifier l'affichage » de l'app (chaque niveau de chaque jeu,
+# toutes les classes) ; l'iPad aussi en paysage. Les captures et le rapport (index.html,
 # rapport.md) sont dans les artefacts « ios-… » ; le résumé s'affiche sur la page de l'exécution.
 # Se lance à la main (onglet Actions → Simulateur iOS → Run workflow) et quand ce test change.
 on:
@@ -19,7 +20,7 @@ jobs:
   ios:
     name: ${{ matrix.nom }}
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:

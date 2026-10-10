@@ -139,6 +139,14 @@ async function wd(methode, chemin, corps) {
 
 /** Safari dans le simulateur, piloté par safaridriver (W3C WebDriver). */
 async function piloteSafari(sim) {
+  // Safari déjà ouvert dans le simulateur : sans cela, safaridriver ne le trouvait pas sur l'iPad
+  // (« waiting for its RWIApplication to appear »)
+  try {
+    simctl('launch', sim.udid, 'com.apple.mobilesafari');
+    await pause(8000);
+  } catch (e) {
+    console.log(`Safari ne s'ouvre pas d'avance : ${String(e.stderr || e.message).trim()}`);
+  }
   const driver = spawn('safaridriver', ['--port', new URL(WD).port], { stdio: 'inherit' });
   for (let i = 0; i < 40; i++) {
     if (await fetch(`${WD}/status`).then((r) => r.ok, () => false)) break;
@@ -166,14 +174,17 @@ async function piloteSafari(sim) {
   return {
     ouvrir: (url) => wd('POST', `/session/${id}/url`, { url }),
     evaluer,
-    // un vrai toucher ; si Safari le refuse (bouton animé, recouvert…), un clic en JavaScript
+    // un clic en JavaScript : le toucher simulé par WebDriver (element/click) ne déclenchait aucun
+    // bouton dans Safari sur le simulateur (iOS 18.5 et 26.2), sans erreur
     async toucher(selecteur) {
-      try {
-        const element = await wd('POST', `/session/${id}/element`, { using: 'css selector', value: selecteur });
-        await wd('POST', `/session/${id}/element/${Object.values(element)[0]}/click`, {});
-      } catch {
-        await evaluer((s) => { document.querySelector(s).click(); }, selecteur);
-      }
+      const ok = await evaluer((s) => {
+        const el = document.querySelector(s);
+        if (!el) return false;
+        el.scrollIntoView({ block: 'center' });
+        el.click();
+        return true;
+      }, selecteur);
+      if (!ok) throw new Error(`« ${selecteur} » introuvable`);
     },
     capture: async () => Buffer.from(await wd('GET', `/session/${id}/screenshot`), 'base64'),
     async fermer() {
@@ -254,10 +265,10 @@ function fonctions() {
 
 // ---------------------------------------------------------------- parcours
 
-async function attendre(pilote, selecteur, ms = 20000) {
+async function attendre(pilote, selecteur, ms = 20000, pas = 250) {
   for (const fin = Date.now() + ms; Date.now() < fin;) {
     if (await pilote.evaluer((s) => Boolean(document.querySelector(s)), selecteur).catch(() => false)) return;
-    await pause(250);
+    await pause(pas);
   }
   throw new Error(`« ${selecteur} » n'apparaît pas`);
 }
@@ -271,7 +282,20 @@ async function main() {
     console.log(`simulateur : ${sim.nom}, iOS ${sim.version} (${sim.udid})`);
     demarrer(sim);
   }
-  const pilote = PILOTE === 'safari' ? await piloteSafari(sim) : await pilotePlaywright();
+  let pilote;
+  try {
+    pilote = PILOTE === 'safari' ? await piloteSafari(sim) : await pilotePlaywright();
+  } catch (e) {
+    console.log(`✘ Safari ne répond pas : ${e.message}`);
+    try {
+      simctl('io', sim.udid, 'screenshot', '--type=png', `${SORTIE}/appareil-sans-session.png`);
+    } catch {
+      // pas de capture
+    }
+    serveur.close();
+    rapport(sim, null, [{ nom: 'session Safari', fichier: null, appareil: 'appareil-sans-session.png', problemes: [`Safari ne répond pas : ${e.message}`], avertissements: [], erreurs: [] }]);
+    process.exit(1);
+  }
   const ecrans = [];
   let fonctionsSafari = null;
 
@@ -308,9 +332,32 @@ async function main() {
     try {
       await faire();
     } catch (e) {
-      console.log(`✘ ${nom} : ${e.message}`);
+      const page = await pilote.evaluer(() => `${document.querySelector('main.screen')?.className || '(aucun écran)'} : ${document.body.innerText.replace(/\s+/g, ' ').slice(0, 160)}`).catch(() => '?');
+      console.log(`✘ ${nom} : ${e.message}\n   à l'écran : ${page}`);
       ecrans.push({ nom, fichier: null, problemes: [`étape impossible : ${e.message}`], avertissements: [], erreurs: [] });
     }
+  }
+
+  /** Espace parents → Réglages (la question de la barrière est calculée). */
+  async function reglages() {
+    await pilote.ouvrir(BASE);
+    await attendre(pilote, '.profiles, .home');
+    if (await pilote.evaluer(() => Boolean(document.querySelector('.home')))) await pilote.toucher('.profile-chip');
+    await attendre(pilote, '.parent-btn');
+    await pilote.toucher('.parent-btn');
+    await attendre(pilote, '.gate, .parents');
+    if (await pilote.evaluer(() => Boolean(document.querySelector('.gate')))) {
+      await pilote.evaluer(() => {
+        const [a, b] = document.querySelector('.gate-question').textContent.match(/\d+/g).map(Number);
+        const champ = document.querySelector('.gate-input');
+        champ.value = String(a * b);
+        champ.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      await pilote.toucher('.gate-form button');
+    }
+    await attendre(pilote, '.parents');
+    await pilote.toucher('[data-tab="reglages"]');
+    await attendre(pilote, '.settings');
   }
 
   async function parcourir(suffixe = '') {
@@ -362,25 +409,30 @@ async function main() {
       });
     }
     await etape(`réglages des parents${suffixe}`, async () => {
-      await pilote.ouvrir(BASE);
-      await attendre(pilote, '.profiles, .home');
-      if (await pilote.evaluer(() => Boolean(document.querySelector('.home')))) await pilote.toucher('.profile-chip');
-      await attendre(pilote, '.parent-btn');
-      await pilote.toucher('.parent-btn');
-      await attendre(pilote, '.gate, .parents');
-      if (await pilote.evaluer(() => Boolean(document.querySelector('.gate')))) {
-        await pilote.evaluer(() => {
-          const [a, b] = document.querySelector('.gate-question').textContent.match(/\d+/g).map(Number);
-          const champ = document.querySelector('.gate-input');
-          champ.value = String(a * b);
-          champ.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-        await pilote.toucher('.gate-form button');
-      }
-      await attendre(pilote, '.parents');
-      await pilote.toucher('[data-tab="reglages"]');
-      await attendre(pilote, '.settings');
+      await reglages();
       await capturer(`réglages des parents${suffixe}`);
+    });
+    // la vérification de l'app elle-même (espace parents) : chaque niveau de chaque jeu, dans ce Safari.
+    // Dans le navigateur, ses barres prennent le bas de l'écran : une réponse « sous le bas de
+    // l'écran » est un avertissement (l'app installée a cette place) ; le reste est un échec.
+    await etape(`vérifier l'affichage, toutes les classes${suffixe}`, async () => {
+      await reglages();
+      await pilote.toucher('[data-verif="toutes"]');
+      await attendre(pilote, '.verif-result', 30 * 60 * 1000, 3000);
+      const r = await pilote.evaluer(() => ({
+        resume: document.querySelector('.verif-result > p')?.textContent || '',
+        lignes: [...document.querySelectorAll('.verif-list li')].map((li) => li.textContent),
+      }));
+      const bas = (l) => /sous le bas de l'écran|sous le bas de l’écran/.test(l) && !/dépasse|plus large|erreur/.test(l);
+      const nom = `vérifier l'affichage, toutes les classes${suffixe}`;
+      console.log(`  ${r.resume}`);
+      for (const l of r.lignes) console.log(`  ${bas(l) ? '⚠' : '✘'} ${l}`);
+      await capturer(nom);
+      const ecran = ecrans.at(-1);
+      ecran.problemes.push(...r.lignes.filter((l) => !bas(l)));
+      const enBas = r.lignes.filter(bas);
+      if (enBas.length) ecran.avertissements.push(`${enBas.length} niveaux avec des réponses sous les barres de Safari`);
+      ecran.resume = r.resume;
     });
   }
 
