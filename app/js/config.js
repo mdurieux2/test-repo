@@ -23,6 +23,7 @@ export const CHANGELOG = [
       'Mettre l’icône sur l’écran d’accueil : les étapes suivent le navigateur (Safari et iOS 26, Chrome, Samsung Internet, Firefox, Brave, Edge…), et le bouton « Installer l’app » apparaît même quand le navigateur le propose après l’ouverture.',
       'Emoji en couleur sur les navigateurs qui ne les montrent qu’en noir et blanc (écran des voitures Tesla, Chromium sous Linux).',
       'Pictogrammes plus grands : les images à remettre dans l’ordre (deux fois plus grandes sur téléphone), les groupes d’objets à compter (l’un sous l’autre, chacun sur sa ligne), les suites, les dessins à toucher, les calculs illustrés et les balances.',
+      'Cherche et trouve : sur iPhone et iPad, la page ne glisse plus de côté quand une image tournée touche le bord de la carte.',
     ],
   },
   {

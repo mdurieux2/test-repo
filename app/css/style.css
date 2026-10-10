@@ -772,13 +772,17 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
   background: var(--card); border-radius: 20px; box-shadow: 0 0 0 3px var(--line) inset;
 }
 .choices-seek .choice {
-  position: absolute; width: calc(100% / var(--cols)); height: calc(100% / var(--rows));
-  left: calc(var(--x) * 1% - 50% / var(--cols)); top: calc(var(--y) * 1% - 50% / var(--rows));
+  /* un rond (le côté le plus court de la case), centré sur sa place : la carte peut s'étirer en hauteur */
+  position: absolute; width: min(calc(100cqw / var(--cols)), calc(100cqh / var(--rows))); height: auto; aspect-ratio: 1;
+  left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); translate: -50% -50%;
   min-height: 0; padding: 0; border-radius: 50%; background: none; box-shadow: none; line-height: 1;
   font-size: min(calc(100cqw / var(--cols) * 0.56), calc(100cqh / var(--rows) * 0.56));
-  transform: rotate(var(--r)) scale(var(--s));
+  transform: scale(var(--s));
 }
-.choices-seek .choice:active { transform: rotate(var(--r)) scale(calc(var(--s) * 0.9)); box-shadow: none; }
+/* seule l'image tourne, pas son rond : une case tournée (haute et étroite sur une carte étirée)
+   sortait de l'écran au bord de la carte, et Safari faisait alors glisser la page de côté */
+.choices-seek .choice > span { transform: rotate(var(--r)); }
+.choices-seek .choice:active { transform: scale(calc(var(--s) * 0.9)); box-shadow: none; }
 .choices-seek .choice.correct { box-shadow: 0 0 0 4px var(--good-dark); }
 .choices-seek .choice.wrong { box-shadow: 0 0 0 3px #f3b4b4; }
 .choices-seek .choice.hint { box-shadow: 0 0 0 4px var(--hint); }

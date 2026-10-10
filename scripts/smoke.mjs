@@ -2617,7 +2617,15 @@ async function checkLayout(page, label, { reachable = true } = {}) {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
     for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game, .son-chip')) {
       if (el.clientWidth <= 1) continue; // caché à l'écran, gardé pour le clavier (flèches du labyrinthe rond)
+      if (el.closest('.choices-seek')) continue; // cherche et trouve : l'image tourne exprès dans son rond
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
+    }
+    // cherche et trouve : chaque image de la carte reste dans l'écran. Chromium ne compte pas ce qui
+    // sort de la carte (conteneur de taille) dans la largeur de la page, Safari si : la page glissait
+    // de côté sur iPhone 17 (simulateur iOS)
+    for (const el of document.querySelectorAll('.choices-seek .choice')) {
+      const r = el.getBoundingClientRect();
+      if (r.left < -1 || r.right > window.innerWidth + 1) return `image hors de l'écran sur le côté : « ${el.textContent.trim()} »`;
     }
     // sous-titres : le bandeau (en bas, ou à droite sur un téléphone en paysage) ne cache rien
     const band = document.querySelector('.caption-band:not([hidden])')?.getBoundingClientRect();

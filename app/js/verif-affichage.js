@@ -46,8 +46,17 @@ export function mesurerEcran(win = globalThis) {
   if (largeur > win.innerWidth + 1) problemes.push(`la page est plus large que l'écran (${largeur} > ${win.innerWidth} points)`);
   for (const el of doc.querySelectorAll(CASES)) {
     if (el.clientWidth <= 1) continue; // caché à l'écran, gardé pour le clavier
+    if (el.closest('.choices-seek')) continue; // une image tournée exprès dans son rond (vérifiée ci-dessous)
     if (el.scrollWidth > el.clientWidth + 1) {
       problemes.push(`« ${el.textContent.trim().slice(0, 30)} » dépasse de sa case`);
+      break;
+    }
+  }
+  // « Cherche et trouve » : chaque image de la carte reste dans l'écran (Safari ferait glisser la page)
+  for (const el of doc.querySelectorAll('.choices-seek .choice')) {
+    const r = el.getBoundingClientRect();
+    if (r.left < -1 || r.right > win.innerWidth + 1) {
+      problemes.push(`« ${el.textContent.trim()} » sort de l'écran sur le côté`);
       break;
     }
   }
