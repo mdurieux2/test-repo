@@ -1255,7 +1255,9 @@ function nextQuestion(session) {
     h('div', { class: 'instruction' },
       withDemoButton(h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
         avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')), demoBtn),
-      h('button', { class: 'bubble bubble-left', onclick: replay }, readable(frenchSpacing(brief ? q.short.text : q.text)))),
+      // une longue question (histoire, sciences du CM) : plus petite en paysage (style.css), pour laisser la place aux réponses
+      h('button', { class: `bubble bubble-left${(brief ? q.short.text : q.text).length > 70 ? ' long' : ''}`, onclick: replay },
+        readable(frenchSpacing(brief ? q.short.text : q.text)))),
     stage,
     zone,
     feedback));

@@ -44,10 +44,11 @@ function aToucher({ key, consigne, court, stage = { type: 'none' }, choices, sty
   };
 }
 
-function aTaper({ key, consigne, court = 'Tape la réponse.', stage, answer, dire }) {
+/** `texte` : ce qui est écrit, quand la consigne dite est trop longue pour l'écran (sinon la consigne). */
+function aTaper({ key, consigne, texte = consigne, court = 'Tape la réponse.', stage, answer, dire }) {
   return {
     key,
-    text: consigne,
+    text: texte,
     instruction: consigne,
     short: { key: `${key.split(':')[0]}:${consigne}`, text: court },
     stage,
@@ -459,6 +460,7 @@ function aireCarreaux(rng) {
   return aTaper({
     key: `mesures-cm:aire:${cells.map((c) => c.join('-')).join('/')}`,
     consigne: 'Un carreau mesure 1 centimètre carré. Quelle est l’aire de la figure hachurée, en centimètres carrés ?',
+    texte: '1 carreau = 1 cm². Quelle est l’aire de la figure hachurée ?',
     court: 'L’aire, en centimètres carrés ?',
     stage: dessin({ kind: 'cm-aire', cols: 8, rows: 5, cells }, `Une figure de ${n} carreaux hachurés sur un quadrillage`),
     answer: n,

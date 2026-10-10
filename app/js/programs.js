@@ -250,8 +250,8 @@ export const PROGRAMS = {
     // l'oral, et les premiers mots écrits (lire des mots familiers illustrés, épeler, copier : programme de 2026)
     anglais: [
       ['ecoute', 5, 10], ['lis-anglais', 1, 8], ['mot-anglais', 1, 8], ['relie-anglais', 1, 8], ['epelle-anglais', 1, 7],
-      ['compte-anglais', 2, 7], ['nombres-anglais', 2, 8], ['calcul-anglais', 3, 8], ['couleurs-anglais', 2, 7], ['colorie-anglais', 1, 5],
-      ['memory-anglais', 1, 7], ['intrus-anglais', 1, 4], ['contraires-anglais', 1, 5], ['ou-est', 3, 8], ['phrase-anglais', 1, 2],
+      ['compte-anglais', 2, 7], ['nombres-anglais', 2, 8], ['calcul-anglais', 3, 8], ['couleurs-anglais', 2, 7], ['colorie-anglais', 1, 7],
+      ['memory-anglais', 1, 8], ['intrus-anglais', 1, 4], ['contraires-anglais', 1, 5], ['ou-est', 3, 8], ['phrase-anglais', 1, 2],
       ['parle-anglais', 2, 8],
     ],
   },
@@ -282,11 +282,12 @@ export const PROGRAMS = {
     ],
     // mélanges, lumière et ombres, phases de la Lune, classification, réseaux alimentaires, météo, objets techniques
     sciences: [
-      ['sciences-cm', 1, 7], ['melanges', 6, 10], ['milieux', 5, 10], ['ciel', 4, 6, [5]], ['meteo', 7, 10], ['objets', 7, 10],
+      ['sciences-cm', 1, 7], ['corps', 9, 10], ['melanges', 6, 10], ['milieux', 5, 10], ['ciel', 4, 6, [5]], ['meteo', 7, 10], ['objets', 7, 10],
     ],
     anglais: [
       ['anglais-cm', 1, 8], ['ecoute', 8, 10], ['lis-anglais', 8, 10], ['mot-anglais', 8, 10], ['relie-anglais', 8, 10], ['epelle-anglais', 7, 10],
       ['nombres-anglais', 6, 8], ['ou-est', 6, 8], ['phrase-anglais', 3, 7], ['parle-anglais', 4, 8],
+      ['intrus-anglais', 4, 7], ['contraires-anglais', 5, 7],
     ],
   },
   CM2: {
@@ -313,7 +314,7 @@ export const PROGRAMS = {
       ['histoire', 3, 10, [4]], ['geographie', 4, 10], ['republique', 6, 10], ['carte-monde', 7, 10], ['pays', 7, 8],
     ],
     sciences: [
-      ['sciences-cm', 1, 10, [7]], ['ciel', 7, 10], ['electricite', 7, 10], ['planete', 8, 10], ['milieux', 8, 10], ['objets', 8, 10],
+      ['sciences-cm', 1, 10, [7]], ['corps', 9, 10], ['ciel', 7, 10], ['electricite', 7, 10], ['planete', 8, 10], ['milieux', 8, 10], ['objets', 8, 10],
     ],
     anglais: [
       ['anglais-cm', 1, 10], ['ecoute', 9, 10], ['lis-anglais', 9, 10], ['mot-anglais', 9, 10], ['relie-anglais', 9, 10], ['epelle-anglais', 8, 10],

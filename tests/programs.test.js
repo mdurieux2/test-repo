@@ -25,6 +25,18 @@ test('les programmes ne citent que des jeux et des niveaux qui existent', () => 
   }
 });
 
+test('chaque niveau de chaque jeu est au programme d’au moins une classe (sinon personne n’y joue)', () => {
+  const missing = [];
+  for (const game of GAMES.filter((g) => !g.paliers)) {
+    for (let level = 1; level <= game.levels.length; level++) {
+      const used = Object.values(PROGRAMS).some((domains) => Object.values(domains).some((entries) => entries.some(
+        ([id, min, max, skip = []]) => id === game.id && level >= min && level <= max && !skip.includes(level))));
+      if (!used) missing.push(`${game.id} niveau ${level}`);
+    }
+  }
+  assert.deepEqual(missing, []);
+});
+
 test('la maternelle ne fait ni lecture de mots ni grands nombres', () => {
   for (const grade of ['PS', 'MS']) {
     const games = programFor(grade).flatMap((d) => d.games.map((g) => g.game.id));
