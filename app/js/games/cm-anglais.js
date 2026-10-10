@@ -46,8 +46,8 @@ function question(rng, { key, text, instruction = text, short, replay, stage, li
 
 // ---------------------------------------------------------------- Niveau 1 : l'alphabet
 
-// Les lettres qu'un petit Français confond en anglais : A se dit « é », E se dit « i », I se dit
-// « aï », R presque « a », G et J s'échangent, Y se dit « ouaï »… Chaque lettre est proposée avec des
+// Les lettres qu'un petit Français confond en anglais : A se dit « éï », E se dit « i », I se dit
+// « aï », R se dit « ar », G « dji » et J « djéï », Y « ouaï »… Chaque lettre est proposée avec des
 // lettres qui se disent presque pareil (Z n'est jamais dite : « zed » ou « zee » selon le pays).
 const LETTER_TRAPS = {
   A: ['E', 'I', 'R', 'H'], E: ['I', 'A', 'G'], I: ['E', 'Y', 'A'], R: ['A', 'E', 'I'], G: ['J', 'E', 'I'], J: ['G', 'A', 'H'],
@@ -73,6 +73,13 @@ const SPELLINGS = [
   { en: 'girl', emoji: '👧', wrong: ['gerl', 'girle'] }, { en: 'bike', emoji: '🚲', wrong: ['baik', 'bik'] },
   { en: 'key', emoji: '🔑', wrong: ['ki', 'kee'] }, { en: 'fish', emoji: '🐟', wrong: ['fich', 'fishe'] },
   { en: 'shoe', emoji: '👟', wrong: ['chou', 'shou'] }, { en: 'nose', emoji: '👃', wrong: ['noze', 'nos'] },
+];
+
+// Des mots anglais qui se disent comme une lettre (you → U, why → Y, see → C…) : on trouve la lettre
+// en lisant, sans avoir à l'entendre.
+const LETTER_WORDS = [
+  ['you', 'U', ['Y', 'W', 'O']], ['why', 'Y', ['W', 'I', 'U']], ['see', 'C', ['S', 'E', 'Z']], ['bee', 'B', ['P', 'V', 'D']],
+  ['tea', 'T', ['D', 'E', 'P']], ['are', 'R', ['A', 'E', 'H']], ['eye', 'I', ['E', 'Y', 'A']], ['oh', 'O', ['U', 'A', 'E']],
 ];
 
 /** « bag » → « B, A, G. » : les lettres dites une à une. */
@@ -110,6 +117,23 @@ function motEpele(rng) {
     style: 'words',
     answer: word,
     success: [sound, say(word)],
+  });
+}
+
+function lettreMot(rng) {
+  const [word, letter, traps] = pick(rng, LETTER_WORDS);
+  const sound = say(word);
+  return question(rng, {
+    key: `anglais-cm:lettre-mot:${word}`,
+    text: 'Quelle lettre anglaise se dit comme ce mot ?',
+    instruction: ['Quelle lettre anglaise se dit comme ce mot ?', sound],
+    short: { key: 'anglais-cm:lettre-mot', text: 'Quelle lettre ?', speak: [sound] },
+    replay: [sound],
+    stage: wordStage(word, 'en'),
+    options: [letter, ...traps],
+    style: 'letters',
+    answer: letter,
+    success: [sound, say(`The letter ${letter}.`, 0.8)],
   });
 }
 
@@ -416,8 +440,8 @@ const LINKS = [
   ['My aunt’s son is my…', 'cousin'], ['My aunt’s daughter is my…', 'cousin'],
   ['My uncle’s son is my…', 'cousin'], ['My uncle’s daughter is my…', 'cousin'],
 ];
-const GIRLS = ['Anna', 'Lucy', 'Emma', 'Mia'];
-const BOYS = ['Tom', 'Ben', 'Jack', 'Leo'];
+const GIRLS = ['Anna', 'Lucy', 'Emma'];
+const BOYS = ['Tom', 'Ben', 'Jack'];
 // His ou her : la personne dont on parle, et le prénom de son frère, de sa sœur, de sa maman…
 const RELATIVES = [
   { en: 'sister', names: GIRLS }, { en: 'brother', names: BOYS }, { en: 'cousin', names: [...GIRLS, ...BOYS] },
@@ -454,7 +478,7 @@ function familleAnglais(rng) {
     choice: frChoice,
     style: 'words',
     answer: FAMILY[word].fr,
-    success: [sound, `${capital(FAMILY[word].fr)} !`],
+    success: [sound, `C’est ${FAMILY[word].fr} !`],
   });
 }
 
@@ -614,9 +638,9 @@ function prefere(rng) {
   const story = say((rng() < 0.5 ? parts : parts.reverse()).join(' '));
   return question(rng, {
     key: `anglais-cm:prefere:${liked.en}:${disliked.en}`,
-    text: 'Écoute l’enfant, et touche ce qu’il aime.',
-    instruction: ['Écoute l’enfant, et touche ce qu’il aime.', story],
-    short: { key: 'anglais-cm:prefere', text: 'Qu’est-ce qu’il aime ?', speak: [story] },
+    text: 'Écoute, et touche ce que l’enfant aime.',
+    instruction: ['Écoute, et touche ce que l’enfant aime.', story],
+    short: { key: 'anglais-cm:prefere', text: 'Qu’est-ce que l’enfant aime ?', speak: [story] },
     replay: [story],
     listen: true,
     options: [liked, disliked, third],
@@ -635,27 +659,29 @@ const SUBJECTS = {
   He: { have: 'has', be: 'is', badHave: 'have', badBe: 'are', frHave: 'Il a', frBe: 'Il est', other: 'She' },
   She: { have: 'has', be: 'is', badHave: 'have', badBe: 'are', frHave: 'Elle a', frBe: 'Elle est', other: 'He' },
 };
-// Ce qu'on a (have got) ou ce qu'on est (be : tall, short). `order` : l'ordre des mots à la française
-// (eyes blue) ; `others` / `frOthers` : d'autres descriptions, pour les pièges ; `bare` : sans « a ».
+// Ce qu'on a (have got) ou ce qu'on est (be : tall, short). `others` / `frOthers` : d'autres
+// descriptions, pour les pièges ; `bare` : sans « a » (he has got beard).
+/** Une description avec have got : « blue eyes », et l'ordre des mots à la française (« eyes blue »). */
+const got = (adj, noun, fr, others, frOthers) => ({ id: `${adj}-${noun}`, en: `${adj} ${noun}`, order: `${noun} ${adj}`, fr, others, frOthers });
 const LOOKS = [
-  { id: 'blue-eyes', en: 'blue eyes', order: 'eyes blue', fr: 'les yeux bleus', others: ['brown eyes', 'green eyes', 'blue hair'], frOthers: ['les yeux marron', 'les yeux verts', 'les cheveux bleus'] },
-  { id: 'brown-eyes', en: 'brown eyes', order: 'eyes brown', fr: 'les yeux marron', others: ['blue eyes', 'green eyes', 'brown hair'], frOthers: ['les yeux bleus', 'les yeux verts', 'les cheveux bruns'] },
-  { id: 'green-eyes', en: 'green eyes', order: 'eyes green', fr: 'les yeux verts', others: ['blue eyes', 'brown eyes', 'green hair'], frOthers: ['les yeux bleus', 'les yeux marron', 'les cheveux verts'] },
-  { id: 'long-hair', en: 'long hair', order: 'hair long', fr: 'les cheveux longs', others: ['short hair', 'curly hair'], frOthers: ['les cheveux courts', 'les cheveux bouclés'] },
-  { id: 'short-hair', en: 'short hair', order: 'hair short', fr: 'les cheveux courts', others: ['long hair', 'straight hair'], frOthers: ['les cheveux longs', 'les cheveux raides'] },
-  { id: 'curly-hair', en: 'curly hair', order: 'hair curly', fr: 'les cheveux bouclés', others: ['straight hair', 'long hair'], frOthers: ['les cheveux raides', 'les cheveux longs'] },
-  { id: 'straight-hair', en: 'straight hair', order: 'hair straight', fr: 'les cheveux raides', others: ['curly hair', 'short hair'], frOthers: ['les cheveux bouclés', 'les cheveux courts'] },
-  { id: 'blond-hair', en: 'blond hair', order: 'hair blond', fr: 'les cheveux blonds', others: ['black hair', 'brown hair'], frOthers: ['les cheveux noirs', 'les cheveux bruns'] },
-  { id: 'black-hair', en: 'black hair', order: 'hair black', fr: 'les cheveux noirs', others: ['blond hair', 'black eyes'], frOthers: ['les cheveux blonds', 'les yeux noirs'] },
-  { id: 'brown-hair', en: 'brown hair', order: 'hair brown', fr: 'les cheveux bruns', others: ['blond hair', 'brown eyes'], frOthers: ['les cheveux blonds', 'les yeux marron'] },
-  { id: 'red-hair', en: 'red hair', order: 'hair red', fr: 'les cheveux roux', others: ['blond hair', 'black hair'], frOthers: ['les cheveux blonds', 'les cheveux noirs'] },
+  got('blue', 'eyes', 'les yeux bleus', ['brown eyes', 'green eyes', 'blue hair'], ['les yeux marron', 'les yeux verts', 'les cheveux bleus']),
+  got('brown', 'eyes', 'les yeux marron', ['blue eyes', 'green eyes', 'brown hair'], ['les yeux bleus', 'les yeux verts', 'les cheveux bruns']),
+  got('green', 'eyes', 'les yeux verts', ['blue eyes', 'brown eyes', 'green hair'], ['les yeux bleus', 'les yeux marron', 'les cheveux verts']),
+  got('long', 'hair', 'les cheveux longs', ['short hair', 'curly hair'], ['les cheveux courts', 'les cheveux bouclés']),
+  got('short', 'hair', 'les cheveux courts', ['long hair', 'straight hair'], ['les cheveux longs', 'les cheveux raides']),
+  got('curly', 'hair', 'les cheveux bouclés', ['straight hair', 'long hair'], ['les cheveux raides', 'les cheveux longs']),
+  got('straight', 'hair', 'les cheveux raides', ['curly hair', 'short hair'], ['les cheveux bouclés', 'les cheveux courts']),
+  got('blond', 'hair', 'les cheveux blonds', ['black hair', 'brown hair'], ['les cheveux noirs', 'les cheveux bruns']),
+  got('black', 'hair', 'les cheveux noirs', ['blond hair', 'black eyes'], ['les cheveux blonds', 'les yeux noirs']),
+  got('brown', 'hair', 'les cheveux bruns', ['blond hair', 'brown eyes'], ['les cheveux blonds', 'les yeux marron']),
+  got('red', 'hair', 'les cheveux roux', ['blond hair', 'black hair'], ['les cheveux blonds', 'les cheveux noirs']),
   { id: 'glasses', en: 'glasses', fr: 'des lunettes', others: ['blue eyes'], frOthers: ['les yeux bleus'] },
   { id: 'beard', en: 'a beard', bare: 'beard', fr: 'une barbe', he: true, others: ['glasses'], frOthers: ['des lunettes'] },
   { id: 'tall', be: true, en: 'tall', fr: ['grand', 'grande'], opposite: 'short' },
   { id: 'short', be: true, en: 'short', fr: ['petit', 'petite'], opposite: 'tall' },
 ];
 const look = (id) => LOOKS.find((l) => l.id === id);
-// Les parties du corps au pluriel (teeth, feet : des pluriels irréguliers ; hair : sans s).
+// Les parties du corps (au pluriel, teeth et feet sont irréguliers, et hair ne prend pas de s).
 const BODY = [
   { fr: 'les dents', en: 'teeth', wrong: ['tooths', 'tooth', 'feet'] }, { fr: 'les pieds', en: 'feet', wrong: ['foots', 'foot', 'teeth'] },
   { fr: 'les yeux', en: 'eyes', wrong: ['eye', 'ears', 'legs'] }, { fr: 'les oreilles', en: 'ears', wrong: ['ear', 'eyes', 'arms'] },
@@ -664,8 +690,8 @@ const BODY = [
   { fr: 'le nez', en: 'nose', wrong: ['knees', 'mouth', 'ears'] }, { fr: 'la bouche', en: 'mouth', wrong: ['mouse', 'nose', 'month'] },
   { fr: 'les cheveux', en: 'hair', wrong: ['hairs', 'head', 'ears'] }, { fr: 'les genoux', en: 'knees', wrong: ['knee', 'nose', 'legs'] },
 ];
-// Le sujet des phrases à trous : un prénom, « I », « my brother »…
-const GAP_SUBJECTS = [['I', 'I'], ['Tom', 'He'], ['Anna', 'She'], ['My brother', 'He'], ['My mum', 'She']];
+// Le sujet des phrases à trous (et le pronom qui lui correspond).
+const GAP_SUBJECTS = [['I', 'I'], ['He', 'He'], ['She', 'She'], ['Tom', 'He'], ['Anna', 'She']];
 
 function lookEn(s, l) {
   return l.be ? `${s} ${SUBJECTS[s].be} ${l.en}.` : `${s} ${SUBJECTS[s].have} got ${l.en}.`;
@@ -761,7 +787,7 @@ function corps(rng) {
   return question(rng, {
     key: `anglais-cm:corps:${part.en}`,
     text: 'Comment dit-on en anglais ?',
-    instruction: 'Comment dit-on ces mots en anglais ? Attention au pluriel !',
+    instruction: 'Comment dit-on cette partie du corps en anglais ?',
     short: { key: 'anglais-cm:corps', text: 'En anglais ?' },
     stage: wordStage(part.fr),
     options: [part.en, ...part.wrong],
@@ -846,7 +872,7 @@ function lieuAnglais(rng) {
     choice: frChoice,
     style: 'words',
     answer: PLACES[place].fr,
-    success: [sound, `${capital(PLACES[place].fr)} !`],
+    success: [sound, `C’est ${PLACES[place].fr} !`],
   });
 }
 
@@ -1147,7 +1173,7 @@ function questionDoes(rng) {
   return question(rng, {
     key: `anglais-cm:question-does:${h.subj}:${h.rest}`,
     text: 'Quelle est la bonne question ?',
-    instruction: ['Lis la phrase. Touche la bonne question pour la demander.', sound],
+    instruction: ['Lis la phrase. Touche la même phrase, sous forme de question.', sound],
     short: { key: 'anglais-cm:question-does', text: 'La bonne question ?', speak: [sound] },
     replay: [sound],
     stage: { type: 'sentence', text: affirmative(h), lang: 'en' },
@@ -1208,7 +1234,7 @@ function reponseCourte(rng) {
 
 // Les formes de questions de chaque niveau, dans l'ordre où elles alternent (l'écoute entre deux lectures).
 const KINDS = [
-  [lettre, orthographe, motEpele],
+  [lettre, orthographe, motEpele, lettreMot],
   [(rng) => jour(rng, false), dateEntendue, moisSuivant, jourOuMois, (rng) => jour(rng, true), dateEcrite, fete],
   [(rng) => heurePhrase(rng, false), (rng) => heureChiffres(rng, true), (rng) => heurePhrase(rng, true), (rng) => heureChiffres(rng, false)],
   [familleFrancais, familleEntendue, lien, familleAnglais, hisHer],
