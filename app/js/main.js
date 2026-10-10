@@ -1561,7 +1561,9 @@ function choiceZone(ctx) {
     const label = typeof choice.label === 'string' ? choice.label : '';
     const classes = ['choice'];
     if (label.length > 7 && q.choiceStyle !== 'sentences') classes.push('long');
-    if (/^\d{3,}$/.test(label)) classes.push(label.length >= 4 ? 'digits-4' : 'digits-3'); // grands nombres : police plus petite
+    // grands nombres, écrits ou non avec une espace fine (« 1 441 ») : police plus petite
+    const digits = label.replace(/\s/g, '');
+    if (/^\d{3,}$/.test(digits)) classes.push(digits.length >= 4 ? 'digits-4' : 'digits-3');
     const btn = choice.place
       ? h('button', {
         class: classes.join(' '), 'data-value': String(choice.value), 'aria-label': choice.name,
