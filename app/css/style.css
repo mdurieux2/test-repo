@@ -373,8 +373,10 @@ input { -webkit-user-select: text; user-select: text; }
 .reveal-hl { color: var(--accent); text-decoration: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; }
 /* le mot ou le groupe dont on parle (grammaire du CM) : souligné et en gras, pas seulement en couleur */
 .stage-text.long .text-body { font-size: 1.05rem; line-height: 1.4; font-weight: 600; }
-@media (orientation: portrait) {
-  /* un long texte du CM sur un petit téléphone : l'écran ne défile pas, c'est le texte qui défile
+/* tout sauf le téléphone en paysage (qui a sa mise en page, plus bas) : en portrait, et sur tablette
+   ou ordinateur en paysage (l'iPad mini en paysage, agrandi, a moins de place qu'un iPhone SE) */
+@media (orientation: portrait), (min-height: 521px) {
+  /* un long texte du CM sur un petit écran : l'écran ne défile pas, c'est le texte qui défile
      dans sa boîte (le titre et « Écouter le texte » restent visibles), les réponses en dessous */
   .screen.play:has(.stage-text.long) { height: calc(100vh / var(--zoom, 1)); height: calc(100dvh / var(--zoom, 1)); }
   .play > .stage:has(> .stage-text.long) { flex: 1 1 0; min-height: 170px; align-items: stretch; }
@@ -382,10 +384,17 @@ input { -webkit-user-select: text; user-select: text; }
   .stage-text.long .text-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .screen.play:has(.stage-text.long) .feedback { min-height: 60px; }
 }
-@media (orientation: portrait) and (max-height: 760px) {
-  /* cinq réponses en phrases (« Quel genre de texte ? ») sur un petit téléphone : deux colonnes */
+/* écran peu haut une fois agrandi : téléphone en portrait jusqu'à 760 px, tablette en paysage
+   jusqu'à 851 px (agrandie 1,12 fois, voir --zoom) */
+@media (orientation: portrait) and (max-height: 760px), (orientation: landscape) and (min-height: 521px) and (max-height: 851px) {
+  /* cinq réponses en phrases (« Quel genre de texte ? ») : deux colonnes */
   .choices-sentences.n5, .choices-sentences.n6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .choices-sentences.n5 .choice:last-child { grid-column: 1 / -1; }
+}
+@media (orientation: landscape) and (min-height: 521px) and (max-height: 851px) {
+  /* un texte à lire sur tablette en paysage : quatre réponses sur deux colonnes, pour garder de la
+     place au texte (sur iPad mini, il n'en resterait que deux lignes) */
+  .screen.play:has(.stage-text) .choices-sentences.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 .stage-text .text-body:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; border-radius: 6px; }
 .text-lines .text-line { display: block; }
