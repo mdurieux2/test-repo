@@ -9081,6 +9081,15 @@
   "file": "fr/f9fcb7a5d553c73d.mp3"
  },
  {
+  "key": "fr|1|Nous pûmes enfin dormir.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Nous pûmes enfin dormir.",
+  "voice": "estelle",
+  "file": "fr/c21cda7e7a51adf1.mp3"
+ },
+ {
   "key": "en|0.9|The twentieth of August.",
   "lang": "en",
   "rate": 0.9,
@@ -12834,6 +12843,15 @@
   "file": "en/6b9a8100890029e6.mp3"
  },
  {
+  "key": "fr|1|Les marins eurent de la chance.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Les marins eurent de la chance.",
+  "voice": "estelle",
+  "file": "fr/21cef9385005c556.mp3"
+ },
+ {
   "key": "en|0.9|What month comes after October?",
   "lang": "en",
   "rate": 0.9,
@@ -14056,6 +14074,15 @@
   "text": "Ben … breakfast at seven o'clock.",
   "voice": "estelle",
   "file": "en/c071630b9f0380f9.mp3"
+ },
+ {
+  "key": "fr|1|Demain, tu iras chez le dentiste.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Demain, tu iras chez le dentiste.",
+  "voice": "estelle",
+  "file": "fr/3469d2f837b15cda.mp3"
  },
  {
   "key": "fr|1|Quelle période va de 476 à 1492 ?",
@@ -15939,6 +15966,15 @@
   "file": "fr/a2e234fa2a8cb16d.mp3"
  },
  {
+  "key": "fr|1|La veille, tu avais pris ton billet.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "La veille, tu avais pris ton billet.",
+  "voice": "estelle",
+  "file": "fr/bdf70d88aa64643e.mp3"
+ },
+ {
   "key": "fr|1|Où rapporte-t-on les piles usagées ?",
   "lang": "fr",
   "rate": 1,
@@ -15982,6 +16018,15 @@
   "text": "Comment appelle-t-on cette méthode ?",
   "voice": "estelle",
   "file": "fr/8939a91a47ea9dd3.mp3"
+ },
+ {
+  "key": "fr|1|Nous eûmes très froid cette nuit-là.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Nous eûmes très froid cette nuit-là.",
+  "voice": "estelle",
+  "file": "fr/ebbf1b306b36b5d4.mp3"
  },
  {
   "key": "fr|1|Quelle est la capitale de la Grèce ?",
@@ -16578,6 +16623,15 @@
   "file": "fr/0c0bcfd2592b76fe.mp3"
  },
  {
+  "key": "fr|1|Le chat put enfin attraper la souris.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Le chat put enfin attraper la souris.",
+  "voice": "estelle",
+  "file": "fr/f5599b86a9481a3f.mp3"
+ },
+ {
   "key": "fr|1|Oui : 1163, c'est le douzième siècle.",
   "lang": "fr",
   "rate": 1,
@@ -16972,6 +17026,15 @@
   "text": "Qui a écrit La Marseillaise, en 1792 ?",
   "voice": "estelle",
   "file": "fr/413c8f44f7a56ebc.mp3"
+ },
+ {
+  "key": "fr|1|La veille, tu avais réussi ton examen.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "La veille, tu avais réussi ton examen.",
+  "voice": "estelle",
+  "file": "fr/5185eb619f528012.mp3"
  },
  {
   "key": "fr|1|Quelle est la capitale de l'Autriche ?",
@@ -26611,6 +26674,15 @@
   "text": "Quel mot désigne un appareil pour voir les choses minuscules ?",
   "voice": "estelle",
   "file": "fr/badd4be5f44fbd56.mp3"
+ },
+ {
+  "key": "fr|1|À cette époque, je voyais mes grands-parents chaque dimanche.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "À cette époque, je voyais mes grands-parents chaque dimanche.",
+  "voice": "estelle",
+  "file": "fr/281294a32ed2f2fc.mp3"
  },
  {
   "key": "fr|1|Oui : l'agriculteur cultive les plantes et élève les animaux.",
@@ -98181,105 +98253,6 @@
   "file": "fr/7c4a29b8385d64ff.mp3"
  },
  {
-  "key": "fr|1|En octobre, on est en automne.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "En octobre, on est en automne.",
-  "voice": "estelle",
-  "file": "fr/3c56e5238ed80eca.mp3"
- },
- {
-  "key": "en|0.9|What is the opposite of white?",
-  "lang": "en",
-  "rate": 0.9,
-  "type": "phrase",
-  "text": "What is the opposite of white?",
-  "voice": "estelle",
-  "file": "en/e3c2077e811ba8dd.mp3"
- },
- {
-  "key": "en|1|It's snowy.",
-  "lang": "en",
-  "rate": 1,
-  "type": "phrase",
-  "text": "It's snowy.",
-  "voice": "estelle",
-  "file": "en/fbc6e5e23869b764.mp3"
- },
- {
-  "key": "fr|1|Quel mot dit la plus petite peur ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Quel mot dit la plus petite peur ?",
-  "voice": "estelle",
-  "file": "fr/b0623261d98a24c0.mp3"
- },
- {
-  "key": "fr|1|L'araignée tisse sa toile pour attraper des insectes.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "L'araignée tisse sa toile pour attraper des insectes.",
-  "voice": "estelle",
-  "file": "fr/272e673ba81dd768.mp3"
- },
- {
-  "key": "fr|1|Quelle est la moitié de 12 ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Quelle est la moitié de 12 ?",
-  "voice": "estelle",
-  "file": "fr/d5bb43a9dcc63f65.mp3"
- },
- {
-  "key": "fr|1|Quelle est la moitié de 60 ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Quelle est la moitié de 60 ?",
-  "voice": "estelle",
-  "file": "fr/505e21eac9a5cc49.mp3"
- },
- {
-  "key": "fr|1|En mai, on est au printemps.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "En mai, on est au printemps.",
-  "voice": "estelle",
-  "file": "fr/447a27cdcf80fd33.mp3"
- },
- {
-  "key": "fr|1|Il pleut sur la ville.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Il pleut sur la ville.",
-  "voice": "estelle",
-  "file": "fr/44618385347ebe61.mp3"
- },
- {
-  "key": "fr|1|Le gâteau est bon.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Le gâteau est bon.",
-  "voice": "estelle",
-  "file": "fr/5211abcde691b3b2.mp3"
- },
- {
-  "key": "fr|1|Elle a dix pattes.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "phrase",
-  "text": "Elle a dix pattes.",
-  "voice": "estelle",
-  "file": "fr/de0f5cc3f1723032.mp3"
- },
- {
   "key": "fr|1|Oui,",
   "lang": "fr",
   "rate": 1,
@@ -98550,15 +98523,6 @@
   "file": "fr/b35dd419b026bf40.mp3"
  },
  {
-  "key": "fr|1|Demain,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Demain,",
-  "voice": "estelle",
-  "file": "fr/d190f0adb68e0bc1.mp3"
- },
- {
   "key": "fr|1|bateau,",
   "lang": "fr",
   "rate": 1,
@@ -98575,6 +98539,15 @@
   "text": "et 1 :",
   "voice": "estelle",
   "file": "fr/168b048e3e0431c6.mp3"
+ },
+ {
+  "key": "fr|1|Demain,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Demain,",
+  "voice": "estelle",
+  "file": "fr/d190f0adb68e0bc1.mp3"
  },
  {
   "key": "fr|1|canard,",
@@ -105885,15 +105858,6 @@
   "file": "fr/46a73295d313fc71.mp3"
  },
  {
-  "key": "fr|1|La veille,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "La veille,",
-  "voice": "estelle",
-  "file": "fr/f694d4c81a530468.mp3"
- },
- {
   "key": "fr|1|ou Indien ?",
   "lang": "fr",
   "rate": 1,
@@ -107323,15 +107287,6 @@
   "text": "5 tulipes",
   "voice": "estelle",
   "file": "fr/a69b4a59da867c70.mp3"
- },
- {
-  "key": "fr|1|À cette époque,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "À cette époque,",
-  "voice": "estelle",
-  "file": "fr/66deb8fa85e7c088.mp3"
  },
  {
   "key": "fr|1|Il y a 10 minutes,",
@@ -108927,6 +108882,15 @@
   "file": "fr/2d4c90a80cbb0533.mp3"
  },
  {
+  "key": "fr|1|on est en automne.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "on est en automne.",
+  "voice": "estelle",
+  "file": "fr/6b19b400f6c90c27.mp3"
+ },
+ {
   "key": "fr|1|3 paquets de 3",
   "lang": "fr",
   "rate": 1,
@@ -109528,6 +109492,15 @@
   "text": "ou la porcherie",
   "voice": "estelle",
   "file": "fr/fcf743b3f073a8f4.mp3"
+ },
+ {
+  "key": "fr|1|À cette époque,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "À cette époque,",
+  "voice": "estelle",
+  "file": "fr/66deb8fa85e7c088.mp3"
  },
  {
   "key": "fr|1|c'est un mardi.",
@@ -111726,6 +111699,15 @@
   "file": "fr/8d3d83582d4efcb1.mp3"
  },
  {
+  "key": "fr|1|La veille,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "La veille,",
+  "voice": "estelle",
+  "file": "fr/f694d4c81a530468.mp3"
+ },
+ {
   "key": "fr|1|Le glaçon,",
   "lang": "fr",
   "rate": 1,
@@ -111751,6 +111733,15 @@
   "text": "Le deuxième samedi,",
   "voice": "estelle",
   "file": "fr/7935c7255c018368.mp3"
+ },
+ {
+  "key": "fr|1|on est au printemps.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "on est au printemps.",
+  "voice": "estelle",
+  "file": "fr/c0e2413d1c0576f1.mp3"
  },
  {
   "key": "fr|1|Cet été,",
@@ -114498,6 +114489,15 @@
   "file": "fr/b60b64e0b6eb3546.mp3"
  },
  {
+  "key": "fr|1|En mai,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "En mai,",
+  "voice": "estelle",
+  "file": "fr/a8b5fc471adbf341.mp3"
+ },
+ {
   "key": "fr|1|on ne voit presque pas la Lune.",
   "lang": "fr",
   "rate": 1,
@@ -116188,6 +116188,15 @@
   "text": "en tissu",
   "voice": "estelle",
   "file": "fr/e1c021688df1c8ee.mp3"
+ },
+ {
+  "key": "fr|1|En octobre,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "En octobre,",
+  "voice": "estelle",
+  "file": "fr/384264ac96406205.mp3"
  },
  {
   "key": "fr|1|Ottawa",
@@ -121651,15 +121660,6 @@
   "text": "Le deuxième mardi,",
   "voice": "estelle",
   "file": "fr/c5a0daa885a53302.mp3"
- },
- {
-  "key": "fr|1|on est en automne.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "on est en automne.",
-  "voice": "estelle",
-  "file": "fr/6b19b400f6c90c27.mp3"
  },
  {
   "key": "fr|1|c'est 21.",
@@ -131769,24 +131769,6 @@
   "file": "fr/4aa681c2a555a8bb.mp3"
  },
  {
-  "key": "fr|1|Sens interdit,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Sens interdit,",
-  "voice": "estelle",
-  "file": "fr/a19c68c495c7e44d.mp3"
- },
- {
-  "key": "fr|1|l'ancre flotte",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "l'ancre flotte",
-  "voice": "estelle",
-  "file": "fr/cb39ca757cacf8a7.mp3"
- },
- {
   "key": "fr|1|Bravo",
   "lang": "fr",
   "rate": 1,
@@ -140049,6 +140031,15 @@
   "file": "fr/94d4c766cbff5737.mp3"
  },
  {
+  "key": "fr|1|Quelle est la moitié de",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Quelle est la moitié de",
+  "voice": "estelle",
+  "file": "fr/2d0a8ab92f0796a9.mp3"
+ },
+ {
   "key": "fr|1|billes rouges",
   "lang": "fr",
   "rate": 1,
@@ -140137,15 +140128,6 @@
   "text": "biscuits entre",
   "voice": "estelle",
   "file": "fr/b6df7e936bfa9a50.mp3"
- },
- {
-  "key": "fr|1|Quelle est la moitié de",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Quelle est la moitié de",
-  "voice": "estelle",
-  "file": "fr/2d0a8ab92f0796a9.mp3"
  },
  {
   "key": "fr|1|carottes",
@@ -145764,6 +145746,69 @@
   "file": "fr/2cf4d19c4eed98d5.mp3"
  },
  {
+  "key": "en|0.9|What is the opposite of white?",
+  "lang": "en",
+  "rate": 0.9,
+  "type": "morceau",
+  "text": "What is the opposite of white?",
+  "voice": "estelle",
+  "file": "en/e3c2077e811ba8dd.mp3"
+ },
+ {
+  "key": "en|1|It's snowy.",
+  "lang": "en",
+  "rate": 1,
+  "type": "morceau",
+  "text": "It's snowy.",
+  "voice": "estelle",
+  "file": "en/fbc6e5e23869b764.mp3"
+ },
+ {
+  "key": "fr|1|Quel mot dit la plus petite peur ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Quel mot dit la plus petite peur ?",
+  "voice": "estelle",
+  "file": "fr/b0623261d98a24c0.mp3"
+ },
+ {
+  "key": "fr|1|L'araignée tisse sa toile pour attraper des insectes.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "L'araignée tisse sa toile pour attraper des insectes.",
+  "voice": "estelle",
+  "file": "fr/272e673ba81dd768.mp3"
+ },
+ {
+  "key": "fr|1|Il pleut sur la ville.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Il pleut sur la ville.",
+  "voice": "estelle",
+  "file": "fr/44618385347ebe61.mp3"
+ },
+ {
+  "key": "fr|1|Le gâteau est bon.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Le gâteau est bon.",
+  "voice": "estelle",
+  "file": "fr/5211abcde691b3b2.mp3"
+ },
+ {
+  "key": "fr|1|Elle a dix pattes.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Elle a dix pattes.",
+  "voice": "estelle",
+  "file": "fr/de0f5cc3f1723032.mp3"
+ },
+ {
   "key": "fr|1|Quelle part des élèves vient à vélo ?",
   "lang": "fr",
   "rate": 1,
@@ -146149,6 +146194,24 @@
   "text": "Il reste mille",
   "voice": "estelle",
   "file": "fr/e0692175bfe91461.mp3"
+ },
+ {
+  "key": "fr|1|Sens interdit,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "Sens interdit,",
+  "voice": "estelle",
+  "file": "fr/a19c68c495c7e44d.mp3"
+ },
+ {
+  "key": "fr|1|l'ancre flotte",
+  "lang": "fr",
+  "rate": 1,
+  "type": "morceau",
+  "text": "l'ancre flotte",
+  "voice": "estelle",
+  "file": "fr/cb39ca757cacf8a7.mp3"
  },
  {
   "key": "fr|1|l'ombre tourne",
@@ -148372,87 +148435,6 @@
   "text": "Quelle forme faut-il découper ?",
   "voice": "estelle",
   "file": "fr/8e7f37d0b99f4bd6.mp3"
- },
- {
-  "key": "fr|1|et le poussin.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "et le poussin.",
-  "voice": "estelle",
-  "file": "fr/2a3803c987860104.mp3"
- },
- {
-  "key": "fr|1|la grenouille vit dans la mare.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "la grenouille vit dans la mare.",
-  "voice": "estelle",
-  "file": "fr/7a445ec592894d21.mp3"
- },
- {
-  "key": "fr|1|L'ancre est en quelle matière ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "L'ancre est en quelle matière ?",
-  "voice": "estelle",
-  "file": "fr/c75d6dcb582ca62e.mp3"
- },
- {
-  "key": "fr|1|Il deviendra de la bonne terre.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Il deviendra de la bonne terre.",
-  "voice": "estelle",
-  "file": "fr/a4b7419671265079.mp3"
- },
- {
-  "key": "fr|1|Comment dit-on œuf en anglais ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Comment dit-on œuf en anglais ?",
-  "voice": "estelle",
-  "file": "fr/5c66dee36ae96045.mp3"
- },
- {
-  "key": "fr|1|Où y a-t-il le plus de poissons ?",
-  "lang": "fr",
-  "rate": 1,
-  "type": "morceau",
-  "text": "Où y a-t-il le plus de poissons ?",
-  "voice": "estelle",
-  "file": "fr/09eed90d76d006fb.mp3"
- },
- {
-  "key": "fr|0.8|et maison",
-  "lang": "fr",
-  "rate": 0.8,
-  "type": "morceau",
-  "text": "et maison",
-  "voice": "estelle",
-  "file": "fr/dfe2ae0e3471448e.mp3"
- },
- {
-  "key": "fr|0.8|et citron",
-  "lang": "fr",
-  "rate": 0.8,
-  "type": "morceau",
-  "text": "et citron",
-  "voice": "estelle",
-  "file": "fr/6a521109df0ea801.mp3"
- },
- {
-  "key": "fr|0.8|et bonbon",
-  "lang": "fr",
-  "rate": 0.8,
-  "type": "morceau",
-  "text": "et bonbon",
-  "voice": "estelle",
-  "file": "fr/f852df89130e4c77.mp3"
  },
  {
   "key": "fr|1|frappe",
@@ -217827,6 +217809,87 @@
   "file": "fr/d74d3e908a4944f5.mp3"
  },
  {
+  "key": "fr|1|et le poussin.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "et le poussin.",
+  "voice": "estelle",
+  "file": "fr/2a3803c987860104.mp3"
+ },
+ {
+  "key": "fr|1|la grenouille vit dans la mare.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "la grenouille vit dans la mare.",
+  "voice": "estelle",
+  "file": "fr/7a445ec592894d21.mp3"
+ },
+ {
+  "key": "fr|1|L'ancre est en quelle matière ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "L'ancre est en quelle matière ?",
+  "voice": "estelle",
+  "file": "fr/c75d6dcb582ca62e.mp3"
+ },
+ {
+  "key": "fr|1|Il deviendra de la bonne terre.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Il deviendra de la bonne terre.",
+  "voice": "estelle",
+  "file": "fr/a4b7419671265079.mp3"
+ },
+ {
+  "key": "fr|1|Comment dit-on œuf en anglais ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Comment dit-on œuf en anglais ?",
+  "voice": "estelle",
+  "file": "fr/5c66dee36ae96045.mp3"
+ },
+ {
+  "key": "fr|1|Où y a-t-il le plus de poissons ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Où y a-t-il le plus de poissons ?",
+  "voice": "estelle",
+  "file": "fr/09eed90d76d006fb.mp3"
+ },
+ {
+  "key": "fr|0.8|et maison",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "et maison",
+  "voice": "estelle",
+  "file": "fr/dfe2ae0e3471448e.mp3"
+ },
+ {
+  "key": "fr|0.8|et citron",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "et citron",
+  "voice": "estelle",
+  "file": "fr/6a521109df0ea801.mp3"
+ },
+ {
+  "key": "fr|0.8|et bonbon",
+  "lang": "fr",
+  "rate": 0.8,
+  "type": "proposition",
+  "text": "et bonbon",
+  "voice": "estelle",
+  "file": "fr/f852df89130e4c77.mp3"
+ },
+ {
   "key": "fr|1|ou cactus",
   "lang": "fr",
   "rate": 1,
@@ -218059,15 +218122,6 @@
   "text": "Le premier mercredi,",
   "voice": "estelle",
   "file": "fr/72831a8f98d138db.mp3"
- },
- {
-  "key": "fr|1|on est au printemps.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "on est au printemps.",
-  "voice": "estelle",
-  "file": "fr/c0e2413d1c0576f1.mp3"
  },
  {
   "key": "fr|1|Le bébé de la vache,",
@@ -229903,78 +229957,6 @@
   "text": "thirteen minus two?",
   "voice": "estelle",
   "file": "en/f3bf4dbddd623bf1.mp3"
- },
- {
-  "key": "en|0.8|sixteen minus nine?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "sixteen minus nine?",
-  "voice": "estelle",
-  "file": "en/499dc1d2c6e668c3.mp3"
- },
- {
-  "key": "en|0.8|fifteen minus nine?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "fifteen minus nine?",
-  "voice": "estelle",
-  "file": "en/6e0e33f19df3e328.mp3"
- },
- {
-  "key": "en|0.8|eighteen minus two?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "eighteen minus two?",
-  "voice": "estelle",
-  "file": "en/44443cf73771a706.mp3"
- },
- {
-  "key": "en|0.8|eighteen minus six?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "eighteen minus six?",
-  "voice": "estelle",
-  "file": "en/b5ef7bc79a90bfbc.mp3"
- },
- {
-  "key": "en|0.8|fifteen minus five?",
-  "lang": "en",
-  "rate": 0.8,
-  "type": "proposition",
-  "text": "fifteen minus five?",
-  "voice": "estelle",
-  "file": "en/ef0ce802aa0c859a.mp3"
- },
- {
-  "key": "fr|1|les feuilles des arbres bougent.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "les feuilles des arbres bougent.",
-  "voice": "estelle",
-  "file": "fr/36927792a8dc09db.mp3"
- },
- {
-  "key": "fr|1|Courir partout dans la classe,",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Courir partout dans la classe,",
-  "voice": "estelle",
-  "file": "fr/576f75ce601fb845.mp3"
- },
- {
-  "key": "fr|1|Touche la souris sur la table.",
-  "lang": "fr",
-  "rate": 1,
-  "type": "proposition",
-  "text": "Touche la souris sur la table.",
-  "voice": "estelle",
-  "file": "fr/83afeb0f1cdf55c4.mp3"
  },
  {
   "key": "fr|1|poisson : 2 syllabes !",
@@ -245880,6 +245862,24 @@
   "file": "fr/740558d2e0d36ed2.mp3"
  },
  {
+  "key": "fr|1|Quelle est la moitié de 12 ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Quelle est la moitié de 12 ?",
+  "voice": "estelle",
+  "file": "fr/d5bb43a9dcc63f65.mp3"
+ },
+ {
+  "key": "fr|1|Quelle est la moitié de 60 ?",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Quelle est la moitié de 60 ?",
+  "voice": "estelle",
+  "file": "fr/505e21eac9a5cc49.mp3"
+ },
+ {
   "key": "fr|1|4 plus 5, c'est le double de 4, plus 1 : 9.",
   "lang": "fr",
   "rate": 1,
@@ -251397,6 +251397,15 @@
   "file": "fr/864a1388da31c3d3.mp3"
  },
  {
+  "key": "fr|1|En mai, on est au printemps.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "En mai, on est au printemps.",
+  "voice": "estelle",
+  "file": "fr/447a27cdcf80fd33.mp3"
+ },
+ {
   "key": "fr|1|En été, en hiver, en automne ou au printemps ?",
   "lang": "fr",
   "rate": 1,
@@ -251467,6 +251476,15 @@
   "text": "En été, au printemps, en automne ou en hiver ?",
   "voice": "estelle",
   "file": "fr/c3f47557f444b538.mp3"
+ },
+ {
+  "key": "fr|1|En octobre, on est en automne.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "En octobre, on est en automne.",
+  "voice": "estelle",
+  "file": "fr/3c56e5238ed80eca.mp3"
  },
  {
   "key": "fr|1|En été, en automne, au printemps ou en hiver ?",
@@ -257515,6 +257533,15 @@
   "text": "Touche le chat sous la table.",
   "voice": "estelle",
   "file": "fr/cf7431510c652b3f.mp3"
+ },
+ {
+  "key": "fr|1|Touche la souris sur la table.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "phrase",
+  "text": "Touche la souris sur la table.",
+  "voice": "estelle",
+  "file": "fr/83afeb0f1cdf55c4.mp3"
  },
  {
   "key": "fr|1|Oui, la souris est sur la table.",
@@ -264582,6 +264609,15 @@
   "file": "en/c9a37b778bea4454.mp3"
  },
  {
+  "key": "en|0.8|sixteen minus nine?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "sixteen minus nine?",
+  "voice": "estelle",
+  "file": "en/499dc1d2c6e668c3.mp3"
+ },
+ {
   "key": "en|0.8|nineteen minus two?",
   "lang": "en",
   "rate": 0.8,
@@ -264589,6 +264625,15 @@
   "text": "nineteen minus two?",
   "voice": "estelle",
   "file": "en/af12421010371d39.mp3"
+ },
+ {
+  "key": "en|0.8|fifteen minus nine?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "fifteen minus nine?",
+  "voice": "estelle",
+  "file": "en/6e0e33f19df3e328.mp3"
  },
  {
   "key": "en|0.8|twenty minus seventeen?",
@@ -264681,6 +264726,15 @@
   "file": "en/51fdbbf478903798.mp3"
  },
  {
+  "key": "en|0.8|eighteen minus two?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "eighteen minus two?",
+  "voice": "estelle",
+  "file": "en/44443cf73771a706.mp3"
+ },
+ {
   "key": "en|0.8|twenty minus twelve?",
   "lang": "en",
   "rate": 0.8,
@@ -264753,6 +264807,15 @@
   "file": "en/04d1dcb86d2ccc80.mp3"
  },
  {
+  "key": "en|0.8|eighteen minus six?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "eighteen minus six?",
+  "voice": "estelle",
+  "file": "en/b5ef7bc79a90bfbc.mp3"
+ },
+ {
   "key": "en|0.8|eighteen minus ten?",
   "lang": "en",
   "rate": 0.8,
@@ -264769,6 +264832,15 @@
   "text": "eleven minus one is ten!",
   "voice": "estelle",
   "file": "en/08cdeedf769e0564.mp3"
+ },
+ {
+  "key": "en|0.8|fifteen minus five?",
+  "lang": "en",
+  "rate": 0.8,
+  "type": "phrase",
+  "text": "fifteen minus five?",
+  "voice": "estelle",
+  "file": "en/ef0ce802aa0c859a.mp3"
  },
  {
   "key": "en|0.9|sixteen minus ten is six!",
@@ -279513,6 +279585,15 @@
   "file": "fr/e49fa85f85351b98.mp3"
  },
  {
+  "key": "fr|1|Courir partout dans la classe,",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "Courir partout dans la classe,",
+  "voice": "estelle",
+  "file": "fr/576f75ce601fb845.mp3"
+ },
+ {
   "key": "fr|1|le chat est sous la table.",
   "lang": "fr",
   "rate": 1,
@@ -279664,6 +279745,15 @@
   "text": "Pour savoir si un objet flotte,",
   "voice": "estelle",
   "file": "fr/ee1147fcac382111.mp3"
+ },
+ {
+  "key": "fr|1|les feuilles des arbres bougent.",
+  "lang": "fr",
+  "rate": 1,
+  "type": "proposition",
+  "text": "les feuilles des arbres bougent.",
+  "voice": "estelle",
+  "file": "fr/36927792a8dc09db.mp3"
  },
  {
   "key": "fr|1|Le tee-shirt,",

@@ -106,6 +106,12 @@ const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !',
   'On attrape le papillon par les ailes.',
   // imparfait (CE2) : « allions » et « voyaient », seuls, sont refusés par les contrôles
   'Autrefois, nous allions au marché le samedi.', 'Avant, ils voyaient des loups dans la forêt.',
+  // conjugaison du CM : « avais », « voyais », « iras », « pûmes », « eûmes », « put », « eurent », seuls,
+  // sont refusés par les contrôles (300 tirages par niveau de chaque jeu : seules ces phrases en dépendent)
+  'La veille, tu avais réussi ton examen.', 'La veille, tu avais pris ton billet.',
+  'À cette époque, je voyais mes grands-parents chaque dimanche.', 'Demain, tu iras chez le dentiste.',
+  'Nous pûmes enfin dormir.', 'Nous eûmes très froid cette nuit-là.', 'Le chat put enfin attraper la souris.',
+  'Les marins eurent de la chance.',
   // correction expliquée (explications.js) : la phrase dite avec l'encart, après une première erreur
   ...EXPLAIN_SENTENCES,
   // toucher plutôt que glisser (main.js) : écris au doigt, points à relier
