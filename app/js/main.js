@@ -22,7 +22,7 @@ import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './pr
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import {
   addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logFluence, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
-  resetChild, saveStore,
+  resetChild, saveStore, storeSnapshot,
 } from './storage.js';
 import { demoSeen, markDemoSeen } from './storage.js';
 import { hasDemo, playDemo, stillDemo, stopDemo } from './demo.js';
@@ -55,6 +55,7 @@ import { STORY_DATA } from './games/histoires.js';
 import * as recordings from './recordings.js';
 import { formatDuration, MAX_SECONDS, pickMime, sentenceAt, sentenceTimeline } from './recordings.js';
 import { fichesScreen } from './fiches-ecran.js';
+import { creerSauvegarde, dateEnClair, exporterEnregistrements, importerEnregistrements, lireSauvegarde, nomFichier } from './sauvegarde.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
@@ -439,6 +440,8 @@ const ICONS = {
   reglages: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M4.2 6.2l2.1 2.1M17.7 15.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 17.8l2.1-2.1M17.7 8.3l2.1-2.1"/>',
   partager: '<path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  sauvegarder: '<path d="M12 3v11M7.5 9.5 12 14l4.5-4.5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
+  restaurer: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>',
 };
 
 function icon(name) {
@@ -776,6 +779,7 @@ function welcomeScreen(adding = !store.order.length) {
           },
         }))
       : null,
+    added.length ? null : restoreCard(),
     added.length
       ? h('div', { class: 'welcome-actions' },
         !adding && store.order.length < MAX_CHILDREN
@@ -5750,6 +5754,117 @@ function recordScreen(story) {
   setState('ready');
 }
 
+// ---------------------------------------------------------------- Sauvegarde (sauvegarde.js)
+
+/**
+ * Enregistre le fichier de sauvegarde : sur iPhone et iPad, par le partage (« Enregistrer dans
+ * Fichiers », AirDrop, e-mail…), car un téléchargement y est mal rangé ; ailleurs, téléchargé
+ * (dossier Téléchargements). Renvoie 'partagée', 'téléchargée' ou 'annulée'.
+ */
+async function saveBackupFile(text, name) {
+  const blob = new Blob([text], { type: 'application/json' });
+  if (ceNavigateur().os === 'ios' && typeof File === 'function') {
+    const file = new File([blob], name, { type: 'application/json' });
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return 'partagée';
+      } catch (error) {
+        if (error?.name === 'AbortError') return 'annulée';
+        // partage refusé : le fichier est téléchargé
+      }
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const link = h('a', { href: url, download: name, hidden: true });
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  return 'téléchargée';
+}
+
+function lastBackupText() {
+  const when = dateEnClair(store.settings.lastBackup);
+  return when ? `Dernière sauvegarde : le ${when}.` : 'Pas encore de sauvegarde sur cet appareil.';
+}
+
+/** Le bouton « Restaurer une sauvegarde » (et son choix de fichier caché) ; `status` dit ce qui se passe. */
+function restoreButton(status) {
+  const input = h('input', { type: 'file', class: 'visually-hidden', tabindex: '-1', 'aria-hidden': 'true', 'aria-label': 'Fichier de sauvegarde' });
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    let text = '';
+    try {
+      text = await file.text();
+    } catch {
+      // illisible : lireSauvegarde le dira
+    }
+    const backup = lireSauvegarde(text);
+    if (!backup.ok) {
+      status.textContent = backup.raison;
+      return;
+    }
+    const when = dateEnClair(backup.date);
+    const replaced = store.order.length ? ' Les profils, les progrès et les réglages de cet appareil seront remplacés.' : '';
+    if (!confirm(`Restaurer la sauvegarde${when ? ` du ${when}` : ''} (${backup.enfants.join(', ')}) ?${replaced}`)) return;
+    status.textContent = 'Restauration…';
+    await importerEnregistrements(recordings, backup.enregistrements);
+    backup.store.active = null; // on repart de « Qui joue ? »
+    backup.store.settings.lastBackup = backup.date || new Date().toISOString();
+    if (!saveStore(backup.store)) {
+      status.textContent = 'La sauvegarde n’a pas pu être enregistrée sur cet appareil. Libérez de la place, puis réessayez.';
+      return;
+    }
+    location.reload();
+  });
+  return [input, h('button', { class: 'big-btn backup-restore', onclick: () => input.click() }, icon('restaurer'), 'Restaurer une sauvegarde')];
+}
+
+/** Réglages : enregistrer une sauvegarde de tout ce que l'app garde sur l'appareil, ou en restaurer une. */
+function backupCard() {
+  const status = h('p', { class: 'backup-status', role: 'status' }, lastBackupText());
+  const saveBtn = h('button', { class: 'big-btn primary backup-save', disabled: true }, icon('sauvegarder'), 'Enregistrer une sauvegarde');
+  // les histoires enregistrées sont lues tout de suite : au toucher, le fichier est prêt aussitôt
+  // (le partage doit suivre le geste de près)
+  let enregistrements = null;
+  exporterEnregistrements(recordings).catch(() => []).then((list) => {
+    enregistrements = list;
+    saveBtn.disabled = false;
+  });
+  saveBtn.addEventListener('click', async () => {
+    if (!enregistrements) return;
+    const date = new Date();
+    const name = nomFichier(date);
+    const text = JSON.stringify(creerSauvegarde(storeSnapshot(store), { version: APP.version, date, enregistrements }));
+    const how = await saveBackupFile(text, name);
+    if (how === 'annulée') {
+      status.textContent = 'Sauvegarde annulée.';
+      return;
+    }
+    store.settings.lastBackup = date.toISOString();
+    save();
+    status.textContent = `Sauvegarde ${how === 'partagée' ? 'prête' : 'téléchargée'} : ${name}. Gardez ce fichier en lieu sûr.`;
+  });
+  return h('section', { class: 'card backup' },
+    h('h2', {}, 'Sauvegarder la progression'),
+    h('p', { class: 'muted small' }, 'Les prénoms, les photos, les étoiles, les niveaux, les réglages et les histoires enregistrées, dans un fichier à garder en lieu sûr (Fichiers, Drive, e-mail…). Il permet de tout retrouver dans un autre navigateur, sur un autre appareil, ou si les données de l’app ont été effacées.'),
+    h('div', { class: 'backup-actions' }, saveBtn, restoreButton(status)),
+    status);
+}
+
+/** Premier lancement : retrouver les enfants d'une sauvegarde au lieu de les recréer. */
+function restoreCard() {
+  const status = h('p', { class: 'backup-status', role: 'status' });
+  return h('section', { class: 'card backup' },
+    h('h2', {}, 'Déjà une sauvegarde ?'),
+    h('p', { class: 'muted small' }, 'Retrouvez les enfants et leurs progrès, enregistrés depuis un autre navigateur ou un autre appareil.'),
+    h('div', { class: 'backup-actions' }, restoreButton(status)),
+    status);
+}
+
 /** Réglages : un raccourci vers la section Accessibilité de chaque enfant. */
 function a11yShortcuts() {
   return h('section', { class: 'card a11y-shortcuts' },
@@ -5785,10 +5900,11 @@ function settingsTab() {
     voicesCard(),
     a11yShortcuts(),
     fichesCard(store.active && store.profiles[store.active] ? store.active : store.order[0], 'reglages'),
+    backupCard(),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),
-      h('p', { class: 'muted small' }, 'Les prénoms et les progrès sont gardés sur cet appareil, dans ce navigateur, d’une version de l’app à l’autre. Sur iPhone et iPad, l’app installée est en plus protégée : le navigateur ne peut pas effacer ses données. Mais elle a ses propres données : les profils créés dans le navigateur sont à refaire dans l’app.')),
+      h('p', { class: 'muted small' }, 'Les prénoms et les progrès sont gardés sur cet appareil, dans ce navigateur, d’une version de l’app à l’autre. Sur iPhone et iPad, l’app installée est en plus protégée : le navigateur ne peut pas effacer ses données. Mais elle a ses propres données : pour y retrouver les profils créés dans le navigateur, enregistrez une sauvegarde (ci-dessus), puis restaurez-la dans l’app.')),
     h('section', { class: 'card about' },
       h('h2', {}, 'À propos'),
       h('div', { class: 'setting' }, h('span', {}, 'Version'), h('b', { 'data-version': APP.version }, APP.version)),

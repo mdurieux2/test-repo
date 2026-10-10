@@ -210,12 +210,18 @@ export function loadStore(storage = globalThis.localStorage) {
   }
 }
 
+/**
+ * Ce qui est enregistré sur l'appareil (et dans une sauvegarde, sauvegarde.js). Pendant une partie
+ * à deux, l'enfant actif change à chaque question : on enregistre toujours celui d'avant la partie,
+ * pour le retrouver même si l'app est fermée au milieu.
+ */
+export function storeSnapshot(store) {
+  return store.duo ? { ...store, active: duoHome(store), duo: undefined } : store;
+}
+
 export function saveStore(store, storage = globalThis.localStorage) {
   try {
-    // pendant une partie à deux, l'enfant actif change à chaque question : on enregistre toujours
-    // celui d'avant la partie, pour le retrouver même si l'app est fermée au milieu
-    const data = store.duo ? { ...store, active: duoHome(store), duo: undefined } : store;
-    storage?.setItem(STORAGE_KEY, JSON.stringify(data));
+    storage?.setItem(STORAGE_KEY, JSON.stringify(storeSnapshot(store)));
     return true;
   } catch {
     return false;

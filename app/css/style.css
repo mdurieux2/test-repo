@@ -1277,6 +1277,13 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
 }
 .add-child { margin-top: 10px; min-height: 56px; font-size: 1.15rem; }
 .danger-zone { display: flex; flex-direction: column; gap: 12px; }
+/* sauvegarde de la progression (Réglages, premier lancement) : deux grands boutons l'un sous l'autre */
+.backup-actions { display: flex; flex-direction: column; gap: 12px; margin: 12px 0 6px; }
+.backup-actions .big-btn { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.15rem; min-height: 56px; }
+.backup-actions .big-btn:disabled { opacity: 0.6; }
+.backup-actions .icon { width: 24px; height: 24px; }
+.backup-status { margin: 4px 0 0; font-weight: 700; }
+.backup-status:empty { display: none; }
 
 /* interrupteurs façon iOS (la position du rond indique l'état, pas seulement la couleur) */
 .setting input[type="checkbox"] {
@@ -1386,6 +1393,12 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
   .play[data-game="accords"] .choices-sentences .choice { min-height: 48px; padding: 6px 12px; font-size: 1.05rem; }
   .text-body { font-size: 1.05rem; line-height: 1.4; }
   .stage-text { padding: 8px 14px 6px; gap: 4px; }
+  /* un long texte (lecture du CM) : la boîte tient dans l'écran, le texte défile dedans */
+  .stage-text { max-height: calc(100dvh - 92px); overflow-y: auto; overscroll-behavior: contain; }
+  .stage-text.long .text-body { font-size: 0.98rem; line-height: 1.38; }
+  /* réponses en phrases (jeux du CM) : plus serrées, et sur deux colonnes à partir de quatre */
+  .choices-sentences .choice { min-height: 46px; padding: 6px 12px; font-size: 1.05rem; }
+  .choices-sentences.n4, .choices-sentences.n5, .choices-sentences.n6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .spell-picture { font-size: 52px; }
 
   /* réponses */

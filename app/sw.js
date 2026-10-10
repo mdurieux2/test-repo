@@ -103,6 +103,7 @@ const PRECACHE = [
   './js/recordings.js',
   './js/render.js',
   './js/rewards.js',
+  './js/sauvegarde.js',
   './js/sons-vus.js',
   './js/sounds.js',
   './js/speech.js',

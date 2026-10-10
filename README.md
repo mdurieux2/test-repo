@@ -290,6 +290,10 @@ Il ouvre trois onglets :
   de la voix de l'appareil avec un bouton d'essai, petits sons,
   musique douce, décors de saison, nombre de questions par partie, installation, version,
   journal des modifications, et le contact pour vos remarques.
+- **Sauvegarder la progression** (dans Réglages) : les prénoms, photos, étoiles, niveaux, réglages
+  et histoires enregistrées dans un fichier (sur iPhone et iPad : « Enregistrer dans Fichiers », par
+  e-mail…), à restaurer dans un autre navigateur, sur un autre appareil ou dans l'app installée sur
+  l'écran d'accueil. Au premier lancement, « Déjà une sauvegarde ? » évite de recréer les enfants.
 - **Vos voix pour les histoires** (dans Réglages) : enregistrez-vous en lisant une histoire
   (le texte s'affiche en gros, 3 minutes au plus) ; dans « Histoires », l'enfant entend votre
   voix pendant que les phrases s'allument, puis la question est posée. On peut réécouter,
@@ -335,7 +339,8 @@ une voix installée.
 
 - Aucune inscription, aucune publicité, aucun traceur ; l'application n'envoie rien sur Internet.
 - Les prénoms, photos, progrès et voix enregistrées restent dans le navigateur de l'appareil (stockage local).
-- Effacer les données du site dans le navigateur supprime les profils.
+- Effacer les données du site dans le navigateur supprime les profils : gardez une sauvegarde
+  (*Espace parents → Réglages → Sauvegarder la progression*), qui reste chez vous.
 - Aucune bibliothèque extérieure ; la page n'accepte que ses propres fichiers (règle CSP).
 
 ---
@@ -372,6 +377,7 @@ mise en page.
 | `app/js/dashboard.js` | Tableau de bord des parents |
 | `app/js/characters.js` | Personnages fille et garçon (SVG), prénom sur le tee-shirt |
 | `app/js/storage.js` | Profils et progression, enregistrés sur l'appareil |
+| `app/js/sauvegarde.js` | Sauvegarde de la progression dans un fichier, et sa restauration |
 | `app/js/config.js` | Version, journal des modifications, crédits |
 | `app/sw.js` | Mode hors ligne : tout nouveau fichier doit être ajouté à `PRECACHE` |
 | `app/js/speech.js`, `app/js/voix-cles.js` | Voix naturelle (sons de `app/voix/`), sinon voix de l'appareil |

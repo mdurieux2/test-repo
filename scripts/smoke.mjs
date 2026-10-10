@@ -199,6 +199,66 @@ async function openParents(page) {
   }
 }
 
+/**
+ * Sauvegarde (Espace parents → Réglages) : le fichier téléchargé contient les enfants, leurs progrès
+ * et les histoires enregistrées ; après un effacement complet (autre navigateur, données effacées),
+ * il les restaure dès le premier lancement.
+ */
+async function checkBackup(page) {
+  const storyId = STORY_DATA[0].id;
+  const sound = [1, 2, 3, 250, 251, 252];
+  await openParents(page);
+  await page.evaluate(async ([id, bytes]) => {
+    const rec = await import('./js/recordings.js');
+    await rec.save(id, new Blob([new Uint8Array(bytes)], { type: 'audio/mp4' }), { mime: 'audio/mp4', duration: 2 });
+  }, [storyId, sound]);
+  await page.click('[data-tab="reglages"]');
+  await page.waitForSelector('.backup-save:not([disabled])');
+  if (!(await page.textContent('.backup-status')).includes('Pas encore de sauvegarde')) fail('sauvegarde : « Pas encore de sauvegarde » absent');
+  const [download] = await Promise.all([page.waitForEvent('download'), page.click('.backup-save')]);
+  const name = download.suggestedFilename();
+  if (!/^lire-compter-sauvegarde-\d{4}-\d{2}-\d{2}\.json$/.test(name)) fail(`sauvegarde : fichier nommé « ${name} »`);
+  const text = readFileSync(await download.path(), 'utf8');
+  const file = JSON.parse(text);
+  const before = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), STORAGE_KEY);
+  if (file.app !== 'lire-et-compter' || JSON.stringify(file.donnees.order) !== JSON.stringify(before.order)) fail('sauvegarde : les enfants ne sont pas dans le fichier');
+  if (!file.enregistrements?.some((e) => e.id === storyId)) fail('sauvegarde : l’histoire enregistrée n’est pas dans le fichier');
+  await page.waitForFunction(() => document.querySelector('.backup-status')?.textContent.includes('téléchargée'));
+  await shot('07b-sauvegarde');
+  // tout est perdu (données effacées, autre navigateur…) : au premier lancement, on restaure
+  await page.evaluate(async (key) => {
+    localStorage.removeItem(key);
+    await new Promise((resolve) => {
+      const request = indexedDB.deleteDatabase('lire-et-compter-voix');
+      request.onsuccess = resolve;
+      request.onerror = resolve;
+    });
+  }, STORAGE_KEY);
+  await page.goto(BASE);
+  await page.waitForSelector('.welcome .backup-restore');
+  if (!page.listenerCount('dialog')) page.once('dialog', (dialog) => dialog.accept());
+  await page.setInputFiles('.welcome .backup input[type=file]', { name, mimeType: 'application/json', buffer: Buffer.from(text) });
+  await page.waitForSelector('.profiles', { timeout: 15000 });
+  const after = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), STORAGE_KEY);
+  for (const id of before.order) {
+    const [a, b] = [before.profiles[id], after.profiles[id]];
+    if (!b || a.name !== b.name || a.stars !== b.stars || JSON.stringify(a.games) !== JSON.stringify(b.games)) fail(`sauvegarde : ${a.name} n’est pas revenu à l’identique`);
+  }
+  if (!after.settings.lastBackup) fail('sauvegarde : la date de la dernière sauvegarde n’est pas gardée');
+  const restored = await page.evaluate(async (id) => {
+    const record = await (await import('./js/recordings.js')).get(id);
+    return record && [...new Uint8Array(await record.blob.arrayBuffer())];
+  }, storyId);
+  if (JSON.stringify(restored) !== JSON.stringify(sound)) fail('sauvegarde : l’histoire enregistrée n’est pas revenue');
+  // un fichier qui n'est pas une sauvegarde : refusé avec un message, rien n'est changé
+  await openParents(page);
+  await page.click('[data-tab="reglages"]');
+  await page.setInputFiles('.settings .backup input[type=file]', { name: 'photo.json', mimeType: 'application/json', buffer: Buffer.from('{"hello": 1}') });
+  await page.waitForFunction(() => document.querySelector('.backup-status')?.textContent.includes('pas une sauvegarde'));
+  await page.evaluate(async (id) => (await import('./js/recordings.js')).remove(id), storyId);
+  console.log(`✔ sauvegarde : ${name} (${before.order.length} enfants, ${file.enregistrements.length} histoire enregistrée), tout restauré au premier lancement ; mauvais fichier refusé`);
+}
+
 /** Écran « Vos voix » : Espace parents → Réglages → Vos voix pour les histoires. */
 async function openVoices(page) {
   await openParents(page);
@@ -1654,6 +1714,9 @@ console.log('✔ réglages (photo enregistrée automatiquement, version, journal
 
 // vos voix pour les histoires : enregistrer une histoire, puis l'entendre dans le jeu
 await checkRecordings(page);
+
+// sauvegarde de la progression : un fichier, puis tout retrouvé après un effacement complet
+await checkBackup(page);
 
 // hors ligne (mode avion) : le service worker doit servir l'app et tous les jeux sans réseau
 await checkOffline(context, page);
