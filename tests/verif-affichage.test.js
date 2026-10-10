@@ -29,6 +29,10 @@ test('vérifier l’affichage : chaque niveau des jeux de la classe, une seule f
 test('vérifier l’affichage : l’appareil en clair, d’après le navigateur', () => {
   assert.equal(appareilEnClair('Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1'), 'iPhone, iOS 18.5');
   assert.equal(appareilEnClair('Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1'), 'iPad, iOS 17.4');
+  // iOS 26 : le système annoncé reste 18_7, la version de Safari dit le vrai
+  assert.equal(appareilEnClair('Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Mobile/15E148 Safari/604.1'), 'iPhone, iOS 26.2');
+  // Chrome sur iPhone : pas de « Version/ », on garde le système annoncé
+  assert.equal(appareilEnClair('Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/141.0.7390.41 Mobile/15E148 Safari/604.1'), 'iPhone, iOS 18.7');
   // l'iPad se présente comme un Mac, mais il est tactile
   assert.equal(appareilEnClair('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15', 5), 'iPad');
   assert.equal(appareilEnClair('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15', 0), 'Mac');

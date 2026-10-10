@@ -114,16 +114,36 @@ function demarrer(sim) {
   }
 }
 
-/** Tourne l'appareil (Cmd + flèche droite dans Simulator). Renvoie vrai si c'est fait. */
-function tourner() {
-  try {
-    execFileSync('osascript', ['-e', 'tell application "Simulator" to activate', '-e',
-      'tell application "System Events" to key code 124 using command down']);
-    return true;
-  } catch (e) {
-    console.log(`rotation impossible : ${String(e.stderr || e.message).trim()}`);
-    return false;
+/**
+ * Tourne l'appareil : menu « Device → Rotate Right » de Simulator (« Hardware » sur les anciens
+ * Xcode), sinon Cmd + flèche droite. Après chaque essai, on attend que Safari soit en paysage.
+ * Renvoie vrai si l'appareil a tourné.
+ */
+async function tourner(pilote) {
+  const menu = (barre) => `tell application "System Events" to tell process "Simulator" to click menu item "Rotate Right" of menu 1 of menu bar item "${barre}" of menu bar 1`;
+  const essais = [
+    ['menu Device', menu('Device')],
+    ['menu Hardware', menu('Hardware')],
+    ['Cmd + →', 'tell application "System Events" to key code 124 using command down'],
+  ];
+  for (const [nom, script] of essais) {
+    try {
+      execFileSync('osascript', ['-e', 'tell application "Simulator" to activate', '-e', 'delay 1', '-e', script], { stdio: 'pipe' });
+    } catch (e) {
+      console.log(`rotation (${nom}) : ${String(e.stderr || e.message).trim()}`);
+      continue;
+    }
+    for (let i = 0; i < 20; i++) {
+      await pause(500);
+      const [l, h] = await pilote.evaluer(() => [innerWidth, innerHeight]).catch(() => [0, 1]);
+      if (l > h) {
+        console.log(`rotation (${nom}) : ${l}×${h}`);
+        return true;
+      }
+    }
+    console.log(`rotation (${nom}) : sans effet`);
   }
+  return false;
 }
 
 // ---------------------------------------------------------------- pilotes : Safari (WebDriver) ou Playwright
@@ -438,11 +458,14 @@ async function main() {
 
   await parcourir();
   // iPad : le même parcours en paysage, si l'appareil a pu tourner
-  if (PAYSAGE && sim && tourner()) {
-    await pause(2500);
-    const [l, h] = await pilote.evaluer(() => [innerWidth, innerHeight]);
-    if (l > h) await parcourir(' (paysage)');
-    else ecrans.push({ nom: 'paysage', fichier: null, problemes: [], avertissements: [`l'appareil n'a pas tourné (${l}×${h})`], erreurs: [] });
+  if (PAYSAGE && sim) {
+    if (await tourner(pilote)) {
+      await pause(1500); // la fin de l'animation de rotation
+      await parcourir(' (paysage)');
+    } else {
+      const [l, h] = await pilote.evaluer(() => [innerWidth, innerHeight]);
+      ecrans.push({ nom: 'paysage', fichier: null, problemes: [], avertissements: [`l'appareil n'a pas tourné (${l}×${h})`], erreurs: [] });
+    }
   }
 
   await pilote.fermer();

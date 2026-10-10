@@ -82,7 +82,12 @@ const NAVIGATEURS = {
 /** « iPhone, iOS 18.5 », « tablette Android 14 », « iPad »… d'après l'agent utilisateur. */
 export function appareilEnClair(ua = '', touch = 0) {
   const ios = /\b(iPhone|iPad|iPod)\b[^)]*? OS (\d+)[_.](\d+)/.exec(ua);
-  if (ios) return `${ios[1]}, iOS ${ios[2]}.${ios[3]}`;
+  if (ios) {
+    // depuis iOS 26, Safari annonce toujours « OS 18_7 » ; sa propre version (« Version/26.2 ») suit iOS
+    const safari = /Version\/(\d+)\.(\d+)/.exec(ua);
+    const [majeur, mineur] = safari && Number(safari[1]) > Number(ios[2]) ? [safari[1], safari[2]] : [ios[2], ios[3]];
+    return `${ios[1]}, iOS ${majeur}.${mineur}`;
+  }
   if (/Macintosh/.test(ua) && touch > 1) return 'iPad';
   const android = /Android (\d+(?:\.\d+)?)/.exec(ua);
   if (android) return `${/Mobile/.test(ua) ? 'téléphone' : 'tablette'} Android ${android[1]}`;
