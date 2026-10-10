@@ -1385,6 +1385,13 @@ mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 
    propre dessin ; celui de la question se fait petit pour lui laisser la place */
 @media (orientation: portrait) and (max-height: 760px) {
   .play:has(.explain) .operation-visual .objects.small .object { font-size: min(24px, 5.4vw); }
+  /* quatre réponses en phrases, l'une sous l'autre (anglais du CM) : l'horloge et la phrase à
+     transformer (« Emma does her homework in the evening. ») leur laissent la place, sur iPhone SE */
+  .play:has(> .choices-sentences.n4) .stage-sentence { font-size: 1.25rem; padding: 10px 14px; }
+  .play:has(> .choices-sentences.n4) .stage-clock {
+    width: min(240px, 62vw, calc(100vh / var(--zoom, 1) - 460px));
+    width: min(240px, 62vw, calc(100dvh / var(--zoom, 1) - 460px));
+  }
 }
 
 /* =====================================================================
