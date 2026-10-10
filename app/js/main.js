@@ -15,7 +15,7 @@ import {
 import {
   FLUENCE_SECONDS, fluenceBenchmark, fluenceEntry, fluenceLevelAfter, fluenceScore, fluenceSeconds, fluenceStars, fluenceTime,
 } from './games/fluence.js';
-import { featuredGames, levelRange, MAX_FEATURED, programFor, programForChild } from './programs.js';
+import { featuredGames, levelRange, MAX_FEATURED, nearestLevel, programFor, programForChild } from './programs.js';
 import { dailyPicks, dueReviews as reviewsDue, duoPlan, drawPool } from './picks.js';
 import { createRng, pick, randInt, sample, shuffle } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
@@ -38,6 +38,7 @@ import {
 import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
+import { emojiCouleur } from './emoji.js';
 import { squarePhoto } from './photo.js';
 import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
@@ -831,7 +832,7 @@ function homeScreen() {
 /** « ⭐ Conseillé pour toi » : les jeux choisis par les parents, en haut de l'accueil. */
 function featuredBlock() {
   const list = featuredGames(child())
-    .filter(({ game, min, max }) => !access().skipListening || !gameListenOnly(game, min, max)).slice(0, MAX_FEATURED);
+    .filter(({ game, levels }) => !access().skipListening || !gameListenOnly(game, levels)).slice(0, MAX_FEATURED);
   if (!list.length) return null;
   return h('section', { class: 'home-featured', 'aria-labelledby': 'featured-label' },
     h('h2', { class: 'featured-label', id: 'featured-label' }, '⭐ Conseillé pour toi'),
@@ -871,8 +872,8 @@ function dailyGame() {
     fixedLevel: true,
     badge: () => 'Défi 🔥',
     generate(_level, rng, index, context) {
-      const { game, min, max } = picks[index % picks.length];
-      const level = Math.min(max, Math.max(min, gameStats(child(), game.id, min).level));
+      const { game, min, levels } = picks[index % picks.length];
+      const level = nearestLevel(levels, gameStats(child(), game.id, min).level);
       const q = game.generate(level, rng, index, context);
       return { ...q, key: `defi:${q.key}`, from: game.id, fromLevel: level };
     },
@@ -999,11 +1000,13 @@ function dailyButton() {
 
 // ---------------------------------------------------------------- Choix du jeu
 
-function levelDots(level, min, max) {
-  const total = max - min + 1;
-  if (total > 6) return h('span', { class: 'level-text' }, `Niveau ${level - min + 1}/${total}`);
-  return h('span', { class: 'level-dots', role: 'img', 'aria-label': `Niveau ${level - min + 1} sur ${total}` },
-    Array.from({ length: total }, (_, i) => h('span', { class: i <= level - min ? 'dot on' : 'dot' })));
+/** Où en est l'enfant parmi les niveaux de sa classe (« Niveau 3/8 », ou des points). */
+function levelDots(level, levels) {
+  const total = levels.length;
+  const rank = levels.indexOf(level) + 1;
+  if (total > 6) return h('span', { class: 'level-text' }, `Niveau ${rank}/${total}`);
+  return h('span', { class: 'level-dots', role: 'img', 'aria-label': `Niveau ${rank} sur ${total}` },
+    Array.from({ length: total }, (_, i) => h('span', { class: i < rank ? 'dot on' : 'dot' })));
 }
 
 function palierSummary(min, max) {
@@ -1018,15 +1021,15 @@ function domainScreen(domainId) {
   const featured = new Set(featuredGames(child()).map(({ game }) => game.id));
   const blocks = [];
   let section = null;
-  for (const { game, min, max } of domain.games) {
+  for (const { game, min, max, levels } of domain.games) {
     if (game.section && game.section !== section) {
       section = game.section;
       blocks.push(h('h2', { class: 'section-title' }, section));
     }
     const stats = gameStats(child(), game.id, min);
-    const level = Math.min(max, Math.max(min, stats.level));
+    const level = nearestLevel(levels, stats.level);
     // La carte lance le jeu ; le bas de la carte (les points de niveau) permet de choisir le niveau.
-    const pickable = !game.paliers && max > min;
+    const pickable = !game.paliers && levels.length > 1;
     blocks.push(h('div', { class: featured.has(game.id) ? 'game-card featured' : 'game-card' },
       h('button', {
         class: 'game-play',
@@ -1037,14 +1040,14 @@ function domainScreen(domainId) {
       h('span', { class: 'game-icon', 'aria-hidden': 'true' }, game.icon),
       h('span', { class: 'game-title' }, game.title),
       game.paliers ? palierSummary(min, max) : null,
-      !pickable && !game.paliers ? levelDots(level, min, max) : null,
+      !pickable && !game.paliers ? levelDots(level, levels) : null,
       stats.bestStars ? h('span', { class: 'best' }, '⭐'.repeat(stats.bestStars)) : null),
       pickable
         ? h('button', {
           class: 'level-pick',
           'data-levels': game.id,
           onclick: () => levelScreen(game),
-        }, levelDots(level, min, max), h('span', { class: 'level-pick-label' }, 'Niveaux', h('span', { 'aria-hidden': 'true' }, ' ▾')),
+        }, levelDots(level, levels), h('span', { class: 'level-pick-label' }, 'Niveaux', h('span', { 'aria-hidden': 'true' }, ' ▾')),
         h('span', { class: 'visually-hidden' }, ` (${game.title})`))
         : null));
   }
@@ -1054,13 +1057,13 @@ function domainScreen(domainId) {
   say(guide, `${domain.title}. Choisis un jeu !`);
 }
 
-/** Choisir directement son niveau (dans la fourchette de la classe). */
+/** Choisir directement son niveau (parmi ceux de la classe). */
 function levelScreen(game) {
-  const { min, max } = levelRange(child().grade, game.id);
-  const current = Math.min(max, Math.max(min, gameStats(child(), game.id, min).level));
+  const { min, levels } = levelRange(child().grade, game.id);
+  const current = nearestLevel(levels, gameStats(child(), game.id, min).level);
   const rows = [];
-  for (let level = min; level <= max; level++) {
-    const n = level - min + 1;
+  for (const [i, level] of levels.entries()) {
+    const n = i + 1;
     const state = level < current ? 'passed' : level === current ? 'current' : 'next';
     rows.push(h('button', {
       class: `level-row ${state}`,
@@ -1115,12 +1118,14 @@ function palierMap(min = 1, max = CALC_PALIERS.length) {
 function startSession(game, { level, back, total, duo } = {}) {
   if (!duo && timeIsUp()) return pauseScreen(); // à deux, le temps de chacun est vérifié avant (tryDuo)
   const { min, max } = game.range || levelRange(child().grade, game.id);
+  const levels = game.range ? [min] : levelRange(child().grade, game.id).levels;
   const stats = gameStats(child(), game.id, min);
-  const startLevel = level || Math.min(max, Math.max(min, stats.level));
+  const startLevel = level || nearestLevel(levels, stats.level);
   const session = {
     game,
     min,
     max,
+    levels, // les niveaux de la classe (un niveau d'une autre classe peut manquer entre min et max)
     back: back || (() => domainScreen(game.domain)),
     index: 0,
     total: questionsPerSession(game, total, store.settings.sessionLength), // défi chrono : toujours 10
@@ -1147,7 +1152,7 @@ function newQuestion(session) {
     const index = session.index + session.formatOffset;
     if (skipListening) {
       // niveaux d'écoute facultatifs : une autre question du même niveau, ou le niveau jouable le plus proche
-      const found = playableQuestion(generate, { level: session.levelState.level, min: session.min, max: session.max, index: index + i * PLAYABLE_STEP });
+      const found = playableQuestion(generate, { level: session.levelState.level, levels: session.levels, index: index + i * PLAYABLE_STEP });
       q = found.q;
       if (found.level !== session.levelState.level) session.levelState = { ...session.levelState, level: found.level };
     } else {
@@ -1236,7 +1241,7 @@ function nextQuestion(session) {
   // le bouton « ? » est posé dans le coin du personnage, sans rien déplacer
   const withDemoButton = (guideBtn, btn) => (btn ? h('span', { class: 'guide-wrap' }, guideBtn, btn) : guideBtn);
 
-  const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
+  const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levels.indexOf(session.levelState.level) + 1}`;
   // défi chrono : le chronomètre (mm:ss) s'affiche sous le niveau, en haut à droite
   const clock = session.chrono ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
   const badge = clock
@@ -1498,7 +1503,7 @@ async function markCorrect(ctx) {
   let change = null;
   // défi chrono : le niveau ne change pas pendant la partie (le record est celui du niveau joué)
   if (!game.fixedLevel && !game.timed) {
-    const result = recordAnswer(session.levelState, firstTry, session.max, session.min);
+    const result = recordAnswer(session.levelState, firstTry, session.max, session.min, session.levels);
     session.levelState = result.state;
     change = result.change;
   }
@@ -4452,12 +4457,20 @@ function fluenceZone(ctx) {
   return { stage: h('div', { class: `stage stage-fluence fl-kind-${kind}` }, brief, sheet), zone };
 }
 
+/** Le niveau d'après une partie : un cran vers `next`, en sautant les niveaux qui ne sont pas de la classe. */
+function stepLevel(session, level, next) {
+  if (next === level) return level;
+  const i = session.levels.indexOf(level);
+  if (i < 0) return nearestLevel(session.levels, next);
+  return session.levels[next > level ? i + 1 : i - 1] ?? level;
+}
+
 /** Une lecture terminée : le score est gardé (child.fluence), le niveau suit, et la partie compte pour les étoiles. */
 function endFluence(session, score, { timed, kind }) {
   const { game } = session;
   const kid = child();
   const level = session.levelState.level;
-  const next = fluenceLevelAfter(level, score, session.min, session.max);
+  const next = stepLevel(session, level, fluenceLevelAfter(level, score, session.min, session.max));
   const stats = gameStats(kid, game.id, session.min);
   kid.games[game.id] = {
     ...stats, level: next, streak: 0, recent: [],
@@ -4512,7 +4525,7 @@ function finishSession(session) {
   if (game.timed && !session.chronoStart) {
     // sans chrono (accessibilité) : ni temps ni record, mais le niveau suit les réussites comme d'habitude
     const level = session.levelState.level;
-    const next = chronoLevelAfter(level, session.correct, session.total, session.min, session.max);
+    const next = stepLevel(session, level, chronoLevelAfter(level, session.correct, session.total, session.min, session.max));
     kid.games[game.id] = { ...kid.games[game.id], level: next, streak: 0, recent: [] };
     if (next > level) chronoLine = h('div', { class: 'chrono-result' }, h('p', { class: 'chrono-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')));
   } else if (game.timed) {
@@ -4521,7 +4534,7 @@ function finishSession(session) {
     const record = recordAfter(kid.records, game.id, level, seconds);
     kid.records = record.records;
     newRecord = record.isNew;
-    const next = chronoLevelAfter(level, session.correct, session.total, session.min, session.max);
+    const next = stepLevel(session, level, chronoLevelAfter(level, session.correct, session.total, session.min, session.max));
     kid.games[game.id] = { ...kid.games[game.id], level: next, streak: 0, recent: [] };
     chronoLine = h('div', { class: 'chrono-result' },
       h('p', { class: 'chrono-time' }, frenchSpacing('⏱ Ton temps : '), h('b', {}, formatChrono(seconds))),
@@ -5452,10 +5465,8 @@ function voicesCard() {
 
 /** Les classes qui entendent les histoires de ce niveau (« MS, GS, CP »). */
 function gradesForStoryLevel(level) {
-  return Object.keys(GRADES).filter((grade) => {
-    const { min, max } = levelRange(grade, 'histoires');
-    return level >= min && level <= max;
-  }).join(', ');
+  return Object.keys(GRADES).filter((grade) => programFor(grade)
+    .some((domain) => domain.games.some(({ game, levels }) => game.id === 'histoires' && levels.includes(level)))).join(', ');
 }
 
 /** Toutes les histoires, par niveau, chacune avec 🎙 Enregistrer, et ▶ Écouter, 🗑 Supprimer si elle est enregistrée. */
@@ -5790,6 +5801,7 @@ function settingsTab() {
         h('p', { class: 'contact' }, 'Une remarque, un bug, une idée ? Écrivez à ',
           h('a', { class: 'link-action', href: `mailto:${APP.contact}?subject=${encodeURIComponent(APP.name)}`, 'data-contact': '' }, APP.contact), '.'),
         h('p', { class: 'muted small' }, 'Police Andika © SIL International (licence OFL).'),
+        h('p', { class: 'muted small' }, 'Emoji de secours (quand l’appareil n’en a pas en couleur) : Twemoji © Twitter, licence CC-BY 4.0.'),
         h('p', { class: 'muted small' }, 'Voix naturelle : Pocket TTS © Kyutai, voix « Estelle » (corpus CML-TTS, licence CC-BY 4.0).'))));
 }
 
@@ -5797,6 +5809,7 @@ function settingsTab() {
 
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
 document.addEventListener('pointerdown', unlockNaturalVoice, { capture: true });
+emojiCouleur(); // emoji en couleur, même sur les navigateurs qui n'en ont qu'en noir et blanc
 // voix naturelle : la liste des sons, puis leur téléchargement en arrière-plan (pour le mode avion),
 // avec une barre en haut de l'écran
 voiceProgressBar();

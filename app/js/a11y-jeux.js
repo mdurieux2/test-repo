@@ -70,10 +70,9 @@ export function isListenOnly(q) {
  * niveaux suivants (jusqu'à max), puis aux niveaux précédents (jusqu'à min).
  * Renvoie { q, level } ; `listenOnly: true` si aucun niveau n'a de question jouable.
  */
-export function playableQuestion(generate, { level, min = level, max = level, index = 0, tries = PLAYABLE_TRIES }) {
-  const levels = [level];
-  for (let l = level + 1; l <= max; l++) levels.push(l);
-  for (let l = level - 1; l >= min; l--) levels.push(l);
+export function playableQuestion(generate, { level, levels: allowed = [level], index = 0, tries = PLAYABLE_TRIES }) {
+  // le niveau demandé, puis les suivants de la classe, puis les précédents (du plus proche au plus loin)
+  const levels = [level, ...allowed.filter((l) => l > level), ...allowed.filter((l) => l < level).reverse()];
   let last = null;
   for (const l of levels) {
     for (let k = 0; k < tries; k++) {
@@ -99,21 +98,17 @@ export function levelListenOnly(game, level, samples = LEVEL_SAMPLES) {
 
 const gameCache = new Map();
 
-/** Le jeu (dans la fourchette de niveaux de l'enfant) ne se joue-t-il qu'à l'oreille ? */
-export function gameListenOnly(game, min = 1, max = game.levels.length) {
-  const key = `${game.id}:${min}:${max}`;
-  if (!gameCache.has(key)) {
-    let all = true;
-    for (let level = min; level <= max && all; level++) all = levelListenOnly(game, level);
-    gameCache.set(key, all);
-  }
+/** Le jeu (aux niveaux de la classe de l'enfant) ne se joue-t-il qu'à l'oreille ? */
+export function gameListenOnly(game, levels = game.levels.map((_, i) => i + 1)) {
+  const key = `${game.id}:${levels.join(',')}`;
+  if (!gameCache.has(key)) gameCache.set(key, levels.every((level) => levelListenOnly(game, level)));
   return gameCache.get(key);
 }
 
 /** Les rubriques sans les jeux qui ne se jouent qu'à l'oreille (et sans rubrique vide). */
 export function withoutListenOnly(domains) {
   return domains
-    .map((domain) => ({ ...domain, games: domain.games.filter(({ game, min, max }) => !gameListenOnly(game, min, max)) }))
+    .map((domain) => ({ ...domain, games: domain.games.filter(({ game, levels }) => !gameListenOnly(game, levels)) }))
     .filter((domain) => domain.games.length);
 }
 

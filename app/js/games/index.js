@@ -38,13 +38,14 @@ import { PLANETE_GAMES } from './planete.js';
 import { CE2_GAMES } from './ce2.js';
 import { emotions } from './emotions.js';
 import { chercheTrouve } from './cherche.js';
+import { gaucheDroite } from './gauche-droite.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
   ...LOGIQUE_GAMES, ...LOGIQUE_PLUS_GAMES, ...LABYRINTHE_GAMES, ...JEUX_GAMES, dictee, ...MESURES_GAMES, ...MONDE_GAMES, drapeaux, carteMonde, ...ANGLAIS_GAMES,
   ...ANGLAIS_PLUS_GAMES, ecrire, regleHorloge, tablesChrono, fluence, ...SCIENCES_GAMES, ...NOMBRES_PLUS_GAMES, ...GRAMMAIRE_GAMES,
   ...VIVRE_GAMES, ...OPERATIONS_GAMES, ...VOCABULAIRE_GAMES, ...DONNEES_GAMES, ...CIEL_GAMES, ...CORPS_GAMES, ...TECHNO_GAMES, ...PLANETE_GAMES,
-  ...CE2_GAMES, emotions, chercheTrouve,
+  ...CE2_GAMES, emotions, chercheTrouve, gaucheDroite,
 ];
 
 const RUBRIQUES = [
@@ -77,7 +78,7 @@ const RUBRIQUES = [
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures', 'perimetres'] },
-  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'emotions', 'se-reperer'] },
+  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'emotions', 'se-reperer', 'gauche-droite'] },
   { id: 'sciences', title: 'Sciences', icon: '🔬', games: ['vivant', 'corps', 'milieux', 'matiere', 'melanges', 'electricite', 'objets', 'ciel', 'meteo', 'planete'] },
   {
     id: 'anglais',
@@ -107,7 +108,7 @@ const SECTION_GAMES = {
   'La planète': ['planete'],
   'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
   'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
-  'Vivre ensemble et se repérer': ['vivre-ensemble', 'emotions', 'se-reperer'],
+  'Vivre ensemble et se repérer': ['vivre-ensemble', 'emotions', 'se-reperer', 'gauche-droite'],
   'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais'],
 };
 const SECTIONS = Object.fromEntries(Object.entries(SECTION_GAMES).flatMap(([section, ids]) => ids.map((id) => [id, section])));

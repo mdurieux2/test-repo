@@ -4,7 +4,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const APP = new URL('../app/', import.meta.url).pathname;
-const NOT_CACHED = new Set(['sw.js', 'fonts/OFL.txt']);
+const NOT_CACHED = new Set(['sw.js', 'fonts/OFL.txt', 'fonts/TWEMOJI.txt']);
 
 function listFiles(dir) {
   return readdirSync(dir).flatMap((name) => {

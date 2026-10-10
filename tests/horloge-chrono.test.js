@@ -137,7 +137,9 @@ test('défi chrono : une partie fait toujours 10 questions, quel que soit le ré
   assert.equal(questionsPerSession(findGame('tables'), undefined, 15), 15, 'les autres jeux suivent le réglage');
   assert.equal(questionsPerSession(findGame('tables'), 5, 15), 5, 'défi du jour et révisions : 5 questions');
   assert.equal(findGame('tables-chrono').domain, 'maths');
-  assert.deepEqual(levelRange('CE1', 'tables-chrono'), { min: 1, max: 8 });
+  // CE1 : toutes les tables, et fois 10 ; « fois des dizaines » (3 × 40) est au CE2
+  assert.deepEqual(levelRange('CE1', 'tables-chrono').levels, [1, 2, 3, 4, 5, 6, 7]);
+  assert.deepEqual(levelRange('CE2', 'tables-chrono').levels, [3, 4, 5, 6, 7, 8]);
 });
 
 test('défi chrono : multiplications justes, au pavé, et le nombre qui manque', () => {

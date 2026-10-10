@@ -79,7 +79,7 @@ test('écoute : les niveaux entiers, et les jeux masqués quand on écarte l’�
   assert.equal(levelListenOnly(findGame('parle-anglais'), 2), false); // une question sur deux a une image
   assert.equal(gameListenOnly(findGame('ecoute')), true);
   assert.equal(gameListenOnly(findGame('lettres')), false);
-  assert.equal(gameListenOnly(findGame('lettres'), 1, 3), true);
+  assert.equal(gameListenOnly(findGame('lettres'), [1, 2, 3]), true);
   // classe par classe : les jeux qui disparaissent de l'accueil
   const hidden = {};
   for (const grade of Object.keys(PROGRAMS)) {
@@ -87,28 +87,29 @@ test('écoute : les niveaux entiers, et les jeux masqués quand on écarte l’�
     const after = new Set(withoutListenOnly(programFor(grade)).flatMap((d) => d.games.map(({ game }) => game.id)));
     hidden[grade] = before.filter((id) => !after.has(id));
   }
-  // (dans la fourchette de niveaux de la classe : en MS, « Les lettres » ne se joue qu'à l'oreille)
+  // (aux niveaux de la classe : au CP et au CE1, l'anglais est à l'oral seulement, donc ses jeux
+  // d'écoute disparaissent tous ; au CE2, la dictée est sans image : elle ne se joue qu'à l'oreille)
   assert.deepEqual(hidden, {
-    PS: ['ecoute', 'compte-anglais', 'ou-est'],
-    MS: ['lettres', 'ecoute', 'compte-anglais', 'ou-est'],
+    PS: ['ecoute', 'compte-anglais'],
+    MS: ['ecoute', 'compte-anglais', 'ou-est'],
     GS: ['syllabes', 'ecoute', 'compte-anglais', 'ou-est', 'nombres-anglais'],
-    CP: ['petits-mots', 'ecoute'],
-    CE1: ['ecoute'],
-    CE2: ['dictee', 'ecoute'], // au CE2, la dictée est sans image : elle ne se joue qu'à l'oreille
+    CP: ['ecoute', 'compte-anglais', 'nombres-anglais', 'ou-est'],
+    CE1: ['ecoute', 'compte-anglais', 'nombres-anglais', 'ou-est'],
+    CE2: ['dictee', 'ecoute'],
   });
 });
 
 test('écoute : chaque jeu affiché reste jouable, à chaque niveau de chaque classe', () => {
   for (const grade of Object.keys(PROGRAMS)) {
-    for (const { game, min, max } of withoutListenOnly(programFor(grade)).flatMap((d) => d.games)) {
-      for (let level = min; level <= max; level++) {
+    for (const { game, levels } of withoutListenOnly(programFor(grade)).flatMap((d) => d.games)) {
+      for (const level of levels) {
         const rng = createRng(level * 31);
         const generate = (l, index) => game.generate(l, rng, index, CONTEXT);
         for (let k = 0; k < 4; k++) {
-          const found = playableQuestion(generate, { level, min, max, index: k * 13 });
+          const found = playableQuestion(generate, { level, levels, index: k * 13 });
           const where = `${grade} ${game.id} niveau ${level}`;
           assert.ok(!found.listenOnly && !isListenOnly(found.q), `${where} : pas de question jouable`);
-          assert.ok(found.level >= min && found.level <= max, `${where} : niveau ${found.level} hors de la classe`);
+          assert.ok(levels.includes(found.level), `${where} : niveau ${found.level} hors de la classe`);
           // un niveau qui a des questions à voir n'est jamais passé
           if (!levelListenOnly(game, level)) assert.equal(found.level, level, where);
         }
@@ -121,14 +122,17 @@ test('écoute : un niveau entier à l’oreille est passé (le suivant, sinon le
   const syllabes = findGame('syllabes');
   const rng = createRng(5);
   const generate = (l, index) => syllabes.generate(l, rng, index, CONTEXT);
-  assert.equal(playableQuestion(generate, { level: 3, min: 1, max: 8 }).level, 7);
-  assert.equal(playableQuestion(generate, { level: 3, min: 1, max: 6 }).listenOnly, true);
+  const upTo = (n) => Array.from({ length: n }, (_, i) => i + 1);
+  assert.equal(playableQuestion(generate, { level: 3, levels: upTo(8) }).level, 7);
+  assert.equal(playableQuestion(generate, { level: 3, levels: upTo(6) }).listenOnly, true);
+  // un niveau retiré pour la classe n'est jamais proposé à la place
+  assert.equal(playableQuestion(generate, { level: 3, levels: [1, 2, 3, 4, 5, 6, 8] }).level, 8);
   const dictee = findGame('dictee');
   const fromDictee = (l, index) => dictee.generate(l, rng, index, CONTEXT);
-  assert.equal(playableQuestion(fromDictee, { level: 6, min: 1, max: 8 }).level, 4); // rien après : le précédent
+  assert.equal(playableQuestion(fromDictee, { level: 6, levels: upTo(8) }).level, 4); // rien après : le précédent
   // une question d'un niveau mélangé : une autre du même niveau
   const ponctuation = findGame('ponctuation');
-  const found = playableQuestion((l, index) => ponctuation.generate(l, rng, index, CONTEXT), { level: 10, min: 1, max: 10 });
+  const found = playableQuestion((l, index) => ponctuation.generate(l, rng, index, CONTEXT), { level: 10, levels: upTo(10) });
   assert.equal(found.level, 10);
   assert.equal(isListenOnly(found.q), false);
 });

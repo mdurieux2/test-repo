@@ -6,6 +6,7 @@ import { FLAGS, flagMarkup } from './games/drapeaux.js';
 import { balanceSvg, describeBalance, describeFigure, figureSvg } from './games/logique-plus.js';
 import { fractionSvg, numberLineSvg } from './games/nombres-plus.js';
 import { drawingSvg } from './games/vivre.js';
+import { gaucheDroiteSvg } from './games/gauche-droite.js';
 import { cielSvg } from './games/ciel.js';
 import { technoSvg } from './games/techno.js';
 import { ce2Svg } from './games/ce2.js';
@@ -91,9 +92,10 @@ function operationStage({ a, b, op, emoji, hideEquation = false }) {
     h('span', { class: 'num' }, b), h('span', { class: 'op' }, '='),
     h('span', { class: 'num gap' }, '?'));
   if (!emoji) return h('div', { class: 'stage-operation' }, eq);
+  // --cols : le nombre d'objets sur la ligne la plus large ; moins il y en a, plus ils sont grands (style.css)
   let visual;
   if (op === '+') {
-    visual = h('div', { class: 'operation-visual' },
+    visual = h('div', { class: 'operation-visual', style: { '--cols': Math.min(a, 5) + Math.min(b, 5) + 1 } },
       objectsGrid(emoji, a, 5, 'small'), h('span', { class: 'op' }, '+'), objectsGrid(emoji, b, 5, 'small'));
   } else {
     // Soustraction : on barre les objets qu'on enlève.
@@ -102,7 +104,7 @@ function operationStage({ a, b, op, emoji, hideEquation = false }) {
     const perRow = a > 10 ? 10 : 5;
     const rows = [];
     for (let i = 0; i < a; i += perRow) rows.push(h('div', { class: 'objects-row' }, items.slice(i, i + perRow)));
-    visual = h('div', { class: 'operation-visual' }, h('div', { class: `objects small per-${perRow}` }, rows));
+    visual = h('div', { class: 'operation-visual', style: { '--cols': Math.min(a, perRow) } }, h('div', { class: `objects small per-${perRow}` }, rows));
   }
   return h('div', { class: 'stage-operation' }, visual, hideEquation ? null : eq);
 }
@@ -241,8 +243,9 @@ export function renderStage(stage, actions) {
     case 'flash':
       return flashStage(stage, actions);
     case 'pattern':
-      // suite de motifs (algorithme) : le dernier élément est à trouver
-      return h('div', { class: 'pattern' },
+      // suite de motifs (algorithme) : le dernier élément est à trouver ; peu d'images (4 au plus :
+      // « quel mot les regroupe ? », une rangée d'animaux) : plus grandes
+      return h('div', { class: `pattern n${stage.items.length}${stage.items.length <= 4 ? ' few' : ''}` },
         stage.items.map((it) => withColorName(h('span', { class: it === null ? 'pattern-item gap' : 'pattern-item' }, it === null ? '?' : it), it)));
     case 'shape':
       return shapeSvg(stage.shape, stage.color);
@@ -775,7 +778,7 @@ export function columnGrid({ op, rows, width, steps = [], offsets = [], mini = f
 /** Un dessin en SVG (feu des piétons, panneau, main, quadrillage…, Lune, thermomètre…), voir games/vivre.js et games/ciel.js. */
 function drawingElement(d, cls, label) {
   const el = h('span', { class: cls, role: 'img', 'aria-label': label });
-  el.innerHTML = cielSvg(d) ?? technoSvg(d) ?? ce2Svg(d) ?? drawingSvg(d);
+  el.innerHTML = cielSvg(d) ?? technoSvg(d) ?? ce2Svg(d) ?? gaucheDroiteSvg(d) ?? drawingSvg(d);
   return el;
 }
 

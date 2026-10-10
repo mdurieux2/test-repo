@@ -78,8 +78,8 @@ function withoutReading(label) {
 }
 
 test('PS : chaque jeu se joue sans savoir lire (la voix dit la consigne, on répond en touchant des images)', () => {
-  for (const { game, min, max } of programFor('PS').flatMap((d) => d.games)) {
-    for (let level = min; level <= max; level++) {
+  for (const { game, levels } of programFor('PS').flatMap((d) => d.games)) {
+    for (const level of levels) {
       for (const { q } of questions(game, [level], 40)) {
         const where = `${game.id} niveau ${level} (${q.key})`;
         assert.ok(!['keypad', 'fill', 'order'].includes(q.interaction) || q.items?.every((i) => withoutReading(i.label)), `${where} : ${q.interaction}`);
@@ -95,21 +95,28 @@ test('PS : chaque jeu se joue sans savoir lire (la voix dit la consigne, on rép
   }
 });
 
-test('CE2 : les niveaux les plus hauts, à la suite du CE1, et les nouveaux jeux en entier', () => {
+test('CE2 : à la suite du CE1, et les jeux du CE2 en entier', () => {
+  // un jeu du CE1 qui continue au CE2 y va au moins aussi loin
   for (const entries of Object.values(PROGRAMS.CE1)) {
-    for (const [id, min, max] of entries) {
-      const ce2 = levelRange('CE2', id);
+    for (const [id] of entries) {
       if (!programFor('CE2').some((d) => d.games.some(({ game }) => game.id === id))) continue;
-      assert.ok(ce2.min >= min && ce2.max >= max, `${id} : CE1 ${min}-${max}, CE2 ${ce2.min}-${ce2.max}`);
+      const ce1 = levelRange('CE1', id);
+      const ce2 = levelRange('CE2', id);
+      assert.ok(ce2.min >= ce1.min && ce2.max >= ce1.max, `${id} : CE1 ${ce1.min}-${ce1.max}, CE2 ${ce2.min}-${ce2.max}`);
     }
   }
+  // avant le CE2, seulement ce que le programme du CE1 en demande : l'imparfait d'être, d'avoir et des
+  // verbes en -er, et les débuts de la multiplication (fois 10, 13 × 7 = 10 × 7 + 3 × 7)
+  const before = { imparfait: [1, 2, 3, 6, 7, 8], 'multiplication-posee': [1, 2, 3] };
   for (const game of CE2_GAMES) {
-    assert.deepEqual(levelRange('CE2', game.id), { min: 1, max: game.levels.length }, game.id);
+    assert.deepEqual(levelRange('CE2', game.id).levels, game.levels.map((_, i) => i + 1), game.id);
     for (const grade of ['PS', 'MS', 'GS', 'CP', 'CE1']) {
-      assert.ok(!programFor(grade).some((d) => d.games.some((g) => g.game.id === game.id)), `${game.id} n'est qu'au CE2 (${grade})`);
+      const entry = programFor(grade).flatMap((d) => d.games).find((g) => g.game.id === game.id);
+      if (grade === 'CE1' && before[game.id]) assert.deepEqual(entry?.levels, before[game.id], game.id);
+      else assert.ok(!entry, `${game.id} n'est pas au programme avant le CE2 (${grade})`);
     }
   }
-  assert.deepEqual(levelRange('CE2', 'calcul'), { min: 13, max: 36 });
+  assert.deepEqual(levelRange('CE2', 'calcul').levels, Array.from({ length: 15 }, (_, i) => 22 + i));
 });
 
 // ---------------------------------------------------------------- Les nouveaux jeux
@@ -337,8 +344,8 @@ test('l’imparfait : formes justes (mangeais, mangions, lançait…), une seule
 
 test('tous les jeux de chaque classe génèrent des questions à chaque niveau de leur fourchette', () => {
   for (const grade of ['PS', 'CE2']) {
-    for (const { game, min, max } of programFor(grade).flatMap((d) => d.games)) {
-      for (let level = min; level <= max; level++) {
+    for (const { game, levels } of programFor(grade).flatMap((d) => d.games)) {
+      for (const level of levels) {
         const q = game.generate(level, createRng(level), 0, CONTEXT);
         assert.ok(q.key && q.text && q.stage, `${grade} ${game.id} niveau ${level}`);
       }

@@ -201,7 +201,7 @@ test('duo : 10 questions en alternance A, B, A, B…, chacune du programme de l�
       assert.ok(entry, `${game.id} n’est pas dans le programme de ${player}`);
       assert.ok(!isGameHidden(kid, game.id), `${game.id} est masqué pour ${player}`);
       assert.equal(level, currentLevel(kid, entry));
-      assert.ok(level >= entry.min && level <= entry.max);
+      assert.ok(entry.levels.includes(level));
       assert.ok(game.levels[level - 1], 'niveau existant');
     });
     // 5 questions chacun, sans répéter un jeu tant qu'il en reste
@@ -212,9 +212,11 @@ test('duo : 10 questions en alternance A, B, A, B…, chacune du programme de l�
     }
   }
   // niveau actuel : celui de l'enfant, dans la fourchette de sa classe
-  assert.equal(currentLevel(eva, { game: findGame('compter'), min: 1, max: 9 }), 4);
-  assert.equal(currentLevel(eva, { game: findGame('heure'), min: 1, max: 2 }), 2);
-  assert.equal(currentLevel(eva, { game: findGame('rimes'), min: 2, max: 5 }), 2);
+  assert.equal(currentLevel(eva, { game: findGame('compter'), min: 1, levels: [1, 2, 3, 4, 5, 6, 7, 8, 9] }), 4);
+  assert.equal(currentLevel(eva, { game: findGame('heure'), min: 1, levels: [1, 2] }), 2);
+  assert.equal(currentLevel(eva, { game: findGame('rimes'), min: 2, levels: [2, 3, 4, 5] }), 2);
+  // un niveau retiré pour la classe : le plus proche parmi ceux de la classe (à égalité, le plus facile)
+  assert.equal(currentLevel(eva, { game: findGame('compter'), min: 1, levels: [1, 2, 3, 5, 6] }), 3);
 });
 
 test('duo : impossible si l’un des deux n’a plus aucun jeu affiché', () => {

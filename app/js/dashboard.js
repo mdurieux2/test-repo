@@ -3,7 +3,7 @@
 import { findGame } from './games/index.js';
 import { CALC_PALIERS } from './games/maths.js';
 import { fluenceBenchmark, fluenceSummary, fluenceWeeks, wordReadings } from './games/fluence.js';
-import { GRADE_GOALS, programFor } from './programs.js';
+import { GRADE_GOALS, nearestLevel, programFor } from './programs.js';
 import { GRADES, gameStats } from './storage.js';
 import { h } from './render.js';
 import { resumeSons } from './graphemes.js';
@@ -106,7 +106,7 @@ function relativeDay(iso) {
   return `il y a ${diff} jours`;
 }
 
-function gameRow(kid, { game, min, max }, onChange) {
+function gameRow(kid, { game, min, max, levels }, onChange) {
   if (game.paliers) {
     const range = CALC_PALIERS.slice(min - 1, max);
     const done = range.filter((p) => (kid.paliers[p.id]?.stars || 0) >= 3).length;
@@ -120,11 +120,11 @@ function gameRow(kid, { game, min, max }, onChange) {
       h('p', { class: 'muted small' }, `${done}/${range.length} paliers réussis (3 étoiles ou plus)${next ? ` · prochain : ${next.op}${next.max}` : ''}`));
   }
   const stats = gameStats(kid, game.id, min);
-  const level = Math.min(max, Math.max(min, stats.level));
+  const level = nearestLevel(levels, stats.level);
   const status = skillStatus({ ...stats, level }, max);
   const rate = stats.answered ? Math.round((100 * stats.correct) / stats.answered) : null;
   const select = h('select', { class: 'select level-select', 'aria-label': `Niveau de ${game.title}` },
-    game.levels.slice(min - 1, max).map((label, i) => h('option', { value: min + i, selected: min + i === level }, `${i + 1}. ${label}`)));
+    levels.map((l, i) => h('option', { value: l, selected: l === level }, `${i + 1}. ${game.levels[l - 1]}`)));
   select.addEventListener('change', () => {
     kid.games[game.id] = { ...stats, level: Number(select.value), streak: 0, recent: [] };
     onChange();

@@ -74,6 +74,11 @@ h1, h2, h3 { overflow-wrap: break-word; max-width: 100%; }
 .choices-pictures .choice, .choices-claps .choice, .pattern-item, .bag-item, .basket-item, .add-emoji {
   font-family: 'Andika', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
 }
+/* emoji en couleur de secours (js/emoji.js) : seulement sur les appareils qui n'ont que des emoji en
+   noir et blanc ; la police Twemoji ne couvre que les emoji, le texte reste en Andika */
+.emoji-secours *, .emoji-secours *::before, .emoji-secours *::after {
+  font-family: 'Emoji couleur', 'Andika', 'Avenir Next', system-ui, sans-serif !important;
+}
 button { cursor: pointer; touch-action: manipulation; border: 0; background: none; padding: 0; }
 input { -webkit-user-select: text; user-select: text; }
 
@@ -346,7 +351,7 @@ input { -webkit-user-select: text; user-select: text; }
 .choices-words .choice.long { font-size: min(1.6rem, 6.4vw); }
 .choices-big-numbers .choice { font-size: 3.6rem; min-height: 130px; }
 .choices-objects .choice { min-height: 150px; padding: 12px 4px; }
-.choices-objects .objects .object { font-size: min(26px, 5.6vw); }
+.choices-objects .objects .object { font-size: min(30px, 6.4vw); }
 
 .choice.correct { background: var(--good); color: #fff; box-shadow: 0 6px 0 var(--good-dark); animation: pop 0.35s ease-out; }
 .choice.wrong { background: #ffe3e3; color: #c43d3d; box-shadow: 0 6px 0 #f3b4b4; animation: shake 0.4s; opacity: 0.6; }
@@ -712,6 +717,9 @@ input { -webkit-user-select: text; user-select: text; }
   background: var(--card); border-radius: 14px; box-shadow: 0 3px 0 var(--line);
 }
 .pattern-item.gap { font-family: 'Andika', sans-serif; font-weight: 700; color: var(--accent); border: 3px dashed var(--accent); box-shadow: none; }
+/* 4 images au plus (« quel mot les regroupe ? », une rangée d'animaux) : la scène a toute la place */
+.pattern.few { gap: 12px; }
+.pattern.few .pattern-item { width: min(92px, 20vw); height: min(92px, 20vw); font-size: min(3.6rem, 12vw); border-radius: 20px; }
 .shape { display: block; width: 72%; max-width: 90px; aspect-ratio: 1; }
 .shape svg { width: 100%; height: 100%; display: block; }
 .swatch { display: block; width: 64px; height: 64px; border-radius: 50%; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.1); }
@@ -1281,9 +1289,10 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .choices-objects.n3 .choice { padding: 8px 2px; }
 .choices-objects.n3 .objects .object { font-size: min(17px, 3.8vw); }
-/* illustration d'un calcul (5 + 5 objets) : toujours dans la largeur de l'écran */
+/* illustration d'un calcul (5 + 5 objets) : toujours dans la largeur de l'écran, d'autant plus grande
+   qu'il y a peu d'objets sur la ligne la plus large (--cols, voir operationStage) */
 .operation-visual { flex-wrap: wrap; justify-content: center; max-width: 100%; }
-.operation-visual .objects.small .object { font-size: min(24px, 5.4vw); }
+.operation-visual .objects.small .object { font-size: min(48px, calc((100vw - 120px) / var(--cols, 11) / 1.2)); }
 
 /* =====================================================================
    Téléphone en paysage : le dessin à gauche, la consigne et les réponses
@@ -1330,6 +1339,7 @@ input { -webkit-user-select: text; user-select: text; }
   .stage-listen { width: 104px; height: 104px; font-size: 50px; }
   .object { font-size: min(40px, 9dvh); }
   .objects.per-10 .object { font-size: min(26px, 6.4dvh); }
+  .operation-visual .objects.small .object { font-size: min(34px, 8dvh, calc((50vw - 110px) / var(--cols, 11) / 1.2)); }
   .scatter { width: min(100%, calc((100dvh - 80px) * 1.25)); }
   .maze, .sudoku { width: min(100%, calc(100dvh - 80px)); }
   .rmaze { width: min(100%, calc(100dvh - 68px)); }
@@ -2500,8 +2510,8 @@ body:has(main.play) .voice-progress-text { display: none; }
 .scale { display: block; max-width: 100%; }
 .scale svg {
   display: block; width: auto; max-width: 100%;
-  height: min(110px, calc((100vh / var(--zoom, 1) - 420px) / var(--n)));
-  height: min(110px, calc((100dvh / var(--zoom, 1) - 420px) / var(--n)));
+  height: min(160px, calc((100vh / var(--zoom, 1) - 420px) / var(--n)));
+  height: min(160px, calc((100dvh / var(--zoom, 1) - 420px) / var(--n)));
 }
 .scale-base { fill: #6b3d10; }
 .scale-post { fill: #8a5426; }
@@ -2512,8 +2522,8 @@ body:has(main.play) .voice-progress-text { display: none; }
 .scale-weight path { fill: #4a4e69; }
 .scale-weight text { fill: #fff; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
 .scale-weight .scale-kg { font-size: 6.5px; }
-.scales-ask { display: flex; align-items: center; gap: 6px; font-size: 1.5rem; font-weight: 700; }
-.scales-animal { font-size: 1.9rem; font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
+.scales-ask { display: flex; align-items: center; gap: 6px; font-size: 1.7rem; font-weight: 700; }
+.scales-animal { font-size: 2.5rem; font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
 .scales-ask .gap { min-width: 1.6em; border-radius: 12px; }
 
 /* le dessin caché : les nombres à gauche et en haut, les cases à colorier */
@@ -2558,6 +2568,7 @@ body:has(main.play) .voice-progress-text { display: none; }
   .figure-choice { width: 52px; }
   .scale svg { height: min(110px, calc((100dvh - 120px) / var(--n))); }
   .scales-ask { font-size: 1.3rem; }
+  .scales-animal { font-size: 1.9rem; }
   .picross {
     --cell: min(40px,
       calc((50vw - 44px) / (var(--cols) + var(--rw) * var(--k))),
@@ -2611,9 +2622,14 @@ body:has(main.play) .voice-progress-text { display: none; }
 .drawing-choice .dr-emoji, .stage-drawing .dr-emoji { font-family: 'Andika', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
 .choices-drawings .choice { min-height: 0; padding: 8px 6px; }
 .choices-drawings.n2 .drawing-choice svg { height: min(130px, 18vh); height: min(130px, 18dvh); }
-/* une rangée d'animaux (à gauche de l'arbre, entre, à côté de) : assez grande pour bien voir */
-.play[data-game="se-reperer"] .pattern { gap: 10px; }
-.play[data-game="se-reperer"] .pattern-item { width: 66px; height: 66px; font-size: 2.6rem; border-radius: 16px; }
+/* des dessins en réponse sans scène au-dessus (deux mains, trois carrefours, quatre robots) : plus grands */
+.choices-drawings.center .drawing-choice svg { height: min(140px, 18vh); height: min(140px, 18dvh); }
+@media (orientation: portrait) and (max-width: 600px) {
+  /* sur un téléphone, deux par ligne : trois ou quatre côte à côte seraient minuscules */
+  .choices-drawings.center.n3, .choices-drawings.center.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .choices-drawings.center.n3 .choice:last-child { grid-column: 1 / -1; }
+  .choices-drawings.center .drawing-choice svg { height: min(150px, 20vh); height: min(150px, 20dvh); }
+}
 .choices-arrows { grid-template-columns: minmax(0, 1fr) !important; }
 .choices-arrows .choice { min-height: 52px; padding: 6px; }
 .choices-arrows .drawing-choice svg { height: 38px; }
@@ -2624,7 +2640,8 @@ body:has(main.play) .voice-progress-text { display: none; }
   .drawing-choice svg { height: min(84px, calc((100dvh - 150px) / 2)); }
   .choices-arrows .choice { min-height: 44px; padding: 4px; }
   .choices-arrows .drawing-choice svg { height: 32px; }
-  .play[data-game="se-reperer"] .pattern-item { width: 56px; height: 56px; font-size: 2.1rem; }
+  .pattern.few .pattern-item { width: min(72px, 17dvh); height: min(72px, 17dvh); font-size: min(2.8rem, 11dvh); }
+  .choices-drawings.center .drawing-choice svg { height: min(96px, calc((100dvh - 150px) / 2)); }
   .choices-drawings.n2 .drawing-choice svg { height: min(110px, calc(100dvh - 170px)); }
 }
 

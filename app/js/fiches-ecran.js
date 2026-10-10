@@ -4,7 +4,7 @@
 
 import { clockSvg, h, objectsGrid, renderChoiceContent, renderStage, setAides } from './render.js';
 import { answerText, choiceText, ficheLevels, isPrintable, isWide, makeFiche, FICHE_MIN } from './fiches.js';
-import { programFor, levelRange } from './programs.js';
+import { levelRange, nearestLevel, programFor } from './programs.js';
 import { gameStats } from './storage.js';
 import { seasonOf } from './themes.js';
 import { findGame } from './games/index.js';
@@ -406,16 +406,16 @@ const memo = { childId: null, gameId: null, level: null };
 export function ficheChoices(kid) {
   return programFor(kid.grade).map((domain) => ({
     ...domain,
-    games: domain.games.filter(({ game }) => isPrintable(game.id)).map(({ game, min, max }) => ({
-      game, min, levels: ficheLevels(game).filter((l) => l >= min && l <= max),
+    games: domain.games.filter(({ game }) => isPrintable(game.id)).map(({ game, min, levels }) => ({
+      game, min, classLevels: levels, levels: ficheLevels(game).filter((l) => levels.includes(l)),
     })).filter((g) => g.levels.length),
   })).filter((d) => d.games.length);
 }
 
 /** Niveau proposé : celui où joue l'enfant (ou le niveau imprimable le plus proche). */
 function defaultLevel(kid, entry) {
-  const { min, max } = levelRange(kid.grade, entry.game.id);
-  const current = Math.min(max, Math.max(min, gameStats(kid, entry.game.id, min).level));
+  const { min, levels } = levelRange(kid.grade, entry.game.id);
+  const current = nearestLevel(levels, gameStats(kid, entry.game.id, min).level);
   return entry.levels.reduce((best, l) => (Math.abs(l - current) < Math.abs(best - current) ? l : best), entry.levels[0]);
 }
 
@@ -447,7 +447,7 @@ export function fichesScreen(deps) {
       h('section', { class: 'card' }, h('p', {}, `Aucun jeu de ${kid.name} ne s’imprime pour l’instant.`))));
     return;
   }
-  const { min } = levelRange(kid.grade, entry.game.id);
+  const { levels: classLevels } = levelRange(kid.grade, entry.game.id);
   const gameSelect = h('select', { class: 'select', id: 'fiche-game', 'data-fiche-game': '' },
     choices.map((d) => h('optgroup', { label: `${d.icon} ${d.title}` },
       d.games.map((e) => h('option', { value: e.game.id, selected: e.game.id === entry.game.id }, `${e.game.icon} ${e.game.title}`)))));
@@ -456,7 +456,7 @@ export function fichesScreen(deps) {
     again({ childId, gameId: gameSelect.value });
   });
   const levelSelect = h('select', { class: 'select', id: 'fiche-level', 'data-fiche-level': '' },
-    entry.levels.map((l) => h('option', { value: l, selected: l === level }, `Niveau ${l - min + 1} : ${entry.game.levels[l - 1]}`)));
+    entry.levels.map((l) => h('option', { value: l, selected: l === level }, `Niveau ${classLevels.indexOf(l) + 1} : ${entry.game.levels[l - 1]}`)));
   levelSelect.addEventListener('change', () => {
     memo.level = Number(levelSelect.value);
     draw();
@@ -483,7 +483,7 @@ export function fichesScreen(deps) {
       return;
     }
     const render = (f) => {
-      const sheets = ficheElement(f, { name: kid.name, levelNumber: lvl - min + 1 });
+      const sheets = ficheElement(f, { name: kid.name, levelNumber: classLevels.indexOf(lvl) + 1 });
       scaler.replaceChildren(sheets);
       return sheets;
     };

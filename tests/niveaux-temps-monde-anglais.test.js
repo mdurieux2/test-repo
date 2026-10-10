@@ -3,7 +3,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { findGame } from '../app/js/games/index.js';
 import { DAYS, MONTHS } from '../app/js/games/monde.js';
-import { levelRange } from '../app/js/programs.js';
+import { levelRange, programFor } from '../app/js/programs.js';
+import { GRADES } from '../app/js/storage.js';
 import { createRng } from '../app/js/random.js';
 import { COLOUR_PHRASES } from '../app/js/data/anglais-data.js';
 
@@ -20,12 +21,16 @@ function draw(id, level, runs = 200) {
   return Array.from({ length: runs }, (_, i) => game.generate(level, rng, i, { name: 'Zoé' }));
 }
 
-test('nouveaux niveaux : libellés courts, au programme du CE1', () => {
+test('nouveaux niveaux : libellés courts, au programme d’une classe', () => {
   for (const [id, count] of Object.entries(LEVEL_COUNTS)) {
     const game = findGame(id);
     assert.equal(game.levels.length, count, id);
     for (const label of game.levels.slice(-3)) assert.ok([...label].length <= 26, `${id} : « ${label} » trop long`);
-    assert.equal(levelRange('CE1', id).max, count, `${id} : les nouveaux niveaux doivent être accessibles en CE1`);
+    // le dernier niveau est proposé dans au moins une classe (pas forcément au CE1 : l'anglais écrit
+    // commence au CE2, les plus longues histoires anglaises sont pour le CM)
+    const reached = Object.keys(GRADES).some((grade) => levelRange(grade, id).levels.includes(count)
+      && programFor(grade).some((d) => d.games.some(({ game: g }) => g.id === id)));
+    assert.ok(reached, `${id} : le niveau ${count} n'est proposé dans aucune classe`);
   }
 });
 

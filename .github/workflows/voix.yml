@@ -11,7 +11,7 @@ name: Voix naturelle
 # workflow à la main (onglet Actions, ou API « workflow_dispatch » sur la branche).
 on:
   push:
-    branches: ['claude/**']
+    branches: ['claude/**', 'claude_mdu/**']
     paths: ['scripts/voix/a-generer.json', 'scripts/voix/a-refaire.json', 'scripts/voix/generer.py', '.github/workflows/voix.yml']
   workflow_dispatch:
 
