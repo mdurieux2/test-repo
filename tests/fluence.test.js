@@ -33,8 +33,8 @@ test('fluence : le jeu est dans « Lire et écrire », avec 7 à 10 niveaux, au 
   assert.ok(game.levels.length >= 7 && game.levels.length <= 10);
   assert.equal(game.questions, 1, 'une partie = une lecture');
   assert.equal(game.adult, true);
-  assert.deepEqual(levelRange('CP', 'fluence'), { min: 1, max: 7 });
-  assert.deepEqual(levelRange('CE1', 'fluence'), { min: 4, max: 9 });
+  assert.deepEqual(levelRange('CP', 'fluence').levels, [1, 2, 3, 4, 5, 6, 7]);
+  assert.deepEqual(levelRange('CE1', 'fluence').levels, [5, 6, 7, 8, 9]);
   for (const grade of ['MS', 'GS']) {
     assert.ok(!programFor(grade).some((d) => d.games.some(({ game: g }) => g.id === 'fluence')), grade);
   }

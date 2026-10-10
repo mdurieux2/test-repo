@@ -25,13 +25,25 @@ test('les programmes ne citent que des jeux et des niveaux qui existent', () => 
   }
 });
 
+test('chaque niveau de chaque jeu est au programme d’au moins une classe (sinon personne n’y joue)', () => {
+  const missing = [];
+  for (const game of GAMES.filter((g) => !g.paliers)) {
+    for (let level = 1; level <= game.levels.length; level++) {
+      const used = Object.values(PROGRAMS).some((domains) => Object.values(domains).some((entries) => entries.some(
+        ([id, min, max, skip = []]) => id === game.id && level >= min && level <= max && !skip.includes(level))));
+      if (!used) missing.push(`${game.id} niveau ${level}`);
+    }
+  }
+  assert.deepEqual(missing, []);
+});
+
 test('la maternelle ne fait ni lecture de mots ni grands nombres', () => {
   for (const grade of ['PS', 'MS']) {
     const games = programFor(grade).flatMap((d) => d.games.map((g) => g.game.id));
     for (const id of ['bon-mot', 'petits-mots', 'dizaines', 'tables', 'calcul', 'grands-nombres']) assert.ok(!games.includes(id), `${grade} ${id}`);
   }
-  assert.deepEqual(levelRange('GS', 'calcul'), { min: 1, max: 6 });
-  assert.deepEqual(levelRange('CE1', 'tables'), { min: 1, max: 9 });
+  assert.deepEqual(levelRange('GS', 'calcul'), { min: 1, max: 6, levels: [1, 2, 3, 4, 5, 6] });
+  assert.deepEqual(levelRange('CE1', 'tables').levels, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
 });
 
 test('suivi : activité des 7 derniers jours et jours d’affilée', () => {

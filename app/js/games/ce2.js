@@ -16,12 +16,19 @@ export function ecrit(n) {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, NNBSP);
 }
 
-/** 4725 → « 4 mille 725 » : ce que dit la voix (des sons qu'elle a : 4, mille, 725). */
+/**
+ * 4725 → « 4 mille 725 », 12 345 678 → « 12 millions 345 mille 678 » : ce que dit la voix (des sons
+ * qu'elle a : les nombres jusqu'à 1 000, « mille », « million »).
+ */
 export function dit(n) {
-  if (n < 1000) return String(n);
-  const th = Math.floor(n / 1000);
+  const m = Math.floor(n / 1e6);
+  const th = Math.floor((n % 1e6) / 1000);
   const rest = n % 1000;
-  return `${th === 1 ? '' : `${th} `}mille${rest ? ` ${rest}` : ''}`;
+  const parts = [];
+  if (m) parts.push(`${m} million${m > 1 ? 's' : ''}`);
+  if (th) parts.push(th === 1 ? 'mille' : `${th} mille`);
+  if (rest || !parts.length) parts.push(String(rest));
+  return parts.join(' ');
 }
 
 const UNITS = ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix',
@@ -48,13 +55,22 @@ function below1000(n) {
   return r ? `${head} ${below100(r)}` : head;
 }
 
-/** Le nombre en lettres (orthographe traditionnelle) : 2304 → « deux mille trois cent quatre ». */
+/**
+ * Le nombre en lettres (orthographe traditionnelle), jusqu'à 999 999 999 : 2304 → « deux mille trois
+ * cent quatre ». « Mille » est invariable et ne laisse pas de « s » à « cent » ni à « vingt » devant lui
+ * (deux cent mille, quatre-vingt mille) ; « million » est un nom : il prend un « s » et « cents » le
+ * garde (deux cents millions).
+ */
 export function enLettres(n) {
-  if (n < 1000) return below1000(n);
-  const th = Math.floor(n / 1000);
+  if (n === 0) return below1000(0);
+  const m = Math.floor(n / 1e6);
+  const th = Math.floor((n % 1e6) / 1000);
   const r = n % 1000;
-  const head = th === 1 ? 'mille' : `${below1000(th)} mille`;
-  return r ? `${head} ${below1000(r)}` : head;
+  const out = [];
+  if (m) out.push(`${below1000(m)} million${m > 1 ? 's' : ''}`);
+  if (th) out.push(th === 1 ? 'mille' : `${below1000(th).replace(/(cent|vingt)s$/, '$1')} mille`);
+  if (r) out.push(below1000(r));
+  return out.join(' ');
 }
 
 /** Le chiffre de la colonne `col` (0 : unités, 1 : dizaines, 2 : centaines, 3 : milliers). */

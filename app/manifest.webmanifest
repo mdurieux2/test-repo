@@ -1,7 +1,7 @@
 {
   "name": "Lire, compter et s’amuser !",
   "short_name": "Lire&Compter",
-  "description": "Jeux de français, de maths et d’anglais, de la moyenne section au CE1.",
+  "description": "Jeux de français, de maths et d’anglais, de la petite section au CM2.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

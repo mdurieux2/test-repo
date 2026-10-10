@@ -34,7 +34,8 @@ const zonesOf = (view) => new Set([...bodySvg(view).matchAll(/data-zone="([^"]+)
 
 test('corps et milieux : rubrique « Sciences », section « Le vivant », après « Le vivant », 7 à 10 niveaux', () => {
   const sciences = DOMAINS.find((d) => d.id === 'sciences');
-  assert.deepEqual(sciences.games.map((g) => g.id).slice(0, 3), ['vivant', 'corps', 'milieux']);
+  // les sciences du CM en tête (seulement au CM1 et au CM2), puis le vivant, le corps et les milieux
+  assert.deepEqual(sciences.games.map((g) => g.id).slice(0, 4), ['sciences-cm', 'vivant', 'corps', 'milieux']);
   for (const id of IDS) {
     const game = findGame(id);
     assert.ok(game, `${id} absent de index.js`);

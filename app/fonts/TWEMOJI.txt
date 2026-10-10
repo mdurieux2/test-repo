@@ -1,0 +1,7 @@
+twemoji.woff2 : emoji en couleur de secours, chargés seulement sur les appareils qui n'ont que des
+emoji en noir et blanc (voir js/emoji.js). Réduite aux emoji de l'app par scripts/emoji/police.mjs.
+
+Graphismes : Twemoji, Copyright 2019 Twitter, Inc and other contributors,
+licence CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/), https://github.com/twitter/twemoji
+Police COLR : twemoji-colr (Mozilla, https://github.com/mozilla/twemoji-colr), paquet npm
+twemoji-colr-font 15.0.3, police sous licence SIL Open Font License 1.1 (voir OFL.txt).

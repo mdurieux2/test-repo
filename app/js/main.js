@@ -15,14 +15,14 @@ import {
 import {
   FLUENCE_SECONDS, fluenceBenchmark, fluenceEntry, fluenceLevelAfter, fluenceScore, fluenceSeconds, fluenceStars, fluenceTime,
 } from './games/fluence.js';
-import { featuredGames, levelRange, MAX_FEATURED, programFor, programForChild } from './programs.js';
+import { featuredGames, levelRange, MAX_FEATURED, nearestLevel, programFor, programForChild } from './programs.js';
 import { dailyPicks, dueReviews as reviewsDue, duoPlan, drawPool } from './picks.js';
 import { createRng, pick, randInt, sample, shuffle } from './random.js';
 import { palierStarsAfter, PALIER_MAX_STARS, recordAnswer, starsFor } from './progress.js';
 import { newStickers, STICKERS, starsToNextSticker, stickersUnlocked } from './rewards.js';
 import {
   addChild, beginDuo, cleanName, endDuo, GRADES, gameStats, loadStore, logFluence, logMistake, logSession, MAX_CHILDREN, NAME_MAX, removeChild,
-  resetChild, saveStore,
+  resetChild, saveStore, storeSnapshot,
 } from './storage.js';
 import { demoSeen, markDemoSeen } from './storage.js';
 import { hasDemo, playDemo, stillDemo, stopDemo } from './demo.js';
@@ -38,6 +38,9 @@ import {
 import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
+import { emojiCouleur } from './emoji.js';
+import { dit, ecrit } from './games/ce2.js';
+import { ceNavigateur, etapesInstallation, pourquoiInstaller } from './installation.js';
 import { squarePhoto } from './photo.js';
 import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
@@ -52,6 +55,8 @@ import { STORY_DATA } from './games/histoires.js';
 import * as recordings from './recordings.js';
 import { formatDuration, MAX_SECONDS, pickMime, sentenceAt, sentenceTimeline } from './recordings.js';
 import { fichesScreen } from './fiches-ecran.js';
+import { creerSauvegarde, dateEnClair, exporterEnregistrements, importerEnregistrements, lireSauvegarde, nomFichier } from './sauvegarde.js';
+import { cetAppareil, ecransAVerifier, mesurerEcran, rapportTexte } from './verif-affichage.js';
 
 const app = document.getElementById('app');
 const rng = createRng();
@@ -436,6 +441,8 @@ const ICONS = {
   reglages: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M4.2 6.2l2.1 2.1M17.7 15.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 17.8l2.1-2.1M17.7 8.3l2.1-2.1"/>',
   partager: '<path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  sauvegarder: '<path d="M12 3v11M7.5 9.5 12 14l4.5-4.5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
+  restaurer: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>',
 };
 
 function icon(name) {
@@ -470,41 +477,33 @@ function profileScreen() {
 
 // ---------------------------------------------------------------- Installer l'icône
 
-// Android et ordinateur (Chrome, Edge) : le navigateur propose lui-même l'installation.
+// Android et ordinateur (Chrome, Edge, Brave, Samsung Internet) : le navigateur propose lui-même
+// l'installation, parfois après l'affichage de « Qui joue ? » : l'invitation montre alors son bouton.
 let installPrompt = null;
 addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   installPrompt = e;
+  refreshInstallHint();
+});
+addEventListener('appinstalled', () => {
+  installPrompt = null;
+  store.settings.installHintDone = true;
+  save();
+  refreshInstallHint();
 });
 
-function platform() {
-  const ua = navigator.userAgent;
-  // l'iPad se présente comme un Mac, mais il a un écran tactile
-  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
-  if (/Android/.test(ua)) return 'android';
-  return 'desktop';
+/** L'invitation à installer, refaite sur place (bouton du navigateur arrivé, app installée). */
+function refreshInstallHint() {
+  const card = document.querySelector('[data-install-hint]');
+  if (!card) return;
+  const fresh = installHint();
+  if (fresh) card.replaceWith(fresh);
+  else card.remove();
 }
 
-/** Les étapes pour mettre l'icône sur l'écran d'accueil, selon l'appareil. */
+/** Les étapes pour mettre l'icône sur l'écran d'accueil, selon l'appareil et le navigateur. */
 function installSteps() {
-  const steps = {
-    ios: [
-      'Touchez Partager (le carré avec une flèche vers le haut).',
-      'Faites défiler, puis touchez « Sur l’écran d’accueil ».',
-      'Touchez « Ajouter » : l’icône apparaît, l’app marche sans Internet.',
-    ],
-    android: [
-      'Touchez le menu ⋮ du navigateur, en haut à droite.',
-      'Touchez « Installer l’application » ou « Ajouter à l’écran d’accueil ».',
-      'Confirmez : l’icône apparaît, l’app marche sans Internet.',
-    ],
-    desktop: [
-      'Cliquez sur l’icône d’installation dans la barre d’adresse, ou ouvrez le menu du navigateur.',
-      'Choisissez « Installer Lire, compter et s’amuser ! ».',
-      'L’app s’ouvre alors dans sa propre fenêtre, même sans Internet.',
-    ],
-  };
-  return h('ol', { class: 'plain-list install-steps' }, steps[platform()].map((step) => h('li', {}, step)));
+  return h('ol', { class: 'plain-list install-steps' }, etapesInstallation(ceNavigateur()).map((step) => h('li', {}, step)));
 }
 
 /**
@@ -523,18 +522,18 @@ function installHint() {
     ? h('button', {
       class: 'big-btn primary', 'data-install': '',
       onclick: async () => {
-        installPrompt.prompt();
-        const { outcome } = await installPrompt.userChoice.catch(() => ({}));
-        installPrompt = null;
+        const prompt = installPrompt;
+        installPrompt = null; // l'invite du navigateur ne sert qu'une fois
+        prompt.prompt();
+        const { outcome } = await prompt.userChoice.catch(() => ({}));
         if (outcome === 'accepted') hide({ installHintDone: true });
+        else refreshInstallHint();
       },
     }, '📲 Installer l’app')
     : null;
   return h('section', { class: 'card install-hint', 'data-install-hint': '' },
     h('h2', {}, '📲 Mettez l’icône sur l’écran d’accueil'),
-    h('p', {}, platform() === 'ios'
-      ? 'Sur iPhone et iPad, le navigateur peut effacer les prénoms et les progrès d’un site qu’on n’ouvre pas pendant 7 jours. Avec l’icône, tout est protégé, et l’app s’ouvre en plein écran, même sans Internet.'
-      : 'Avec l’icône, l’app s’ouvre en plein écran, même sans Internet, et les prénoms et les progrès sont mieux protégés.'),
+    h('p', {}, pourquoiInstaller(ceNavigateur())),
     install || h('details', { class: 'install-how' }, h('summary', {}, 'Comment faire ?'), installSteps()),
     h('div', { class: 'install-actions' },
       h('button', { class: 'link-action', 'data-install-later': '', onclick: () => hide({ installHintUntil: Date.now() + 14 * 24 * 3600 * 1000 }) }, 'Plus tard'),
@@ -765,7 +764,7 @@ function welcomeScreen(adding = !store.order.length) {
       h('div', { class: 'welcome-avatars', 'aria-hidden': 'true' },
         avatar('apercu-fille', 'avatar-md', { look: 'fille' }), avatar('apercu-garcon', 'avatar-md', { look: 'garcon' })),
       h('h1', { class: 'welcome-title' }, 'Bienvenue !'),
-      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la petite section au CE2.')),
+      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la petite section au CM2.')),
     added.length ? h('section', { class: 'card' }, h('h2', {}, 'Ils vont jouer'), h('div', { class: 'child-chips' }, added)) : null,
     adding
       ? h('section', { class: 'card' },
@@ -781,6 +780,7 @@ function welcomeScreen(adding = !store.order.length) {
           },
         }))
       : null,
+    added.length ? null : restoreCard(),
     added.length
       ? h('div', { class: 'welcome-actions' },
         !adding && store.order.length < MAX_CHILDREN
@@ -831,7 +831,7 @@ function homeScreen() {
 /** « ⭐ Conseillé pour toi » : les jeux choisis par les parents, en haut de l'accueil. */
 function featuredBlock() {
   const list = featuredGames(child())
-    .filter(({ game, min, max }) => !access().skipListening || !gameListenOnly(game, min, max)).slice(0, MAX_FEATURED);
+    .filter(({ game, levels }) => !access().skipListening || !gameListenOnly(game, levels)).slice(0, MAX_FEATURED);
   if (!list.length) return null;
   return h('section', { class: 'home-featured', 'aria-labelledby': 'featured-label' },
     h('h2', { class: 'featured-label', id: 'featured-label' }, '⭐ Conseillé pour toi'),
@@ -871,8 +871,8 @@ function dailyGame() {
     fixedLevel: true,
     badge: () => 'Défi 🔥',
     generate(_level, rng, index, context) {
-      const { game, min, max } = picks[index % picks.length];
-      const level = Math.min(max, Math.max(min, gameStats(child(), game.id, min).level));
+      const { game, min, levels } = picks[index % picks.length];
+      const level = nearestLevel(levels, gameStats(child(), game.id, min).level);
       const q = game.generate(level, rng, index, context);
       return { ...q, key: `defi:${q.key}`, from: game.id, fromLevel: level };
     },
@@ -999,11 +999,13 @@ function dailyButton() {
 
 // ---------------------------------------------------------------- Choix du jeu
 
-function levelDots(level, min, max) {
-  const total = max - min + 1;
-  if (total > 6) return h('span', { class: 'level-text' }, `Niveau ${level - min + 1}/${total}`);
-  return h('span', { class: 'level-dots', role: 'img', 'aria-label': `Niveau ${level - min + 1} sur ${total}` },
-    Array.from({ length: total }, (_, i) => h('span', { class: i <= level - min ? 'dot on' : 'dot' })));
+/** Où en est l'enfant parmi les niveaux de sa classe (« Niveau 3/8 », ou des points). */
+function levelDots(level, levels) {
+  const total = levels.length;
+  const rank = levels.indexOf(level) + 1;
+  if (total > 6) return h('span', { class: 'level-text' }, `Niveau ${rank}/${total}`);
+  return h('span', { class: 'level-dots', role: 'img', 'aria-label': `Niveau ${rank} sur ${total}` },
+    Array.from({ length: total }, (_, i) => h('span', { class: i < rank ? 'dot on' : 'dot' })));
 }
 
 function palierSummary(min, max) {
@@ -1018,15 +1020,15 @@ function domainScreen(domainId) {
   const featured = new Set(featuredGames(child()).map(({ game }) => game.id));
   const blocks = [];
   let section = null;
-  for (const { game, min, max } of domain.games) {
+  for (const { game, min, max, levels } of domain.games) {
     if (game.section && game.section !== section) {
       section = game.section;
       blocks.push(h('h2', { class: 'section-title' }, section));
     }
     const stats = gameStats(child(), game.id, min);
-    const level = Math.min(max, Math.max(min, stats.level));
+    const level = nearestLevel(levels, stats.level);
     // La carte lance le jeu ; le bas de la carte (les points de niveau) permet de choisir le niveau.
-    const pickable = !game.paliers && max > min;
+    const pickable = !game.paliers && levels.length > 1;
     blocks.push(h('div', { class: featured.has(game.id) ? 'game-card featured' : 'game-card' },
       h('button', {
         class: 'game-play',
@@ -1037,14 +1039,14 @@ function domainScreen(domainId) {
       h('span', { class: 'game-icon', 'aria-hidden': 'true' }, game.icon),
       h('span', { class: 'game-title' }, game.title),
       game.paliers ? palierSummary(min, max) : null,
-      !pickable && !game.paliers ? levelDots(level, min, max) : null,
+      !pickable && !game.paliers ? levelDots(level, levels) : null,
       stats.bestStars ? h('span', { class: 'best' }, '⭐'.repeat(stats.bestStars)) : null),
       pickable
         ? h('button', {
           class: 'level-pick',
           'data-levels': game.id,
           onclick: () => levelScreen(game),
-        }, levelDots(level, min, max), h('span', { class: 'level-pick-label' }, 'Niveaux', h('span', { 'aria-hidden': 'true' }, ' ▾')),
+        }, levelDots(level, levels), h('span', { class: 'level-pick-label' }, 'Niveaux', h('span', { 'aria-hidden': 'true' }, ' ▾')),
         h('span', { class: 'visually-hidden' }, ` (${game.title})`))
         : null));
   }
@@ -1054,13 +1056,13 @@ function domainScreen(domainId) {
   say(guide, `${domain.title}. Choisis un jeu !`);
 }
 
-/** Choisir directement son niveau (dans la fourchette de la classe). */
+/** Choisir directement son niveau (parmi ceux de la classe). */
 function levelScreen(game) {
-  const { min, max } = levelRange(child().grade, game.id);
-  const current = Math.min(max, Math.max(min, gameStats(child(), game.id, min).level));
+  const { min, levels } = levelRange(child().grade, game.id);
+  const current = nearestLevel(levels, gameStats(child(), game.id, min).level);
   const rows = [];
-  for (let level = min; level <= max; level++) {
-    const n = level - min + 1;
+  for (const [i, level] of levels.entries()) {
+    const n = i + 1;
     const state = level < current ? 'passed' : level === current ? 'current' : 'next';
     rows.push(h('button', {
       class: `level-row ${state}`,
@@ -1115,12 +1117,14 @@ function palierMap(min = 1, max = CALC_PALIERS.length) {
 function startSession(game, { level, back, total, duo } = {}) {
   if (!duo && timeIsUp()) return pauseScreen(); // à deux, le temps de chacun est vérifié avant (tryDuo)
   const { min, max } = game.range || levelRange(child().grade, game.id);
+  const levels = game.range ? [min] : levelRange(child().grade, game.id).levels;
   const stats = gameStats(child(), game.id, min);
-  const startLevel = level || Math.min(max, Math.max(min, stats.level));
+  const startLevel = level || nearestLevel(levels, stats.level);
   const session = {
     game,
     min,
     max,
+    levels, // les niveaux de la classe (un niveau d'une autre classe peut manquer entre min et max)
     back: back || (() => domainScreen(game.domain)),
     index: 0,
     total: questionsPerSession(game, total, store.settings.sessionLength), // défi chrono : toujours 10
@@ -1147,7 +1151,7 @@ function newQuestion(session) {
     const index = session.index + session.formatOffset;
     if (skipListening) {
       // niveaux d'écoute facultatifs : une autre question du même niveau, ou le niveau jouable le plus proche
-      const found = playableQuestion(generate, { level: session.levelState.level, min: session.min, max: session.max, index: index + i * PLAYABLE_STEP });
+      const found = playableQuestion(generate, { level: session.levelState.level, levels: session.levels, index: index + i * PLAYABLE_STEP });
       q = found.q;
       if (found.level !== session.levelState.level) session.levelState = { ...session.levelState, level: found.level };
     } else {
@@ -1236,7 +1240,7 @@ function nextQuestion(session) {
   // le bouton « ? » est posé dans le coin du personnage, sans rien déplacer
   const withDemoButton = (guideBtn, btn) => (btn ? h('span', { class: 'guide-wrap' }, guideBtn, btn) : guideBtn);
 
-  const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levelState.level - session.min + 1}`;
+  const levelText = game.badge ? game.badge(session.levelState.level) : `Niv. ${session.levels.indexOf(session.levelState.level) + 1}`;
   // défi chrono : le chronomètre (mm:ss) s'affiche sous le niveau, en haut à droite
   const clock = session.chrono ? h('span', { class: 'chrono-clock', role: 'timer' }) : null;
   const badge = clock
@@ -1252,10 +1256,14 @@ function nextQuestion(session) {
     h('div', { class: 'instruction' },
       withDemoButton(h('button', { class: 'guide-btn', onclick: replay, 'aria-label': `Réécouter ${guide.name}` },
         avatar(guide.id, 'avatar-sm'), h('span', { class: 'speak-badge', 'aria-hidden': 'true' }, '🔊')), demoBtn),
-      h('button', { class: 'bubble bubble-left', onclick: replay }, readable(frenchSpacing(brief ? q.short.text : q.text)))),
+      // une longue question (histoire, sciences du CM) : plus petite en paysage (style.css), pour laisser la place aux réponses
+      h('button', { class: `bubble bubble-left${(brief ? q.short.text : q.text).length > 70 ? ' long' : ''}`, onclick: replay },
+        readable(frenchSpacing(brief ? q.short.text : q.text)))),
     stage,
     zone,
     feedback));
+  // vérification de l'affichage (espace parents) : l'écran seulement, sans voix, chrono ni démonstration
+  if (session.verif) return;
   if (clock) runChrono(session, clock);
   const demoKey = q.from || game.id; // une révision : la démonstration de son jeu d'origine
   if (demoBtn && !demoSeen(child(), demoKey)) {
@@ -1498,7 +1506,7 @@ async function markCorrect(ctx) {
   let change = null;
   // défi chrono : le niveau ne change pas pendant la partie (le record est celui du niveau joué)
   if (!game.fixedLevel && !game.timed) {
-    const result = recordAnswer(session.levelState, firstTry, session.max, session.min);
+    const result = recordAnswer(session.levelState, firstTry, session.max, session.min, session.levels);
     session.levelState = result.state;
     change = result.change;
   }
@@ -1545,6 +1553,8 @@ function choiceZone(ctx) {
   // un mot très long (« l’éléphanteau ») doit tenir sur la largeur d'une colonne
   const longWord = q.choices.some((c) => typeof c.label === 'string' && c.label.split(/\s+/).some((w) => w.length > 9));
   const zone = h('div', { class: `choices choices-${q.choiceStyle} n${q.choices.length}${q.stage.type === 'none' ? ' center' : ''}${longWord ? ' long-words' : ''}` });
+  // des groupes d'objets : le plus grand groupe règle la taille des objets (la même pour tous)
+  if (q.choiceStyle === 'objects') zone.style.setProperty('--most', Math.max(1, ...q.choices.map((c) => c.objects?.count ?? 0)));
   // cherche et trouve : les images éparpillées sur une carte (place en %, angle, taille)
   if (q.seek) {
     zone.style.setProperty('--cols', q.seek.cols);
@@ -1554,7 +1564,13 @@ function choiceZone(ctx) {
     const label = typeof choice.label === 'string' ? choice.label : '';
     const classes = ['choice'];
     if (label.length > 7 && q.choiceStyle !== 'sentences') classes.push('long');
-    if (/^\d{3,}$/.test(label)) classes.push(label.length >= 4 ? 'digits-4' : 'digits-3'); // grands nombres : police plus petite
+    // un seul mot très long (« commençâmes ») : il ne peut pas passer à la ligne, police encore plus petite
+    if (label.length > 10 && !/\s/.test(label) && q.choiceStyle !== 'sentences') classes.push('xlong');
+    // une très longue réponse en phrase (un nombre de millions écrit en lettres) : police plus petite
+    if (label.length > 60 && q.choiceStyle === 'sentences') classes.push('long-text');
+    // grands nombres, écrits ou non avec une espace fine (« 1 441 ») : police plus petite
+    const digits = label.replace(/\s/g, '');
+    if (/^\d{3,}$/.test(digits)) classes.push(digits.length >= 4 ? 'digits-4' : 'digits-3');
     const btn = choice.place
       ? h('button', {
         class: classes.join(' '), 'data-value': String(choice.value), 'aria-label': choice.name,
@@ -1611,9 +1627,10 @@ function keypadZone(ctx) {
     typed = '';
     update();
     const hint = ctx.session.attempts >= 1;
+    // un grand nombre s'écrit « 10 800 » et se dit en morceaux que la voix connaît (« 10 mille 800 »)
     markWrong(ctx, {
-      message: hint ? `C’est ${q.answer} !` : 'Essaie encore !',
-      speech: hint ? `C’est ${q.answer}. Tape ${q.answer} !` : 'Essaie encore !',
+      message: hint ? `C’est ${ecrit(q.answer)} !` : 'Essaie encore !',
+      speech: hint ? `C’est ${dit(q.answer)}. Tape ${dit(q.answer)} !` : 'Essaie encore !',
       given: value,
     });
   };
@@ -4452,12 +4469,20 @@ function fluenceZone(ctx) {
   return { stage: h('div', { class: `stage stage-fluence fl-kind-${kind}` }, brief, sheet), zone };
 }
 
+/** Le niveau d'après une partie : un cran vers `next`, en sautant les niveaux qui ne sont pas de la classe. */
+function stepLevel(session, level, next) {
+  if (next === level) return level;
+  const i = session.levels.indexOf(level);
+  if (i < 0) return nearestLevel(session.levels, next);
+  return session.levels[next > level ? i + 1 : i - 1] ?? level;
+}
+
 /** Une lecture terminée : le score est gardé (child.fluence), le niveau suit, et la partie compte pour les étoiles. */
 function endFluence(session, score, { timed, kind }) {
   const { game } = session;
   const kid = child();
   const level = session.levelState.level;
-  const next = fluenceLevelAfter(level, score, session.min, session.max);
+  const next = stepLevel(session, level, fluenceLevelAfter(level, score, session.min, session.max));
   const stats = gameStats(kid, game.id, session.min);
   kid.games[game.id] = {
     ...stats, level: next, streak: 0, recent: [],
@@ -4512,7 +4537,7 @@ function finishSession(session) {
   if (game.timed && !session.chronoStart) {
     // sans chrono (accessibilité) : ni temps ni record, mais le niveau suit les réussites comme d'habitude
     const level = session.levelState.level;
-    const next = chronoLevelAfter(level, session.correct, session.total, session.min, session.max);
+    const next = stepLevel(session, level, chronoLevelAfter(level, session.correct, session.total, session.min, session.max));
     kid.games[game.id] = { ...kid.games[game.id], level: next, streak: 0, recent: [] };
     if (next > level) chronoLine = h('div', { class: 'chrono-result' }, h('p', { class: 'chrono-next' }, frenchSpacing('🚀 Prêt pour le niveau suivant !')));
   } else if (game.timed) {
@@ -4521,7 +4546,7 @@ function finishSession(session) {
     const record = recordAfter(kid.records, game.id, level, seconds);
     kid.records = record.records;
     newRecord = record.isNew;
-    const next = chronoLevelAfter(level, session.correct, session.total, session.min, session.max);
+    const next = stepLevel(session, level, chronoLevelAfter(level, session.correct, session.total, session.min, session.max));
     kid.games[game.id] = { ...kid.games[game.id], level: next, streak: 0, recent: [] };
     chronoLine = h('div', { class: 'chrono-result' },
       h('p', { class: 'chrono-time' }, frenchSpacing('⏱ Ton temps : '), h('b', {}, formatChrono(seconds))),
@@ -5452,10 +5477,8 @@ function voicesCard() {
 
 /** Les classes qui entendent les histoires de ce niveau (« MS, GS, CP »). */
 function gradesForStoryLevel(level) {
-  return Object.keys(GRADES).filter((grade) => {
-    const { min, max } = levelRange(grade, 'histoires');
-    return level >= min && level <= max;
-  }).join(', ');
+  return Object.keys(GRADES).filter((grade) => programFor(grade)
+    .some((domain) => domain.games.some(({ game, levels }) => game.id === 'histoires' && levels.includes(level)))).join(', ');
 }
 
 /** Toutes les histoires, par niveau, chacune avec 🎙 Enregistrer, et ▶ Écouter, 🗑 Supprimer si elle est enregistrée. */
@@ -5742,6 +5765,246 @@ function recordScreen(story) {
   setState('ready');
 }
 
+// ---------------------------------------------------------------- Sauvegarde (sauvegarde.js)
+
+/**
+ * Enregistre le fichier de sauvegarde : sur iPhone et iPad, par le partage (« Enregistrer dans
+ * Fichiers », AirDrop, e-mail…), car un téléchargement y est mal rangé ; ailleurs, téléchargé
+ * (dossier Téléchargements). Renvoie 'partagée', 'téléchargée' ou 'annulée'.
+ */
+async function saveBackupFile(text, name) {
+  const blob = new Blob([text], { type: 'application/json' });
+  if (ceNavigateur().os === 'ios' && typeof File === 'function') {
+    const file = new File([blob], name, { type: 'application/json' });
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return 'partagée';
+      } catch (error) {
+        if (error?.name === 'AbortError') return 'annulée';
+        // partage refusé : le fichier est téléchargé
+      }
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const link = h('a', { href: url, download: name, hidden: true });
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  return 'téléchargée';
+}
+
+function lastBackupText() {
+  const when = dateEnClair(store.settings.lastBackup);
+  return when ? `Dernière sauvegarde : le ${when}.` : 'Pas encore de sauvegarde sur cet appareil.';
+}
+
+/** Le bouton « Restaurer une sauvegarde » (et son choix de fichier caché) ; `status` dit ce qui se passe. */
+function restoreButton(status) {
+  const input = h('input', { type: 'file', class: 'visually-hidden', tabindex: '-1', 'aria-hidden': 'true', 'aria-label': 'Fichier de sauvegarde' });
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    let text = '';
+    try {
+      text = await file.text();
+    } catch {
+      // illisible : lireSauvegarde le dira
+    }
+    const backup = lireSauvegarde(text);
+    if (!backup.ok) {
+      status.textContent = backup.raison;
+      return;
+    }
+    const when = dateEnClair(backup.date);
+    const replaced = store.order.length ? ' Les profils, les progrès et les réglages de cet appareil seront remplacés.' : '';
+    if (!confirm(`Restaurer la sauvegarde${when ? ` du ${when}` : ''} (${backup.enfants.join(', ')}) ?${replaced}`)) return;
+    status.textContent = 'Restauration…';
+    await importerEnregistrements(recordings, backup.enregistrements);
+    backup.store.active = null; // on repart de « Qui joue ? »
+    backup.store.settings.lastBackup = backup.date || new Date().toISOString();
+    if (!saveStore(backup.store)) {
+      status.textContent = 'La sauvegarde n’a pas pu être enregistrée sur cet appareil. Libérez de la place, puis réessayez.';
+      return;
+    }
+    location.reload();
+  });
+  return [input, h('button', { class: 'big-btn backup-restore', onclick: () => input.click() }, icon('restaurer'), 'Restaurer une sauvegarde')];
+}
+
+/** Réglages : enregistrer une sauvegarde de tout ce que l'app garde sur l'appareil, ou en restaurer une. */
+function backupCard() {
+  const status = h('p', { class: 'backup-status', role: 'status' }, lastBackupText());
+  const saveBtn = h('button', { class: 'big-btn primary backup-save', disabled: true }, icon('sauvegarder'), 'Enregistrer une sauvegarde');
+  // les histoires enregistrées sont lues tout de suite : au toucher, le fichier est prêt aussitôt
+  // (le partage doit suivre le geste de près)
+  let enregistrements = null;
+  exporterEnregistrements(recordings).catch(() => []).then((list) => {
+    enregistrements = list;
+    saveBtn.disabled = false;
+  });
+  saveBtn.addEventListener('click', async () => {
+    if (!enregistrements) return;
+    const date = new Date();
+    const name = nomFichier(date);
+    const text = JSON.stringify(creerSauvegarde(storeSnapshot(store), { version: APP.version, date, enregistrements }));
+    const how = await saveBackupFile(text, name);
+    if (how === 'annulée') {
+      status.textContent = 'Sauvegarde annulée.';
+      return;
+    }
+    store.settings.lastBackup = date.toISOString();
+    save();
+    status.textContent = `Sauvegarde ${how === 'partagée' ? 'prête' : 'téléchargée'} : ${name}. Gardez ce fichier en lieu sûr.`;
+  });
+  return h('section', { class: 'card backup' },
+    h('h2', {}, 'Sauvegarder la progression'),
+    h('p', { class: 'muted small' }, 'Les prénoms, les photos, les étoiles, les niveaux, les réglages et les histoires enregistrées, dans un fichier à garder en lieu sûr (Fichiers, Drive, e-mail…). Il permet de tout retrouver dans un autre navigateur, sur un autre appareil, ou si les données de l’app ont été effacées.'),
+    h('div', { class: 'backup-actions' }, saveBtn, restoreButton(status)),
+    status);
+}
+
+/** Premier lancement : retrouver les enfants d'une sauvegarde au lieu de les recréer. */
+function restoreCard() {
+  const status = h('p', { class: 'backup-status', role: 'status' });
+  return h('section', { class: 'card backup' },
+    h('h2', {}, 'Déjà une sauvegarde ?'),
+    h('p', { class: 'muted small' }, 'Retrouvez les enfants et leurs progrès, enregistrés depuis un autre navigateur ou un autre appareil.'),
+    h('div', { class: 'backup-actions' }, restoreButton(status)),
+    status);
+}
+
+// ---------------------------------------------------------------- Vérifier l'affichage sur cet appareil
+
+/** Deux images affichées : l'écran est mis en page. */
+const apresAffichage = () => new Promise((resolve) => { requestAnimationFrame(() => requestAnimationFrame(resolve)); });
+
+/** Les réglages de l'enfant qui changent la mise en page (pour le rapport, sans son prénom). */
+function aidesAffichage(kid) {
+  const s = a11y(kid);
+  return [
+    s.textSize > 1 ? (s.textSize > 1.2 ? 'texte très grand' : 'texte grand') : '', s.spacing ? 'texte espacé' : '',
+    s.bigTargets ? 'grandes cibles' : '', s.captions ? 'sous-titres' : '', s.tapOnly ? 'toucher plutôt que glisser' : '',
+    kid?.easyRead ? 'lecture facilitée' : '',
+  ].filter(Boolean);
+}
+
+/**
+ * Fait défiler chaque niveau des jeux de ces classes sur cet écran et note ce qui dépasse
+ * (verif-affichage.js). Les questions s'affichent comme dans une partie, avec le prénom et les
+ * réglages d'affichage d'un enfant, mais rien n'est dit ni enregistré (session.verif).
+ */
+async function verifierAffichage(classes) {
+  const liste = ecransAVerifier(classes);
+  const avant = store.active;
+  store.active = store.profiles[avant] ? avant : store.order[0];
+  const aides = aidesAffichage(child());
+  const etat = { arret: false };
+  const avancement = h('span', {}, 'Vérification…');
+  // un voile transparent sur l'écran : un toucher pendant la vérification ne répond à aucune question
+  const arreter = h('button', { class: 'verif-stop', type: 'button', onclick: () => { etat.arret = true; } }, 'Arrêter');
+  const voile = h('div', { class: 'verif-shield' }, h('div', { class: 'verif-band' }, avancement, arreter));
+  document.body.append(voile);
+  app.inert = true;
+  arreter.focus(); // au clavier, « Arrêter » est à portée (le reste de l'écran est inerte)
+  const debut = Date.now();
+  const parNiveau = new Map(); // « jeu:niveau » → le problème, ses phrases réunies
+  let ecrans = 0;
+  try {
+    for (const [i, e] of liste.entries()) {
+      if (etat.arret) break;
+      avancement.textContent = `Vérification : ${i + 1} / ${liste.length}`;
+      const game = findGame(e.jeu);
+      const { min, max, levels } = levelRange(e.classe, game.id);
+      for (let k = 0; k < e.questions && !etat.arret; k++) {
+        let trouve;
+        try {
+          nextQuestion({
+            game, min, max, levels, back: () => {}, index: k, total: 10, correct: 0, recentKeys: [], briefed: new Set(), startedAt: Date.now(),
+            levelState: { level: e.niveau, streak: 0, recent: [] }, formatOffset: 0, chrono: false, verif: true,
+          });
+          await apresAffichage();
+          trouve = mesurerEcran();
+        } catch (err) {
+          trouve = [`erreur : ${err.message}`];
+        }
+        ecrans++;
+        if (!trouve.length) continue;
+        const cle = `${e.jeu}:${e.niveau}`;
+        const deja = parNiveau.get(cle) || { ...e, titre: game.title, problemes: [] };
+        for (const p of trouve) if (!deja.problemes.includes(p)) deja.problemes.push(p);
+        parNiveau.set(cle, deja);
+      }
+    }
+  } finally {
+    voile.remove();
+    app.inert = false;
+    store.active = avant;
+  }
+  verifScreen({
+    classes, ecrans, secondes: Math.round((Date.now() - debut) / 1000), interrompu: etat.arret,
+    problemes: [...parNiveau.values()], appareil: cetAppareil(), aides,
+  });
+}
+
+/** Réglages : lancer la vérification, pour les classes des enfants ou pour toutes. */
+function verifCard() {
+  const classesEnfants = [...new Set(store.order.map((id) => store.profiles[id].grade))];
+  return h('section', { class: 'card verif-card' },
+    h('h2', {}, 'Vérifier l’affichage sur cet appareil'),
+    h('p', { class: 'muted small' }, 'L’app fait défiler chaque niveau des jeux sur cet écran et signale ce qui dépasse (un texte trop large, une réponse sous le bas de l’écran). Rien n’est dit ni enregistré. Tournez l’appareil puis recommencez pour vérifier l’autre sens.'),
+    h('div', { class: 'backup-actions' },
+      h('button', { class: 'big-btn primary', type: 'button', 'data-verif': 'enfants', onclick: () => verifierAffichage(classesEnfants) },
+        `Classes des enfants (${classesEnfants.map((c) => GRADES[c]).join(', ')})`),
+      h('button', { class: 'big-btn', type: 'button', 'data-verif': 'toutes', onclick: () => verifierAffichage(Object.keys(GRADES)) }, 'Toutes les classes')));
+}
+
+/** Le résultat de la vérification, et le rapport à partager (sans aucun prénom). */
+function verifScreen(resultat) {
+  const texte = rapportTexte({ version: APP.version, ...resultat });
+  const { appareil, problemes } = resultat;
+  const statut = h('p', { class: 'backup-status', role: 'status' });
+  const rapport = h('textarea', { class: 'verif-report', readonly: true, rows: 6, 'aria-label': 'Rapport de la vérification' }, texte);
+  const copier = async () => {
+    try {
+      await navigator.clipboard.writeText(texte);
+      statut.textContent = 'Rapport copié : collez-le dans un message.';
+    } catch {
+      rapport.focus();
+      rapport.select();
+      statut.textContent = 'Le rapport est sélectionné ci-dessous : copiez-le.';
+    }
+  };
+  const partager = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Vérification de l’affichage', text: texte });
+        return;
+      } catch (error) {
+        if (error?.name === 'AbortError') return;
+      }
+    }
+    copier();
+  };
+  show(h('main', { class: 'screen parents verif', 'data-title': 'Vérifier l’affichage' },
+    topBar({ onBack: () => parentsScreen({ tab: 'reglages' }), title: 'Vérifier l’affichage' }),
+    h('section', { class: 'card verif-result', 'data-problemes': String(problemes.length) },
+      h('h2', {}, problemes.length ? `⚠ ${problemes.length} niveau${problemes.length > 1 ? 'x' : ''} à revoir` : '✓ Tout tient dans l’écran'),
+      h('p', {}, `${resultat.ecrans} écrans vérifiés en ${resultat.secondes} s${resultat.interrompu ? ' (arrêtée avant la fin)' : ''} : ${appareil.appareil}, ${appareil.navigateur}, ${appareil.ecran}, ${appareil.sens}.`),
+      appareil.installee ? null : h('p', { class: 'muted small' }, 'Dans le navigateur, ses barres prennent une partie de l’écran : une réponse « sous le bas de l’écran » peut tenir dans l’app installée sur l’écran d’accueil.'),
+      problemes.length ? h('ul', { class: 'verif-list' }, problemes.map((p) => h('li', {},
+        h('b', {}, `${p.titre}, niveau ${p.niveau}`), ` (${GRADES[p.classe]}) : ${p.problemes.join(' ; ')}`))) : null,
+      h('div', { class: 'backup-actions' },
+        h('button', { class: 'big-btn primary', type: 'button', onclick: partager }, 'Partager le rapport'),
+        h('button', { class: 'big-btn', type: 'button', onclick: copier }, 'Copier'),
+        h('a', { class: 'big-btn', href: `mailto:${APP.contact}?subject=${encodeURIComponent(`Affichage : ${appareil.appareil}`)}&body=${encodeURIComponent(texte.slice(0, 1800))}` }, 'Envoyer par e-mail')),
+      statut,
+      rapport,
+      h('p', { class: 'muted small' }, 'Le rapport ne contient aucun prénom : l’appareil, les classes, les jeux et les niveaux.'))));
+}
+
 /** Réglages : un raccourci vers la section Accessibilité de chaque enfant. */
 function a11yShortcuts() {
   return h('section', { class: 'card a11y-shortcuts' },
@@ -5777,10 +6040,12 @@ function settingsTab() {
     voicesCard(),
     a11yShortcuts(),
     fichesCard(store.active && store.profiles[store.active] ? store.active : store.order[0], 'reglages'),
+    backupCard(),
+    verifCard(),
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),
-      h('p', { class: 'muted small' }, 'Sur iPhone et iPad, l’app installée est protégée : le navigateur ne peut pas effacer ses données.')),
+      h('p', { class: 'muted small' }, 'Les prénoms et les progrès sont gardés sur cet appareil, dans ce navigateur, d’une version de l’app à l’autre. Sur iPhone et iPad, l’app installée est en plus protégée : le navigateur ne peut pas effacer ses données. Mais elle a ses propres données : pour y retrouver les profils créés dans le navigateur, enregistrez une sauvegarde (ci-dessus), puis restaurez-la dans l’app.')),
     h('section', { class: 'card about' },
       h('h2', {}, 'À propos'),
       h('div', { class: 'setting' }, h('span', {}, 'Version'), h('b', { 'data-version': APP.version }, APP.version)),
@@ -5790,6 +6055,7 @@ function settingsTab() {
         h('p', { class: 'contact' }, 'Une remarque, un bug, une idée ? Écrivez à ',
           h('a', { class: 'link-action', href: `mailto:${APP.contact}?subject=${encodeURIComponent(APP.name)}`, 'data-contact': '' }, APP.contact), '.'),
         h('p', { class: 'muted small' }, 'Police Andika © SIL International (licence OFL).'),
+        h('p', { class: 'muted small' }, 'Emoji de secours (quand l’appareil n’en a pas en couleur) : Twemoji © Twitter, licence CC-BY 4.0.'),
         h('p', { class: 'muted small' }, 'Voix naturelle : Pocket TTS © Kyutai, voix « Estelle » (corpus CML-TTS, licence CC-BY 4.0).'))));
 }
 
@@ -5797,6 +6063,7 @@ function settingsTab() {
 
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
 document.addEventListener('pointerdown', unlockNaturalVoice, { capture: true });
+emojiCouleur(); // emoji en couleur, même sur les navigateurs qui n'en ont qu'en noir et blanc
 // voix naturelle : la liste des sons, puis leur téléchargement en arrière-plan (pour le mode avion),
 // avec une barre en haut de l'écran
 voiceProgressBar();

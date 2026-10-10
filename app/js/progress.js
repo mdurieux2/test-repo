@@ -18,18 +18,23 @@ export function createGameState(level = 1) {
  * @param {boolean} firstTry  bonne réponse dès le premier essai
  * @param {number} maxLevel  niveau le plus haut prévu pour la classe de l'enfant
  * @param {number} minLevel  niveau le plus bas prévu pour la classe de l'enfant
+ * @param {number[]} [levels] les niveaux prévus pour la classe, s'il en manque entre les deux
+ *   (un niveau d'une autre classe est sauté)
  * @returns {{state: object, change: 'up'|'down'|null}}
  */
-export function recordAnswer(state, firstTry, maxLevel, minLevel = 1) {
+export function recordAnswer(state, firstTry, maxLevel, minLevel = 1, levels = null) {
   const recent = [...state.recent, firstTry].slice(-RECENT_WINDOW);
   const streak = firstTry ? state.streak + 1 : 0;
+  const ladder = levels?.includes(state.level) ? levels : null;
+  const above = ladder ? ladder[ladder.indexOf(state.level) + 1] : state.level < maxLevel ? state.level + 1 : undefined;
+  const below = ladder ? ladder[ladder.indexOf(state.level) - 1] : state.level > minLevel ? state.level - 1 : undefined;
 
-  if (firstTry && streak >= LEVEL_UP_STREAK && state.level < maxLevel) {
-    return { state: { level: state.level + 1, streak: 0, recent: [] }, change: 'up' };
+  if (firstTry && streak >= LEVEL_UP_STREAK && above !== undefined) {
+    return { state: { level: above, streak: 0, recent: [] }, change: 'up' };
   }
   const errors = recent.filter((ok) => !ok).length;
-  if (!firstTry && errors >= LEVEL_DOWN_ERRORS && state.level > minLevel) {
-    return { state: { level: state.level - 1, streak: 0, recent: [] }, change: 'down' };
+  if (!firstTry && errors >= LEVEL_DOWN_ERRORS && below !== undefined) {
+    return { state: { level: below, streak: 0, recent: [] }, change: 'down' };
   }
   return { state: { level: state.level, streak, recent }, change: null };
 }

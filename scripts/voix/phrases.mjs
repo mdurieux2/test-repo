@@ -12,7 +12,7 @@
 // jamais dit par une autre voix, tous les mots, les nombres de 0 à 1000 et les prénoms courants
 // sont aussi enregistrés.
 //
-// Usage : node scripts/voix/phrases.mjs [budget en caractères, 200000 par défaut]
+// Usage : node scripts/voix/phrases.mjs [budget en caractères, 400000 par défaut]
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { GAMES } from '../../app/js/games/index.js';
@@ -27,7 +27,9 @@ import {
 } from '../../app/js/voix-cles.js';
 
 const HERE = new URL('.', import.meta.url).pathname;
-const BUDGET = Number(process.argv[2]) || 200000;
+// 400 000 depuis le cours moyen (1.16.0) : un quart de jeux en plus, et les phrases des jeux à
+// phrases entières (ENTIERES) en prennent environ 135 000
+const BUDGET = Number(process.argv[2]) || 400000;
 const SEEDS = 300;
 const SEASONS = ['hiver', 'printemps', 'ete', 'automne', 'noel', 'halloween'];
 const PLACEHOLDER = 'Zélie'; // prénom de l'enfant pendant les tirages (découpé ensuite)
@@ -104,6 +106,12 @@ const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !',
   'On attrape le papillon par les ailes.',
   // imparfait (CE2) : « allions » et « voyaient », seuls, sont refusés par les contrôles
   'Autrefois, nous allions au marché le samedi.', 'Avant, ils voyaient des loups dans la forêt.',
+  // conjugaison du CM : « avais », « voyais », « iras », « pûmes », « eûmes », « put », « eurent », seuls,
+  // sont refusés par les contrôles (300 tirages par niveau de chaque jeu : seules ces phrases en dépendent)
+  'La veille, tu avais réussi ton examen.', 'La veille, tu avais pris ton billet.',
+  'À cette époque, je voyais mes grands-parents chaque dimanche.', 'Demain, tu iras chez le dentiste.',
+  'Nous pûmes enfin dormir.', 'Nous eûmes très froid cette nuit-là.', 'Le chat put enfin attraper la souris.',
+  'Les marins eurent de la chance.',
   // correction expliquée (explications.js) : la phrase dite avec l'encart, après une première erreur
   ...EXPLAIN_SENTENCES,
   // toucher plutôt que glisser (main.js) : écris au doigt, points à relier
@@ -111,8 +119,17 @@ const TOUJOURS = ['Bravo ! Tu as trouvé la bonne réponse.', 'Essaie encore !',
   // ponctuation : l'enfant choisit le signe d'après l'intonation, chaque phrase doit donc être dite d'un seul son
   ...SPOKEN_SENTENCES.flatMap(({ text, marks }) => [...marks].map((m) => (m === '.' ? `${text}.` : `${text} ${m}`)))];
 
+// Les jeux de questions écrites à la main (histoire, géographie, vivre en République, sciences et
+// anglais du CM) : des centaines de phrases, chacune rarement entendue (le poids d'un jeu se partage
+// entre toutes), mais toutes le sont ; dites mot à mot, elles seraient hachées (l'anglais surtout,
+// qu'il faut entendre naturellement). Chacune est donc enregistrée entière, comme celles de TOUJOURS.
+const ENTIERES = new Set(['histoire', 'geographie', 'republique', 'sciences-cm', 'anglais-cm', 'vocabulaire-cm']);
+
 export function allUtterances() {
   const list = gameUtterances();
+  const entieres = new Map();
+  for (const u of list) if (ENTIERES.has(u.game)) entieres.set(`${u.lang}|${u.rate}|${u.text}`, { ...u, poids: 1 });
+  list.push(...entieres.values());
   if (existsSync(LOG)) {
     for (const { text, lang, rate, count } of JSON.parse(readFileSync(LOG, 'utf8'))) {
       list.push({ text, lang, rate, poids: count * 0.2, names: SCENARIO_NAMES, game: 'app' });

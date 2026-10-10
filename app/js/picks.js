@@ -2,7 +2,7 @@
 // partie à deux. Les rubriques et les jeux masqués par les parents ne sont jamais tirés.
 
 import { findGame } from './games/index.js';
-import { isGameHidden, programForChild } from './programs.js';
+import { isGameHidden, nearestLevel, programForChild } from './programs.js';
 import { createRng, sample, shuffle } from './random.js';
 import { gameStats } from './storage.js';
 
@@ -13,9 +13,9 @@ export function hashText(text) {
   return hash >>> 0;
 }
 
-/** Niveau actuel de l'enfant dans un jeu, dans la fourchette de sa classe. */
-export function currentLevel(child, { game, min, max }) {
-  return Math.min(max, Math.max(min, gameStats(child, game.id, min).level));
+/** Niveau actuel de l'enfant dans un jeu, parmi les niveaux de sa classe. */
+export function currentLevel(child, { game, min, levels }) {
+  return nearestLevel(levels, gameStats(child, game.id, min).level);
 }
 
 /**

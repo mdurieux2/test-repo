@@ -6,6 +6,8 @@
 //         ONLY=hors-ligne npm run test:e2e      (seulement le mode avion : chaque jeu sans réseau)
 //         ONLY=ecrans npm run test:e2e          (seulement la mise en page des écrans fixes : accueil, listes, duo, parents)
 //         PLAY=memory,points npm run test:e2e   (seulement une partie de ces jeux, sur iPhone)
+//         PLAY=compter,sauvegarde npm run test:e2e   (… puis la sauvegarde : fichier, effacement, restauration)
+//         PLAY=compter,verif npm run test:e2e   (… puis « Vérifier l'affichage » de l'espace parents, sur iPhone)
 //         PARTS=scenario | PARTS=layout SHARD=1/4 | PARTS=a11y   (une partie du test, comme dans la CI)
 //         A11Y=1 PARTS=layout npm run test:e2e   (mise en page avec un profil d'accessibilité : texte très grand,
 //                  grandes cibles, texte espacé ; sur iPhone SE, Android 360 points et iPhone SE en paysage,
@@ -197,6 +199,95 @@ async function openParents(page) {
     await page.click('.gate-form button');
     await page.waitForSelector('.parents');
   }
+}
+
+/**
+ * Vérifier l'affichage (Espace parents → Réglages) : l'app fait défiler chaque niveau des jeux des
+ * classes des enfants sur cet écran. Tout doit tenir ; rien n'est dit ni enregistré, un toucher
+ * pendant la vérification ne répond à aucune question, et le rapport ne contient aucun prénom.
+ */
+async function checkVerif(page) {
+  await openParents(page);
+  await page.click('[data-tab="reglages"]');
+  await page.waitForSelector('[data-verif="enfants"]');
+  const before = await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY);
+  const spoken = await page.evaluate(() => (window.__spoken || []).length);
+  await page.click('[data-verif="enfants"]');
+  await page.waitForSelector('.verif-band');
+  const { width, height } = page.viewportSize();
+  await page.mouse.click(width / 2, height * 0.7); // un toucher sur l'écran vérifié
+  await page.waitForSelector('.verif-result', { timeout: 10 * 60 * 1000 });
+  const count = Number(await page.getAttribute('.verif-result', 'data-problemes'));
+  if (count) fail(`vérifier l’affichage : ${count} niveaux à revoir : ${(await page.$$eval('.verif-list li', (els) => els.map((e) => e.textContent))).join(' ; ')}`);
+  if ((await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)) !== before) fail('vérifier l’affichage : les données de l’app ont changé');
+  if ((await page.evaluate(() => (window.__spoken || []).length)) !== spoken) fail('vérifier l’affichage : la voix a parlé pendant la vérification');
+  const report = await page.inputValue('.verif-report');
+  const names = await page.evaluate((key) => Object.values(JSON.parse(localStorage.getItem(key)).profiles).map((p) => p.name), STORAGE_KEY);
+  if (names.some((name) => report.includes(name))) fail('vérifier l’affichage : un prénom est dans le rapport');
+  const screens = /(\d+) écrans vérifiés/.exec(report)?.[1];
+  if (!screens || Number(screens) < 100) fail(`vérifier l’affichage : trop peu d’écrans vérifiés (${screens})`);
+  await page.click('.top-bar .icon-btn');
+  await page.waitForSelector('.settings');
+  console.log(`✔ vérifier l’affichage : ${screens} écrans des classes des enfants, tout tient ; rien n’est dit ni enregistré, rapport sans prénom`);
+}
+
+/**
+ * Sauvegarde (Espace parents → Réglages) : le fichier téléchargé contient les enfants, leurs progrès
+ * et les histoires enregistrées ; après un effacement complet (autre navigateur, données effacées),
+ * il les restaure dès le premier lancement.
+ */
+async function checkBackup(page) {
+  const storyId = STORY_DATA[0].id;
+  const sound = [1, 2, 3, 250, 251, 252];
+  await openParents(page);
+  await page.evaluate(async ([id, bytes]) => {
+    const rec = await import('./js/recordings.js');
+    await rec.save(id, new Blob([new Uint8Array(bytes)], { type: 'audio/mp4' }), { mime: 'audio/mp4', duration: 2 });
+  }, [storyId, sound]);
+  await page.click('[data-tab="reglages"]');
+  await page.waitForSelector('.backup-save:not([disabled])');
+  if (!(await page.textContent('.backup-status')).includes('Pas encore de sauvegarde')) fail('sauvegarde : « Pas encore de sauvegarde » absent');
+  const [download] = await Promise.all([page.waitForEvent('download'), page.click('.backup-save')]);
+  const name = download.suggestedFilename();
+  if (!/^lire-compter-sauvegarde-\d{4}-\d{2}-\d{2}\.json$/.test(name)) fail(`sauvegarde : fichier nommé « ${name} »`);
+  const text = readFileSync(await download.path(), 'utf8');
+  const file = JSON.parse(text);
+  const before = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), STORAGE_KEY);
+  if (file.app !== 'lire-et-compter' || JSON.stringify(file.donnees.order) !== JSON.stringify(before.order)) fail('sauvegarde : les enfants ne sont pas dans le fichier');
+  if (!file.enregistrements?.some((e) => e.id === storyId)) fail('sauvegarde : l’histoire enregistrée n’est pas dans le fichier');
+  await page.waitForFunction(() => document.querySelector('.backup-status')?.textContent.includes('téléchargée'));
+  // tout est perdu (données effacées, autre navigateur…) : au premier lancement, on restaure
+  await page.evaluate(async (key) => {
+    localStorage.removeItem(key);
+    await new Promise((resolve) => {
+      const request = indexedDB.deleteDatabase('lire-et-compter-voix');
+      request.onsuccess = resolve;
+      request.onerror = resolve;
+    });
+  }, STORAGE_KEY);
+  await page.goto(BASE);
+  await page.waitForSelector('.welcome .backup-restore');
+  if (!page.listenerCount('dialog')) page.once('dialog', (dialog) => dialog.accept());
+  await page.setInputFiles('.welcome .backup input[type=file]', { name, mimeType: 'application/json', buffer: Buffer.from(text) });
+  await page.waitForSelector('.profiles', { timeout: 15000 });
+  const after = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), STORAGE_KEY);
+  for (const id of before.order) {
+    const [a, b] = [before.profiles[id], after.profiles[id]];
+    if (!b || a.name !== b.name || a.stars !== b.stars || JSON.stringify(a.games) !== JSON.stringify(b.games)) fail(`sauvegarde : ${a.name} n’est pas revenu à l’identique`);
+  }
+  if (!after.settings.lastBackup) fail('sauvegarde : la date de la dernière sauvegarde n’est pas gardée');
+  const restored = await page.evaluate(async (id) => {
+    const record = await (await import('./js/recordings.js')).get(id);
+    return record && [...new Uint8Array(await record.blob.arrayBuffer())];
+  }, storyId);
+  if (JSON.stringify(restored) !== JSON.stringify(sound)) fail('sauvegarde : l’histoire enregistrée n’est pas revenue');
+  // un fichier qui n'est pas une sauvegarde : refusé avec un message, rien n'est changé
+  await openParents(page);
+  await page.click('[data-tab="reglages"]');
+  await page.setInputFiles('.settings .backup input[type=file]', { name: 'photo.json', mimeType: 'application/json', buffer: Buffer.from('{"hello": 1}') });
+  await page.waitForFunction(() => document.querySelector('.backup-status')?.textContent.includes('pas une sauvegarde'));
+  await page.evaluate(async (id) => (await import('./js/recordings.js')).remove(id), storyId);
+  console.log(`✔ sauvegarde : ${name} (${before.order.length} enfants, ${file.enregistrements.length} histoire enregistrée), tout restauré au premier lancement ; mauvais fichier refusé`);
 }
 
 /** Écran « Vos voix » : Espace parents → Réglages → Vos voix pour les histoires. */
@@ -1180,6 +1271,8 @@ for (const game of GAMES.filter((g) => !PLAY || PLAY.includes(g.id))) {
 
 if (PLAY) {
   if (PLAY.includes('histoires')) await checkRecordings(page);
+  if (PLAY.includes('sauvegarde')) await checkBackup(page);
+  if (PLAY.includes('verif')) await checkVerif(page);
   return;
 }
 
@@ -1194,7 +1287,9 @@ if ((await page.locator('.level-row').count()) !== compterMax - compterMin + 1) 
 await shot('19-niveaux');
 await page.click('.level-row[data-level="4"]');
 await page.waitForSelector('.choices');
-if ((await page.textContent('.level-badge')) !== 'Niv. 4') fail('le niveau choisi n’est pas celui de la partie');
+// les niveaux sont numérotés dans la classe : le niveau 4 du jeu est le 2e du CP (qui commence au 3)
+const chosenBadge = `Niv. ${4 - compterMin + 1}`;
+if ((await page.textContent('.level-badge')) !== chosenBadge) fail(`le niveau choisi n’est pas celui de la partie (« ${await page.textContent('.level-badge')} » au lieu de « ${chosenBadge} »)`);
 if ((await page.evaluate(() => globalThis.__lc.question.stage.count)) < 10) fail('compter niveau 4 : moins de 10 objets');
 console.log('✔ choix direct du niveau');
 
@@ -1655,6 +1750,12 @@ console.log('✔ réglages (photo enregistrée automatiquement, version, journal
 // vos voix pour les histoires : enregistrer une histoire, puis l'entendre dans le jeu
 await checkRecordings(page);
 
+// sauvegarde de la progression : un fichier, puis tout retrouvé après un effacement complet
+await checkBackup(page);
+
+// vérifier l'affichage : chaque niveau des jeux des enfants sur cet écran
+await checkVerif(page);
+
 // hors ligne (mode avion) : le service worker doit servir l'app et tous les jeux sans réseau
 await checkOffline(context, page);
 await context.close();
@@ -1953,6 +2054,15 @@ async function a11yPart() {
   await page.click('[data-tab="reglages"]');
   await page.waitForSelector('.settings');
   await audit('espace parents, réglages');
+  // vérifier l'affichage, arrêtée aussitôt lancée : l'écran du résultat et son rapport
+  await page.click('[data-verif="enfants"]');
+  await page.waitForSelector('.verif-band');
+  if (!(await page.evaluate(() => document.activeElement?.matches('.verif-stop')))) problems.push('vérifier l’affichage : « Arrêter » n’a pas le focus');
+  await page.keyboard.press('Enter');
+  await page.waitForSelector('.verif-result');
+  await audit('espace parents, vérifier l’affichage');
+  await page.click('.top-bar .icon-btn');
+  await page.waitForSelector('.settings');
   await page.click('[data-fiches="reglages"]');
   await page.waitForSelector('.fiche-page');
   await audit('espace parents, fiches à imprimer');
@@ -2315,7 +2425,7 @@ async function demoChecks() {
 // Jeux dont on vérifie la fiche imprimée (une forme d'exercice chacun) : [jeu, classe]
 const FICHE_SAMPLE = [
   ['calcul', 'CP'], ['trous', 'CP'], ['relie-calculs', 'CE1'], ['ranger', 'CP'], ['heure', 'CP'], ['regle-horloge', 'CE1'],
-  ['addition-posee', 'CE1'], ['sudoku', 'CE1'], ['labyrinthe', 'CE1'], ['ecrire', 'CP'], ['points', 'CE1'], ['symetrie', 'CP'],
+  ['addition-posee', 'CE1'], ['sudoku', 'CE1'], ['labyrinthe', 'CE1'], ['ecrire', 'CP'], ['points', 'CP'], ['symetrie', 'CE2'],
   ['picross', 'CE1'], ['petits-textes', 'CE1'], ['vivant', 'CP'], ['drapeaux', 'CE1'], ['graphiques', 'CE1'], ['bon-mot', 'CP'],
 ];
 
@@ -2362,7 +2472,8 @@ async function checkFiches() {
   page.on('pageerror', (e) => errors.push(`fiches : ${e.message}`));
   await page.goto(BASE);
   await page.waitForSelector('.welcome');
-  await setStore(page, "store.profiles['eva-rose'].grade = 'CP'; store.profiles['eva-rose'].games = { heure: { level: 2 } }; store.profiles.matteo = store.profiles.matteo || { grade: 'MS', games: {} };");
+  // au CE1 (au CP, « Quelle heure est-il ? » n'a que l'heure pile, son 1er niveau)
+  await setStore(page, "store.profiles['eva-rose'].grade = 'CE1'; store.profiles['eva-rose'].games = { heure: { level: 2 } }; store.profiles.matteo = store.profiles.matteo || { grade: 'MS', games: {} };");
   await openParents(page);
   // depuis le Suivi d'Eva-Rose
   await page.click('[data-child="eva-rose"]');
@@ -2388,7 +2499,7 @@ async function checkFiches() {
   if (!(sheet.consigne || '').replace('Consigne :', '').trim()) fail('fiches : consigne vide');
   if (!(sheet.scale > 0.3 && sheet.scale < 0.6)) fail(`fiches : l’aperçu n’est pas réduit à la largeur de l’écran (${sheet.scale})`);
   await checkLayout(page, 'fiches à imprimer (390×844)', { reachable: false });
-  // le niveau proposé est celui de l'enfant (le 2e niveau de « Quelle heure est-il ? » au CP)
+  // le niveau proposé est celui de l'enfant (le 2e niveau de « Quelle heure est-il ? » au CE1)
   await page.selectOption('[data-fiche-game]', 'heure');
   await page.waitForFunction(() => document.querySelector('.fiche-exercices .ex-stage .stage-clock'));
   sheet = await info();
@@ -2506,7 +2617,15 @@ async function checkLayout(page, label, { reachable = true } = {}) {
     if (document.documentElement.scrollWidth > window.innerWidth) return 'la page déborde en largeur';
     for (const el of document.querySelectorAll('.choice, .key, .match-item, .tile, .fill-row, .stage > *, .palier-tile, .game-card, .domain-btn, .profile-card, .parent-tab, .look-option, .child-row, .maze-arrow, .path-cell, .order-item, .order-slot, .level-row, .level-pick, .story-text, .text-body, .sudoku-cell, .sudoku-symbol, .sym-cell, .featured-game, .domain-tile, .kid-game, .son-chip')) {
       if (el.clientWidth <= 1) continue; // caché à l'écran, gardé pour le clavier (flèches du labyrinthe rond)
+      if (el.closest('.choices-seek')) continue; // cherche et trouve : l'image tourne exprès dans son rond
       if (el.scrollWidth > el.clientWidth + 1) return `contenu trop large : « ${el.textContent.trim().slice(0, 30)} »`;
+    }
+    // cherche et trouve : chaque image de la carte reste dans l'écran. Chromium ne compte pas ce qui
+    // sort de la carte (conteneur de taille) dans la largeur de la page, Safari si : la page glissait
+    // de côté sur iPhone 17 (simulateur iOS)
+    for (const el of document.querySelectorAll('.choices-seek .choice')) {
+      const r = el.getBoundingClientRect();
+      if (r.left < -1 || r.right > window.innerWidth + 1) return `image hors de l'écran sur le côté : « ${el.textContent.trim()} »`;
     }
     // sous-titres : le bandeau (en bas, ou à droite sur un téléphone en paysage) ne cache rien
     const band = document.querySelector('.caption-band:not([hidden])')?.getBoundingClientRect();
@@ -2554,6 +2673,9 @@ async function checkExplanation(page, label) {
     await page.evaluate((answer) => [...document.querySelectorAll('.choice')].find((b) => b.dataset.value !== String(answer))?.click(), q.answer);
   }
   await page.waitForSelector('.explain');
+  // après une erreur au pavé, le « ? » tremble 0,4 s (±8 px) : la mise en page se mesure une fois
+  // l'égalité immobile (sinon « 22−12=? » paraît trop large, le temps d'un tremblement)
+  await page.waitForFunction(() => !document.querySelector('.shake'), null, { timeout: 2000 }).catch(() => {});
   await checkLayout(page, label);
   const problem = await page.evaluate(() => {
     const r = document.querySelector('.explain').getBoundingClientRect();

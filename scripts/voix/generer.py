@@ -393,9 +393,12 @@ with tempfile.TemporaryDirectory() as tmp:
             f0 = pitch(raw, rate)
             note = (abs(np.log(f0 / PITCH.get(voice, f0))) if f0 else 0.0) / PITCH_TOLERANCE
             measures = {'hauteur': round(f0) if f0 else None, 'duree': round(len(raw) / rate, 2), 'essai': 'ancien son'}
-            if checked_by_asr(text) or args.phonemes:
-                note += diction(trial, measures)
-            best = (note, None, measures)
+            try:
+                if checked_by_asr(text) or args.phonemes:
+                    note += diction(trial, measures)
+                best = (note, None, measures)
+            except subprocess.CalledProcessError:
+                problems.append('ancien son illisible')
         for attempt in ([] if best and best[0] <= 1 else attempts(text, args.essais, lang)):
             cut = isinstance(attempt, tuple)
             attempt = attempt[1] if cut else attempt
@@ -425,7 +428,15 @@ with tempfile.TemporaryDirectory() as tmp:
             if checked_by_asr(text) or args.phonemes:
                 write_wav(wav, audio, rate)
                 encode(wav, trial, 1)
-                note += diction(trial, measures)
+                # un essai tout en silence : ffmpeg a tout retiré, il ne reste rien à écouter
+                if trial.stat().st_size < 480:
+                    problems.append('son vide')
+                    continue
+                try:
+                    note += diction(trial, measures)
+                except subprocess.CalledProcessError:
+                    problems.append('son illisible')  # un essai raté ne doit pas arrêter tout le morceau
+                    continue
             if best is None or note < best[0]:
                 best = (note, audio, measures)
             if note <= 1:

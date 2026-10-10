@@ -351,11 +351,14 @@ export function fluenceWeeks(scores, now = Date.now(), count = 8) {
   });
 }
 
-// Repères de l'Éducation nationale (guides et évaluations de CP et de CE1), donnés à titre indicatif.
+// Repères de l'Éducation nationale (guides et évaluations de CP et de CE1 ; programmes du cycle 3
+// de 2025 : « en ciblant 110 mots par minute en moyenne » au CM1, 120 au CM2), donnés à titre indicatif.
 const REPERES = {
   CP: 'environ 50 mots par minute en fin de CP',
   CE1: 'environ 70 à 90 mots par minute en fin de CE1',
   CE2: 'environ 90 à 110 mots par minute en fin de CE2',
+  CM1: 'environ 110 mots par minute en fin de CM1',
+  CM2: 'environ 120 mots par minute en fin de CM2',
 };
 
 /**

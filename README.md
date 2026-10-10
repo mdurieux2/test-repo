@@ -1,6 +1,6 @@
 # Lire, compter et s’amuser !
 
-Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la petite section au CE2.
+Des jeux pour apprendre **à lire, à compter et à parler anglais**, de la petite section au CM2.
 
 - Sur **téléphone, tablette et ordinateur** : iPhone, iPad, Android, Windows, Mac.
 - **Sans compte ni publicité**, et **sans Internet** une fois installée.
@@ -72,8 +72,9 @@ l'écran d'accueil (les étapes dépendent de l'appareil) ; « Plus tard » masq
 
 ## Ce qu'on apprend
 
-Les jeux et les niveaux s'adaptent à la classe choisie pour chaque enfant (programmes
-officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/programs.js`.
+Les jeux et les niveaux s'adaptent à la classe choisie pour chaque enfant : seuls les jeux et les
+niveaux de l'année sont proposés, d'après les programmes officiels en vigueur en 2026-2027. Les sources
+et les repères sont dans `docs/programmes.md`, la liste jeu par jeu dans `app/js/programs.js`.
 
 | Classe | Français | Maths | Anglais | Le monde | Sciences |
 |---|---|---|---|---|---|
@@ -83,6 +84,8 @@ officiels de 2024 et langues vivantes 2026). Le détail est dans `app/js/program
 | CP | Premier son, syllabes, lire des mots, mots-outils, **petits textes**, épeler, **dictée de mots**, écrire au doigt | Dénombrement, dizaines, **calcul en 36 paliers**, calculs à trous, relier les calculs, problèmes, ranger, l'heure, **régler l'horloge**, la monnaie, sudoku, symétrie, cubes, coloriage magique avec des calculs | Écouter (10 thèmes), lire, relier, compter, les nombres jusqu'à 20, calculer en anglais, colorier, memory, petites phrases | Ce que mangent les animaux, les jours, les pays, les drapeaux, traverser la rue, les numéros d'urgence | Les organes, qui mange qui, l'eau dans tous ses états, dissoudre et filtrer, le circuit électrique, la roue et le levier, la Lune, économiser l'eau |
 | CE1 | Mots, phrases et textes, homophones (a/à, et/est…), déterminants, dictée (sons complexes, lettres pièges) | Nombres jusqu'à 1000, tables, **défi chrono des tables**, problèmes en deux étapes, l'heure, régler l'horloge, moitiés, **sudoku 9 × 9**, labyrinthes 9 × 9 et **ronds**, **tableau logique**, **balances**, **dessin caché**, points de 5 en 5 et de 10 en 10 | Écouter, lire, relier, épeler, les nombres jusqu'à 100, phrases de 5 mots | Qui pond des œufs, les mois, les continents, compléter un drapeau, **la carte du monde** (pays, voisins, capitales), plans et quadrillages | La digestion, les chaînes alimentaires, conducteurs et isolants, poulies et engrenages, les planètes et les saisons, le thermomètre, protéger la nature |
 | CE2 | Textes plus longs, **lire à voix haute en une minute**, conjugaison (dont **l'imparfait**), accords, homophones, compréhension | **Les grands nombres** jusqu'à 10 000, **la multiplication** (de tête puis posée), **la division** (partage, groupements, reste), problèmes, durées, monnaie, **périmètres et longueurs**, fractions | Écouter, lire, épeler, phrases (niveau A1) | Cartes, pays et capitales, vivre ensemble | Les niveaux les plus hauts des dix jeux de sciences |
+| CM1 | **Lecture de textes variés** (récit, documentaire, poème, théâtre), la phrase et ses fonctions, COD et COI, accords et homophones, **conjugaison du CM**, préfixes et suffixes | Nombres jusqu'à 999 999, **décimaux** jusqu'aux centièmes, **fractions** (droite graduée, fraction d'une quantité), calcul mental, opérations posées, problèmes, proportionnalité, **aires**, **angles**, solides, données et hasard | L'alphabet, la date, l'heure, la famille, ce qu'on aime (A1) | **Le Moyen Âge, les rois, les explorations, 1789** ; se nourrir, se déplacer ; vivre en République | Mélanges, lumière et ombres, phases de la Lune, classer le vivant, écosystèmes, le cerveau |
+| CM2 | Textes longs, **passé simple** et plus-que-parfait, attribut, épithète, phrase complexe | Nombres jusqu'aux centaines de millions, **millièmes**, entier × fraction, division décimale, **aire du rectangle**, unités d'aire, 90°, trapèze, « a chances sur b » | Se décrire, se situer en ville, who/what/where/when, le présent simple | **La République, l'âge industriel, les guerres mondiales, l'Europe** ; mieux habiter ; laïcité, symboles, droits et devoirs | Le système solaire, l'énergie, volcans et séismes, l'électricité |
 
 Chaque jeu a de 7 à 10 niveaux de difficulté croissante (le calcul en a 36 paliers) ; le niveau s'adapte à
 l'enfant, et on peut aussi le choisir directement.
@@ -93,7 +96,12 @@ l'enfant, et on peut aussi le choisir directement.
 - *Écouter les sons* : frappe les syllabes, les rimes.
 - *Lettres et sons* : les lettres, le premier son, les syllabes.
 - *Lire* : le bon mot, les petits mots, la bonne phrase, **petits textes** avec des questions
-  de compréhension (dont des textes de saison, plus fréquents pendant leur saison).
+  de compréhension (dont des textes de saison, plus fréquents pendant leur saison) ; au cours moyen,
+  **lire et comprendre** (récits, documentaires, poèmes, scènes de théâtre, lettres : l'implicite, le genre du
+  texte, le sens d'un mot, qui parle, l'ordre des événements).
+- *Pour le cours moyen* : **la conjugaison du CM** (jusqu'au passé simple et au plus-que-parfait),
+  **la phrase et ses fonctions** (sujet, COD, COI, compléments circonstanciels, attribut, épithète),
+  **accords et homophones** et **les mots du CM** (synonymes, préfixes, suffixes, homonymes).
 - *Histoires* : lues en karaoké, par la voix d'Estelle ou **par la voix d'un parent** ;
   des histoires d'Halloween, de Noël, d'hiver, de printemps, d'été et d'automne reviennent pendant leur saison.
   **Dans l'ordre** : remettre de 3 à 5 images d'une histoire dans l'ordre (le début, la fin, avant, après).
@@ -102,7 +110,7 @@ l'enfant, et on peut aussi le choisir directement.
   composé), **les accords** (pluriel en s ou x, féminin, l'adjectif et le verbe, la lettre ajoutée
   soulignée), **ponctuation et majuscules** (choisir . ? ou ! d'après l'intonation d'Estelle).
 - *Vocabulaire* : **les mots** (catégories, contraires, synonymes, familles de mots).
-- **Lire à voix haute** (CP, CE1, CE2) : l'enfant lit le plus de syllabes, de mots ou de texte possible
+- **Lire à voix haute** (du CP au CM2) : l'enfant lit le plus de syllabes, de mots ou de texte possible
   en une minute, comme aux évaluations nationales ; un adulte écoute et touche les mots ratés (barrés en
   rouge), puis le dernier mot lu. Le score (mots correctement lus par minute) et son évolution sont dans le Suivi.
 - **Textes déchiffrables** (CP) : si les parents ont coché les sons déjà vus en classe, les jeux de
@@ -129,6 +137,14 @@ l'enfant, et on peut aussi le choisir directement.
 - *Pour le CE2* : **les grands nombres** (lire, décomposer, comparer, encadrer jusqu'à 10 000),
   **la multiplication** (par 10 et 100, décomposer, puis posée avec retenue), **la division** (partage,
   groupements, quotient et reste) et **périmètres et longueurs** (unités, conversions, périmètre d'un polygone).
+- *Pour le cours moyen* (CM1 et CM2, dix niveaux chacun) : **les très grands nombres** (jusqu'aux
+  centaines de millions, multiples et diviseurs), **les nombres décimaux** (fractions décimales, droite
+  graduée, comparer, ranger, × et ÷ par 10, 100, 1 000), **les fractions du CM**, **le calcul mental du CM**,
+  **les opérations du CM** (virgule sous la virgule, multiplier par un nombre à deux chiffres, quotient et
+  reste, division décimale), **les problèmes du CM** (proportionnalité, fractions, durées, programmes de
+  calcul), **données et hasard** (tableaux, diagrammes, courbes, diagramme circulaire, probabilités),
+  **les mesures du CM** (conversions, durées, aires) et **la géométrie du CM** (angles, droites, figures
+  codées, cercle, solides, patron du cube).
 - *Formes et logique* : les formes, les suites de motifs, l'intrus, **cherche et trouve** (retrouver une image parmi
   6 à 27 autres, de plus en plus petites, tournées et ressemblantes ; un visage ; celle qui n'est pas comme les autres),
   les ombres, le **sudoku**
@@ -161,7 +177,8 @@ météo, émotions, famille)
   orange »), **colorie en anglais** (lire « 1 red, 2 blue… »).
 - *Mots et phrases* : **le memory anglais** (image et mot), **l'intrus**, **les contraires**
   (big / small, hot / cold…), « Where is the cat? », **les petites phrases** à remettre dans
-  l'ordre, parler anglais (saluer, comptines).
+  l'ordre, parler anglais (saluer, comptines), et **l'anglais du CM** (l'alphabet, la date, l'heure,
+  la famille, I like / I don't like, se décrire, la ville, who/what/where/when, le présent simple).
 
 **Le monde**
 - *Les animaux* : où ils vivent, leurs bébés, ce qu'ils mangent, qui pond des œufs.
@@ -178,8 +195,16 @@ météo, émotions, famille)
   (agacé, en colère, furieux), découvrir des émotions plus fines (fier, jaloux, déçu, timide, soulagé…), savoir se
   calmer et aider un copain.
 - **Se repérer** : sur, sous, devant, derrière, gauche, droite, puis quadrillages, plans et flèches.
+- **Gauche ou droite ?** : l'image de gauche ou de droite, lire de gauche à droite, ma main gauche,
+  les flèches, le robot qui tourne, la voiture au carrefour, la gauche d'une personne de face.
+- *Pour le cours moyen* : **l'histoire de France** (du Moyen Âge à la construction européenne, et la
+  frise du temps), **la géographie** (se nourrir, se déplacer, Internet, mieux habiter, les paysages et
+  les villes de France et d'Europe) et **vivre en République** (civisme, numéros d'urgence, démocratie,
+  égalité, fraternité, symboles, droits et devoirs, libertés, laïcité, l'Union européenne).
 
-**Sciences** (questionner le monde, de la petite section au CE2)
+**Sciences** (de la petite section au CM2 ; au cours moyen, **les sciences du CM** : mélanges, lumière
+et ombres, la Lune, classer le vivant, naître et grandir, écosystèmes, le cerveau, le système solaire,
+l'énergie, volcans et séismes)
 - *Le vivant* : **le vivant** (le corps, les cinq sens, les cycles de vie, l'hygiène, le sommeil, bien
   manger), **le corps humain** (toucher sur le dessin un os, une articulation, un organe, suivre le
   trajet des aliments), **les animaux et leur milieu** (classer, qui mange qui, l'hiver des animaux).
@@ -265,6 +290,15 @@ Il ouvre trois onglets :
   de la voix de l'appareil avec un bouton d'essai, petits sons,
   musique douce, décors de saison, nombre de questions par partie, installation, version,
   journal des modifications, et le contact pour vos remarques.
+- **Sauvegarder la progression** (dans Réglages) : les prénoms, photos, étoiles, niveaux, réglages
+  et histoires enregistrées dans un fichier (sur iPhone et iPad : « Enregistrer dans Fichiers », par
+  e-mail…), à restaurer dans un autre navigateur, sur un autre appareil ou dans l'app installée sur
+  l'écran d'accueil. Au premier lancement, « Déjà une sauvegarde ? » évite de recréer les enfants.
+- **Vérifier l'affichage sur cet appareil** (dans Réglages) : l'app fait défiler chaque niveau des jeux
+  des classes des enfants (ou de toutes les classes) sur ce téléphone, cette tablette ou cet ordinateur,
+  dans le sens où on le tient, et signale ce qui dépasse (texte plus large que sa case, réponses sous le
+  bas de l'écran). Rien n'est dit ni enregistré pendant la vérification ; le rapport (appareil,
+  classes, jeux, niveaux, sans aucun prénom) se partage ou s'envoie par e-mail.
 - **Vos voix pour les histoires** (dans Réglages) : enregistrez-vous en lisant une histoire
   (le texte s'affiche en gros, 3 minutes au plus) ; dans « Histoires », l'enfant entend votre
   voix pendant que les phrases s'allument, puis la question est posée. On peut réécouter,
@@ -310,7 +344,8 @@ une voix installée.
 
 - Aucune inscription, aucune publicité, aucun traceur ; l'application n'envoie rien sur Internet.
 - Les prénoms, photos, progrès et voix enregistrées restent dans le navigateur de l'appareil (stockage local).
-- Effacer les données du site dans le navigateur supprime les profils.
+- Effacer les données du site dans le navigateur supprime les profils : gardez une sauvegarde
+  (*Espace parents → Réglages → Sauvegarder la progression*), qui reste chez vous.
 - Aucune bibliothèque extérieure ; la page n'accepte que ses propres fichiers (règle CSP).
 
 ---
@@ -338,6 +373,14 @@ parcours complet ou la mise en page seulement), `SHARD=2/4` (un quart de la mise
 Sur GitHub, le test tourne en 5 morceaux en même temps : le parcours complet et 4 quarts de la
 mise en page.
 
+Ces tests utilisent Chromium à la taille de chaque appareil. Pour voir l'app dans le vrai Safari
+d'iOS, `npm run test:ios` (sur un Mac avec Xcode, après `sudo safaridriver --enable`) l'ouvre dans
+un simulateur iOS, parcourt une vingtaine d'écrans et enregistre des captures avec un rapport
+(`ios-sortie/index.html`) : `IOS_APPAREIL="iPad mini (A17 Pro)" IOS_VERSION=26.2 IOS_PAYSAGE=1`
+pour choisir l'appareil. Sans Mac : le workflow « Simulateur iOS » (onglet Actions, « Run
+workflow ») le fait sur les Mac de GitHub, sur iPhone SE (iOS 18.5), iPhone 17 et iPad mini
+(iOS 26.2) ; les captures sont dans les artefacts de l'exécution.
+
 | Fichier | Rôle |
 |---|---|
 | `app/js/games/*.js` | Les jeux : chacun génère des questions décrites par des données |
@@ -347,10 +390,13 @@ mise en page.
 | `app/js/dashboard.js` | Tableau de bord des parents |
 | `app/js/characters.js` | Personnages fille et garçon (SVG), prénom sur le tee-shirt |
 | `app/js/storage.js` | Profils et progression, enregistrés sur l'appareil |
+| `app/js/sauvegarde.js` | Sauvegarde de la progression dans un fichier, et sa restauration |
+| `app/js/verif-affichage.js` | « Vérifier l'affichage sur cet appareil » : écrans à faire défiler, mesures, rapport |
 | `app/js/config.js` | Version, journal des modifications, crédits |
 | `app/sw.js` | Mode hors ligne : tout nouveau fichier doit être ajouté à `PRECACHE` |
 | `app/js/speech.js`, `app/js/voix-cles.js` | Voix naturelle (sons de `app/voix/`), sinon voix de l'appareil |
 | `scripts/voix/` | Fabrication des sons de la voix naturelle (voir ci-dessous) |
+| `scripts/smoke.mjs`, `scripts/ios.mjs` | Test de bout en bout (Chromium), parcours dans Safari sur simulateur iOS |
 
 **Voix naturelle.** `node scripts/voix/phrases.mjs` choisit les sons à enregistrer, d'après ce que
 disent les jeux à tous les niveaux et ce que dit l'app pendant le parcours complet

@@ -74,6 +74,11 @@ h1, h2, h3 { overflow-wrap: break-word; max-width: 100%; }
 .choices-pictures .choice, .choices-claps .choice, .pattern-item, .bag-item, .basket-item, .add-emoji {
   font-family: 'Andika', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
 }
+/* emoji en couleur de secours (js/emoji.js) : seulement sur les appareils qui n'ont que des emoji en
+   noir et blanc ; la police Twemoji ne couvre que les emoji, le texte reste en Andika */
+.emoji-secours *, .emoji-secours *::before, .emoji-secours *::after {
+  font-family: 'Emoji couleur', 'Andika', 'Avenir Next', system-ui, sans-serif !important;
+}
 button { cursor: pointer; touch-action: manipulation; border: 0; background: none; padding: 0; }
 input { -webkit-user-select: text; user-select: text; }
 
@@ -294,6 +299,9 @@ input { -webkit-user-select: text; user-select: text; }
 .operation-visual .op { font-size: 2rem; font-weight: 700; color: var(--accent-dark); }
 .equation { display: flex; align-items: center; gap: 10px; font-size: 3rem; font-weight: 700; }
 .equation.big { font-size: 3.6rem; }
+/* une longue égalité du CM (grands nombres, décimaux) : plus petite, pour tenir sur la largeur */
+.equation.fit { font-size: min(3.6rem, calc((100vw / var(--zoom, 1) - 56px) / var(--len) / 0.6)); }
+.equation .frac { font-size: 0.6em; }
 .equation .op { color: var(--accent-dark); }
 .gap {
   display: inline-grid; place-items: center;
@@ -344,9 +352,14 @@ input { -webkit-user-select: text; user-select: text; }
 .choices .choice.digits-4 { font-size: min(1.8rem, 6vw); }
 .choices-words .choice { font-size: min(2rem, 8vw); min-height: 76px; }
 .choices-words .choice.long { font-size: min(1.6rem, 6.4vw); }
+/* un seul mot de 11 lettres ou plus (« commençâmes ») : il tient dans sa colonne, même sur 360 px */
+.choices-words .choice.xlong { font-size: min(1.35rem, 5.2vw); }
 .choices-big-numbers .choice { font-size: 3.6rem; min-height: 130px; }
 .choices-objects .choice { min-height: 150px; padding: 12px 4px; }
-.choices-objects .objects .object { font-size: min(26px, 5.6vw); }
+/* des groupes d'objets à toucher, rangés par 5 : aussi grands que la carte le permet (un emoji est
+   un peu plus large que haut : 5 font 6,25 fois leur taille, plus les écarts) */
+.choices-objects .objects { width: 100%; container-type: inline-size; }
+.choices-objects .objects .object { font-size: min(30px, 6.4vw); font-size: min(44px, calc((100cqw - 10px) / 6.4)); }
 
 .choice.correct { background: var(--good); color: #fff; box-shadow: 0 6px 0 var(--good-dark); animation: pop 0.35s ease-out; }
 .choice.wrong { background: #ffe3e3; color: #c43d3d; box-shadow: 0 6px 0 #f3b4b4; animation: shake 0.4s; opacity: 0.6; }
@@ -360,6 +373,35 @@ input { -webkit-user-select: text; user-select: text; }
 .level-up { font-size: 1.3rem; font-weight: 700; color: var(--accent-dark); animation: pop 0.5s ease-out; }
 .reveal { font-size: 2.6rem; font-weight: 700; letter-spacing: 0.04em; }
 .reveal-hl { color: var(--accent); text-decoration: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; }
+/* le mot ou le groupe dont on parle (grammaire du CM) : souligné et en gras, pas seulement en couleur */
+.stage-text.long .text-body { font-size: 1.05rem; line-height: 1.4; font-weight: 600; }
+/* tout sauf le téléphone en paysage (qui a sa mise en page, plus bas) : en portrait, et sur tablette
+   ou ordinateur en paysage (l'iPad mini en paysage, agrandi, a moins de place qu'un iPhone SE) */
+@media (orientation: portrait), (min-height: 521px) {
+  /* un long texte du CM sur un petit écran : l'écran ne défile pas, c'est le texte qui défile
+     dans sa boîte (le titre et « Écouter le texte » restent visibles), les réponses en dessous */
+  .screen.play:has(.stage-text.long) { height: calc(100vh / var(--zoom, 1)); height: calc(100dvh / var(--zoom, 1)); }
+  .play > .stage:has(> .stage-text.long) { flex: 1 1 0; min-height: 170px; align-items: stretch; }
+  .stage-text.long { max-height: 100%; min-height: 0; }
+  .stage-text.long .text-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+  .screen.play:has(.stage-text.long) .feedback { min-height: 60px; }
+}
+/* écran peu haut une fois agrandi : téléphone en portrait jusqu'à 760 px, tablette en paysage
+   jusqu'à 851 px (agrandie 1,12 fois, voir --zoom) */
+@media (orientation: portrait) and (max-height: 760px), (orientation: landscape) and (min-height: 521px) and (max-height: 851px) {
+  /* cinq réponses en phrases (« Quel genre de texte ? ») : deux colonnes */
+  .choices-sentences.n5, .choices-sentences.n6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .choices-sentences.n5 .choice:last-child { grid-column: 1 / -1; }
+}
+@media (orientation: landscape) and (min-height: 521px) and (max-height: 851px) {
+  /* un texte à lire sur tablette en paysage : quatre réponses sur deux colonnes, pour garder de la
+     place au texte (sur iPad mini, il n'en resterait que deux lignes) */
+  .screen.play:has(.stage-text) .choices-sentences.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+.stage-text .text-body:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; border-radius: 6px; }
+.text-lines .text-line { display: block; }
+.text-lines .text-line + .text-line { margin-top: 2px; }
+mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 700; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 5px; }
 .reveal.long { font-size: min(2rem, 7.5vw); }
 
 /* ---------- résultats ---------- */
@@ -712,6 +754,9 @@ input { -webkit-user-select: text; user-select: text; }
   background: var(--card); border-radius: 14px; box-shadow: 0 3px 0 var(--line);
 }
 .pattern-item.gap { font-family: 'Andika', sans-serif; font-weight: 700; color: var(--accent); border: 3px dashed var(--accent); box-shadow: none; }
+/* 4 images au plus (« quel mot les regroupe ? », une rangée d'animaux) : la scène a toute la place */
+.pattern.few { gap: 12px; }
+.pattern.few .pattern-item { width: min(92px, 20vw); height: min(92px, 20vw); font-size: min(3.6rem, 12vw); border-radius: 20px; }
 .shape { display: block; width: 72%; max-width: 90px; aspect-ratio: 1; }
 .shape svg { width: 100%; height: 100%; display: block; }
 .swatch { display: block; width: 64px; height: 64px; border-radius: 50%; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.1); }
@@ -727,13 +772,17 @@ input { -webkit-user-select: text; user-select: text; }
   background: var(--card); border-radius: 20px; box-shadow: 0 0 0 3px var(--line) inset;
 }
 .choices-seek .choice {
-  position: absolute; width: calc(100% / var(--cols)); height: calc(100% / var(--rows));
-  left: calc(var(--x) * 1% - 50% / var(--cols)); top: calc(var(--y) * 1% - 50% / var(--rows));
+  /* un rond (le côté le plus court de la case), centré sur sa place : la carte peut s'étirer en hauteur */
+  position: absolute; width: min(calc(100cqw / var(--cols)), calc(100cqh / var(--rows))); height: auto; aspect-ratio: 1;
+  left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); translate: -50% -50%;
   min-height: 0; padding: 0; border-radius: 50%; background: none; box-shadow: none; line-height: 1;
   font-size: min(calc(100cqw / var(--cols) * 0.56), calc(100cqh / var(--rows) * 0.56));
-  transform: rotate(var(--r)) scale(var(--s));
+  transform: scale(var(--s));
 }
-.choices-seek .choice:active { transform: rotate(var(--r)) scale(calc(var(--s) * 0.9)); box-shadow: none; }
+/* seule l'image tourne, pas son rond : une case tournée (haute et étroite sur une carte étirée)
+   sortait de l'écran au bord de la carte, et Safari faisait alors glisser la page de côté */
+.choices-seek .choice > span { transform: rotate(var(--r)); }
+.choices-seek .choice:active { transform: scale(calc(var(--s) * 0.9)); box-shadow: none; }
 .choices-seek .choice.correct { box-shadow: 0 0 0 4px var(--good-dark); }
 .choices-seek .choice.wrong { box-shadow: 0 0 0 3px #f3b4b4; }
 .choices-seek .choice.hint { box-shadow: 0 0 0 4px var(--hint); }
@@ -743,6 +792,9 @@ input { -webkit-user-select: text; user-select: text; }
 .choices-claps .choice { font-size: min(1.8rem, 7vw); letter-spacing: -0.05em; }
 .choices-sentences { grid-template-columns: 1fr !important; }
 .choices-sentences .choice { font-size: 1.25rem; min-height: 60px; text-align: left; justify-items: start; padding: 10px 16px; }
+/* plus de 60 signes (« six cent soixante millions cinq cent… ») : trois réponses tiennent sous le
+   nombre, même sur iPhone SE */
+.choices-sentences .choice.long-text { font-size: 1.05rem; }
 .stage-sentence { margin: 0; background: var(--card); border-radius: 22px; padding: 18px 20px; font-size: 1.6rem; font-weight: 700; text-align: center; box-shadow: 0 5px 0 var(--line); }
 /* accords : « un chat → des … », avec l'image au-dessus */
 .stage-accord { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 100%; }
@@ -798,11 +850,14 @@ input { -webkit-user-select: text; user-select: text; }
 @media (min-width: 1000px) and (min-height: 1300px) { :root { --zoom: 1.5; } }
 @media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) { :root { --zoom: 1.12; } }
 @media (orientation: landscape) and (min-width: 1300px) and (min-height: 1000px) { :root { --zoom: 1.3; } }
-/* iPad mini en paysage (744 px de haut) : pavé un peu moins haut, pour que la zone de retour
-   (et l'encart de correction expliquée) reste dans l'écran sous le pavé */
-@media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) and (max-height: 780px) {
+/* tablette en paysage peu haute (iPad mini, Galaxy Tab, iPad 10,2" et 11") : pavé un peu moins haut,
+   pour que la zone de retour (et l'encart de correction expliquée) reste dans l'écran sous le pavé */
+@media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) and (max-height: 860px) {
   .play-keypad .keypad { gap: 6px 10px; }
   .play-keypad .key { min-height: 50px; }
+}
+/* iPad mini en paysage (744 px de haut) */
+@media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) and (max-height: 780px) {
   /* texte agrandi ou grandes cibles (a11y.js) : déjà plus grand, sans l'agrandissement de l'iPad */
   body.a11y-text-large, body.a11y-big-targets { --zoom: 1; }
   /* accueil avec des jeux conseillés : l'icône au-dessus du nom (« Histoires » ne tient pas à côté) */
@@ -922,8 +977,14 @@ input { -webkit-user-select: text; user-select: text; }
 .order-item.order-picture { min-height: 112px; }
 .order-item.placed { opacity: 0.25; transform: scale(0.92); }
 .order-item.hint { animation: glow 1s ease-in-out infinite; box-shadow: 0 6px 0 #e6b800, 0 0 0 4px var(--hint) inset; }
-.order-emoji { font-size: calc(var(--scale, 1) * min(44px, 10vw)); line-height: 1; }
-.order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(30px, 7vw)); }
+/* les images à ranger : grandes (trois cases font la largeur de l'écran), un peu moins à 4 ou 5 ;
+   deux emoji côte à côte (« 🐔🥚 », --scale de 0,9 à 0,6 : voir comprendre.js) tiennent dans la case */
+.order-emoji { font-size: calc(var(--scale, 1) * min(56px, 11.8vw)); line-height: 1; }
+.order-items.n4 .order-emoji { font-size: calc(var(--scale, 1) * min(50px, 10.5vw)); }
+.order-items.n5 .order-emoji { font-size: calc(var(--scale, 1) * min(44px, 9.6vw)); }
+.order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(44px, 10vw)); }
+.order-slots.n4 .order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(34px, 8vw)); }
+.order-slots.n5 .order-slot .order-emoji { font-size: calc(var(--scale, 1) * min(30px, 6.4vw)); }
 
 /* labyrinthe */
 .stage-maze { padding: 4px 0; min-height: 0; }
@@ -1221,10 +1282,12 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .look-option.on { background: #fff; box-shadow: 0 0 0 3px var(--lecture) inset; }
 .look-option.on span:last-child::before { content: '✓ '; }
-.grade-picker { justify-content: space-between; }
-.grade-picker .seg { flex: 1; min-height: 44px; }
-/* six classes (PS à CE2) sur la largeur d'un téléphone de 360 points */
-.grade-picker .seg { min-width: 0; padding: 6px 2px; white-space: nowrap; }
+/* huit classes (PS à CM2) : sur une ligne, ou deux lignes de quatre sur un téléphone */
+.grade-picker { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 2px; }
+.grade-picker .seg { min-height: 44px; min-width: 0; padding: 6px 2px; white-space: nowrap; }
+@media (max-width: 560px) {
+  .grade-picker { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 .form-error { margin: 0; min-height: 1.2em; color: #c43d3d; font-weight: 700; }
 
 /* espace parents : trois onglets */
@@ -1250,6 +1313,26 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .add-child { margin-top: 10px; min-height: 56px; font-size: 1.15rem; }
 .danger-zone { display: flex; flex-direction: column; gap: 12px; }
+/* sauvegarde de la progression (Réglages, premier lancement) : deux grands boutons l'un sous l'autre */
+.backup-actions { display: flex; flex-direction: column; gap: 12px; margin: 12px 0 6px; }
+.backup-actions .big-btn { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.15rem; min-height: 56px; }
+.backup-actions .big-btn:disabled { opacity: 0.6; }
+.backup-actions .icon { width: 24px; height: 24px; }
+.backup-status { margin: 4px 0 0; font-weight: 700; }
+.backup-status:empty { display: none; }
+/* Vérifier l'affichage : un voile transparent (aucun toucher n'arrive au jeu) et l'avancement en bas,
+   par-dessus l'écran vérifié, sans rien changer à sa mise en page */
+.verif-shield { position: fixed; inset: 0; z-index: 1000; }
+.verif-band {
+  position: absolute; left: 50%; bottom: calc(var(--safe-bottom, 0px) + 10px); transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 16px; border-radius: 999px; white-space: nowrap;
+  background: #1f2430; color: #fff; font-weight: 700; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.verif-stop { min-height: 44px; padding: 0 16px; border-radius: 999px; background: #fff; color: #1f2430; font-weight: 700; }
+.verif-list { margin: 10px 0; padding-left: 1.2em; }
+.verif-list li { margin: 6px 0; line-height: 1.35; }
+.verif-report { width: 100%; margin-top: 10px; font: 0.8rem/1.4 ui-monospace, monospace; border: 2px solid var(--field-line); border-radius: 10px; padding: 8px; }
+.verif-result a.big-btn { text-decoration: none; color: var(--ink); } /* « Envoyer par e-mail » : un lien qui a l'air d'un bouton */
 
 /* interrupteurs façon iOS (la position du rond indique l'état, pas seulement la couleur) */
 .setting input[type="checkbox"] {
@@ -1265,7 +1348,6 @@ input { -webkit-user-select: text; user-select: text; }
 .setting input[type="checkbox"]:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 
 /* compléments de mise en page (petits écrans) */
-.choices-objects.n3 .objects .object { font-size: min(20px, 4.6vw); }
 .order-items.n6 { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .order-items.n6 .order-item { font-size: min(1.6rem, 6vw); min-height: 64px; }
 .order-slots.n6 .order-slot { height: 60px; font-size: min(1.5rem, 6vw); }
@@ -1280,10 +1362,41 @@ input { -webkit-user-select: text; user-select: text; }
   .text-listen { min-height: 40px; }
 }
 .choices-objects.n3 .choice { padding: 8px 2px; }
-.choices-objects.n3 .objects .object { font-size: min(17px, 3.8vw); }
-/* illustration d'un calcul (5 + 5 objets) : toujours dans la largeur de l'écran */
+@media (orientation: portrait) {
+  /* trois groupes côte à côte seraient minuscules : l'un sous l'autre, chacun sur une ligne (les
+     rangées de 5 côte à côte : 7, c'est 5 et 2), d'autant plus grands que le plus grand groupe est
+     petit (--most, voir choiceZone) */
+  .choices-objects.n3 { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .choices-objects.n3 .choice { min-height: 0; padding: 8px; }
+  .choices-objects.n3 .objects { flex-flow: row wrap; justify-content: center; column-gap: 16px; }
+  .choices-objects.n3 .objects .object { font-size: min(40px, calc((100cqw - 24px) / var(--most, 10) / 1.35)); }
+}
+@media (orientation: portrait) and (min-height: 780px) {
+  /* écran haut : les rangées de 5 l'une sous l'autre, les objets encore plus grands */
+  .choices-objects.n3 .objects { flex-direction: column; }
+  .choices-objects.n3 .objects .object { font-size: min(40px, calc((100cqw - 10px) / 6.4)); }
+}
+/* illustration d'un calcul (5 + 5 objets) : toujours dans la largeur de l'écran, d'autant plus grande
+   qu'il y a peu d'objets sur la ligne la plus large (--cols, voir operationStage) */
 .operation-visual { flex-wrap: wrap; justify-content: center; max-width: 100%; }
-.operation-visual .objects.small .object { font-size: min(24px, 5.4vw); }
+.operation-visual .objects.small .object { font-size: min(48px, calc((100vw - 120px) / var(--cols, 11) / 1.2)); }
+/* tablette en paysage : l'écran, agrandi, est peu haut ; les objets un peu moins grands, pour que
+   l'explication après une erreur reste dans l'écran sous le pavé */
+@media (orientation: landscape) and (min-width: 1000px) and (min-height: 700px) {
+  .operation-visual .objects.small .object { font-size: min(32px, calc(480px / var(--cols, 11) / 1.2)); }
+}
+/* téléphone peu haut (iPhone SE, Android 740 px) : une erreur expliquée sous le pavé, avec son
+   propre dessin ; celui de la question se fait petit pour lui laisser la place */
+@media (orientation: portrait) and (max-height: 760px) {
+  .play:has(.explain) .operation-visual .objects.small .object { font-size: min(24px, 5.4vw); }
+  /* quatre réponses en phrases, l'une sous l'autre (anglais du CM) : l'horloge et la phrase à
+     transformer (« Emma does her homework in the evening. ») leur laissent la place, sur iPhone SE */
+  .play:has(> .choices-sentences.n4) .stage-sentence { font-size: 1.25rem; padding: 10px 14px; }
+  .play:has(> .choices-sentences.n4) .stage-clock {
+    width: min(240px, 62vw, calc(100vh / var(--zoom, 1) - 460px));
+    width: min(240px, 62vw, calc(100dvh / var(--zoom, 1) - 460px));
+  }
+}
 
 /* =====================================================================
    Téléphone en paysage : le dessin à gauche, la consigne et les réponses
@@ -1324,12 +1437,14 @@ input { -webkit-user-select: text; user-select: text; }
   .instruction { gap: 10px; }
   .instruction .avatar-sm { width: 48px; height: 48px; }
   .instruction .bubble { font-size: 1rem; padding: 8px 12px; }
+  .instruction .bubble.long { font-size: 0.9rem; line-height: 1.25; }
 
   /* dessins : à la hauteur de l'écran */
   .stage-picture { font-size: min(110px, 28dvh); padding: 2px 20px; }
   .stage-listen { width: 104px; height: 104px; font-size: 50px; }
   .object { font-size: min(40px, 9dvh); }
   .objects.per-10 .object { font-size: min(26px, 6.4dvh); }
+  .operation-visual .objects.small .object { font-size: min(34px, 8dvh, calc((50vw - 110px) / var(--cols, 11) / 1.2)); }
   .scatter { width: min(100%, calc((100dvh - 80px) * 1.25)); }
   .maze, .sudoku { width: min(100%, calc(100dvh - 80px)); }
   .rmaze { width: min(100%, calc(100dvh - 68px)); }
@@ -1337,6 +1452,7 @@ input { -webkit-user-select: text; user-select: text; }
   .stage-clock { width: min(220px, calc(100dvh - 90px)); }
   .equation { font-size: 2.4rem; }
   .equation.big { font-size: 2.8rem; }
+  .equation.fit { font-size: min(2.8rem, calc((min(100vw, 1000px) - 80px) / 2 / var(--len) / 0.6)); }
   .stage-word { font-size: 2.6rem; padding: 10px 24px; }
   .stage-sentence, .story-text { font-size: 1.2rem; padding: 12px 16px; }
   .accord-line { font-size: 1.2rem; padding: 10px 14px; }
@@ -1344,6 +1460,13 @@ input { -webkit-user-select: text; user-select: text; }
   .play[data-game="accords"] .choices-sentences .choice { min-height: 48px; padding: 6px 12px; font-size: 1.05rem; }
   .text-body { font-size: 1.05rem; line-height: 1.4; }
   .stage-text { padding: 8px 14px 6px; gap: 4px; }
+  /* un long texte (lecture du CM) : la boîte tient dans l'écran, le texte défile dedans */
+  .stage-text { max-height: calc(100dvh - 92px); min-height: 0; }
+  .stage-text .text-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+  .stage-text.long .text-body { font-size: 0.98rem; line-height: 1.38; }
+  /* réponses en phrases (jeux du CM) : plus serrées, et sur deux colonnes à partir de quatre */
+  .choices-sentences .choice { min-height: 46px; padding: 6px 12px; font-size: 1.05rem; }
+  .choices-sentences.n4, .choices-sentences.n5, .choices-sentences.n6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .spell-picture { font-size: 52px; }
 
   /* réponses */
@@ -1384,6 +1507,8 @@ input { -webkit-user-select: text; user-select: text; }
   .order { gap: 14px; width: 100%; }
   .order-item.order-picture { min-height: 92px; }
   /* deux emoji côte à côte (« 🐔🥚 ») tiennent dans une case de la colonne de droite */
+  .order-emoji { font-size: calc(var(--scale, 1) * min(44px, 11dvh)); }
+  .order-slots .order-slot .order-emoji { font-size: calc(var(--scale, 1) * 30px); }
   .order-items.n4 .order-emoji { font-size: calc(var(--scale, 1) * 28px); }
   .order-items.n5 .order-emoji { font-size: calc(var(--scale, 1) * 24px); }
   /* une phrase à remettre dans l'ordre : 5 mots tiennent dans la colonne de droite */
@@ -1413,9 +1538,12 @@ input { -webkit-user-select: text; user-select: text; }
   .choices-words .choice { font-size: 1.45rem; min-height: 60px; }
   .choices-words .choice.long { font-size: 1.15rem; }
   .choices-pictures .choice { font-size: 2.1rem; }
-  .choices-objects .objects .object, .choices-objects.n3 .objects .object { font-size: 18px; }
+  .choices-objects .objects .object { font-size: min(30px, 7dvh, calc((100cqw - 10px) / 6.4)); }
+  /* trois groupes l'un sous l'autre, chacun sur une ligne (rangées de 5 côte à côte) */
   .choices-objects.n3 { grid-template-columns: minmax(0, 1fr); }
-  .choices-objects.n3 .choice { min-height: 52px; padding: 4px; }
+  .choices-objects.n3 .choice { min-height: 44px; padding: 4px; }
+  .choices-objects.n3 .objects { flex-flow: row wrap; justify-content: center; column-gap: 14px; }
+  .choices-objects.n3 .objects .object { font-size: min(34px, 9dvh, calc((100cqw - 24px) / var(--most, 10) / 1.35)); }
   .choice .swatch { width: 44px; height: 44px; }
   .choices-scenes.n4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .choices-scenes .scene, .choices-scenes.n4 .scene { max-width: 96px; }
@@ -1465,6 +1593,9 @@ input { -webkit-user-select: text; user-select: text; }
 @media (orientation: landscape) and (max-height: 520px) {
   .sym-grid { width: min(100%, calc((100dvh - 90px) * var(--cols) / var(--rows))); }
   .choices-answers .choice { font-size: 1.05rem; }
+  /* trois réponses côte à côte (94 points chacune sur iPhone SE) : un mot de 9 lettres (« Amsterdam »,
+     « mammifère ») y tient ; un mot plus long n'y est pas agrandi */
+  .choices-answers.n3 .choice, .choices-answers.long-words .choice { font-size: 0.95rem; }
   .stage-cubes svg { height: calc(100dvh - 110px); }
 }
 
@@ -2500,8 +2631,8 @@ body:has(main.play) .voice-progress-text { display: none; }
 .scale { display: block; max-width: 100%; }
 .scale svg {
   display: block; width: auto; max-width: 100%;
-  height: min(110px, calc((100vh / var(--zoom, 1) - 420px) / var(--n)));
-  height: min(110px, calc((100dvh / var(--zoom, 1) - 420px) / var(--n)));
+  height: min(160px, calc((100vh / var(--zoom, 1) - 420px) / var(--n)));
+  height: min(160px, calc((100dvh / var(--zoom, 1) - 420px) / var(--n)));
 }
 .scale-base { fill: #6b3d10; }
 .scale-post { fill: #8a5426; }
@@ -2512,8 +2643,8 @@ body:has(main.play) .voice-progress-text { display: none; }
 .scale-weight path { fill: #4a4e69; }
 .scale-weight text { fill: #fff; font-size: 10.5px; font-weight: 700; text-anchor: middle; }
 .scale-weight .scale-kg { font-size: 6.5px; }
-.scales-ask { display: flex; align-items: center; gap: 6px; font-size: 1.5rem; font-weight: 700; }
-.scales-animal { font-size: 1.9rem; font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
+.scales-ask { display: flex; align-items: center; gap: 6px; font-size: 1.7rem; font-weight: 700; }
+.scales-animal { font-size: 2.5rem; font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
 .scales-ask .gap { min-width: 1.6em; border-radius: 12px; }
 
 /* le dessin caché : les nombres à gauche et en haut, les cases à colorier */
@@ -2558,6 +2689,7 @@ body:has(main.play) .voice-progress-text { display: none; }
   .figure-choice { width: 52px; }
   .scale svg { height: min(110px, calc((100dvh - 120px) / var(--n))); }
   .scales-ask { font-size: 1.3rem; }
+  .scales-animal { font-size: 1.9rem; }
   .picross {
     --cell: min(40px,
       calc((50vw - 44px) / (var(--cols) + var(--rw) * var(--k))),
@@ -2611,9 +2743,14 @@ body:has(main.play) .voice-progress-text { display: none; }
 .drawing-choice .dr-emoji, .stage-drawing .dr-emoji { font-family: 'Andika', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; }
 .choices-drawings .choice { min-height: 0; padding: 8px 6px; }
 .choices-drawings.n2 .drawing-choice svg { height: min(130px, 18vh); height: min(130px, 18dvh); }
-/* une rangée d'animaux (à gauche de l'arbre, entre, à côté de) : assez grande pour bien voir */
-.play[data-game="se-reperer"] .pattern { gap: 10px; }
-.play[data-game="se-reperer"] .pattern-item { width: 66px; height: 66px; font-size: 2.6rem; border-radius: 16px; }
+/* des dessins en réponse sans scène au-dessus (deux mains, trois carrefours, quatre robots) : plus grands */
+.choices-drawings.center .drawing-choice svg { height: min(140px, 18vh); height: min(140px, 18dvh); }
+@media (orientation: portrait) and (max-width: 600px) {
+  /* sur un téléphone, deux par ligne : trois ou quatre côte à côte seraient minuscules */
+  .choices-drawings.center.n3, .choices-drawings.center.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .choices-drawings.center.n3 .choice:last-child { grid-column: 1 / -1; }
+  .choices-drawings.center .drawing-choice svg { height: min(150px, 20vh); height: min(150px, 20dvh); }
+}
 .choices-arrows { grid-template-columns: minmax(0, 1fr) !important; }
 .choices-arrows .choice { min-height: 52px; padding: 6px; }
 .choices-arrows .drawing-choice svg { height: 38px; }
@@ -2624,7 +2761,8 @@ body:has(main.play) .voice-progress-text { display: none; }
   .drawing-choice svg { height: min(84px, calc((100dvh - 150px) / 2)); }
   .choices-arrows .choice { min-height: 44px; padding: 4px; }
   .choices-arrows .drawing-choice svg { height: 32px; }
-  .play[data-game="se-reperer"] .pattern-item { width: 56px; height: 56px; font-size: 2.1rem; }
+  .pattern.few .pattern-item { width: min(72px, 17dvh); height: min(72px, 17dvh); font-size: min(2.8rem, 11dvh); }
+  .choices-drawings.center .drawing-choice svg { height: min(96px, calc((100dvh - 150px) / 2)); }
   .choices-drawings.n2 .drawing-choice svg { height: min(110px, calc(100dvh - 170px)); }
 }
 
