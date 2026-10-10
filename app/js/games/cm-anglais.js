@@ -27,6 +27,7 @@ function wordStage(text, lang) {
  * en choix par `choice` ; avec `listen`, l'anglais n'est qu'entendu (scène « écoute », listenOnly).
  */
 function question(rng, { key, text, instruction = text, short, replay, stage, listen = false, options, choice = enChoice, style, answer, success }) {
+  const choices = shuffle(rng, options).map(choice);
   return {
     key,
     text,
@@ -35,8 +36,9 @@ function question(rng, { key, text, instruction = text, short, replay, stage, li
     ...(replay ? { replay } : {}),
     stage: listen ? { type: 'listen' } : stage,
     ...(listen ? { listenOnly: true } : {}),
-    choices: shuffle(rng, options).map(choice),
-    choiceStyle: style,
+    choices,
+    // un libellé long (« la bibliothèque », « swimming pool ») : des boutons plus petits
+    choiceStyle: style === 'words' && choices.some((c) => c.label.length > 12) ? 'answers' : style,
     answer,
     success: { speak: success },
   };
@@ -825,7 +827,7 @@ function lieuImage(rng) {
     options: [place, ...sample(rng, PLACE_WORDS.filter((p) => p !== place), 3)],
     style: 'words',
     answer: place,
-    success: [say(`It’s the ${place}.`)],
+    success: [say(`It’s ${/^[aeiou]/.test(place) ? 'an' : 'a'} ${place}.`)],
   });
 }
 
