@@ -91,7 +91,8 @@ test('écoute : les niveaux entiers, et les jeux masqués quand on écarte l’�
     hidden[grade] = before.filter((id) => !after.has(id));
   }
   // (aux niveaux de la classe : au CP et au CE1, l'anglais est à l'oral seulement, donc ses jeux
-  // d'écoute disparaissent tous ; au CE2, la dictée est sans image : elle ne se joue qu'à l'oreille)
+  // d'écoute disparaissent tous ; à partir du CE2, la dictée est sans image : elle ne se joue qu'à
+  // l'oreille ; au CM, « Where is the cat? » n'a plus que ses niveaux entendus)
   assert.deepEqual(hidden, {
     PS: ['ecoute', 'compte-anglais'],
     MS: ['ecoute', 'compte-anglais', 'ou-est'],
@@ -99,6 +100,8 @@ test('écoute : les niveaux entiers, et les jeux masqués quand on écarte l’�
     CP: ['ecoute', 'compte-anglais', 'nombres-anglais', 'ou-est'],
     CE1: ['ecoute', 'compte-anglais', 'nombres-anglais', 'ou-est'],
     CE2: ['dictee', 'ecoute'],
+    CM1: ['dictee', 'ecoute', 'ou-est'],
+    CM2: ['dictee', 'ecoute', 'ou-est'],
   });
 });
 

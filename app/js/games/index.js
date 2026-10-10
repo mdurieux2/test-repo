@@ -47,6 +47,7 @@ import { CM_NOMBRES_GAMES } from './cm-nombres.js';
 import { CM_OPERATIONS_GAMES } from './cm-operations.js';
 import { CM_MESURES_GAMES } from './cm-mesures.js';
 import { CM_ANGLAIS_GAMES } from './cm-anglais.js';
+import { CM_MONDE_GAMES } from './cm-monde.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
@@ -56,7 +57,7 @@ const ALL = [
   ...CE2_GAMES, emotions, chercheTrouve, gaucheDroite,
   // cours moyen
   conjugaisonCm, ...CM_GRAMMAIRE_GAMES, vocabulaireCm, lectureCm, ...CM_NOMBRES_GAMES, ...CM_OPERATIONS_GAMES, ...CM_MESURES_GAMES,
-  ...CM_ANGLAIS_GAMES,
+  ...CM_ANGLAIS_GAMES, ...CM_MONDE_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -95,8 +96,21 @@ const RUBRIQUES = [
     ],
   },
   { id: 'temps', title: 'Temps et mesures', icon: '⏰', games: ['heure', 'regle-horloge', 'calendrier', 'saisons', 'monnaie', 'mesures', 'perimetres', 'mesures-cm'] },
-  { id: 'monde', title: 'Le monde', icon: '🌍', games: ['animaux-monde', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'emotions', 'se-reperer', 'gauche-droite'] },
-  { id: 'sciences', title: 'Sciences', icon: '🔬', games: ['vivant', 'corps', 'milieux', 'matiere', 'melanges', 'electricite', 'objets', 'ciel', 'meteo', 'planete'] },
+  {
+    id: 'monde',
+    title: 'Le monde',
+    icon: '🌍',
+    games: [
+      'histoire', 'geographie', 'republique',
+      'animaux-monde', 'pays', 'drapeaux', 'carte-monde', 'vivre-ensemble', 'emotions', 'se-reperer', 'gauche-droite',
+    ],
+  },
+  {
+    id: 'sciences',
+    title: 'Sciences',
+    icon: '🔬',
+    games: ['sciences-cm', 'vivant', 'corps', 'milieux', 'matiere', 'melanges', 'electricite', 'objets', 'ciel', 'meteo', 'planete'],
+  },
   {
     id: 'anglais',
     title: 'Anglais',
@@ -118,7 +132,10 @@ const SECTION_GAMES = {
   'Logique': ['formes', 'algorithmes', 'intrus', 'cherche-trouve', 'ombres', 'sudoku', 'tableau-logique', 'balances', 'picross'],
   'Formes et espace': ['symetrie', 'reproduire', 'tangram', 'cubes', 'geometrie-cm'],
   'Labyrinthes': ['labyrinthe', 'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres'],
+  'Histoire et géographie': ['histoire', 'geographie'],
+  'Enseignement moral et civique': ['republique'],
   'Animaux, pays et cartes': ['animaux-monde', 'pays', 'drapeaux', 'carte-monde'],
+  'Sciences et technologie': ['sciences-cm'],
   'Le vivant': ['vivant', 'corps', 'milieux'],
   'La matière et les objets': ['matiere', 'melanges', 'electricite', 'objets'],
   'Le ciel et la Terre': ['ciel', 'meteo'],

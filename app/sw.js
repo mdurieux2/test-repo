@@ -53,6 +53,7 @@ const PRECACHE = [
   './js/games/cm-grammaire.js',
   './js/games/cm-lecture.js',
   './js/games/cm-mesures.js',
+  './js/games/cm-monde.js',
   './js/games/cm-nombres.js',
   './js/games/cm-operations.js',
   './js/games/cm-vocabulaire.js',
