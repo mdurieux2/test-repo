@@ -352,6 +352,8 @@ input { -webkit-user-select: text; user-select: text; }
 .choices .choice.digits-4 { font-size: min(1.8rem, 6vw); }
 .choices-words .choice { font-size: min(2rem, 8vw); min-height: 76px; }
 .choices-words .choice.long { font-size: min(1.6rem, 6.4vw); }
+/* un seul mot de 11 lettres ou plus (« commençâmes ») : il tient dans sa colonne, même sur 360 px */
+.choices-words .choice.xlong { font-size: min(1.35rem, 5.2vw); }
 .choices-big-numbers .choice { font-size: 3.6rem; min-height: 130px; }
 .choices-objects .choice { min-height: 150px; padding: 12px 4px; }
 /* des groupes d'objets à toucher, rangés par 5 : aussi grands que la carte le permet (un emoji est

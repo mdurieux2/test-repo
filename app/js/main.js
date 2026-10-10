@@ -1561,6 +1561,8 @@ function choiceZone(ctx) {
     const label = typeof choice.label === 'string' ? choice.label : '';
     const classes = ['choice'];
     if (label.length > 7 && q.choiceStyle !== 'sentences') classes.push('long');
+    // un seul mot très long (« commençâmes ») : il ne peut pas passer à la ligne, police encore plus petite
+    if (label.length > 10 && !/\s/.test(label) && q.choiceStyle !== 'sentences') classes.push('xlong');
     // grands nombres, écrits ou non avec une espace fine (« 1 441 ») : police plus petite
     const digits = label.replace(/\s/g, '');
     if (/^\d{3,}$/.test(digits)) classes.push(digits.length >= 4 ? 'digits-4' : 'digits-3');
