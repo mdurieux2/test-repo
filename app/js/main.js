@@ -39,6 +39,8 @@ import { zoneName } from './data/carte-data.js';
 import { ACCESSORIES, LOOKS, makeCharacter, SHIRTS } from './characters.js';
 import { dashboard } from './dashboard.js';
 import { emojiCouleur } from './emoji.js';
+import { dit, ecrit } from './games/ce2.js';
+import { ceNavigateur, etapesInstallation, pourquoiInstaller } from './installation.js';
 import { squarePhoto } from './photo.js';
 import { a11y, applyA11y, cleanA11y } from './a11y.js';
 import { syllabesPermises } from './syllabes.js';
@@ -471,41 +473,33 @@ function profileScreen() {
 
 // ---------------------------------------------------------------- Installer l'icône
 
-// Android et ordinateur (Chrome, Edge) : le navigateur propose lui-même l'installation.
+// Android et ordinateur (Chrome, Edge, Brave, Samsung Internet) : le navigateur propose lui-même
+// l'installation, parfois après l'affichage de « Qui joue ? » : l'invitation montre alors son bouton.
 let installPrompt = null;
 addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   installPrompt = e;
+  refreshInstallHint();
+});
+addEventListener('appinstalled', () => {
+  installPrompt = null;
+  store.settings.installHintDone = true;
+  save();
+  refreshInstallHint();
 });
 
-function platform() {
-  const ua = navigator.userAgent;
-  // l'iPad se présente comme un Mac, mais il a un écran tactile
-  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
-  if (/Android/.test(ua)) return 'android';
-  return 'desktop';
+/** L'invitation à installer, refaite sur place (bouton du navigateur arrivé, app installée). */
+function refreshInstallHint() {
+  const card = document.querySelector('[data-install-hint]');
+  if (!card) return;
+  const fresh = installHint();
+  if (fresh) card.replaceWith(fresh);
+  else card.remove();
 }
 
-/** Les étapes pour mettre l'icône sur l'écran d'accueil, selon l'appareil. */
+/** Les étapes pour mettre l'icône sur l'écran d'accueil, selon l'appareil et le navigateur. */
 function installSteps() {
-  const steps = {
-    ios: [
-      'Touchez Partager (le carré avec une flèche vers le haut).',
-      'Faites défiler, puis touchez « Sur l’écran d’accueil ».',
-      'Touchez « Ajouter » : l’icône apparaît, l’app marche sans Internet.',
-    ],
-    android: [
-      'Touchez le menu ⋮ du navigateur, en haut à droite.',
-      'Touchez « Installer l’application » ou « Ajouter à l’écran d’accueil ».',
-      'Confirmez : l’icône apparaît, l’app marche sans Internet.',
-    ],
-    desktop: [
-      'Cliquez sur l’icône d’installation dans la barre d’adresse, ou ouvrez le menu du navigateur.',
-      'Choisissez « Installer Lire, compter et s’amuser ! ».',
-      'L’app s’ouvre alors dans sa propre fenêtre, même sans Internet.',
-    ],
-  };
-  return h('ol', { class: 'plain-list install-steps' }, steps[platform()].map((step) => h('li', {}, step)));
+  return h('ol', { class: 'plain-list install-steps' }, etapesInstallation(ceNavigateur()).map((step) => h('li', {}, step)));
 }
 
 /**
@@ -524,18 +518,18 @@ function installHint() {
     ? h('button', {
       class: 'big-btn primary', 'data-install': '',
       onclick: async () => {
-        installPrompt.prompt();
-        const { outcome } = await installPrompt.userChoice.catch(() => ({}));
-        installPrompt = null;
+        const prompt = installPrompt;
+        installPrompt = null; // l'invite du navigateur ne sert qu'une fois
+        prompt.prompt();
+        const { outcome } = await prompt.userChoice.catch(() => ({}));
         if (outcome === 'accepted') hide({ installHintDone: true });
+        else refreshInstallHint();
       },
     }, '📲 Installer l’app')
     : null;
   return h('section', { class: 'card install-hint', 'data-install-hint': '' },
     h('h2', {}, '📲 Mettez l’icône sur l’écran d’accueil'),
-    h('p', {}, platform() === 'ios'
-      ? 'Sur iPhone et iPad, le navigateur peut effacer les prénoms et les progrès d’un site qu’on n’ouvre pas pendant 7 jours. Avec l’icône, tout est protégé, et l’app s’ouvre en plein écran, même sans Internet.'
-      : 'Avec l’icône, l’app s’ouvre en plein écran, même sans Internet, et les prénoms et les progrès sont mieux protégés.'),
+    h('p', {}, pourquoiInstaller(ceNavigateur())),
     install || h('details', { class: 'install-how' }, h('summary', {}, 'Comment faire ?'), installSteps()),
     h('div', { class: 'install-actions' },
       h('button', { class: 'link-action', 'data-install-later': '', onclick: () => hide({ installHintUntil: Date.now() + 14 * 24 * 3600 * 1000 }) }, 'Plus tard'),
@@ -766,7 +760,7 @@ function welcomeScreen(adding = !store.order.length) {
       h('div', { class: 'welcome-avatars', 'aria-hidden': 'true' },
         avatar('apercu-fille', 'avatar-md', { look: 'fille' }), avatar('apercu-garcon', 'avatar-md', { look: 'garcon' })),
       h('h1', { class: 'welcome-title' }, 'Bienvenue !'),
-      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la petite section au CE2.')),
+      h('p', { class: 'welcome-text' }, 'Des jeux pour apprendre à lire, à compter et à parler anglais, de la petite section au CM2.')),
     added.length ? h('section', { class: 'card' }, h('h2', {}, 'Ils vont jouer'), h('div', { class: 'child-chips' }, added)) : null,
     adding
       ? h('section', { class: 'card' },
@@ -1616,9 +1610,10 @@ function keypadZone(ctx) {
     typed = '';
     update();
     const hint = ctx.session.attempts >= 1;
+    // un grand nombre s'écrit « 10 800 » et se dit en morceaux que la voix connaît (« 10 mille 800 »)
     markWrong(ctx, {
-      message: hint ? `C’est ${q.answer} !` : 'Essaie encore !',
-      speech: hint ? `C’est ${q.answer}. Tape ${q.answer} !` : 'Essaie encore !',
+      message: hint ? `C’est ${ecrit(q.answer)} !` : 'Essaie encore !',
+      speech: hint ? `C’est ${dit(q.answer)}. Tape ${dit(q.answer)} !` : 'Essaie encore !',
       given: value,
     });
   };
@@ -5791,7 +5786,7 @@ function settingsTab() {
     isStandalone() ? null : h('section', { class: 'card' },
       h('h2', {}, 'Installer sur l’écran d’accueil'),
       installSteps(),
-      h('p', { class: 'muted small' }, 'Sur iPhone et iPad, l’app installée est protégée : le navigateur ne peut pas effacer ses données.')),
+      h('p', { class: 'muted small' }, 'Les prénoms et les progrès sont gardés sur cet appareil, dans ce navigateur, d’une version de l’app à l’autre. Sur iPhone et iPad, l’app installée est en plus protégée : le navigateur ne peut pas effacer ses données. Mais elle a ses propres données : les profils créés dans le navigateur sont à refaire dans l’app.')),
     h('section', { class: 'card about' },
       h('h2', {}, 'À propos'),
       h('div', { class: 'setting' }, h('span', {}, 'Version'), h('b', { 'data-version': APP.version }, APP.version)),

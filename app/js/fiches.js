@@ -26,6 +26,7 @@ export const NON_IMPRIMABLES = new Set([
   'labyrinthe-rond', 'chemin-nombres', 'chemin-lettres', 'carte-monde', 'cherche-trouve',
   'tangram', // des pièces qu'on reconnaît à leur couleur et qu'on fait tourner
   'fluence', // lire à voix haute en une minute, avec un adulte qui écoute et touche les mots ratés
+  'lecture-cm', // un long texte par question : une page par texte, pas une fiche d'exercices
 ]);
 
 /**

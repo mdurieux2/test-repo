@@ -5,12 +5,17 @@
 //     (avant 4 ans = PS, à partir de 4 ans = MS, à partir de 5 ans = GS) ;
 //   CP, CE1, CE2 : français et maths de 2024 (BO n°41), écrits classe par classe ; au CP, nouveaux
 //     programmes de sciences (BO n°24 du 11/6/2026), d'histoire-géographie (BO n°22 du 28/5/2026)
-//     et de langues vivantes (BO n°12 du 19/3/2026) ; au CE1 et au CE2, ceux de 2020 jusqu'en 2027.
+//     et de langues vivantes (BO n°12 du 19/3/2026) ; au CE1 et au CE2, ceux de 2020 jusqu'en 2027 ;
+//   CM1, CM2 : français et maths du cycle 3 de 2025 (le CM2 les applique pour la première fois en
+//     2026-2027) ; au CM1, les nouveaux programmes de 2026 en sciences, histoire-géographie et
+//     anglais ; au CM2, ceux de 2020 (2023 en sciences) jusqu'en 2027 ; EMC de 2024.
 // Un jeu n'est proposé que dans les classes où ce qu'il travaille est au programme, et seulement à
 // ses niveaux de l'année (avec un peu de l'année d'avant pour commencer) : rien de trop dur, ni
 // rien de déjà su. Quelques repères qui décident de beaucoup de choses :
 //   - lettres : capitales et voyelles en MS, toutes les lettres en GS ; lecture de mots au CP ;
-//   - nombres : 3 ou 4 en PS, 6 en MS, 10 et un peu plus en GS, 100 au CP, 1 000 au CE1, 10 000 au CE2 ;
+//   - nombres : 3 ou 4 en PS, 6 en MS, 10 et un peu plus en GS, 100 au CP, 1 000 au CE1, 10 000 au CE2,
+//     999 999 au CM1 (décimaux jusqu'aux centièmes), les centaines de millions au CM2 (millièmes) ;
+//     le milliard, les pourcentages, l'arrondi au dixième et le « retour à l'unité » sont en 6e ;
 //   - les fractions commencent au CE1 ; les tables de multiplication aussi ; la division au CE2 ;
 //   - l'heure : les heures pile au CP, les demi-heures et les quarts d'heure au CE1, à la minute au CE2 ;
 //   - conjugaison : être et avoir au présent au CP ; présent, imparfait, futur et passé composé
@@ -213,7 +218,7 @@ export const PROGRAMS = {
     francais: [
       ['bon-mot', 5, 8], ['petits-mots', 6, 8], ['phrase', 5, 8], ['fluence', 7, 9], ['vocabulaire', 6, 10], ['ponctuation', 6, 10],
       ['homophones', 2, 6], ['genre', 6, 8],
-      ['conjugaison', 4, 10], ['imparfait', 1, 8], ['accords', 3, 10],
+      ['conjugaison', 4, 10], ['imparfait', 1, 8], ['conjugaison-cm', 1, 3], ['accords', 3, 10],
       ['dictee', 5, 8],
     ],
     histoires: [
@@ -250,6 +255,71 @@ export const PROGRAMS = {
       ['parle-anglais', 2, 8],
     ],
   },
+  CM1: {
+    francais: [
+      ['fluence', 8, 9], ['vocabulaire-cm', 1, 8], ['ponctuation', 9, 10], ['homophones', 5, 8],
+      ['conjugaison-cm', 1, 7], ['grammaire-cm', 1, 6], ['orthographe-cm', 1, 6], ['accords', 9, 10], ['dictee', 6, 8],
+    ],
+    histoires: [
+      ['lecture-cm', 1, 8],
+    ],
+    // nombres jusqu'à 999 999, décimaux jusqu'aux centièmes, fractions jusqu'à 20, fraction unitaire d'une quantité
+    maths: [
+      ['nombres-cm', 1, 6], ['decimaux', 1, 8], ['fractions-cm', 1, 10, [8, 9]], ['calcul-cm', 1, 9, [8]], ['tables-chrono', 5, 8],
+      ['operations-cm', 1, 8], ['multiplication-posee', 6, 8], ['division', 5, 8], ['problemes-cm', 1, 10], ['schemas', 8, 10],
+      ['donnees-cm', 1, 6],
+    ],
+    jeux: [
+      ['geometrie-cm', 1, 8], ['symetrie', 4, 7], ['reproduire', 6, 8], ['cubes', 5, 7], ['tangram', 6, 8],
+      ['sudoku', 7, 10], ['tableau-logique', 6, 9], ['balances', 6, 8], ['picross', 6, 8], ['labyrinthe', 8, 10], ['labyrinthe-rond', 7, 9],
+    ],
+    temps: [
+      ['mesures-cm', 1, 7], ['perimetres', 5, 9], ['heure', 6, 7], ['regle-horloge', 7, 8],
+    ],
+    // nouveaux programmes de 2026 : le Moyen Âge, la monarchie, les explorations, 1789 ; se nourrir, se déplacer, Internet
+    monde: [
+      ['histoire', 1, 5], ['geographie', 1, 5], ['republique', 1, 5], ['carte-monde', 5, 10], ['pays', 6, 8], ['se-reperer', 9, 10],
+    ],
+    // mélanges, lumière et ombres, phases de la Lune, classification, réseaux alimentaires, météo, objets techniques
+    sciences: [
+      ['sciences-cm', 1, 7], ['melanges', 6, 10], ['milieux', 5, 10], ['ciel', 4, 6, [5]], ['meteo', 7, 10], ['objets', 7, 10],
+    ],
+    anglais: [
+      ['anglais-cm', 1, 8], ['ecoute', 8, 10], ['lis-anglais', 8, 10], ['mot-anglais', 8, 10], ['relie-anglais', 8, 10], ['epelle-anglais', 7, 10],
+      ['nombres-anglais', 6, 8], ['ou-est', 6, 8], ['phrase-anglais', 3, 7], ['parle-anglais', 4, 8],
+    ],
+  },
+  CM2: {
+    francais: [
+      ['fluence', 9, 9], ['vocabulaire-cm', 2, 10], ['conjugaison-cm', 4, 10], ['grammaire-cm', 4, 10], ['orthographe-cm', 3, 10], ['dictee', 7, 8],
+    ],
+    histoires: [
+      ['lecture-cm', 2, 10],
+    ],
+    // nombres jusqu'aux centaines de millions, millièmes, entier × fraction, proportionnalité (sans tableau)
+    maths: [
+      ['nombres-cm', 3, 10], ['decimaux', 2, 10], ['fractions-cm', 2, 10], ['calcul-cm', 2, 10], ['tables-chrono', 6, 8],
+      ['operations-cm', 3, 10], ['problemes-cm', 2, 10], ['schemas', 9, 10], ['donnees-cm', 2, 10],
+    ],
+    jeux: [
+      ['geometrie-cm', 3, 10], ['symetrie', 6, 7], ['reproduire', 7, 8], ['cubes', 6, 7], ['tangram', 7, 8],
+      ['sudoku', 8, 10], ['tableau-logique', 7, 9], ['balances', 7, 8], ['picross', 7, 8], ['labyrinthe', 9, 10], ['labyrinthe-rond', 8, 9],
+    ],
+    temps: [
+      ['mesures-cm', 4, 10], ['perimetres', 7, 9], ['regle-horloge', 8, 8],
+    ],
+    // programmes de 2020 jusqu'en 2027 : la République, l'âge industriel, les guerres mondiales, l'Europe (et les rois, 1789)
+    monde: [
+      ['histoire', 3, 10, [4]], ['geographie', 4, 10], ['republique', 6, 10], ['carte-monde', 7, 10], ['pays', 7, 8],
+    ],
+    sciences: [
+      ['sciences-cm', 1, 10, [7]], ['ciel', 7, 10], ['electricite', 7, 10], ['planete', 8, 10], ['milieux', 8, 10], ['objets', 8, 10],
+    ],
+    anglais: [
+      ['anglais-cm', 1, 10], ['ecoute', 9, 10], ['lis-anglais', 9, 10], ['mot-anglais', 9, 10], ['relie-anglais', 9, 10], ['epelle-anglais', 8, 10],
+      ['ou-est', 7, 8], ['phrase-anglais', 5, 7], ['parle-anglais', 6, 8],
+    ],
+  },
 };
 
 /**
@@ -263,6 +333,8 @@ export const GRADE_GOALS = {
   CP: 'Lire de petits textes (30 mots par minute), écrire sous la dictée, être et avoir au présent ; nombres jusqu’à 100, calcul, problèmes, l’heure pile, les euros, tourner à gauche ou à droite.',
   CE1: 'Lire des textes d’une quinzaine de lignes (70 mots par minute), conjuguer au présent, à l’imparfait, au futur et au passé composé ; nombres jusqu’à 1 000, tables, fractions, quarts d’heure.',
   CE2: 'Lire des textes plus longs (90 mots par minute), conjuguer les verbes fréquents, accorder ; nombres jusqu’à 10 000, multiplication posée, division, fractions, l’heure à la minute, l’anglais écrit.',
+  CM1: 'Comprendre des textes variés, analyser la phrase, conjuguer ; nombres jusqu’à 999 999, décimaux, fractions, opérations posées, aires, angles ; le Moyen Âge à 1789 ; l’anglais (A1).',
+  CM2: 'Lire des textes longs, le passé simple, les fonctions ; nombres jusqu’aux millions, millièmes, proportionnalité, aire du rectangle ; la République, l’Europe ; l’anglais (A1).',
 };
 
 /**

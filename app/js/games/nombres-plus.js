@@ -59,8 +59,10 @@ export function numberLineSvg(stage, { place = false, target = null } = {}) {
     const h = major.has(v) ? 11 : 7;
     return `<line class="nl-tick${major.has(v) ? ' major' : ''}" x1="${x}" y1="${y - h}" x2="${x}" y2="${y + h}"/>`;
   }).join('');
+  // les graduations peuvent porter une autre écriture (`texts`) : 1,5 ; 3/4 ; 340 000
+  const texte = (v) => stage.texts?.[v] ?? v;
   const texts = stage.ticks.filter((v) => labels.has(v) && v !== stage.mark)
-    .map((v) => `<text class="nl-label" x="${lineX(stage, v).toFixed(2)}" y="${y + 31}">${v}</text>`).join('');
+    .map((v) => `<text class="nl-label" x="${lineX(stage, v).toFixed(2)}" y="${y + 31}">${texte(v)}</text>`).join('');
   const parts = [
     `<line class="nl-axis" x1="${x0 - 12}" y1="${y}" x2="${x1 + 12}" y2="${y}"/>`,
     `<polygon class="nl-axis-head" points="${x1 + 22},${y} ${x1 + 10},${y - 7} ${x1 + 10},${y + 7}"/>`,
@@ -70,7 +72,7 @@ export function numberLineSvg(stage, { place = false, target = null } = {}) {
   if (stage.mark !== undefined) parts.push(arrowMarkup('nl-mark', lineX(stage, stage.mark)), boxMarkup('nl-ask', lineX(stage, stage.mark), '?'));
   if (stage.frog !== undefined) parts.push(`<text class="nl-frog" x="${lineX(stage, stage.frog).toFixed(2)}" y="${y - 16}">🐸</text>`);
   if (place) {
-    parts.push(arrowMarkup('nl-ghost', lineX(stage, target)), boxMarkup('nl-reveal', lineX(stage, target), target),
+    parts.push(arrowMarkup('nl-ghost', lineX(stage, target)), boxMarkup('nl-reveal', lineX(stage, target), texte(target)),
       arrowMarkup('nl-cursor', x0));
   }
   return `<svg class="nl-svg" viewBox="0 0 ${NL.width} ${NL.height}" aria-hidden="true">${parts.join('')}</svg>`;

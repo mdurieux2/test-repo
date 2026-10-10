@@ -4,13 +4,25 @@
 
 export const APP = {
   name: 'Lire, compter et s’amuser\u00a0!',
-  version: '1.15.0',
+  version: '1.16.0',
   author: 'Michaël Durieux',
   contact: 'Michael.Durieux@gmail.com', // remarques, bugs, idées d'évolution
 };
 
 /** Journal des modifications, de la plus récente à la plus ancienne. */
 export const CHANGELOG = [
+  {
+    version: '1.16.0',
+    date: '2026-10-10',
+    changes: [
+      'Deux nouvelles classes, le CM1 et le CM2, avec 19 nouveaux jeux en dix niveaux : la conjugaison, la phrase et ses fonctions, accords et homophones, les mots et la lecture du CM ; les très grands nombres, les décimaux, les fractions, le calcul mental, les opérations, les problèmes, données et hasard, les mesures et la géométrie du CM ; l’histoire, la géographie, vivre en République, les sciences et l’anglais du CM.',
+      'Chaque classe a maintenant son programme, d’après les textes officiels en vigueur : seuls les jeux et les niveaux de l’année sont proposés, de la petite section au CM2.',
+      'Nouveau jeu « Gauche ou droite ? » (Le monde), de la moyenne section au CE2 : l’image de gauche ou de droite, lire de gauche à droite, sa main gauche, les flèches, le robot qui tourne, la voiture au carrefour, la droite d’une personne de face.',
+      'Mettre l’icône sur l’écran d’accueil : les étapes suivent le navigateur (Safari et iOS 26, Chrome, Samsung Internet, Firefox, Brave, Edge…), et le bouton « Installer l’app » apparaît même quand le navigateur le propose après l’ouverture.',
+      'Emoji en couleur sur les navigateurs qui ne les montrent qu’en noir et blanc (écran des voitures Tesla, Chromium sous Linux).',
+      'Pictogrammes plus grands dans les suites, les dessins à toucher, les calculs illustrés et les balances.',
+    ],
+  },
   {
     version: '1.15.0',
     date: '2026-10-08',

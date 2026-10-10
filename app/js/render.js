@@ -7,6 +7,7 @@ import { balanceSvg, describeBalance, describeFigure, figureSvg } from './games/
 import { fractionSvg, numberLineSvg } from './games/nombres-plus.js';
 import { drawingSvg } from './games/vivre.js';
 import { gaucheDroiteSvg } from './games/gauche-droite.js';
+import { cmSvg } from './games/cm-mesures.js';
 import { cielSvg } from './games/ciel.js';
 import { technoSvg } from './games/techno.js';
 import { ce2Svg } from './games/ce2.js';
@@ -256,7 +257,7 @@ export function renderStage(stage, actions) {
       return aides.namedColors && stage.name ? h('span', { class: 'color-named' }, swatch, colorName(stage.name)) : swatch;
     }
     case 'sentence':
-      return h('p', { class: 'stage-sentence', lang: stage.lang }, wordSpans(stage.text, stage.lang));
+      return h('p', { class: 'stage-sentence', lang: stage.lang }, stage.mark ? markedSpans(stage.text, stage.mark, stage.lang) : wordSpans(stage.text, stage.lang));
     case 'accord':
       return accordStage(stage);
     case 'text':
@@ -306,9 +307,12 @@ export function renderStage(stage, actions) {
       return markupStage(`stage-chart chart-${stage.chart.kind}`, chartMarkup(stage.chart), describeChart(stage.chart));
     case 'schema':
       return markupStage(`stage-schema${stage.model ? ' with-model' : ''}`, schemaMarkup(stage), stage.model ? describeModel(stage.model) : null);
-    case 'equation':
-      return h('div', { class: 'equation big' },
-        stage.parts.map((p) => h('span', { class: p === null ? 'num gap' : typeof p === 'number' ? 'num' : 'op' }, p === null ? '?' : p)));
+    case 'equation': {
+      // une longue égalité du CM (345 678 ; 82,69 ÷ 1 000) s'écrit plus petit, pour tenir sur la largeur
+      const len = stage.parts.reduce((sum, p) => sum + equationWidth(p), 0) + 0.5 * (stage.parts.length - 1);
+      return h('div', { class: `equation big${len > 9 ? ' fit' : ''}`, style: len > 9 ? { '--len': len.toFixed(1) } : null },
+        stage.parts.map(equationPart));
+    }
     case 'share':
       return shareScene(stage);
     case 'column':
@@ -334,12 +338,36 @@ function markupStage(cls, markup, label) {
   return el;
 }
 
+/** La largeur d'un morceau d'égalité, en chiffres (une fraction : son plus long nombre). */
+function equationWidth(p) {
+  if (p === null) return 1.6;
+  if (typeof p === 'object') return Math.max(String(p.n).length, String(p.d).length) + 0.4;
+  return String(p).length;
+}
+
+/** Un morceau d'égalité : un nombre, un signe, la case à remplir, ou une fraction (3 sur la barre, 4 dessous). */
+function equationPart(p) {
+  if (p === null) return h('span', { class: 'num gap' }, '?');
+  if (typeof p === 'object') {
+    return h('span', { class: 'num frac', role: 'img', 'aria-label': p.words || `${p.n} sur ${p.d}` },
+      h('span', { class: 'frac-n', 'aria-hidden': 'true' }, p.n), h('span', { class: 'frac-d', 'aria-hidden': 'true' }, p.d));
+  }
+  // un nombre écrit en chiffres (« 345 678 », « 2,5 ») est un nombre, pas un signe
+  return h('span', { class: typeof p === 'number' || /\d/.test(p) ? 'num' : 'op' }, p);
+}
+
 /** Petit texte à lire ; le bouton 🔊 le lit à voix haute, en cas de besoin. */
-function textStage({ title, text }, actions) {
-  return h('div', { class: 'stage-text' },
+function textStage({ title, text, lines, say }, actions) {
+  // un texte du CM (plus de 280 signes) : en plus petit, pour tenir avec ses réponses sur un téléphone
+  const long = (text || lines.join(' ')).length > 280;
+  return h('div', { class: long ? 'stage-text long' : 'stage-text' },
     title ? h('h2', { class: 'text-title' }, title) : null,
-    h('p', { class: 'text-body' }, wordSpans(text)),
-    h('button', { class: 'text-listen', onclick: () => actions.speak?.([{ text: `${title ? `${title}. ` : ''}${text}`, rate: 0.9 }]) }, '🔊 Écouter le texte'));
+    // un poème, une scène de théâtre, une lettre : chaque ligne à la ligne
+    lines
+      ? h('p', { class: 'text-body text-lines' }, lines.map((line) => h('span', { class: 'text-line' }, wordSpans(line))))
+      : h('p', { class: 'text-body' }, wordSpans(text)),
+    // `say` : le texte tel que la voix doit le dire (les grands nombres en morceaux : « mille 924 »)
+    h('button', { class: 'text-listen', onclick: () => actions.speak?.([{ text: `${title ? `${title}. ` : ''}${say || text || lines.join(' ')}`, rate: 0.9 }]) }, '🔊 Écouter le texte'));
 }
 
 /** Petite scène « où est le chat ? » : sur, sous, à côté de la table, ou dans le panier. */
@@ -665,7 +693,8 @@ function zoneLabel(id) {
 
 /** La droite graduée ; `options` (main.js) ajoute la flèche à placer. */
 export function numberLineElement(stage, options = {}) {
-  const el = h('div', { class: 'stage-numberline', role: 'img', 'aria-label': `Une droite graduée de ${stage.min} à ${stage.max}` });
+  const texte = (v) => stage.texts?.[v] ?? v; // décimaux, fractions, grands nombres : leur écriture
+  const el = h('div', { class: 'stage-numberline', role: 'img', 'aria-label': `Une droite graduée de ${texte(stage.min)} à ${texte(stage.max)}` });
   el.innerHTML = numberLineSvg(stage, options);
   return el;
 }
@@ -684,10 +713,11 @@ export function fractionElement(st, extraClass = '') {
 }
 
 /** 3/4 écrit en fraction (3 sur la barre, 4 dessous), et en mots : « trois quarts ». */
-function fractionLabel({ n, d, words }) {
+function fractionLabel({ n, d, words, hideWords = false }) {
   return h('span', { class: 'frac-choice' },
     h('span', { class: 'frac', 'aria-hidden': 'true' }, h('span', { class: 'frac-n' }, n), h('span', { class: 'frac-d' }, d)),
-    h('span', { class: 'frac-words' }, words));
+    // fraction à lire soi-même (écrite en lettres dans la question) : les mots restent pour les lecteurs d'écran
+    h('span', { class: hideWords ? 'visually-hidden' : 'frac-words' }, words));
 }
 
 export function renderChoiceContent(choice) {
@@ -778,7 +808,7 @@ export function columnGrid({ op, rows, width, steps = [], offsets = [], mini = f
 /** Un dessin en SVG (feu des piétons, panneau, main, quadrillage…, Lune, thermomètre…), voir games/vivre.js et games/ciel.js. */
 function drawingElement(d, cls, label) {
   const el = h('span', { class: cls, role: 'img', 'aria-label': label });
-  el.innerHTML = cielSvg(d) ?? technoSvg(d) ?? ce2Svg(d) ?? gaucheDroiteSvg(d) ?? drawingSvg(d);
+  el.innerHTML = cielSvg(d) ?? technoSvg(d) ?? ce2Svg(d) ?? gaucheDroiteSvg(d) ?? cmSvg(d) ?? drawingSvg(d);
   return el;
 }
 
@@ -833,6 +863,21 @@ export function wordSpans(text, lang = null) {
     pos += word.length + 1;
     return i ? [' ', span] : [span];
   });
+}
+
+/** Une phrase dont un mot ou un groupe est souligné (et en gras : pas seulement en couleur). */
+function markedSpans(text, mark, lang) {
+  // le mot entier, pas un morceau d'un autre mot (« le » dans « lettre », « me » dans « mes »)
+  const found = new RegExp(`(?<![\\p{L}’'])${mark.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'u').exec(text);
+  if (!found) return wordSpans(text, lang);
+  const i = found.index;
+  const before = text.slice(0, i);
+  const after = text.slice(i + mark.length);
+  return [
+    ...(before.trim() ? [...wordSpans(before.trim(), lang), before.endsWith(' ') ? ' ' : ''] : []),
+    h('mark', { class: 'hl' }, wordSpans(mark, lang)),
+    ...(after.trim() ? [after.startsWith(' ') ? ' ' : '', ...wordSpans(after.trim(), lang)] : []),
+  ];
 }
 
 /** Histoire lue en karaoké : titre, image, phrases (chaque mot s'allume quand il est lu). */

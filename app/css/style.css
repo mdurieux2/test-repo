@@ -299,6 +299,9 @@ input { -webkit-user-select: text; user-select: text; }
 .operation-visual .op { font-size: 2rem; font-weight: 700; color: var(--accent-dark); }
 .equation { display: flex; align-items: center; gap: 10px; font-size: 3rem; font-weight: 700; }
 .equation.big { font-size: 3.6rem; }
+/* une longue égalité du CM (grands nombres, décimaux) : plus petite, pour tenir sur la largeur */
+.equation.fit { font-size: min(3.6rem, calc((100vw / var(--zoom, 1) - 56px) / var(--len) / 0.6)); }
+.equation .frac { font-size: 0.6em; }
 .equation .op { color: var(--accent-dark); }
 .gap {
   display: inline-grid; place-items: center;
@@ -365,6 +368,11 @@ input { -webkit-user-select: text; user-select: text; }
 .level-up { font-size: 1.3rem; font-weight: 700; color: var(--accent-dark); animation: pop 0.5s ease-out; }
 .reveal { font-size: 2.6rem; font-weight: 700; letter-spacing: 0.04em; }
 .reveal-hl { color: var(--accent); text-decoration: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; }
+/* le mot ou le groupe dont on parle (grammaire du CM) : souligné et en gras, pas seulement en couleur */
+.stage-text.long .text-body { font-size: 1.05rem; line-height: 1.4; font-weight: 600; }
+.text-lines .text-line { display: block; }
+.text-lines .text-line + .text-line { margin-top: 2px; }
+mark.hl { background: none; color: var(--accent-dark, var(--ink)); font-weight: 700; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 5px; }
 .reveal.long { font-size: min(2rem, 7.5vw); }
 
 /* ---------- résultats ---------- */
@@ -1229,10 +1237,12 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .look-option.on { background: #fff; box-shadow: 0 0 0 3px var(--lecture) inset; }
 .look-option.on span:last-child::before { content: '✓ '; }
-.grade-picker { justify-content: space-between; }
-.grade-picker .seg { flex: 1; min-height: 44px; }
-/* six classes (PS à CE2) sur la largeur d'un téléphone de 360 points */
-.grade-picker .seg { min-width: 0; padding: 6px 2px; white-space: nowrap; }
+/* huit classes (PS à CM2) : sur une ligne, ou deux lignes de quatre sur un téléphone */
+.grade-picker { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 2px; }
+.grade-picker .seg { min-height: 44px; min-width: 0; padding: 6px 2px; white-space: nowrap; }
+@media (max-width: 560px) {
+  .grade-picker { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 .form-error { margin: 0; min-height: 1.2em; color: #c43d3d; font-weight: 700; }
 
 /* espace parents : trois onglets */
@@ -1347,6 +1357,7 @@ input { -webkit-user-select: text; user-select: text; }
   .stage-clock { width: min(220px, calc(100dvh - 90px)); }
   .equation { font-size: 2.4rem; }
   .equation.big { font-size: 2.8rem; }
+  .equation.fit { font-size: min(2.8rem, calc((min(100vw, 1000px) - 80px) / 2 / var(--len) / 0.6)); }
   .stage-word { font-size: 2.6rem; padding: 10px 24px; }
   .stage-sentence, .story-text { font-size: 1.2rem; padding: 12px 16px; }
   .accord-line { font-size: 1.2rem; padding: 10px 14px; }

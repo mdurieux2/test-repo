@@ -31,10 +31,11 @@ const numbersIn = (text) => (text.replace(/[  ](?=\d{3}\b)/g, '').match(/\d+/
 
 // ---------------------------------------------------------------- Les classes
 
-test('six classes, de la petite section au CE2, chacune avec son programme et ses attendus', () => {
-  assert.deepEqual(Object.keys(GRADES), ['PS', 'MS', 'GS', 'CP', 'CE1', 'CE2']);
+test('huit classes, de la petite section au CM2, chacune avec son programme et ses attendus', () => {
+  assert.deepEqual(Object.keys(GRADES), ['PS', 'MS', 'GS', 'CP', 'CE1', 'CE2', 'CM1', 'CM2']);
   assert.equal(GRADES.PS, 'Petite section');
   assert.equal(GRADES.CE2, 'CE2');
+  assert.equal(GRADES.CM2, 'CM2');
   assert.deepEqual(Object.keys(PROGRAMS), Object.keys(GRADES));
   for (const grade of Object.keys(GRADES)) {
     assert.ok(GRADE_GOALS[grade] && GRADE_GOALS[grade].length < 200, `${grade} : attendus`);
