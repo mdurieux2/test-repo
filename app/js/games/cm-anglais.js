@@ -860,7 +860,8 @@ function lieuImage(rng) {
 function lieuAnglais(rng) {
   const place = pick(rng, PLACE_WORDS);
   const sound = say(place);
-  const traps = [...(FALSE_FRIENDS[place] ? [FALSE_FRIENDS[place]] : []), ...shuffle(rng, PLACE_WORDS.filter((p) => p !== place)).map((p) => PLACES[p].fr)];
+  const others = shuffle(rng, PLACE_WORDS.filter((p) => p !== place)).map((p) => PLACES[p].fr);
+  const traps = [...(FALSE_FRIENDS[place] ? [FALSE_FRIENDS[place]] : []), ...others];
   return question(rng, {
     key: `anglais-cm:lieu-en:${place}`,
     text: 'Que veut dire ce mot anglais ?',
@@ -1051,7 +1052,8 @@ const HABITS = [
   },
   {
     subj: 'Lucy', pron: 'she', base: 'watch', s: 'watches', ing: 'watching', bad: 'watchs', rest: 'TV after school',
-    fr: 'Lucy regarde la télé après l’école.', frNeg: 'Lucy ne regarde pas la télé après l’école.', frOther: 'Lucy regarde la télé avant l’école.',
+    fr: 'Lucy regarde la télé après l’école.', frNeg: 'Lucy ne regarde pas la télé après l’école.',
+    frOther: 'Lucy regarde la télé avant l’école.',
   },
   {
     subj: 'Tom', pron: 'he', base: 'play', s: 'plays', ing: 'playing', bad: 'plaies', rest: 'tennis on Wednesdays',
@@ -1068,7 +1070,8 @@ const HABITS = [
   },
   {
     subj: 'My sister', pron: 'she', base: 'study', s: 'studies', ing: 'studying', bad: 'studys', rest: 'English at school',
-    fr: 'Ma sœur étudie l’anglais à l’école.', frNeg: 'Ma sœur n’étudie pas l’anglais à l’école.', frOther: 'Ma sœur étudie l’anglais à la maison.',
+    fr: 'Ma sœur étudie l’anglais à l’école.', frNeg: 'Ma sœur n’étudie pas l’anglais à l’école.',
+    frOther: 'Ma sœur étudie l’anglais à la maison.',
   },
   {
     subj: 'Dad', pron: 'he', base: 'wash', s: 'washes', ing: 'washing', bad: 'washs', rest: 'the car on Sundays',
@@ -1169,7 +1172,8 @@ function negation(rng) {
 function questionDoes(rng) {
   const h = pick(rng, HABITS);
   const sound = say(affirmative(h));
-  const traps = [`Do ${inside(h.subj)} ${h.base} ${h.rest}?`, `Does ${inside(h.subj)} ${h.s} ${h.rest}?`, `Is ${inside(h.subj)} ${h.base} ${h.rest}?`];
+  const who = inside(h.subj);
+  const traps = [`Do ${who} ${h.base} ${h.rest}?`, `Does ${who} ${h.s} ${h.rest}?`, `Is ${who} ${h.base} ${h.rest}?`];
   return question(rng, {
     key: `anglais-cm:question-does:${h.subj}:${h.rest}`,
     text: 'Quelle est la bonne question ?',

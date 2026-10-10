@@ -46,6 +46,7 @@ import { lectureCm } from './cm-lecture.js';
 import { CM_NOMBRES_GAMES } from './cm-nombres.js';
 import { CM_OPERATIONS_GAMES } from './cm-operations.js';
 import { CM_MESURES_GAMES } from './cm-mesures.js';
+import { CM_ANGLAIS_GAMES } from './cm-anglais.js';
 
 const ALL = [
   ...FRANCAIS_EXTRA_GAMES, ...LECTURE_GAMES, petitsTextes, histoires, ...COMPRENDRE_GAMES, ...MATHS_GAMES, ...MATHS_EXTRA_GAMES,
@@ -55,6 +56,7 @@ const ALL = [
   ...CE2_GAMES, emotions, chercheTrouve, gaucheDroite,
   // cours moyen
   conjugaisonCm, ...CM_GRAMMAIRE_GAMES, vocabulaireCm, lectureCm, ...CM_NOMBRES_GAMES, ...CM_OPERATIONS_GAMES, ...CM_MESURES_GAMES,
+  ...CM_ANGLAIS_GAMES,
 ];
 
 const RUBRIQUES = [
@@ -102,7 +104,7 @@ const RUBRIQUES = [
     games: [
       'ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais',
       'compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais',
-      'memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais',
+      'memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais', 'anglais-cm',
     ],
   },
 ];
@@ -124,7 +126,7 @@ const SECTION_GAMES = {
   'Écouter et lire': ['ecoute', 'lis-anglais', 'mot-anglais', 'relie-anglais', 'epelle-anglais'],
   'Nombres et couleurs': ['compte-anglais', 'nombres-anglais', 'calcul-anglais', 'couleurs-anglais', 'colorie-anglais'],
   'Vivre ensemble et se repérer': ['vivre-ensemble', 'emotions', 'se-reperer', 'gauche-droite'],
-  'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais'],
+  'Mots et phrases': ['memory-anglais', 'intrus-anglais', 'contraires-anglais', 'ou-est', 'phrase-anglais', 'parle-anglais', 'anglais-cm'],
 };
 const SECTIONS = Object.fromEntries(Object.entries(SECTION_GAMES).flatMap(([section, ids]) => ids.map((id) => [id, section])));
 
